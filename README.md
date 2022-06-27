@@ -4,7 +4,7 @@ A *Phigros* chart render based on [Pixi.js](https://pixijs.com)
 
 This project is still working.
 
-Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesone [phi-sim](https://github.com/lchzh3473/sim-phi) project!
+Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesone [sim-phi](https://github.com/lchzh3473/sim-phi) project!
 
 ## Development
 
