@@ -28,9 +28,12 @@ export default class Render
         this.zipFiles = params.zipFiles;
 
         this.sprites = {};
+        this.audioContext = undefined;
 
         this.resize();
         window.addEventListener('resize', () => { this.resize() });
+
+        this.tick = this.tick.bind(this);
     }
 
     static from (params)
@@ -73,33 +76,32 @@ export default class Render
 
         this.chart.notes.forEach((note, index) =>
         {
-            let sprite;
+            note.createSprite(this.texture, this.zipFiles);
 
-            switch (note.type)
+            if (note.type === 3)
             {
-                case 1:
-                {
-
-                    break;
-                }
-                case 2:
-                {
-                    break;
-                }
-                case 3:
-                {
-                    break;
-                }
-                case 4:
-                {
-                    break;
-                }
-                default :
-                {
-                    throw new Error('Unsupported note type: ' + note.type);
-                }
+                note.sprite.children[1].height = note.holdLength * this.pixi.renderer.noteSpeed / this.pixi.renderer.noteScale;
+                note.sprite.children[2].position.y = -(note.holdLength * this.pixi.renderer.noteSpeed / this.pixi.renderer.noteScale);
             }
+
+            note.sprite.scale.set(this.pixi.renderer.noteScale);
+            note.sprite.zIndex = this.chart.judgelines.length + (note.type === 3 ? index : index + 10);
+
+            this.pixi.stage.addChild(note.sprite);
+            // this.sprites.mainContainer.addChild(note.sprite);
         });
+    }
+
+    async start()
+    {
+        this.audioContext = this.music.play();
+        this.pixi.ticker.add(this.tick);
+    }
+
+    tick()
+    {
+        let currentTime = (this.audioContext.progress * this.music.duration) + this.audioOffset + this.chart.offset;
+        this.chart.calcTime(currentTime, this.pixi);
     }
     
     resize()
@@ -123,6 +125,20 @@ export default class Render
 
                     judgeline.sprite.height = this.pixi.renderer.lineScale * 18.75 * 0.008;
                     judgeline.sprite.width = judgeline.sprite.height * judgeline.sprite.texture.width / judgeline.sprite.texture.height * 1.042;
+                });
+            }
+
+            if (this.chart.notes && this.chart.notes.length > 0)
+            {
+                this.chart.notes.forEach((note) =>
+                {
+                    if (note.type === 3)
+                    {
+                        note.sprite.children[1].height = note.holdLength * this.pixi.renderer.noteSpeed / this.pixi.renderer.noteScale;
+                        note.sprite.children[2].position.y = -(note.holdLength * this.pixi.renderer.noteSpeed / this.pixi.renderer.noteScale);
+                    }
+
+                    note.sprite.scale.set(this.pixi.renderer.noteScale);
                 });
             }
         }

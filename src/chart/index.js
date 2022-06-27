@@ -33,6 +33,14 @@ export default class Chart
         }
     }
 
+    calcTime(currentTime, pixi)
+    {
+        this.judgelines.forEach((judgeline) =>
+        {
+            judgeline.calcTime(currentTime, pixi);
+        });
+    }
+
     get totalNotes() {
         return this.notes.length;
     }

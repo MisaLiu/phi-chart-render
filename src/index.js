@@ -5,13 +5,15 @@ import { Sound } from '@pixi/sound';
 
 
 const doms = {
+    fileSelect: document.querySelector('div.file-select'),
     file : {
         chart: document.querySelector('input#file-chart'),
         music: document.querySelector('input#file-music'),
         bg: document.querySelector('input#file-bg')
     },
     startBtn : document.querySelector('button#start'),
-    canvas : document.querySelector('canvas#canvas')
+    canvas : document.querySelector('canvas#canvas'),
+    debug: document.querySelector('div#debug')
 };
 
 const files = {
@@ -22,6 +24,7 @@ const files = {
 
 const textures = {};
 
+window.doms = doms;
 window.files = files;
 window.textures = textures;
 
@@ -80,8 +83,13 @@ doms.startBtn.addEventListener('click', () => {
             texture: textures
         }
     });
+
+    render.debug = doms.debug;
     
     render.createSprites();
+    render.start();
+
+    doms.fileSelect.style.display = 'none';
 });
 
 

@@ -53,11 +53,11 @@ export default class Judgeline
         );
         this.sprite.anchor.set(0.5);
         this.sprite.alpha = 1;
-        
+
         return this.sprite;
     }
 
-    calcTime(currentTime)
+    calcTime(currentTime, pixi)
     {
         for (const i of this.event.speed)
         {
@@ -78,7 +78,7 @@ export default class Judgeline
             this.x = i.start * time1 + i.end * time2;
 
             if (this.sprite) {
-                this.sprite.position.x = this.x * this.sprite.parent.width;
+                this.sprite.position.x = this.x * pixi.renderer.fixedWidth + pixi.renderer.fixedWidthOffset;
             }
         }
 
@@ -90,10 +90,10 @@ export default class Judgeline
             let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
             let time1 = 1 - time2;
 
-            this.y = i.start * time1 + i.end * time2;
+            this.y = 1 - (i.start * time1 + i.end * time2);
 
             if (this.sprite) {
-                this.sprite.position.y = this.y * this.sprite.parent.height;
+                this.sprite.position.y = this.y * pixi.screen.height;
             }
         }
 
@@ -105,7 +105,7 @@ export default class Judgeline
             let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
             let time1 = 1 - time2;
 
-            this.deg = i.startDeg * time1 + i.endDeg * time2;
+            this.deg = i.start * time1 + i.end * time2;
             this.cosr = Math.cos(this.deg);
             this.sinr = Math.sin(this.deg);
 
