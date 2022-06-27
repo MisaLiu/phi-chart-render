@@ -1,3 +1,5 @@
+import { Sprite } from 'pixi.js-legacy';
+
 export default class Note {
     constructor(params) {
         this.lineId        = (!isNaN(Number(params.lineId)) && params.lineId >= 0) ? Number(params.lineId) : -1;
@@ -11,8 +13,24 @@ export default class Note {
         this.xScale        = !isNaN(Number(params.xScale)) ? Number(params.xScale) : 1;
         this.isAbove       = (params.isAbove instanceof Boolean) ? params.isAbove : true;
         this.isFake        = (params.isFake instanceof Boolean) ? params.isFake : false;
+        this.isMulti       = false;
         this.texture       = (params.texture && params.texture != '') ? params.texture : undefined;
 
         this.sprite = undefined;
+    }
+
+    createSprite(texture, zipFiles)
+    {
+        if (this.sprite) return this.sprite;
+
+        this.sprite = new Sprite(
+            (this.texture && this.texture != '' && this.texture != 'judgeline') ?
+            zipFiles[judgeline.texture] :
+            texture.judgeline
+        );
+        this.sprite.anchor.set(0.5);
+        this.sprite.alpha = 1;
+        
+        return this.sprite;
     }
 };

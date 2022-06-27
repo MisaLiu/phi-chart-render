@@ -1,3 +1,5 @@
+import { Sprite } from 'pixi.js-legacy';
+
 export default class Judgeline
 {
     constructor(params)
@@ -38,6 +40,21 @@ export default class Judgeline
         function _sort(a, b) {
             return a.startTime - b.startTime;
         }
+    }
+
+    createSprite(texture, zipFiles)
+    {
+        if (this.sprite) return this.sprite;
+
+        this.sprite = new Sprite(
+            (this.texture && this.texture != '' && this.texture != 'judgeline') ?
+            zipFiles[judgeline.texture] :
+            texture.judgeline
+        );
+        this.sprite.anchor.set(0.5);
+        this.sprite.alpha = 1;
+        
+        return this.sprite;
     }
 
     calcTime(currentTime)

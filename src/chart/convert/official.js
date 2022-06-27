@@ -78,8 +78,7 @@ export default function OfficialChartConverter(_chart)
         chart.judgelines.push(judgeline);
     });
 
-    notes.sort((a, b) => a.time - b.time);
-    notes.forEach((note, index) =>
+    notes.forEach((note) =>
     {
         chart.notes.push(new Note({
             lineId        : note.lineId,
@@ -92,7 +91,16 @@ export default function OfficialChartConverter(_chart)
             isAbove       : note.isAbove
         }));
     });
+
     chart.notes.sort((a, b) => a.time - b.time);
+    chart.notes.forEach((note, index) =>
+    {
+        if (!chart.notes[index + 1]) return;
+        if (Number(chart.notes[index + 1].time.toFixed(4)) === Number(note.time.toFixed(4))) {
+            note.isMulti = true;
+            chart.notes[index + 1].isMulti = true;
+        }
+    });
 
     return chart;
 };

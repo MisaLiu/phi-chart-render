@@ -1,7 +1,5 @@
 import * as Convert from './convert';
 
-import Judgeline from './judgeline';
-
 export default class Chart
 {
     constructor()
@@ -33,6 +31,26 @@ export default class Chart
         {
             throw new Error('Unsupported chart format');
         }
+    }
+
+    get totalNotes() {
+        return this.notes.length;
+    }
+
+    get totalRealNotes() {
+        let result = 0;
+        this.notes.forEach((note) => {
+            if (!note.isFake) result++;
+        });
+        return result;
+    }
+
+    get totalFakeNotes() {
+        let result = 0;
+        this.notes.forEach((note) => {
+            if (note.isFake) result++;
+        });
+        return result;
     }
 }
 
