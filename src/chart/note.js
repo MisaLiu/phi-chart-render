@@ -13,7 +13,7 @@ export default class Note {
         this.xScale        = !isNaN(Number(params.xScale)) ? Number(params.xScale) : 1;
         this.isAbove       = (params.isAbove instanceof Boolean) ? params.isAbove : true;
         this.isFake        = (params.isFake instanceof Boolean) ? params.isFake : false;
-        this.isMulti       = false;
+        this.isMulti       = (params.isMulti instanceof Boolean) ? params.isMulti : false;
         this.texture       = (params.texture && params.texture != '') ? params.texture : undefined;
 
         this.sprite = undefined;
