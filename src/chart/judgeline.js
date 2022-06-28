@@ -6,6 +6,7 @@ export default class Judgeline
     {
         this.id = !isNaN(params.id) ? Number(params.id) : -1;
         this.texture = 'judgeline';
+        this.notes = [];
         this.event = {
             speed: [],
             moveX: [],
@@ -13,10 +14,6 @@ export default class Judgeline
             rotate: [],
             alpha: []
         };
-
-        this.totalNotes = 0;
-        this.totalRealNotes = 0;
-        this.totalFakeNotes = 0;
 
         this.floorPosition = 0;
         this.alpha = 1;
@@ -42,6 +39,15 @@ export default class Judgeline
         }
     }
 
+    sortNote()
+    {
+        this.notes.sort(_sort);
+
+        function _sort(a, b) {
+            return a.startTime - b.startTime;
+        }
+    }
+
     createSprite(texture, zipFiles)
     {
         if (this.sprite) return this.sprite;
@@ -57,7 +63,7 @@ export default class Judgeline
         return this.sprite;
     }
 
-    calcTime(currentTime, pixi)
+    calcTime(currentTime, size)
     {
         for (const i of this.event.speed)
         {
@@ -78,7 +84,7 @@ export default class Judgeline
             this.x = i.start * time1 + i.end * time2;
 
             if (this.sprite) {
-                this.sprite.position.x = this.x * pixi.renderer.fixedWidth + pixi.renderer.fixedWidthOffset;
+                this.sprite.position.x = this.x * size.width + size.widthOffset;
             }
         }
 
@@ -93,7 +99,7 @@ export default class Judgeline
             this.y = 1 - (i.start * time1 + i.end * time2);
 
             if (this.sprite) {
-                this.sprite.position.y = this.y * pixi.screen.height;
+                this.sprite.position.y = this.y * size.height;
             }
         }
 
@@ -128,5 +134,11 @@ export default class Judgeline
                 this.sprite.alpha = this.alpha;
             }
         }
+        /**
+        this.notes.forEach((note) =>
+        {
+            note.calcTime(currentTime, this, size);
+        });
+        **/
     }
 }

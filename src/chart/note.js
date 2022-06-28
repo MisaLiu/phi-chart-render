@@ -4,14 +4,14 @@ export default class Note
 {
     constructor(params)
     {
-        this.lineId        = (!isNaN(Number(params.lineId)) && params.lineId >= 0) ? Number(params.lineId) : -1;
         this.type          = !isNaN(Number(params.type)) ? Number(params.type) : 1;
-        this.time          = !isNaN(Number(params.time)) ? Number(params.time) : -1;
-        this.holdTime      = (this.type === 3 && !isNaN(Number(params.holdTime))) ? Number(params.holdTime) : 0;
+        this.time          = !isNaN(Number(params.time)) ? Number(Number(params.time).toFixed(4)) : -1;
+        this.holdTime      = (this.type === 3 && !isNaN(Number(params.holdTime))) ? Number(Number(params.holdTime).toFixed(4)) : 0;
         this.speed         = !isNaN(Number(params.speed)) ? Number(params.speed) : 1;
-        this.holdLength    = this.type === 3 ? this.holdTime * this.speed : 0;
-        this.floorPosition = !isNaN(Number(params.floorPosition)) ? Number(params.floorPosition) : 0;
-        this.positionX     = !isNaN(Number(params.positionX)) ? Number(params.positionX) : 0;
+        this.floorPosition = !isNaN(Number(params.floorPosition)) ? Number(params.floorPosition) : this.time;
+        this.holdLength    = (this.type === 3 && !isNaN(Number(params.holdLength))) ? Number(params.holdLength) : 0;
+        this.endPosition   = this.floorPosition + this.holdLength;
+        this.positionX     = !isNaN(Number(params.positionX)) ? Number(Number(params.positionX).toFixed(6)) : 0;
         this.yOffset       = !isNaN(Number(params.yOffset)) ? Number(params.yOffset) : 0;
         this.xScale        = !isNaN(Number(params.xScale)) ? Number(params.xScale) : 1;
         this.isAbove       = (params.isAbove instanceof Boolean) ? params.isAbove : true;
@@ -19,7 +19,8 @@ export default class Note
         this.isMulti       = (params.isMulti instanceof Boolean) ? params.isMulti : false;
         this.forceSpeed    = (this.type === 3 && (params.forceSpeed instanceof Boolean)) ? params.forceSpeed : false;
         this.texture       = (params.texture && params.texture != '') ? params.texture : undefined;
-
+        this.judgeline     = params.judgeline;
+        
         this.sprite = undefined;
     }
 
@@ -99,5 +100,68 @@ export default class Note
         this.sprite.alpha = 1;
         
         return this.sprite;
+    }
+
+    calcTime(currentTime, size)
+    {
+        if (this.sprite)
+        {
+            let originX = size.widthPercent * this.positionX,
+                originY = (this.floorPosition - this.judgeline.floorPosition) * this.speed * (this.isAbove ? -1 : 1) * size.noteSpeed,
+                realX = 0,
+                realY = 0;
+
+            if (this.type === 3 && this.floorPosition <= this.judgeline.floorPosition)
+            {
+                originY = 0;
+            }
+
+            realX = originX * this.judgeline.cosr - originY * this.judgeline.sinr + this.judgeline.sprite.position.x;
+            realY = originY * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
+
+            this.sprite.position.x = realX;
+            this.sprite.position.y = realY;
+            this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
+
+            // 不渲染在屏幕外边的 Note
+            if (
+                (-size.halfWidth >= realX || size.halfWidth <= realX) &&
+                (-size.halfHeight >= realY || size.halfHeight <= realY) &&
+                this.sprite.visible === true
+            ) {
+                this.sprite.visible = false;
+            }
+            else if (
+                (-size.halfWidth < realX && size.halfWidth > realX) &&
+                (-size.halfHeight < realY && size.halfHeight > realY) &&
+                this.sprite.visible === false
+            ) {
+                this.sprite.visible = true;
+            }
+
+            if (this.type !== 3)
+            {
+                if (this.floorPosition <= this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
+                else if (this.floorPosition > this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
+            }
+            else
+            {
+                if (this.endPosition <= this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
+                else if (this.endPosition > this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
+            }
+            
+            
+            /**
+            if (currentTime < this.time)
+            {
+                if (this.judgeline.floorPosition >= this.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
+                else if (this.judgeline.floorPosition < this.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
+            }
+            else
+            {
+
+            }
+            **/
+        }
     }
 };

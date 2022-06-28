@@ -56,47 +56,20 @@ export default function OfficialChartConverter(_chart)
                 end           : e.end
             });
         });
-
-        judgeline.event.speed = arrangeSpeedEvents(judgeline.event.speed);
-        judgeline.event.moveX = arrangeLineEvents(judgeline.event.moveX);
-        judgeline.event.moveY = arrangeLineEvents(judgeline.event.moveY);
-        judgeline.event.rotate = arrangeLineEvents(judgeline.event.rotate);
-        judgeline.event.alpha = arrangeLineEvents(judgeline.event.alpha);
-        
         judgeline.sortEvent();
 
-        _judgeline.notesAbove.forEach((note) =>
+        _judgeline.notesAbove.forEach((rawNote) =>
         {
-            note.lineId = index;
-            note.isAbove = true;
-            note.time = calcRealTime(note.time, _judgeline.bpm);
-            note.holdTime = calcRealTime(note.holdTime, _judgeline.bpm);
-            notes.push(note);
+            let note = pushNote(rawNote, judgeline, _judgeline.bpm, true);
+            chart.notes.push(note);
         });
-        _judgeline.notesBelow.forEach((note) =>
+        _judgeline.notesBelow.forEach((rawNote) =>
         {
-            note.lineId = index;
-            note.isAbove = false;
-            note.time = calcRealTime(note.time, _judgeline.bpm);
-            note.holdTime = calcRealTime(note.holdTime, _judgeline.bpm);
-            notes.push(note);
+            let note = pushNote(rawNote, judgeline, _judgeline.bpm, false);
+            chart.notes.push(note);
         });
 
         chart.judgelines.push(judgeline);
-    });
-
-    notes.forEach((note) =>
-    {
-        chart.notes.push(new Note({
-            lineId        : note.lineId,
-            type          : note.type,
-            time          : note.time,
-            holdTime      : note.holdTime,
-            positionX     : note.position,
-            floorPosition : note.floorPosition,
-            speed         : note.speed,
-            isAbove       : note.isAbove
-        }));
     });
 
     chart.notes.sort((a, b) => a.time - b.time);
@@ -110,6 +83,30 @@ export default function OfficialChartConverter(_chart)
     });
 
     return chart;
+
+    function pushNote(rawNote, judgeline, bpm = 120, isAbove = true)
+    {
+        rawNote.isAbove = isAbove;
+        rawNote.time = calcRealTime(rawNote.time, bpm);
+        if (rawNote.type == 3)
+        {
+            rawNote.holdTime = calcRealTime(rawNote.holdTime, bpm);
+            rawNote.holdLength = rawNote.holdTime * rawNote.speed;
+            rawNote.speed = 1;
+        }
+
+        return new Note({
+            lineId        : rawNote.lineId,
+            type          : rawNote.type,
+            time          : rawNote.time,
+            holdTime      : rawNote.holdTime,
+            positionX     : rawNote.positionX,
+            floorPosition : rawNote.floorPosition,
+            speed         : rawNote.speed,
+            isAbove       : rawNote.isAbove,
+            judgeline     : judgeline
+        });
+    }
 };
 
 
@@ -164,100 +161,6 @@ function convertOfficialVersion(chart)
 	return newChart;
 }
 
-function arrangeLineEvents(events) {
-    let oldEvents = JSON.parse(JSON.stringify(events));
-    let newEvents2 = [];
-    let newEvents = [{ // 以 1-1e6 开始
-        startTime : 1 - 1e6,
-        endTime   : 0,
-        start     : oldEvents[0] ? oldEvents[0].start : 0,
-        end       : oldEvents[0] ? oldEvents[0].end : 0
-    }];
-    
-    oldEvents.push({ // 以 1e9 结束
-        startTime : 0,
-        endTime   : 1e9,
-        start     : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].start : 0,
-        end       : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0
-    });
-    
-    // 保证时间连续性
-    for (let oldEvent of oldEvents) {
-        let lastNewEvent = newEvents[newEvents.length - 1];
-        
-        if (lastNewEvent.endTime > oldEvent.endTime)
-        {
-            // 忽略此分支
-        }
-        else if (lastNewEvent.endTime == oldEvent.startTime)
-        {
-            newEvents.push(oldEvent);
-        }
-        else if (lastNewEvent.endTime < oldEvent.startTime)
-        {
-            newEvents.push({
-                startTime : lastNewEvent.endTime,
-                endTime   : oldEvent.startTime,
-                start     : lastNewEvent.end,
-                end       : lastNewEvent.end
-            }, oldEvent);
-        }
-        else if (lastNewEvent.endTime > oldEvent.startTime)
-        {
-            newEvents.push({
-                startTime : lastNewEvent.endTime,
-                endTime   : oldEvent.endTime,
-                start     : (oldEvent.start * (oldEvent.endTime - lastNewEvent.endTime) + oldEvent.end * (lastNewEvent.endTime - oldEvent.startTime)) / (oldEvent.endTime - oldEvent.startTime),
-                end       : lastNewEvent.end
-            });
-        }
-    }
-    
-    // 合并相同变化率事件
-    newEvents2 = [ newEvents.shift() ];
-    for (let newEvent of newEvents)
-    {
-        let lastNewEvent2 = newEvents2[newEvents2.length - 1];
-        let duration1 = lastNewEvent2.endTime - lastNewEvent2.startTime;
-        let duration2 = newEvent.endTime - newEvent.startTime;
-        
-        if (newEvent.startTime == newEvent.endTime)
-        {
-            // 忽略此分支    
-        }
-        else if (
-            lastNewEvent2.end == newEvent.start &&
-            (lastNewEvent2.end - lastNewEvent2.start) * duration2 == (newEvent.end - newEvent.start) * duration1
-        )
-        {
-            lastNewEvent2.endTime = newEvent.endTime;
-            lastNewEvent2.end     = newEvent.end;
-        }
-        else
-        {
-            newEvents2.push(newEvent);
-        }
-    }
-    
-    return JSON.parse(JSON.stringify(newEvents2));
-}
-
-function arrangeSpeedEvents(events)
-{
-    let newEvents = [];
-    for (let i of events) {
-        let lastEvent = newEvents[newEvents.length - 1];
-        
-        if (!lastEvent || lastEvent.value != i.value) {
-            newEvents.push(i);
-        } else {
-            lastEvent.endTime = i.endTime;
-        }
-    }
-    
-    return JSON.parse(JSON.stringify(newEvents));
-}
-
 function calcRealTime(time, bpm) {
-    return time / bpm * 1.875;
+    return Number(Number(time / bpm * 1.875).toFixed(4));
 }

@@ -30,6 +30,8 @@ export default class Render
         this.sprites = {};
         this.audioContext = undefined;
 
+        this.renderSize = {};
+
         this.resize();
         window.addEventListener('resize', () => { this.resize() });
 
@@ -101,7 +103,7 @@ export default class Render
     tick()
     {
         let currentTime = (this.audioContext.progress * this.music.duration) + this.audioOffset + this.chart.offset;
-        this.chart.calcTime(currentTime, this.pixi);
+        this.chart.calcTime(currentTime, this.renderSize);
     }
     
     resize()
@@ -109,11 +111,20 @@ export default class Render
         if (!this.pixi) return;
 
         this.pixi.renderer.fixedWidth = (this.pixi.resizeTo.clientHeight / 9 * 16 < this.pixi.resizeTo.clientWidth ? this.pixi.resizeTo.clientHeight / 9 * 16 : this.pixi.resizeTo.clientWidth);
-        this.pixi.renderer.fixedWidthOffset = this.pixi.resizeTo.clientWidth - this.pixi.renderer.fixedWidth;
+        this.pixi.renderer.fixedWidthPercent = this.pixi.renderer.fixedWidth / 18;
+        this.pixi.renderer.fixedWidthOffset = (this.pixi.resizeTo.clientWidth - this.pixi.renderer.fixedWidth) / 2;
 
         this.pixi.renderer.noteSpeed = this.pixi.resizeTo.clientHeight * 0.6;
         this.pixi.renderer.noteScale = this.pixi.renderer.fixedWidth / this.noteScale;
         this.pixi.renderer.lineScale = this.pixi.renderer.fixedWidth > this.pixi.resizeTo.clientHeight * 0.75 ? this.pixi.resizeTo.clientHeight / 18.75 : this.pixi.renderer.fixedWidth / 14.0625;
+
+        this.renderSize.width = this.pixi.renderer.fixedWidth;
+        this.renderSize.halfWidth = this.renderSize.width / 4;
+        this.renderSize.widthPercent = this.pixi.renderer.fixedWidthPercent;
+        this.renderSize.widthOffset = this.pixi.renderer.fixedWidthOffset;
+        this.renderSize.height = this.pixi.screen.height;
+        this.renderSize.halfHeight = this.renderSize.height / 4;
+        this.renderSize.noteSpeed = this.pixi.renderer.noteSpeed;
 
         if (this.chart)
         {
