@@ -86,7 +86,7 @@ export default class Render
                 note.sprite.children[2].position.y = -(note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale);
             }
 
-            note.sprite.scale.set(this.renderSize.noteScale);
+            note.sprite.scale.set(this.renderSize.noteScale * note.xScale, this.renderSize.noteScale);
             note.sprite.zIndex = this.chart.judgelines.length + (note.type === 3 ? index : index + 10);
 
             this.pixi.stage.addChild(note.sprite);
@@ -150,7 +150,7 @@ export default class Render
                         note.sprite.children[2].position.y = -(note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale);
                     }
 
-                    note.sprite.scale.set(this.renderSize.noteScale);
+                    note.sprite.scale.set(this.renderSize.noteScale * note.xScale, this.renderSize.noteScale);
                 });
             }
         }
