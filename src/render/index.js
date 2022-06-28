@@ -82,11 +82,11 @@ export default class Render
 
             if (note.type === 3)
             {
-                note.sprite.children[1].height = note.holdLength * this.pixi.renderer.noteSpeed / this.pixi.renderer.noteScale;
-                note.sprite.children[2].position.y = -(note.holdLength * this.pixi.renderer.noteSpeed / this.pixi.renderer.noteScale);
+                note.sprite.children[1].height = note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale;
+                note.sprite.children[2].position.y = -(note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale);
             }
 
-            note.sprite.scale.set(this.pixi.renderer.noteScale);
+            note.sprite.scale.set(this.renderSize.noteScale);
             note.sprite.zIndex = this.chart.judgelines.length + (note.type === 3 ? index : index + 10);
 
             this.pixi.stage.addChild(note.sprite);
@@ -125,6 +125,7 @@ export default class Render
         this.renderSize.height = this.pixi.screen.height;
         this.renderSize.halfHeight = this.renderSize.height / 4;
         this.renderSize.noteSpeed = this.pixi.renderer.noteSpeed;
+        this.renderSize.noteScale = this.pixi.renderer.noteScale;
 
         if (this.chart)
         {
@@ -145,11 +146,11 @@ export default class Render
                 {
                     if (note.type === 3)
                     {
-                        note.sprite.children[1].height = note.holdLength * this.pixi.renderer.noteSpeed / this.pixi.renderer.noteScale;
-                        note.sprite.children[2].position.y = -(note.holdLength * this.pixi.renderer.noteSpeed / this.pixi.renderer.noteScale);
+                        note.sprite.children[1].height = note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale;
+                        note.sprite.children[2].position.y = -(note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale);
                     }
 
-                    note.sprite.scale.set(this.pixi.renderer.noteScale);
+                    note.sprite.scale.set(this.renderSize.noteScale);
                 });
             }
         }

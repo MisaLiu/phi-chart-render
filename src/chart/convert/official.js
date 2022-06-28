@@ -100,6 +100,7 @@ export default function OfficialChartConverter(_chart)
             type          : rawNote.type,
             time          : rawNote.time,
             holdTime      : rawNote.holdTime,
+            holdLength    : rawNote.holdLength,
             positionX     : rawNote.positionX,
             floorPosition : rawNote.floorPosition,
             speed         : rawNote.speed,

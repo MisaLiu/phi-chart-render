@@ -6,7 +6,6 @@ export default class Judgeline
     {
         this.id = !isNaN(params.id) ? Number(params.id) : -1;
         this.texture = 'judgeline';
-        this.notes = [];
         this.event = {
             speed: [],
             moveX: [],
@@ -33,15 +32,6 @@ export default class Judgeline
         this.event.moveY.sort(_sort);
         this.event.rotate.sort(_sort);
         this.event.alpha.sort(_sort);
-
-        function _sort(a, b) {
-            return a.startTime - b.startTime;
-        }
-    }
-
-    sortNote()
-    {
-        this.notes.sort(_sort);
 
         function _sort(a, b) {
             return a.startTime - b.startTime;

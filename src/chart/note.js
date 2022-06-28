@@ -111,9 +111,18 @@ export default class Note
                 realX = 0,
                 realY = 0;
 
-            if (this.type === 3 && this.floorPosition <= this.judgeline.floorPosition)
+            // Hold 的特殊位置写法
+            if (this.type === 3 && this.floorPosition <= this.judgeline.floorPosition && this.endPosition > this.judgeline.floorPosition)
             {
                 originY = 0;
+
+                if (this.sprite.children[0].visible === true) this.sprite.children[0].visible = false;
+                this.sprite.children[1].height = (this.endPosition - this.judgeline.floorPosition) * size.noteSpeed / size.noteScale;
+                this.sprite.children[2].position.y = -((this.endPosition - this.judgeline.floorPosition) * size.noteSpeed / size.noteScale);
+            }
+            else if (this.type === 3 && this.floorPosition > this.judgeline.floorPosition && this.sprite.children[0].visible === false)
+            {
+                this.sprite.children[0].visible = true;
             }
 
             realX = originX * this.judgeline.cosr - originY * this.judgeline.sinr + this.judgeline.sprite.position.x;
