@@ -20,6 +20,8 @@ export default class Note
         this.forceSpeed    = (this.type === 3 && (params.forceSpeed instanceof Boolean)) ? params.forceSpeed : false;
         this.texture       = (params.texture && params.texture != '') ? params.texture : undefined;
         this.judgeline     = params.judgeline;
+
+        if (!this.judgeline) throw new Error('Note must have a judgeline');
         
         this.sprite = undefined;
     }
