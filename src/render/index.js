@@ -101,7 +101,17 @@ export default class Render
             this.sprites.mainContainer.addChild(note.sprite);
         });
 
+        this.sprites.mainContainer.sortChildren();
         this.resize();
+    }
+
+    addSprite(sprite, name)
+    {
+        if (this.sprites.mainContainer)
+        {
+            if (name) this.sprites[name] = sprite;
+            this.sprites.mainContainer.addChild(sprite);
+        }
     }
 
     async start()
