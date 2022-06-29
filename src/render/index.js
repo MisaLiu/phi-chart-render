@@ -6,12 +6,13 @@ export default class Render
     {
         if (!params.texture) throw new Error('Render must use a texture object for creating sprites.');
 
-        this.chart = null;
-        this.music = null;
-        this.bg = null;
+        this.chart = undefined;
+        this.music = undefined;
+        this.bg = undefined;
 
         this.noteScale = !isNaN(Number(params.noteScale)) ? Number(params.noteScale) : 8000;
         this.audioOffset = 0;
+        this.bgDim = 0.5;
         
         this.pixi = new PIXI.Application({
             width       : !isNaN(Number(params.width)) ? Number(params.width) : document.documentElement.clientWidth,
@@ -43,7 +44,6 @@ export default class Render
         if (!params) throw new Error('Please input an argument');
         if (!params.chart) throw new Error('You must input a chart');
         if (!params.music) throw new Error('You must input a music');
-        if (!params.bg) throw new Error('You must input a bg');
         if (!params.render || !params.render.canvas) throw new Error('You must input a canvas as stage');
 
         let render = new Render(params.render);
@@ -52,21 +52,34 @@ export default class Render
         render.music = params.music;
         render.bg = params.bg;
 
-
-
         return render;
     }
 
     createSprites()
     {
         // this.sprites.mainContainer = new PIXI.Container();
+        if (this.bg)
+        {
+            this.sprites.bg = new PIXI.Sprite(this.bg);
+
+            let bgCover = new PIXI.Graphics();
+
+            bgCover.beginFill(0x000000);
+            bgCover.drawRect(0, 0, this.sprites.bg.texture.width, this.sprites.bg.texture.height);
+            bgCover.endFill();
+
+            bgCover.position.x = -this.sprites.bg.width / 2;
+            bgCover.position.y = -this.sprites.bg.height / 2;
+            bgCover.alpha = 1 - this.bgDim;
+
+            this.sprites.bg.addChild(bgCover);
+            this.sprites.bg.anchor.set(0.5);
+            this.pixi.stage.addChild(this.sprites.bg);
+        }
 
         this.chart.judgelines.forEach((judgeline, index) =>
         {
             judgeline.createSprite(this.texture, this.zipFiles);
-
-            judgeline.sprite.height = this.pixi.renderer.lineScale * 18.75 * 0.008;
-            judgeline.sprite.width = judgeline.sprite.height * judgeline.sprite.texture.width / judgeline.sprite.texture.height * 1.042;
 
             judgeline.sprite.position.x = this.pixi.screen.width / 2;
             judgeline.sprite.position.y = this.pixi.screen.height / 2;
@@ -79,19 +92,13 @@ export default class Render
         this.chart.notes.forEach((note, index) =>
         {
             note.createSprite(this.texture, this.zipFiles);
-
-            if (note.type === 3)
-            {
-                note.sprite.children[1].height = note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale;
-                note.sprite.children[2].position.y = -(note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale);
-            }
-
-            note.sprite.scale.set(this.renderSize.noteScale * note.xScale, this.renderSize.noteScale);
             note.sprite.zIndex = this.chart.judgelines.length + (note.type === 3 ? index : index + 10);
 
             this.pixi.stage.addChild(note.sprite);
             // this.sprites.mainContainer.addChild(note.sprite);
         });
+
+        this.resize();
     }
 
     async start()
@@ -119,13 +126,28 @@ export default class Render
         this.pixi.renderer.lineScale = this.pixi.renderer.fixedWidth > this.pixi.resizeTo.clientHeight * 0.75 ? this.pixi.resizeTo.clientHeight / 18.75 : this.pixi.renderer.fixedWidth / 14.0625;
 
         this.renderSize.width = this.pixi.renderer.fixedWidth;
-        this.renderSize.halfWidth = this.renderSize.width / 4;
         this.renderSize.widthPercent = this.pixi.renderer.fixedWidthPercent;
         this.renderSize.widthOffset = this.pixi.renderer.fixedWidthOffset;
         this.renderSize.height = this.pixi.screen.height;
-        this.renderSize.halfHeight = this.renderSize.height / 4;
+        this.renderSize.startX = -this.renderSize.width / 4;
+        this.renderSize.endX = this.renderSize.width + this.renderSize.width / 4;
+        this.renderSize.startY = -this.renderSize.height / 4;
+        this.renderSize.endY = this.renderSize.height + this.renderSize.height / 4;
         this.renderSize.noteSpeed = this.pixi.renderer.noteSpeed;
         this.renderSize.noteScale = this.pixi.renderer.noteScale;
+
+        if (this.sprites)
+        {
+            if (this.sprites.bg)
+            {
+                let bgScaleWidth = this.renderSize.width / this.sprites.bg.texture.width;
+                let bgScaleHeight = this.renderSize.height / this.sprites.bg.texture.height;
+                let bgScale = bgScaleWidth > bgScaleHeight ? bgScaleWidth : bgScaleHeight;
+
+                this.sprites.bg.scale.set(bgScale);
+                this.sprites.bg.position.set(this.renderSize.width / 2 + this.renderSize.widthOffset, this.renderSize.height / 2);
+            }
+        }
 
         if (this.chart)
         {

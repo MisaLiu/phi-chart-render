@@ -2,7 +2,7 @@ import Chart from './chart';
 import Render from './render';
 import { Loader, Texture } from 'pixi.js-legacy';
 import { Sound } from '@pixi/sound';
-
+import * as StackBlur from 'stackblur-canvas';
 
 const doms = {
     fileSelect: document.querySelector('div.file-select'),
@@ -66,7 +66,9 @@ doms.file.bg.addEventListener('input', function () {
     let reader = new FileReader();
 
     reader.onload = function () {
-        files.bg = Texture.from(this.result);
+        let bg = Texture.from(this.result);
+        let blur = Texture.from(blurImage(bg, 50));
+        files.bg = blur;
     };
 
     reader.readAsDataURL(this.files[0]);
@@ -117,3 +119,18 @@ window.addEventListener('load', () => {
         }
     });
 });
+
+
+function blurImage(_texture, radius = 10)
+{
+    let canvas = document.createElement('canvas');
+    let texture;
+
+    if (_texture.baseTexture) texture = _texture.baseTexture.resource.source;
+    else texture = _texture;
+
+    // console.log(texture);
+
+    StackBlur.image(texture, canvas, radius);
+    return canvas;
+}

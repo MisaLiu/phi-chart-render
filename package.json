@@ -2,8 +2,10 @@
   "name": "phi-chart-render",
   "description": "A Phigros chart render based on Pixi.js",
   "author": "MisaLiu",
-  "files": [ "./src" ],
-  "main": "./src/index.js",
+  "files": [
+    "./src"
+  ],
+  "main": "./src/main.js",
   "scripts": {
     "dev": "npx webpack-dev-server --progress --color"
   },
@@ -15,6 +17,7 @@
   },
   "dependencies": {
     "@pixi/sound": "^4.2.0",
-    "pixi.js-legacy": "^6.4.2"
+    "pixi.js-legacy": "^6.4.2",
+    "stackblur-canvas": "^2.5.0"
   }
 }

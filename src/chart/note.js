@@ -114,7 +114,7 @@ export default class Note
                 realY = 0;
 
             // Hold 的特殊位置写法
-            if (this.type === 3 && this.floorPosition <= this.judgeline.floorPosition && this.endPosition > this.judgeline.floorPosition)
+            if (this.type === 3 && this.floorPosition < this.judgeline.floorPosition && this.endPosition >= this.judgeline.floorPosition)
             {
                 originY = 0;
 
@@ -122,7 +122,7 @@ export default class Note
                 this.sprite.children[1].height = (this.endPosition - this.judgeline.floorPosition) * size.noteSpeed / size.noteScale;
                 this.sprite.children[2].position.y = -((this.endPosition - this.judgeline.floorPosition) * size.noteSpeed / size.noteScale);
             }
-            else if (this.type === 3 && this.floorPosition > this.judgeline.floorPosition && this.sprite.children[0].visible === false)
+            else if (this.type === 3 && this.floorPosition >= this.judgeline.floorPosition && this.sprite.children[0].visible === false)
             {
                 this.sprite.children[0].visible = true;
             }
@@ -136,30 +136,32 @@ export default class Note
 
             // 不渲染在屏幕外边的 Note
             if (
-                (-size.halfWidth >= realX || size.halfWidth <= realX) &&
-                (-size.halfHeight >= realY || size.halfHeight <= realY) &&
+                (size.startX >= realX || size.endX <= realX) &&
+                (size.startY >= realY || size.endY <= realY) &&
                 this.sprite.visible === true
             ) {
                 this.sprite.visible = false;
             }
             else if (
-                (-size.halfWidth < realX && size.halfWidth > realX) &&
-                (-size.halfHeight < realY && size.halfHeight > realY) &&
+                (size.startX < realX && size.endX > realX) &&
+                (size.startY < realY && size.endY > realY) &&
                 this.sprite.visible === false
             ) {
                 this.sprite.visible = true;
             }
 
-            if (this.type !== 3)
+            
+            if (this.type !== 3 && currentTime <= this.time)
             {
-                if (this.floorPosition <= this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
-                else if (this.floorPosition > this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
+                if (this.floorPosition < this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
+                else if (this.floorPosition >= this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
             }
-            else
+            else if (this.type === 3)
             {
-                if (this.endPosition <= this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
-                else if (this.endPosition > this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
+                if (this.endPosition < this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
+                else if (this.endPosition >= this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
             }
+            
             
             
             /**
