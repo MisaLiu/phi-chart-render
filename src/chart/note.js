@@ -136,6 +136,7 @@ export default class Note
 
             // 不渲染在屏幕外边的 Note
             if (
+                this.type !== 3 && // 思来想去还是没有想到一个针对 Hold 的适配方案，就先行略过8
                 (size.startX >= realX || size.endX <= realX) &&
                 (size.startY >= realY || size.endY <= realY) &&
                 this.sprite.visible === true
@@ -143,6 +144,7 @@ export default class Note
                 this.sprite.visible = false;
             }
             else if (
+                this.type !== 3 &&
                 (size.startX < realX && size.endX > realX) &&
                 (size.startY < realY && size.endY > realY) &&
                 this.sprite.visible === false
@@ -151,7 +153,7 @@ export default class Note
             }
 
             
-            if (this.type !== 3 && currentTime <= this.time)
+            if (this.type !== 3 && currentTime < this.time)
             {
                 if (this.floorPosition < this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
                 else if (this.floorPosition >= this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;

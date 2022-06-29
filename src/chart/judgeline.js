@@ -74,7 +74,7 @@ export default class Judgeline
             this.x = i.start * time1 + i.end * time2;
 
             if (this.sprite) {
-                this.sprite.position.x = this.x * size.width + size.widthOffset;
+                this.sprite.position.x = this.x * size.width;
             }
         }
 
