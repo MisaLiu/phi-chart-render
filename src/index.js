@@ -89,6 +89,14 @@ doms.startBtn.addEventListener('click', () => {
     render.debug = doms.debug;
     
     render.createSprites();
+
+    render.chart.addFunction('note', (currentTime, note) =>
+    {
+        if (currentTime < note.time) return;
+        if (currentTime - 0.2 > note.time) return;
+        note.sprite.alpha = 1 - (currentTime - note.time) / 0.2;
+    });
+
     render.start();
 
     doms.fileSelect.style.display = 'none';

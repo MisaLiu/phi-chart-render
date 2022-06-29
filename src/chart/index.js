@@ -7,6 +7,11 @@ export default class Chart
         this.judgelines = [];
         this.notes = [];
         this.offset = 0;
+
+        this.function = {
+            judgeline: [],
+            note: []
+        }
     }
 
     static from(rawChart)
@@ -41,15 +46,29 @@ export default class Chart
         return chart;
     }
 
+    addFunction(type, func)
+    {
+        if (!this.function[type]) throw new Error('Invaild function type');
+        this.function[type].push(func);
+    }
+
     calcTime(currentTime, size)
     {
         this.judgelines.forEach((judgeline) =>
         {
             judgeline.calcTime(currentTime, size);
+            this.function.judgeline.forEach((func) =>
+            {
+                func(currentTime, judgeline);
+            });
         });
         this.notes.forEach((note) =>
         {
             note.calcTime(currentTime, size);
+            this.function.note.forEach((func) =>
+            {
+                func(currentTime, note);
+            });
         })
     }
 

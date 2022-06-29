@@ -19,10 +19,14 @@ export default class Note
         this.isMulti       = (params.isMulti instanceof Boolean) ? params.isMulti : false;
         this.forceSpeed    = (this.type === 3 && (params.forceSpeed instanceof Boolean)) ? params.forceSpeed : false;
         this.texture       = (params.texture && params.texture != '') ? params.texture : undefined;
+        this.hitsound      = (params.hitsound && params.hitsound != '') ? params.hitsound : undefined;
         this.judgeline     = params.judgeline;
 
         if (!this.judgeline) throw new Error('Note must have a judgeline');
         
+        this.floorPosition = this.floorPosition + this.yOffset;
+        this.endPosition   = (this.type === 3 && this.endPosition > 0) ? this.endPosition + this.yOffset : 0;
+
         this.sprite = undefined;
     }
 
@@ -100,6 +104,32 @@ export default class Note
         if (this.type !== 3) this.sprite.anchor.set(0.5);
         if (!this.isAbove) this.sprite.angle = 180;
         this.sprite.alpha = 1;
+
+        if (this.hitsound)
+        {
+            this.hitsound = zipFiles[this.hitsound];
+        }
+        else{
+            switch (this.type)
+            {
+                case 1:
+                {
+                    break;
+                }
+                case 2:
+                {
+                    break;
+                }
+                case 3:
+                {
+                    break;
+                }
+                case 4:
+                {
+                    break;
+                }
+            }
+        }
         
         return this.sprite;
     }
@@ -163,20 +193,6 @@ export default class Note
                 if (this.endPosition < this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
                 else if (this.endPosition >= this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
             }
-            
-            
-            
-            /**
-            if (currentTime < this.time)
-            {
-                if (this.judgeline.floorPosition >= this.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
-                else if (this.judgeline.floorPosition < this.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
-            }
-            else
-            {
-
-            }
-            **/
         }
     }
 };
