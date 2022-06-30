@@ -22,7 +22,11 @@ export default class Chart
         {
             if (!isNaN(Number(rawChart.formatVersion)))
             {
-                chart =  Convert.Official(rawChart);
+                chart = Convert.Official(rawChart);
+            }
+            else if (!isNaN(Number(rawChart.META.RPEVersion)))
+            {
+                chart = Convert.RePhiEdit(rawChart);
             }
         }
         else if (rawChart instanceof String)
@@ -57,10 +61,12 @@ export default class Chart
         this.judgelines.forEach((judgeline) =>
         {
             judgeline.calcTime(currentTime, size);
+            /*
             this.function.judgeline.forEach((func) =>
             {
                 func(currentTime, judgeline);
             });
+            */
         });
         this.notes.forEach((note) =>
         {

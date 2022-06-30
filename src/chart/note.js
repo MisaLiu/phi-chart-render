@@ -14,9 +14,9 @@ export default class Note
         this.positionX     = !isNaN(Number(params.positionX)) ? Number(Number(params.positionX).toFixed(6)) : 0;
         this.yOffset       = !isNaN(Number(params.yOffset)) ? Number(params.yOffset) : 0;
         this.xScale        = !isNaN(Number(params.xScale)) ? Number(params.xScale) : 1;
-        this.isAbove       = (params.isAbove instanceof Boolean) ? params.isAbove : true;
-        this.isFake        = (params.isFake instanceof Boolean) ? params.isFake : false;
-        this.isMulti       = (params.isMulti instanceof Boolean) ? params.isMulti : false;
+        this.isAbove       = (params.isAbove instanceof Boolean) ? !!params.isAbove : true;
+        this.isFake        = (params.isFake instanceof Boolean) ? !!params.isFake : false;
+        this.isMulti       = (params.isMulti instanceof Boolean) ? !!params.isMulti : false;
         this.forceSpeed    = (this.type === 3 && (params.forceSpeed instanceof Boolean)) ? params.forceSpeed : false;
         this.texture       = (params.texture && params.texture != '') ? params.texture : undefined;
         this.hitsound      = (params.hitsound && params.hitsound != '') ? params.hitsound : undefined;

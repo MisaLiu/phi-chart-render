@@ -65,9 +65,11 @@ doms.file.bg.addEventListener('input', function () {
 
     let reader = new FileReader();
 
-    reader.onload = function () {
-        let bg = Texture.from(this.result);
-        let blur = Texture.from(blurImage(bg, 50));
+    reader.onload = async function () {
+        // VS Code: 别用 await，没有效果
+        // Me: 加了 await 之后就没有 error 了
+        let bg = await Texture.from(this.result);
+        let blur = await Texture.from(blurImage(bg, 50));
         files.bg = blur;
     };
 
@@ -142,3 +144,98 @@ function blurImage(_texture, radius = 10)
     StackBlur.image(texture, canvas, radius);
     return canvas;
 }
+
+function testMultiLayerArrange()
+{
+    const eventLayers = [
+        [
+            {
+                startTime: 1,
+                endTime: 4,
+                start: 1,
+                end: 1.5
+            },
+            {
+                startTime: 6,
+                endTime: 10,
+                start: 2,
+                end: 3
+            },
+        ],
+        [
+            {
+                startTime: 2,
+                endTime: 3,
+                start: 1,
+                end: 1.5
+            }
+        ]
+    ];
+    let newEvents = [];
+
+    eventLayers.forEach((eventLayer) =>
+    {
+        eventLayer.forEach((event) =>
+        {
+            newEvents.push(event);
+
+            newEvents.forEach((newEvent, index) =>
+            {
+                // 不处理完全不与其重叠的事件
+                if (event.startTime < newEvent.startTime && event.endTime < newEvent.startTime) return;
+                if (event.startTime > newEvent.endTime && event.endTime > newEvent.endTime) return;
+
+                let separatedEvent = [];
+
+                if (event.startTime >= newEvent.startTime && event.endTime <= newEvent.endTime)
+                { // 当上层事件在下层某一事件之间发生时
+                    separatedEvent.push({
+                        startTime: newEvent.startTime,
+                        endTime: event.startTime,
+                        start: newEvent.start,
+                        end: valueCalculator(newEvent.startTime, newEvent.endTime, event.startTime, newEvent.start, newEvent.end)
+                    });
+
+                    separatedEvent.push({
+                        startTime: event.startTime,
+                        endTime: event.endTime,
+                        start: valueCalculator(newEvent.startTime, newEvent.endTime, event.startTime, newEvent.start, newEvent.end) + event.start,
+                        end: valueCalculator(newEvent.startTime, newEvent.endTime, event.endTime, newEvent.start, newEvent.end) + event.end
+                    });
+
+                    separatedEvent.push({
+                        startTime: event.endTime,
+                        endTime: newEvent.endTime,
+                        start: valueCalculator(newEvent.startTime, newEvent.endTime, event.endTime, newEvent.start, newEvent.end),
+                        end: newEvent.end
+                    });
+                }
+
+                if (separatedEvent.length >= 1)
+                {
+                    newEvents.splice(index, 1);
+                    separatedEvent.forEach((sEvent, sIndex) =>
+                    {
+                        newEvents.splice(index + sIndex, 0, sEvent);
+                    });
+                }
+            });
+        });
+    });
+
+    console.log(newEvents);
+
+    function valueCalculator(startTime, endTime, currentTime, start, end)
+    {
+        if (startTime > currentTime) throw new Error('currentTime must bigger than startTime');
+
+        let time2 = (currentTime - startTime) / (endTime - startTime);
+        let time1 = 1 - time2;
+
+        return start * time1 + end * time2;
+    }
+}
+
+(() => {
+    testMultiLayerArrange();
+})();
