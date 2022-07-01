@@ -161,70 +161,101 @@ function testMultiLayerArrange()
                 start: 2,
                 end: 3
             },
+            {
+                startTime: 12,
+                endTime: 14,
+                start: 5,
+                end: 1
+            }
         ],
         [
             {
-                startTime: 0.5,
-                endTime: 5,
+                startTime: 2,
+                endTime: 13,
                 start: 1.5,
                 end: 2
+            },
+        ],
+        [
+            {
+                startTime: 20,
+                endTime: 25,
+                start: 1,
+                end: 0
             }
         ]
     ];
-    let newEvents = [];
 
-    eventLayers.forEach((eventLayer, lIndex) =>
+    let result = [];
+
+    eventLayers.forEach((eventLayer, eventLayerIndex) =>
     {
-        eventLayer.forEach((event) =>
+        eventLayer.forEach((addedEvent, addedEventIndex) =>
         {
-            if (lIndex <= 0)
+            if (eventLayerIndex <= 0)
             {
-                newEvents.push(event);
+                result.push(addedEvent);
                 return;
             }
 
-            let _newEvents = JSON.parse(JSON.stringify(newEvents));
+            let _result = JSON.parse(JSON.stringify(result));
+            let basedEventIndexOffset = 0;
+            let extraDeleteEventCount = 0;
+            let mergedLayer = false;
 
-            newEvents.forEach((newEvent, nIndex) =>
+            result.forEach((basedEvent, basedEventIndex) =>
             {
                 // 不处理完全不与其重叠的事件
-                if (event.startTime < newEvent.startTime && event.endTime < newEvent.startTime) return;
-                if (event.startTime > newEvent.endTime && event.endTime > newEvent.endTime) return;
+                if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime < basedEvent.startTime) return;
+                if (addedEvent.startTime > basedEvent.endTime && addedEvent.endTime > basedEvent.endTime) return;
 
-                let separatedEvent = [];
+                let addedResult = [];
 
-                if (event.startTime >= newEvent.startTime && event.endTime <= newEvent.endTime)
+                if (addedEvent.startTime >= basedEvent.startTime && addedEvent.endTime <= basedEvent.endTime)
                 {
-                    separatedEvent = separateEvent(newEvent, event);
+                    addedResult = separateEvent(basedEvent, addedEvent);
                 }
-                else if (event.startTime >= newEvent.startTime && event.endTime > newEvent.endTime)
+                else if (addedEvent.startTime >= basedEvent.startTime && addedEvent.endTime > basedEvent.endTime)
                 {
-                    separatedEvent = separateEvent(newEvent, event);
-                }
-                else if (event.startTime < newEvent.startTime && event.endTime <= newEvent.endTime)
-                {
-                    separatedEvent = separateEvent(newEvent, event);
-                }
-                else if (event.startTime < newEvent.startTime && event.endTime > newEvent.endTime)
-                {
-                    separatedEvent = separateEvent(newEvent, event);
-                }
+                    addedResult = separateEvent(basedEvent, addedEvent);
 
-                if (separatedEvent.length >= 1)
-                {
-                    _newEvents.splice(nIndex, 1);
-                    separatedEvent.forEach((sEvent, sIndex) =>
+                    for (let extraIndex = basedEventIndex + 1, extraLength = result.length; extraIndex < extraLength; extraIndex++)
                     {
-                        _newEvents.splice(nIndex + sIndex, 0, sEvent);
+                        let extraEvent = result[extraIndex];
+                        let _events = separateEvent(extraEvent, addedResult[addedResult.length - 1]);
+
+                        if (_events.length >= 1)
+                        {
+                            addedResult.splice(addedResult.length - 1, 1);
+                            _events.forEach((_event) =>
+                            {
+                                addedResult.push(_event);
+                            });
+                            extraDeleteEventCount++;
+                        }
+                    }
+                }
+
+                if (addedResult.length >= 1)
+                {
+                    mergedLayer = true;
+                    _result.splice(addedEventIndex, 1 + extraDeleteEventCount);
+                    addedResult.forEach((event, index) =>
+                    {
+                        _result.splice(addedEventIndex + index, 0, event);
                     });
                 }
             });
 
-            newEvents = JSON.parse(JSON.stringify(_newEvents));
+            if (!mergedLayer) _result.push(addedEvent);
+
+            result = JSON.parse(JSON.stringify(_result));
         });
     });
 
-    console.log(newEvents);
+    result.sort((a, b) => a.startTime - b.startTime);
+
+    console.log(result);
 
     function separateEvent(basedEvent, addedEvent)
     {
