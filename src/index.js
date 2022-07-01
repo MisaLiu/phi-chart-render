@@ -91,7 +91,7 @@ doms.startBtn.addEventListener('click', () => {
     render.debug = doms.debug;
     
     render.createSprites();
-
+    
     render.chart.addFunction('note', (currentTime, note) =>
     {
         if (currentTime < note.time) return;
@@ -164,10 +164,10 @@ function testMultiLayerArrange()
         ],
         [
             {
-                startTime: 2,
-                endTime: 3,
-                start: 1,
-                end: 1.5
+                startTime: 0.5,
+                endTime: 5,
+                start: 1.5,
+                end: 2
             }
         ]
     ];
@@ -194,27 +194,20 @@ function testMultiLayerArrange()
                 let separatedEvent = [];
 
                 if (event.startTime >= newEvent.startTime && event.endTime <= newEvent.endTime)
-                { // 当上层事件在下层某一事件之间发生时
-                    separatedEvent.push({
-                        startTime: newEvent.startTime,
-                        endTime: event.startTime,
-                        start: newEvent.start,
-                        end: valueCalculator(newEvent.startTime, newEvent.endTime, event.startTime, newEvent.start, newEvent.end)
-                    });
-
-                    separatedEvent.push({
-                        startTime: event.startTime,
-                        endTime: event.endTime,
-                        start: valueCalculator(newEvent.startTime, newEvent.endTime, event.startTime, newEvent.start, newEvent.end) + event.start,
-                        end: valueCalculator(newEvent.startTime, newEvent.endTime, event.endTime, newEvent.start, newEvent.end) + event.end
-                    });
-
-                    separatedEvent.push({
-                        startTime: event.endTime,
-                        endTime: newEvent.endTime,
-                        start: valueCalculator(newEvent.startTime, newEvent.endTime, event.endTime, newEvent.start, newEvent.end),
-                        end: newEvent.end
-                    });
+                {
+                    separatedEvent = separateEvent(newEvent, event);
+                }
+                else if (event.startTime >= newEvent.startTime && event.endTime > newEvent.endTime)
+                {
+                    separatedEvent = separateEvent(newEvent, event);
+                }
+                else if (event.startTime < newEvent.startTime && event.endTime <= newEvent.endTime)
+                {
+                    separatedEvent = separateEvent(newEvent, event);
+                }
+                else if (event.startTime < newEvent.startTime && event.endTime > newEvent.endTime)
+                {
+                    separatedEvent = separateEvent(newEvent, event);
                 }
 
                 if (separatedEvent.length >= 1)
@@ -233,14 +226,117 @@ function testMultiLayerArrange()
 
     console.log(newEvents);
 
-    function valueCalculator(startTime, endTime, currentTime, start, end)
+    function separateEvent(basedEvent, addedEvent)
     {
-        if (startTime > currentTime) throw new Error('currentTime must bigger than startTime');
+        let result = [];
 
-        let time2 = (currentTime - startTime) / (endTime - startTime);
+        if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime < basedEvent.startTime) return result;
+        if (addedEvent.startTime > basedEvent.endTime && addedEvent.endTime > basedEvent.endTime) return result;
+
+        if (basedEvent.startTime <= addedEvent.startTime && basedEvent.endTime >= addedEvent.endTime)
+        { // 叠加事件在基础事件的时间范围内
+            result.push({
+                startTime: basedEvent.startTime,
+                endTime: addedEvent.startTime,
+                start: basedEvent.start,
+                end: valueCalculator(basedEvent, addedEvent.startTime)
+            });
+
+            result.push({
+                startTime: addedEvent.startTime,
+                endTime: addedEvent.endTime,
+                start: valueCalculator(basedEvent, addedEvent.startTime) + addedEvent.start,
+                end: valueCalculator(basedEvent, addedEvent.endTime) + addedEvent.end
+            });
+
+            result.push({
+                startTime: addedEvent.endTime,
+                endTime: basedEvent.endTime,
+                start: valueCalculator(basedEvent, addedEvent.endTime),
+                end: basedEvent.end
+            });
+        }
+        else if (basedEvent.startTime <= addedEvent.startTime && basedEvent.endTime < addedEvent.endTime)
+        { // 叠加事件的开始时间在基础事件时间范围内，结束时间在范围外
+            result.push({
+                startTime: basedEvent.startTime,
+                endTime: addedEvent.startTime,
+                start: basedEvent.start,
+                end: valueCalculator(basedEvent, addedEvent.startTime)
+            });
+
+            result.push({
+                startTime: addedEvent.startTime,
+                endTime: basedEvent.endTime,
+                start: valueCalculator(basedEvent, addedEvent.startTime) + addedEvent.start,
+                end: basedEvent.end + valueCalculator(addedEvent, basedEvent.endTime)
+            });
+
+            result.push({
+                startTime: basedEvent.endTime,
+                endTime: addedEvent.endTime,
+                start: valueCalculator(addedEvent, basedEvent.endTime),
+                end: addedEvent.end
+            });
+        }
+        else if (basedEvent.startTime > addedEvent.startTime && basedEvent.endTime >= addedEvent.endTime)
+        { // 叠加事件的开始时间在基础事件时间范围外，结束时间在范围内
+            result.push({
+                startTime: addedEvent.startTime,
+                endTime: basedEvent.startTime,
+                start: addedEvent.start,
+                end: valueCalculator(addedEvent, basedEvent.startTime)
+            });
+
+            result.push({
+                startTime: basedEvent.startTime,
+                endTime: addedEvent.endTime,
+                start: basedEvent.start + valueCalculator(addedEvent, basedEvent.startTime),
+                end: valueCalculator(basedEvent, addedEvent.endTime) + addedEvent.end
+            });
+
+            result.push({
+                startTime: addedEvent.endTime,
+                endTime: basedEvent.endTime,
+                start: valueCalculator(basedEvent, addedEvent.endTime),
+                end: basedEvent.end
+            });
+        }
+        else if (basedEvent.startTime > addedEvent.startTime && basedEvent.endTime < addedEvent.endTime)
+        { // 叠加事件在基础事件的时间范围外
+            result.push({
+                startTime: addedEvent.startTime,
+                endTime: basedEvent.startTime,
+                start: addedEvent.start,
+                end: valueCalculator(addedEvent, basedEvent.startTime)
+            });
+
+            result.push({
+                startTime: basedEvent.startTime,
+                endTime: basedEvent.endTime,
+                start: valueCalculator(addedEvent, basedEvent.startTime) + basedEvent.start,
+                end: valueCalculator(addedEvent, basedEvent.endTime) + basedEvent.end
+            });
+
+            result.push({
+                startTime: basedEvent.endTime,
+                endTime: addedEvent.endTime,
+                start: valueCalculator(addedEvent, basedEvent.endTime),
+                end: addedEvent.end
+            });
+        }
+
+        return result;
+    }
+
+    function valueCalculator(event, currentTime)
+    {
+        if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
+
+        let time2 = (currentTime - event.startTime) / (event.endTime - event.startTime);
         let time1 = 1 - time2;
 
-        return start * time1 + end * time2;
+        return event.start * time1 + event.end * time2;
     }
 }
 
