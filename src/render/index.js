@@ -16,13 +16,14 @@ export default class Render
         
         this.parentNode = params.resizeTo ? params.resizeTo : (params.canvas ? params.canvas.parentNode : document.documentElement);
         this.pixi = new PIXI.Application({
-            width       : !isNaN(Number(params.width)) ? Number(params.width) : document.documentElement.clientWidth,
-            height      : !isNaN(Number(params.height)) ? Number(params.height) : document.documentElement.clientHeight,
-            resolution  : !isNaN(Number(params.resolution)) ? Number(params.resolution) : window.devicePixelRatio,
-            autoDensity : params.autoDensity instanceof Boolean ? params.autoDensity : true,
-            antialias   : params.antialias instanceof Boolean ? params.antialias : true,
-            forceCanvas : params.forceCanvas instanceof Boolean ? params.forceCanvas : false,
-            view        : params.canvas ? params.canvas : undefined
+            width           : !isNaN(Number(params.width)) ? Number(params.width) : document.documentElement.clientWidth,
+            height          : !isNaN(Number(params.height)) ? Number(params.height) : document.documentElement.clientHeight,
+            resolution      : !isNaN(Number(params.resolution)) ? Number(params.resolution) : window.devicePixelRatio,
+            autoDensity     : params.autoDensity instanceof Boolean ? params.autoDensity : true,
+            antialias       : params.antialias instanceof Boolean ? params.antialias : true,
+            forceCanvas     : params.forceCanvas instanceof Boolean ? params.forceCanvas : false,
+            view            : params.canvas ? params.canvas : undefined,
+            backgroundAlpha : 1
         });
 
         this.texture = params.texture;
@@ -116,6 +117,7 @@ export default class Render
 
     async start()
     {
+        this.pixi.view.style.backgroundColor = '#000000';
         this.audioContext = this.music.play();
         this.pixi.ticker.add(this.tick);
     }

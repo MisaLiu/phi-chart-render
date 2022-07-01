@@ -173,6 +173,7 @@ function testMultiLayerArrange()
     ];
     let newEvents = [];
 
+    /**
     eventLayers.forEach((eventLayer) =>
     {
         eventLayer.forEach((event) =>
@@ -220,6 +221,65 @@ function testMultiLayerArrange()
                     });
                 }
             });
+        });
+    });
+    **/
+
+    eventLayers.forEach((eventLayer, lIndex) =>
+    {
+        eventLayer.forEach((event) =>
+        {
+            if (lIndex <= 0)
+            {
+                newEvents.push(event);
+                return;
+            }
+
+            let _newEvents = JSON.parse(JSON.stringify(newEvents));
+
+            newEvents.forEach((newEvent, nIndex) =>
+            {
+                // 不处理完全不与其重叠的事件
+                if (event.startTime < newEvent.startTime && event.endTime < newEvent.startTime) return;
+                if (event.startTime > newEvent.endTime && event.endTime > newEvent.endTime) return;
+
+                let separatedEvent = [];
+
+                if (event.startTime >= newEvent.startTime && event.endTime <= newEvent.endTime)
+                { // 当上层事件在下层某一事件之间发生时
+                    separatedEvent.push({
+                        startTime: newEvent.startTime,
+                        endTime: event.startTime,
+                        start: newEvent.start,
+                        end: valueCalculator(newEvent.startTime, newEvent.endTime, event.startTime, newEvent.start, newEvent.end)
+                    });
+
+                    separatedEvent.push({
+                        startTime: event.startTime,
+                        endTime: event.endTime,
+                        start: valueCalculator(newEvent.startTime, newEvent.endTime, event.startTime, newEvent.start, newEvent.end) + event.start,
+                        end: valueCalculator(newEvent.startTime, newEvent.endTime, event.endTime, newEvent.start, newEvent.end) + event.end
+                    });
+
+                    separatedEvent.push({
+                        startTime: event.endTime,
+                        endTime: newEvent.endTime,
+                        start: valueCalculator(newEvent.startTime, newEvent.endTime, event.endTime, newEvent.start, newEvent.end),
+                        end: newEvent.end
+                    });
+                }
+
+                if (separatedEvent.length >= 1)
+                {
+                    _newEvents.splice(nIndex, 1);
+                    separatedEvent.forEach((sEvent, sIndex) =>
+                    {
+                        _newEvents.splice(nIndex + sIndex, 0, sEvent);
+                    });
+                }
+            });
+
+            newEvents = JSON.parse(JSON.stringify(_newEvents));
         });
     });
 

@@ -27,6 +27,9 @@ export default class Note
         this.floorPosition = this.floorPosition + this.yOffset;
         this.endPosition   = (this.type === 3 && this.endPosition > 0) ? this.endPosition + this.yOffset : 0;
 
+        this.outScreen     = this.type !== 3 ? true : false;
+
+
         this.sprite = undefined;
     }
 
@@ -104,6 +107,7 @@ export default class Note
         if (this.type !== 3) this.sprite.anchor.set(0.5);
         if (!this.isAbove) this.sprite.angle = 180;
         this.sprite.alpha = 1;
+        this.sprite.visible = false;
 
         if (this.hitsound)
         {
@@ -167,31 +171,39 @@ export default class Note
             // 不渲染在屏幕外边的 Note
             if (
                 this.type !== 3 && // 思来想去还是没有想到一个针对 Hold 的适配方案，就先行略过8
-                (size.startX >= realX || size.endX <= realX) &&
-                (size.startY >= realY || size.endY <= realY) &&
-                this.sprite.visible === true
+                (
+                    (realX <= size.startX || realX >= size.endX) ||
+                    (realY <= size.startY || realY >= size.endY)
+                ) &&
+                this.outScreen === false
             ) {
+                this.outScreen = true;
                 this.sprite.visible = false;
             }
             else if (
                 this.type !== 3 &&
-                (size.startX < realX && size.endX > realX) &&
-                (size.startY < realY && size.endY > realY) &&
-                this.sprite.visible === false
+                (
+                    (realX > size.startX && realX < size.endX) &&
+                    (realY > size.startY && realY < size.endY)
+                ) &&
+                this.outScreen === true
             ) {
+                this.outScreen = false;
                 this.sprite.visible = true;
             }
 
-            
-            if (this.type !== 3 && currentTime < this.time)
+            if (this.outScreen === false)
             {
-                if (this.floorPosition < this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
-                else if (this.floorPosition >= this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
-            }
-            else if (this.type === 3)
-            {
-                if (this.endPosition < this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
-                else if (this.endPosition >= this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
+                if (this.type !== 3 && currentTime < this.time)
+                {
+                    if (this.floorPosition < this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
+                    else if (this.floorPosition >= this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
+                }
+                else if (this.type === 3)
+                {
+                    if (this.endPosition < this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
+                    else if (this.endPosition >= this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
+                }
             }
         }
     }
