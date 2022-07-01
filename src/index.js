@@ -173,58 +173,6 @@ function testMultiLayerArrange()
     ];
     let newEvents = [];
 
-    /**
-    eventLayers.forEach((eventLayer) =>
-    {
-        eventLayer.forEach((event) =>
-        {
-            newEvents.push(event);
-
-            newEvents.forEach((newEvent, index) =>
-            {
-                // 不处理完全不与其重叠的事件
-                if (event.startTime < newEvent.startTime && event.endTime < newEvent.startTime) return;
-                if (event.startTime > newEvent.endTime && event.endTime > newEvent.endTime) return;
-
-                let separatedEvent = [];
-
-                if (event.startTime >= newEvent.startTime && event.endTime <= newEvent.endTime)
-                { // 当上层事件在下层某一事件之间发生时
-                    separatedEvent.push({
-                        startTime: newEvent.startTime,
-                        endTime: event.startTime,
-                        start: newEvent.start,
-                        end: valueCalculator(newEvent.startTime, newEvent.endTime, event.startTime, newEvent.start, newEvent.end)
-                    });
-
-                    separatedEvent.push({
-                        startTime: event.startTime,
-                        endTime: event.endTime,
-                        start: valueCalculator(newEvent.startTime, newEvent.endTime, event.startTime, newEvent.start, newEvent.end) + event.start,
-                        end: valueCalculator(newEvent.startTime, newEvent.endTime, event.endTime, newEvent.start, newEvent.end) + event.end
-                    });
-
-                    separatedEvent.push({
-                        startTime: event.endTime,
-                        endTime: newEvent.endTime,
-                        start: valueCalculator(newEvent.startTime, newEvent.endTime, event.endTime, newEvent.start, newEvent.end),
-                        end: newEvent.end
-                    });
-                }
-
-                if (separatedEvent.length >= 1)
-                {
-                    newEvents.splice(index, 1);
-                    separatedEvent.forEach((sEvent, sIndex) =>
-                    {
-                        newEvents.splice(index + sIndex, 0, sEvent);
-                    });
-                }
-            });
-        });
-    });
-    **/
-
     eventLayers.forEach((eventLayer, lIndex) =>
     {
         eventLayer.forEach((event) =>
