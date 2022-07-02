@@ -91,6 +91,8 @@ const Easing = [
     }
 ];
 
+window.Easing = Easing;
+
 export default function RePhiEditChartConverter(_chart)
 {
     let chart = new Chart();
@@ -131,6 +133,32 @@ export default function RePhiEditChartConverter(_chart)
         });
     });
 
+    // 拆分缓动
+    rawChart.judgeLineList.forEach((judgeline) =>
+    {
+        judgeline.eventLayers.forEach((eventLayer) =>
+        {
+            let newEevents = {};
+
+            for (const name in eventLayer)
+            {
+                if (!newEevents[name]) newEevents[name] = [];
+                eventLayer[name].forEach((event) =>
+                {
+                    calculateEventEase(event)
+                        .forEach((event) =>
+                        {
+                            newEevents[name].push(event);
+                        }
+                    );
+                });
+            }
+
+            console.log(newEevents);
+            eventLayer = newEevents;
+        });
+    });
+
     // 多层 EventLayer 叠加
     rawChart.judgeLineList.forEach((judgeline) =>
     {
@@ -152,7 +180,7 @@ export default function RePhiEditChartConverter(_chart)
         });
 
         judgeline.event = finalEvent;
-        console.log(finalEvent);
+        // console.log(finalEvent);
     });
 
     console.log(rawChart);
@@ -188,6 +216,41 @@ function beat2Time(event)
         e.endTime = e.endTime[0] + e.endTime[1] / e.endTime[2];
     });
     return event;
+}
+
+function calculateEventEase(event)
+{
+    let result = [];
+    let timeBetween = event.endTime - event.startTime;
+    let valueBetween = event.end - event.start;
+
+    for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / 0.125); timeIndex < timeCount; timeIndex++)
+    {
+        let time2 = (timeIndex * 0.125) / timeBetween;
+        let time1 = 1 - time2;
+
+        if (event.easingType && event.easingType !== 1)
+        {
+            result.push({
+                startTime: event.startTime + timeIndex * 0.125,
+                endTime: event.startTime + (timeIndex + 1) * 0.125 <= event.endTime ? event.startTime + (timeIndex + 1) * 0.125 : event.endTime,
+                start: valueBetween * Easing[event.easingType - 1](time1),
+                end: valueBetween * Easing[event.easingType - 1](time2)
+            });
+        }
+        else
+        {
+            result.push({
+                startTime: event.startTime,
+                endTime: event.endTime,
+                start: event.start,
+                end: event.end
+            });
+            break;
+        }
+    }
+
+    return result;
 }
 
 function valueCalculator(event, currentTime)
