@@ -171,15 +171,15 @@ function testMultiLayerArrange()
         [
             {
                 startTime: 2,
-                endTime: 13,
+                endTime: 7,
                 start: 1.5,
                 end: 2
             },
         ],
         [
             {
-                startTime: 20,
-                endTime: 25,
+                startTime: 3,
+                endTime: 8,
                 start: 1,
                 end: 0
             }
@@ -203,20 +203,22 @@ function testMultiLayerArrange()
             let extraDeleteEventCount = 0;
             let mergedLayer = false;
 
-            result.forEach((basedEvent, basedEventIndex) =>
+            for (let basedEventIndex = 0, baseEventsLength = result.length; basedEventIndex < baseEventsLength; basedEventIndex++)
             {
+                let basedEvent = result[basedEventIndex];
+
                 // 不处理完全不与其重叠的事件
-                if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime < basedEvent.startTime) return;
-                if (addedEvent.startTime > basedEvent.endTime && addedEvent.endTime > basedEvent.endTime) return;
+                if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime < basedEvent.startTime) continue;
+                if (addedEvent.startTime > basedEvent.endTime && addedEvent.endTime > basedEvent.endTime) continue;
 
                 let addedResult = [];
 
                 if (addedEvent.startTime >= basedEvent.startTime && addedEvent.endTime <= basedEvent.endTime)
-                {
+                { // 叠加事件在基础事件的时间范围内
                     addedResult = separateEvent(basedEvent, addedEvent);
                 }
                 else if (addedEvent.startTime >= basedEvent.startTime && addedEvent.endTime > basedEvent.endTime)
-                {
+                { // 叠加事件的开始时间在基础事件时间范围内，结束时间在范围外
                     addedResult = separateEvent(basedEvent, addedEvent);
 
                     for (let extraIndex = basedEventIndex + 1, extraLength = result.length; extraIndex < extraLength; extraIndex++)
@@ -235,6 +237,30 @@ function testMultiLayerArrange()
                         }
                     }
                 }
+                else if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime <= basedEvent.endTime)
+                { // 叠加事件的开始时间在基础事件时间范围外，结束时间在范围内
+                    addedResult = separateEvent(basedEvent, addedEvent);
+
+                    for (let extraIndex = basedEventIndex - 1; extraIndex >= 0; extraIndex--)
+                    {
+                        let extraEvent = result[extraIndex];
+                        let _events = separateEvent(extraEvent, addedResult[0]);
+
+                        if (_events.length >= 1)
+                        {
+                            addedResult.splice(addedResult.length - 1, 1);
+                            _events.forEach((_event) =>
+                            {
+                                addedResult.unshift(_event);
+                            });
+                            extraDeleteEventCount++;
+                        }
+                    }
+                }
+                else if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime > basedEvent.endTime)
+                { // 叠加事件在基础事件的时间范围外
+
+                }
 
                 if (addedResult.length >= 1)
                 {
@@ -244,8 +270,9 @@ function testMultiLayerArrange()
                     {
                         _result.splice(addedEventIndex + index, 0, event);
                     });
+                    break;
                 }
-            });
+            }
 
             if (!mergedLayer) _result.push(addedEvent);
 
@@ -254,6 +281,23 @@ function testMultiLayerArrange()
     });
 
     result.sort((a, b) => a.startTime - b.startTime);
+
+    result.forEach((event, index) =>
+    { // 事件去重
+        let nextEvent = result[index + 1];
+        if (!nextEvent) return;
+
+        if (
+            event.startTime == nextEvent.startTime &&
+            event.endTime == nextEvent.endTime &&
+            event.start == nextEvent.start &&
+            event.end == nextEvent.end
+        ) {
+            console.log(event);
+            console.log(nextEvent);
+            result.splice(index, 1);
+        }
+    });
 
     console.log(result);
 
