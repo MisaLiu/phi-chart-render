@@ -170,20 +170,12 @@ function testMultiLayerArrange()
         ],
         [
             {
-                startTime: 2,
-                endTime: 7,
-                start: 1.5,
-                end: 2
-            },
-        ],
-        [
-            {
-                startTime: 3,
-                endTime: 8,
-                start: 1,
-                end: 0
+                startTime: 0.5,
+                endTime: 5,
+                start: 2,
+                end: 1
             }
-        ]
+        ],
     ];
 
     let result = [];
@@ -220,46 +212,28 @@ function testMultiLayerArrange()
                 else if (addedEvent.startTime >= basedEvent.startTime && addedEvent.endTime > basedEvent.endTime)
                 { // 叠加事件的开始时间在基础事件时间范围内，结束时间在范围外
                     addedResult = separateEvent(basedEvent, addedEvent);
+                    let extraEventsInfo = addEventsAfter(result, basedEventIndex, addedResult);
 
-                    for (let extraIndex = basedEventIndex + 1, extraLength = result.length; extraIndex < extraLength; extraIndex++)
-                    {
-                        let extraEvent = result[extraIndex];
-                        let _events = separateEvent(extraEvent, addedResult[addedResult.length - 1]);
-
-                        if (_events.length >= 1)
-                        {
-                            addedResult.splice(addedResult.length - 1, 1);
-                            _events.forEach((_event) =>
-                            {
-                                addedResult.push(_event);
-                            });
-                            extraDeleteEventCount++;
-                        }
-                    }
+                    addedResult = extraEventsInfo.addedResults;
+                    extraDeleteEventCount += extraEventsInfo.extraDeleteEventCount;
                 }
                 else if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime <= basedEvent.endTime)
                 { // 叠加事件的开始时间在基础事件时间范围外，结束时间在范围内
                     addedResult = separateEvent(basedEvent, addedEvent);
-
-                    for (let extraIndex = basedEventIndex - 1; extraIndex >= 0; extraIndex--)
-                    {
-                        let extraEvent = result[extraIndex];
-                        let _events = separateEvent(extraEvent, addedResult[0]);
-
-                        if (_events.length >= 1)
-                        {
-                            addedResult.splice(addedResult.length - 1, 1);
-                            _events.forEach((_event) =>
-                            {
-                                addedResult.unshift(_event);
-                            });
-                            extraDeleteEventCount++;
-                        }
-                    }
+                    let extraEventsInfo = addEventsBefore(result, basedEventIndex, addedResult);
+                    
+                    addedResult = extraEventsInfo.addedResults;
+                    extraDeleteEventCount += extraEventsInfo.extraDeleteEventCount;
                 }
                 else if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime > basedEvent.endTime)
                 { // 叠加事件在基础事件的时间范围外
+                    addedResult = separateEvent(basedEvent, addedEvent);
 
+                    let extraEventsInfoBefore = addEventsBefore(result, basedEventIndex, addedResult);
+                    extraDeleteEventCount += extraEventsInfoBefore.extraDeleteEventCount;
+
+                    let extraEventsInfoAfter = addEventsAfter(result, basedEventIndex, extraEventsInfoBefore.addedResults);
+                    extraDeleteEventCount += extraEventsInfoAfter.extraDeleteEventCount;
                 }
 
                 if (addedResult.length >= 1)
@@ -283,6 +257,16 @@ function testMultiLayerArrange()
     result.sort((a, b) => a.startTime - b.startTime);
 
     result.forEach((event, index) =>
+    { // 去除 startTime == endTime 且 start == end 的事件 
+        if (
+            event.startTime == event.endTime &&
+            event.start == event.end
+        ) {
+            result.splice(index, 1);
+        }
+    });
+
+    result.forEach((event, index) =>
     { // 事件去重
         let nextEvent = result[index + 1];
         if (!nextEvent) return;
@@ -300,6 +284,16 @@ function testMultiLayerArrange()
     });
 
     console.log(result);
+
+    function valueCalculator(event, currentTime)
+    {
+        if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
+
+        let time2 = (currentTime - event.startTime) / (event.endTime - event.startTime);
+        let time1 = 1 - time2;
+
+        return event.start * time1 + event.end * time2;
+    }
 
     function separateEvent(basedEvent, addedEvent)
     {
@@ -404,14 +398,63 @@ function testMultiLayerArrange()
         return result;
     }
 
-    function valueCalculator(event, currentTime)
+    function addEventsBefore(events, basedEventIndex, _addedResults)
     {
-        if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
+        let addedResults = JSON.parse(JSON.stringify(_addedResults));
+        let extraDeleteEventCount = 0;
 
-        let time2 = (currentTime - event.startTime) / (event.endTime - event.startTime);
-        let time1 = 1 - time2;
+        for (let extraIndex = basedEventIndex - 1; extraIndex >= 0; extraIndex--)
+        {
+            let extraEvent = events[extraIndex];
 
-        return event.start * time1 + event.end * time2;
+            if (extraEvent.endTime < addedResults[0].startTime && extraEvent.startTime < addedResults[0].startTime) break;
+
+            let _events = separateEvent(extraEvent, addedResults[0]);
+
+            if (_events.length >= 1)
+            {
+                addedResults.splice(addedResults.length - 1, 1);
+                _events.forEach((_event) =>
+                {
+                    addedResults.unshift(_event);
+                });
+                extraDeleteEventCount++;
+            }
+        }
+
+        return {
+            addedResults,
+            extraDeleteEventCount
+        };
+    }
+
+    function addEventsAfter(events, basedEventIndex, _addedResults)
+    {
+        let addedResults = JSON.parse(JSON.stringify(_addedResults));
+        let extraDeleteEventCount = 0;
+
+        for (let extraIndex = basedEventIndex + 1, extraLength = events.length; extraIndex < extraLength; extraIndex++)
+        {
+            let extraEvent = events[extraIndex];
+
+            if (extraEvent.startTime > addedResults[addedResults.length - 1].endTime && extraEvent.endTime > addedResults[addedResults.length - 1].endTime) break;
+
+            let _events = separateEvent(extraEvent, addedResults[addedResults.length - 1]);
+            if (_events.length >= 1)
+            {
+                addedResults.splice(addedResults.length - 1, 1);
+                _events.forEach((_event) =>
+                {
+                    addedResults.push(_event);
+                });
+                extraDeleteEventCount++;
+            }
+        }
+
+        return {
+            addedResults,
+            extraDeleteEventCount
+        };
     }
 }
 
