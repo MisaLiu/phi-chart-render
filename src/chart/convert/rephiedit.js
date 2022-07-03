@@ -186,6 +186,29 @@ export default function RePhiEditChartConverter(_chart)
         judgeline.eventLayers = undefined;
     });
 
+    // 拆分 speedEvents
+    rawChart.judgeLineList.forEach((judgeline) =>
+    {
+        let newSpeedEvents = [];
+        judgeline.event.speed.forEach((event) =>
+        {
+            separateSpeedEvent(event)
+                .forEach((_event) =>
+                {
+                    newSpeedEvents.push(_event);
+                }
+            );
+        });
+        newSpeedEvents.sort((a, b) => a.startTime - b.startTime);
+        judgeline.event.speed = newSpeedEvents;
+    });
+
+    // 计算 speedEvent 的 floorPosition
+    rawChart.judgeLineList.forEach((judgeline) =>
+    {
+        judgeline.event.speed = calculateSpeedEventFloorPosition(rawChart.BPMList, judgeline.event.speed);
+    });
+
     // 计算事件的真实时间
     rawChart.judgeLineList.forEach((judgeline) =>
     {
@@ -230,9 +253,9 @@ function beat2Time(event)
     return event;
 }
 
-function calculateEventEase(event)
+function calculateEventEase(event, forceLinear = false)
 {
-    const calcBetweenTime = 0.0625;
+    const calcBetweenTime = 0.125;
     let result = [];
     let timeBetween = event.endTime - event.startTime;
     let valueBetween = event.end - event.start;
@@ -242,7 +265,7 @@ function calculateEventEase(event)
         let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
         let timePercentEnd = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
 
-        if (event.easingType && event.easingType !== 1)
+        if (event.easingType && (event.easingType !== 1 || forceLinear))
         {
             result.push({
                 startTime: event.startTime + timeIndex * calcBetweenTime,
@@ -268,6 +291,76 @@ function calculateEventEase(event)
             break;
         }
     }
+
+    return result;
+}
+
+function separateSpeedEvent(event)
+{
+    const calcBetweenTime = 0.125;
+    let result = [];
+    let timeBetween = event.endTime - event.startTime;
+    let valueBetween = event.end - event.start;
+
+    for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
+    {
+        let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
+
+        if (event.start != event.end)
+        {
+            result.push({
+                startTime: event.startTime + timeIndex * calcBetweenTime,
+                endTime: (
+                    timeIndex + 1 == timeCount && event.startTime + (timeIndex + 1) * calcBetweenTime != event.endTime ?
+                    event.endTime : event.startTime + (timeIndex + 1) * calcBetweenTime
+                ),
+                value: event.start + valueBetween * Easing[event.easingType ? event.easingType - 1 : 0](timePercentStart),
+                floorPosition: 0
+            });
+        }
+        else
+        {
+            result.push({
+                startTime: event.startTime,
+                endTime: event.endTime,
+                value: event.start,
+                floorPosition: 0
+            });
+            break;
+        }
+    }
+
+    return result;
+}
+
+function calculateSpeedEventFloorPosition(_bpmList, events)
+{
+    let bpmList = JSON.parse(JSON.stringify(_bpmList));
+    let currentFloorPosition = 0;
+    let result = [];
+
+    bpmList.sort((a, b) => b.startTime - a.startTime);
+
+    events.forEach((event, index) =>
+    {
+        let newEvent = JSON.parse(JSON.stringify(event));
+
+        newEvent.endTime = index < events.length - 1 ? events[index + 1].startTime : 1e9;
+        if (newEvent.startTime < index) newEvent.startTime = 0;
+
+        for (let bpmIndex = 0, bpmLength = bpmList.length; bpmIndex < bpmLength; bpmIndex++)
+        {
+            let bpm = bpmList[bpmIndex];
+
+            if (bpm.startBeat > newEvent.endTime) continue;
+
+            newEvent.floorPosition = currentFloorPosition;
+            currentFloorPosition += ((newEvent.endTime - newEvent.startTime) * 32) * newEvent.value / bpm.bpm * 1.875;
+            
+            result.push(newEvent);
+            break;
+        }
+    });
 
     return result;
 }
