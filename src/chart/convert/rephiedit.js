@@ -220,22 +220,29 @@ function beat2Time(event)
 
 function calculateEventEase(event)
 {
+    const calcBetweenTime = 0.0625;
     let result = [];
     let timeBetween = event.endTime - event.startTime;
     let valueBetween = event.end - event.start;
 
-    for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / 0.125); timeIndex < timeCount; timeIndex++)
+    for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
     {
-        let time2 = (timeIndex * 0.125) / timeBetween;
-        let time1 = 1 - time2;
+        let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
+        let timePercentEnd = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
 
         if (event.easingType && event.easingType !== 1)
         {
             result.push({
-                startTime: event.startTime + timeIndex * 0.125,
-                endTime: event.startTime + (timeIndex + 1) * 0.125 <= event.endTime ? event.startTime + (timeIndex + 1) * 0.125 : event.endTime,
-                start: valueBetween * Easing[event.easingType - 1](time1),
-                end: valueBetween * Easing[event.easingType - 1](time2)
+                startTime: event.startTime + timeIndex * calcBetweenTime,
+                endTime: (
+                    timeIndex + 1 == timeCount && event.startTime + (timeIndex + 1) * calcBetweenTime != event.endTime ?
+                    event.endTime : event.startTime + (timeIndex + 1) * calcBetweenTime
+                ),
+                start: event.start + valueBetween * Easing[event.easingType - 1](timePercentStart),
+                end: (
+                    timeIndex + 1 == timeCount && event.start + valueBetween * Easing[event.easingType - 1](timePercentEnd) != event.end ?
+                    event.end : event.start + valueBetween * Easing[event.easingType - 1](timePercentEnd)
+                )
             });
         }
         else
