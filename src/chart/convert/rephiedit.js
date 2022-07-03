@@ -115,8 +115,6 @@ export default function RePhiEditChartConverter(_chart)
             currentBeatRealTime = 60 / bpm.bpm;
             bpm.beatTime = 60 / bpm.bpm;
         });
-
-        console.log(rawChart.BPMList);
     }
 
     // Beat 数组转换为小数
@@ -136,23 +134,23 @@ export default function RePhiEditChartConverter(_chart)
     {
         judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
         {
-            let newEevents = {};
+            let newEvents = {};
 
             for (const name in eventLayer)
             {
-                if (!newEevents[name]) newEevents[name] = [];
+                if (!newEvents[name]) newEvents[name] = [];
                 eventLayer[name].forEach((event) =>
                 {
                     calculateEventEase(event)
                         .forEach((event) =>
                         {
-                            newEevents[name].push(event);
+                            newEvents[name].push(event);
                         }
                     );
                 });
             }
 
-            judgeline.eventLayers[eventLayerIndex] = newEevents;
+            judgeline.eventLayers[eventLayerIndex] = newEvents;
         });
     });
 
@@ -186,7 +184,6 @@ export default function RePhiEditChartConverter(_chart)
 
         judgeline.event = finalEvent;
         judgeline.eventLayers = undefined;
-        // console.log(finalEvent);
     });
 
     // 计算事件的真实时间
