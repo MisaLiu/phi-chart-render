@@ -91,8 +91,6 @@ const Easing = [
     }
 ];
 
-window.Easing = Easing;
-
 export default function RePhiEditChartConverter(_chart)
 {
     let chart = new Chart();
@@ -189,6 +187,15 @@ export default function RePhiEditChartConverter(_chart)
         judgeline.event = finalEvent;
         judgeline.eventLayers = undefined;
         // console.log(finalEvent);
+    });
+
+    // 计算事件的真实时间
+    rawChart.judgeLineList.forEach((judgeline) =>
+    {
+        for (const name in judgeline.event)
+        {
+            judgeline.event[name] = calculateRealTime(rawChart.BPMList, judgeline.event[name]);
+        }
     });
 
     console.log(rawChart);
@@ -541,6 +548,41 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
             console.log(event);
             console.log(nextEvent);
             result.splice(index, 1);
+        }
+    });
+
+    return result;
+}
+
+function calculateRealTime(_bpmList, events)
+{
+    let bpmList = JSON.parse(JSON.stringify(_bpmList));
+    let result = [];
+
+    bpmList.sort((a, b) => b.startBeat - a.startBeat);
+
+    events.forEach((event) =>
+    {
+        let newEvent = JSON.parse(JSON.stringify(event));
+
+        for (let bpmIndex = 0, bpmLength = bpmList.length; bpmIndex < bpmLength; bpmIndex++)
+        {
+            let bpm = bpmList[bpmIndex];
+
+            if (bpm.startBeat > newEvent.endTime) continue;
+            newEvent.endTime = Number((bpm.startTime + ((newEvent.endTime - bpm.startBeat) * bpm.beatTime)).toFixed(4));
+
+            for (let nextBpmIndex = bpmIndex; nextBpmIndex < bpmLength; nextBpmIndex++)
+            {
+                let nextBpm = bpmList[nextBpmIndex];
+
+                if (nextBpm.startBeat > newEvent.startTime) continue;
+                newEvent.startTime = Number((nextBpm.startTime + ((newEvent.startTime - nextBpm.startBeat) * nextBpm.beatTime)).toFixed(4));
+                break;
+            }
+
+            result.push(newEvent);
+            break;
         }
     });
 
