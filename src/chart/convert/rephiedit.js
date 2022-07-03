@@ -136,7 +136,7 @@ export default function RePhiEditChartConverter(_chart)
     // 拆分缓动
     rawChart.judgeLineList.forEach((judgeline) =>
     {
-        judgeline.eventLayers.forEach((eventLayer) =>
+        judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
         {
             let newEevents = {};
 
@@ -154,8 +154,7 @@ export default function RePhiEditChartConverter(_chart)
                 });
             }
 
-            console.log(newEevents);
-            eventLayer = newEevents;
+            judgeline.eventLayers[eventLayerIndex] = newEevents;
         });
     });
 
@@ -176,10 +175,19 @@ export default function RePhiEditChartConverter(_chart)
             {
                 if (name == 'alphaEvents')
                     finalEvent.alpha = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.alpha);
+                if (name == 'moveXEvents')
+                    finalEvent.moveX = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.moveX);
+                if (name == 'moveYEvents')
+                    finalEvent.moveY = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.moveY);
+                if (name == 'rotateEvents')
+                    finalEvent.rotate = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.rotate);
+                if (name == 'speedEvents')
+                    finalEvent.speed = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.speed);
             }
         });
 
         judgeline.event = finalEvent;
+        judgeline.eventLayers = undefined;
         // console.log(finalEvent);
     });
 
@@ -506,6 +514,7 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
         result = JSON.parse(JSON.stringify(_result));
     });
 
+    // 事件排序
     result.sort((a, b) => a.startTime - b.startTime);
 
     result.forEach((event, index) =>
