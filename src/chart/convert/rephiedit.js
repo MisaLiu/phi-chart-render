@@ -93,6 +93,7 @@ const Easing = [
 
 export default function RePhiEditChartConverter(_chart)
 {
+    let notes = [];
     let chart = new Chart();
     let rawChart = convertChartFormat(_chart);
 
@@ -103,12 +104,23 @@ export default function RePhiEditChartConverter(_chart)
         let bpmChangedBeat = 0; // 当前 BPM 是在什么时候被更改的（Beat）
         let bpmChangedTime = 0; // 当前 BPM 是在什么时候被更改的（秒）
 
-        rawChart.BPMList.forEach((bpm) =>
+        rawChart.BPMList.forEach((bpm, index) =>
         {   
+            if (index < rawChart.BPMList.length - 1)
+            {
+                bpm.endTime = rawChart.BPMList[index + 1].startTime;
+            }
+            else
+            {
+                bpm.endTime = [1e9, 0, 1];
+            }
+
             bpm.startBeat = bpm.startTime[0] + bpm.startTime[1] / bpm.startTime[2];
+            bpm.endBeat = bpm.endTime[0] + bpm.endTime[1] / bpm.endTime[2];
 
             bpmChangedTime += currentBeatRealTime * (bpm.startBeat - bpmChangedBeat);
             bpm.startTime = bpmChangedTime;
+            bpm.endTime = currentBeatRealTime * (bpm.endBeat - bpmChangedBeat);
 
             bpmChangedBeat += (bpm.startBeat - bpmChangedBeat);
             
@@ -117,9 +129,9 @@ export default function RePhiEditChartConverter(_chart)
         });
     }
 
-    // Beat 数组转换为小数
     rawChart.judgeLineList.forEach((judgeline) =>
     {
+        // Beat 数组转换为小数
         judgeline.eventLayers.forEach((eventLayer) =>
         {
             for (const name in eventLayer)
@@ -127,11 +139,8 @@ export default function RePhiEditChartConverter(_chart)
                 eventLayer[name] = beat2Time(eventLayer[name]);
             }
         });
-    });
 
-    // 拆分缓动
-    rawChart.judgeLineList.forEach((judgeline) =>
-    {
+        // 拆分缓动
         judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
         {
             let newEvents = {};
@@ -152,66 +161,56 @@ export default function RePhiEditChartConverter(_chart)
 
             judgeline.eventLayers[eventLayerIndex] = newEvents;
         });
-    });
 
-    // 多层 EventLayer 叠加
-    rawChart.judgeLineList.forEach((judgeline) =>
-    {
-        let finalEvent = {
-            speed: [],
-            moveX: [],
-            moveY: [],
-            rotate: [],
-            alpha: []
-        };
-
-        judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
-        {
-            for (const name in eventLayer)
+        { // 多层 EventLayer 叠加
+            let finalEvent = {
+                speed: [],
+                moveX: [],
+                moveY: [],
+                rotate: [],
+                alpha: []
+            };
+    
+            judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
             {
-                if (name == 'alphaEvents')
-                    finalEvent.alpha = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.alpha);
-                if (name == 'moveXEvents')
-                    finalEvent.moveX = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.moveX);
-                if (name == 'moveYEvents')
-                    finalEvent.moveY = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.moveY);
-                if (name == 'rotateEvents')
-                    finalEvent.rotate = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.rotate);
-                if (name == 'speedEvents')
-                    finalEvent.speed = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.speed);
-            }
-        });
-
-        judgeline.event = finalEvent;
-        judgeline.eventLayers = undefined;
-    });
-
-    // 拆分 speedEvents
-    rawChart.judgeLineList.forEach((judgeline) =>
-    {
-        let newSpeedEvents = [];
-        judgeline.event.speed.forEach((event) =>
-        {
-            separateSpeedEvent(event)
-                .forEach((_event) =>
+                for (const name in eventLayer)
                 {
-                    newSpeedEvents.push(_event);
+                    if (name == 'alphaEvents')
+                        finalEvent.alpha = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.alpha);
+                    if (name == 'moveXEvents')
+                        finalEvent.moveX = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.moveX);
+                    if (name == 'moveYEvents')
+                        finalEvent.moveY = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.moveY);
+                    if (name == 'rotateEvents')
+                        finalEvent.rotate = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.rotate);
+                    if (name == 'speedEvents')
+                        finalEvent.speed = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.speed);
                 }
-            );
-        });
-        newSpeedEvents.sort((a, b) => a.startTime - b.startTime);
-        judgeline.event.speed = newSpeedEvents;
-    });
+            });
+    
+            judgeline.event = finalEvent;
+            judgeline.eventLayers = undefined;
+        }
 
-    // 计算 speedEvent 的 floorPosition
-    rawChart.judgeLineList.forEach((judgeline) =>
-    {
+        { // 拆分 speedEvents
+            let newSpeedEvents = [];
+            judgeline.event.speed.forEach((event) =>
+            {
+                separateSpeedEvent(event)
+                    .forEach((_event) =>
+                    {
+                        newSpeedEvents.push(_event);
+                    }
+                );
+            });
+            newSpeedEvents.sort((a, b) => a.startTime - b.startTime);
+            judgeline.event.speed = newSpeedEvents;
+        }
+
+        // 计算 speedEvent 的 floorPosition
         judgeline.event.speed = calculateSpeedEventFloorPosition(rawChart.BPMList, judgeline.event.speed);
-    });
 
-    // 计算事件规范值
-    rawChart.judgeLineList.forEach((judgeline) =>
-    {
+        // 计算事件规范值
         judgeline.event.alpha.forEach((event) =>
         {
             event.start = event.start / 255;
@@ -232,11 +231,46 @@ export default function RePhiEditChartConverter(_chart)
             event.start = -(Math.PI / 180) * event.start;
             event.end = -(Math.PI / 180) * event.end;
         });
-    });
 
-    // 计算事件的真实时间
-    rawChart.judgeLineList.forEach((judgeline) =>
-    {
+        // Note 的 Beat 转小数
+        judgeline.notes = beat2Time(judgeline.notes ? judgeline.notes : []);
+
+        judgeline.notes.forEach((note) =>
+        {
+            { // 计算 Note 的 floorPosition
+                let noteStartSpeedEvent;
+                let noteEndSpeedEvent;
+
+                for (const event of judgeline.event.speed)
+                {
+                    if (event.startBeat < note.startTime) continue;
+                    if (event.endBeat > note.startTime) break;
+
+                    noteStartSpeedEvent = event;
+                }
+
+                note.floorPosition = noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value / noteStartSpeedEvent.bpm * 1.875;
+
+                if (note.type == 2)
+                {
+                    for (const event of judgeline.event.speed)
+                    {
+                        if (event.startBeat < note.endTime) continue;
+                        if (event.endBeat > note.endTime) break;
+
+                        noteEndSpeedEvent = event;
+                    }
+
+                    note.holdLength = noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value / noteEndSpeedEvent.bpm * 1.875 - note.floorPosition;
+                }
+                else
+                {
+                    note.holdLength = 0;
+                }
+            }
+        });
+
+        // 计算事件的真实时间
         for (const name in judgeline.event)
         {
             judgeline.event[name] = calculateRealTime(rawChart.BPMList, judgeline.event[name]);
@@ -254,8 +288,46 @@ export default function RePhiEditChartConverter(_chart)
         
         judgeline.sortEvent();
         chart.judgelines.push(judgeline);
+        
+        _judgeline.notes.forEach((note) =>
+        {
+            notes.push(new Note({
+                type: (
+                    note.type == 1 ? 1 :
+                    note.type == 2 ? 3 :
+                    note.type == 3 ? 4 :
+                    note.type == 4 ? 2 : 1
+                ),
+                time: note.startTime,
+                holdTime: note.endTime,
+                speed: note.speed,
+                floorPosition: note.floorPosition,
+                holdLength: note.holdLength,
+                positionX: (note.positionX / 1340) / 18,
+                yOffset: note.yOffset,
+                xScale: note.size,
+                isAbove: note.above == 1,
+                isMulti: false,
+                isFake: note.isFake == 1,
+                judgeline: judgeline
+            }));
+        });
     });
 
+    notes = calculateRealNoteTime(rawChart.BPMList, notes);
+    notes.sort((a, b) => a.time - b.time);
+    notes.forEach((note, index) =>
+    {
+        let nextNote = notes[index + 1];
+        if (!nextNote) return;
+
+        if (notes.time == nextNote.time)
+        {
+            note.isMulti = true;
+            nextNote.isMulti = true;
+        }
+    });
+    chart.notes = notes;
 
     return chart;
 }
@@ -375,30 +447,99 @@ function calculateSpeedEventFloorPosition(_bpmList, events)
     let currentFloorPosition = 0;
     let result = [];
 
-    bpmList.sort((a, b) => b.startTime - a.startTime);
+    // bpmList.sort((a, b) => b.startTime - a.startTime);
+
+    events.sort((a, b) => a.startTime - b.startTime);
+    events.forEach((event, index) =>
+    {
+        event.endTime = index < events.length - 1 ? events[index + 1].startTime : 1e9;
+        if (event.startTime < index) event.startTime = 0;
+    });
 
     events.forEach((event, index) =>
     {
-        let newEvent = JSON.parse(JSON.stringify(event));
+        let bpmEventInfo = _separateEvent(bpmList, event, currentFloorPosition);
 
-        newEvent.endTime = index < events.length - 1 ? events[index + 1].startTime : 1e9;
-        if (newEvent.startTime < index) newEvent.startTime = 0;
+        bpmEventInfo.result.forEach((_event) =>
+        {
+            result.push(_event);
+        });
+        currentFloorPosition = bpmEventInfo.currentFloorPosition;
+    });
+
+    result.sort((a, b) => a.startTime - b.startTime);
+    result.forEach((event, index) =>
+    {
+        event.endTime = index < result.length - 1 ? result[index + 1].startTime : 1e9;
+        if (event.startTime < index) event.startTime = 0;
+    });
+
+    return result;
+
+    function _separateEvent(bpmList, event, _currentFloorPosition = 0)
+    {
+        let currentFloorPosition = _currentFloorPosition;
+        let result = [];
 
         for (let bpmIndex = 0, bpmLength = bpmList.length; bpmIndex < bpmLength; bpmIndex++)
         {
             let bpm = bpmList[bpmIndex];
 
-            if (bpm.startBeat > newEvent.endTime) continue;
+            if (bpm.startBeat < event.startTime && bpm.endBeat < event.startTime) continue;
+            if (bpm.startBeat > event.endTime && bpm.endBeat > event.endTime) break;
 
-            newEvent.floorPosition = currentFloorPosition;
-            currentFloorPosition += ((newEvent.endTime - newEvent.startTime) * 8) * newEvent.value / bpm.bpm * 1.875;
-            
-            result.push(newEvent);
-            break;
+            if (bpm.startBeat <= event.startTime && bpm.endBeat >= event.endTime)
+            {
+                result.push({
+                    startTime: event.startTime,
+                    endTime: event.endTime,
+                    value: event.value,
+                    floorPosition: currentFloorPosition,
+                    bpm: bpm.bpm
+                });
+                currentFloorPosition += ((event.endTime - event.startTime) * 8) * event.value / bpm.bpm * 1.875;
+
+            }
+            else if (bpm.startBeat <= event.startTime && bpm.endBeat < event.endTime)
+            {
+                let nextBpm = bpmList[bpmIndex + 1];
+
+                result.push({
+                    startTime: event.startTime,
+                    endTime: bpm.endBeat,
+                    value: event.value,
+                    floorPosition: currentFloorPosition,
+                    bpm: bpm.bpm
+                });
+                currentFloorPosition += ((bpm.endBeat - event.startTime) * 8) * event.value / bpm.bpm * 1.875;
+
+                result.push({
+                    startTime: bpm.endBeat,
+                    endTime: event.endTime,
+                    value: event.value,
+                    floorPosition: currentFloorPosition,
+                    bpm: nextBpm.bpm
+                });
+                currentFloorPosition += ((event.endTime - bpm.endBeat) * 8) * event.value / nextBpm.bpm * 1.875;
+            }
         }
-    });
 
-    return result;
+        if (result.length > 1)
+        {
+            let extraEventInfo = _separateEvent(bpmList, result[result.length - 1], currentFloorPosition);
+            extraEventInfo.result.forEach((event, index) =>
+            {
+                if (index == 0) return;
+                result.push(event);
+            });
+            currentFloorPosition = extraEventInfo.currentFloorPosition;
+        }
+
+        return {
+            result,
+            currentFloorPosition
+        };
+    }
 }
 
 function valueCalculator(event, currentTime)
@@ -713,4 +854,34 @@ function calculateRealTime(_bpmList, events)
     });
 
     return result;
+}
+
+function calculateRealNoteTime(bpmList, notes)
+{
+    // let bpmList = JSON.parse(JSON.stringify(_bpmList));
+    // bpmList.sort((a, b) => b.startBeat - a.startBeat);
+
+    notes.forEach((note) =>
+    {
+        for (const bpm of bpmList)
+        {
+            if (note.time < bpm.startBeat) continue;
+            if (note.time > bpm.endBeat) break;
+
+            note.time = Number((bpm.startTime + ((note.time - bpm.startBeat) * bpm.beatTime)).toFixed(4));
+        }
+
+        if (note.type === 3)
+        {
+            for (const bpm of bpmList)
+            {
+                if (note.holdTime < bpm.startBeat) continue;
+                if (note.holdTime > bpm.endBeat) break;
+
+                note.holdTime = Number((bpm.startTime + ((note.holdTime - bpm.startBeat) * bpm.beatTime)).toFixed(4));
+            }
+        }
+    });
+
+    return notes;
 }
