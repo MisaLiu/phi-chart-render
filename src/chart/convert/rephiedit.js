@@ -209,6 +209,31 @@ export default function RePhiEditChartConverter(_chart)
         judgeline.event.speed = calculateSpeedEventFloorPosition(rawChart.BPMList, judgeline.event.speed);
     });
 
+    // 计算事件规范值
+    rawChart.judgeLineList.forEach((judgeline) =>
+    {
+        judgeline.event.alpha.forEach((event) =>
+        {
+            event.start = event.start / 255;
+            event.end = event.end / 255;
+        });
+        judgeline.event.moveX.forEach((event) =>
+        {
+            event.start = event.start / 1340 + 0.5;
+            event.end = event.end / 1340 + 0.5;
+        });
+        judgeline.event.moveY.forEach((event) =>
+        {
+            event.start = event.start / 900 + 0.5;
+            event.end = event.end / 900 + 0.5;
+        });
+        judgeline.event.rotate.forEach((event) =>
+        {
+            event.start = -(Math.PI / 180) * event.start;
+            event.end = -(Math.PI / 180) * event.end;
+        });
+    });
+
     // 计算事件的真实时间
     rawChart.judgeLineList.forEach((judgeline) =>
     {
@@ -219,6 +244,17 @@ export default function RePhiEditChartConverter(_chart)
     });
 
     console.log(rawChart);
+
+    rawChart.judgeLineList.forEach((_judgeline, index) =>
+    {
+        let judgeline = new Judgeline({ id: index });
+
+        judgeline.texture = _judgeline.Texture != 'line.png' ? _judgeline.Texture : 'judgeline';
+        judgeline.event = _judgeline.event;
+        
+        judgeline.sortEvent();
+        chart.judgelines.push(judgeline);
+    });
 
 
     return chart;
@@ -355,7 +391,7 @@ function calculateSpeedEventFloorPosition(_bpmList, events)
             if (bpm.startBeat > newEvent.endTime) continue;
 
             newEvent.floorPosition = currentFloorPosition;
-            currentFloorPosition += ((newEvent.endTime - newEvent.startTime) * 32) * newEvent.value / bpm.bpm * 1.875;
+            currentFloorPosition += ((newEvent.endTime - newEvent.startTime) * 8) * newEvent.value / bpm.bpm * 1.875;
             
             result.push(newEvent);
             break;

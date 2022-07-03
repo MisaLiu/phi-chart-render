@@ -124,7 +124,7 @@ export default class Render
 
     tick()
     {
-        let currentTime = (this.audioContext.progress * this.music.duration) + this.audioOffset + this.chart.offset;
+        let currentTime = (this.audioContext.progress * this.music.duration) - this.audioOffset - this.chart.offset;
         this.chart.calcTime(currentTime, this.renderSize);
     }
     
