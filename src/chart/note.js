@@ -12,6 +12,7 @@ export default class Note
         this.holdLength    = (this.type === 3 && !isNaN(Number(params.holdLength))) ? Number(params.holdLength) : 0;
         this.endPosition   = this.floorPosition + this.holdLength;
         this.positionX     = !isNaN(Number(params.positionX)) ? Number(Number(params.positionX).toFixed(6)) : 0;
+        this.basicAlpha    = (!isNaN(Number(params.basicAlpha)) && Number(params.basicAlpha) >= 0 && Number(params.basicAlpha) <= 1) ? Number(params.basicAlpha) : 1;
         this.yOffset       = !isNaN(Number(params.yOffset)) ? Number(params.yOffset) : 0;
         this.xScale        = !isNaN(Number(params.xScale)) ? Number(params.xScale) : 1;
         this.isAbove       = !!params.isAbove;
@@ -103,7 +104,7 @@ export default class Note
 
         if (this.type !== 3) this.sprite.anchor.set(0.5);
         if (!this.isAbove) this.sprite.angle = 180;
-        this.sprite.alpha = 1;
+        this.sprite.alpha = this.basicAlpha;
         this.sprite.visible = false;
         this.sprite.outScreen = this.type !== 3 ? true : false;
 

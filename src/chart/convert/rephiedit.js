@@ -346,6 +346,7 @@ export default function RePhiEditChartConverter(_chart)
                 floorPosition: note.floorPosition,
                 holdLength: note.holdLength,
                 positionX: (note.positionX / (670 / 9)),
+                basicAlpha: note.alpha / 255,
                 yOffset: note.yOffset,
                 xScale: note.size,
                 isAbove: (

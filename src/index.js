@@ -94,6 +94,7 @@ doms.startBtn.addEventListener('click', () => {
     
     render.chart.addFunction('note', (currentTime, note) =>
     {
+        if (note.isFake) return;
         if (currentTime < note.time) return;
         if (currentTime - 0.2 > note.time) return;
         if (note.type !== 3 && note.sprite.alpha != 0)
