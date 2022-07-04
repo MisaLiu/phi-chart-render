@@ -96,7 +96,12 @@ doms.startBtn.addEventListener('click', () => {
     {
         if (currentTime < note.time) return;
         if (currentTime - 0.2 > note.time) return;
-        note.sprite.alpha = 1 - (currentTime - note.time) / 0.2;
+        if (note.type !== 3 && note.sprite.alpha != 0)
+        {
+            note.sprite.alpha = 0;
+            console.log(note);
+        }
+        // note.sprite.alpha = 1 - (currentTime - note.time) / 0.2;
     });
 
     render.start();
