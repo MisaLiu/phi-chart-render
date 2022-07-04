@@ -268,8 +268,8 @@ export default function RePhiEditChartConverter(_chart)
         });
         judgeline.event.rotate.forEach((event) =>
         {
-            event.start = -(Math.PI / 180) * event.start;
-            event.end = -(Math.PI / 180) * event.end;
+            event.start = (Math.PI / 180) * event.start;
+            event.end = (Math.PI / 180) * event.end;
         });
         judgeline.event.speed.forEach((event) =>
         {
