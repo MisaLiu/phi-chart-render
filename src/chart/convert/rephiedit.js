@@ -273,8 +273,9 @@ export default function RePhiEditChartConverter(_chart)
         });
         judgeline.event.speed.forEach((event) =>
         {
-            event.start = event.start * 120 / 900;
-            event.end = event.end * 120 / 900;
+            event.value = event.value / (0.6 / (120 / 900));
+            event.start = event.start / (0.6 / (120 / 900));
+            event.end = event.end / (0.6 / (120 / 900));
         });
 
         // 计算 speedEvent 的 floorPosition
@@ -320,8 +321,6 @@ export default function RePhiEditChartConverter(_chart)
         });
     });
 
-    console.log(rawChart);
-
     rawChart.judgeLineList.forEach((_judgeline, index) =>
     {
         let judgeline = new Judgeline({ id: index });
@@ -349,9 +348,13 @@ export default function RePhiEditChartConverter(_chart)
                 positionX: (note.positionX / (670 / 9)),
                 yOffset: note.yOffset,
                 xScale: note.size,
-                isAbove: note.above == 1,
+                isAbove: (
+                    note.above == 1 ? true :
+                    note.above == 2 ? false : 
+                    note.above == 0 ? false : true
+                ),
                 isMulti: false,
-                isFake: note.isFake == 1,
+                isFake: note.isFake == 1 ? true : false,
                 judgeline: judgeline
             }));
         });
@@ -363,7 +366,7 @@ export default function RePhiEditChartConverter(_chart)
         let nextNote = notes[index + 1];
         if (!nextNote) return;
 
-        if (notes.time == nextNote.time)
+        if (note.time == nextNote.time)
         {
             note.isMulti = true;
             nextNote.isMulti = true;
@@ -778,8 +781,6 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
             event.start == nextEvent.start &&
             event.end == nextEvent.end
         ) {
-            console.log(event);
-            console.log(nextEvent);
             result.splice(index, 1);
         }
     });
