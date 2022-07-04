@@ -6,6 +6,28 @@ This project is still working.
 
 Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesone [sim-phi](https://github.com/lchzh3473/sim-phi) project!
 
+## Currently supported chart features
+
+* Official charts
+    * [x] Full support
+
+* PhiEdit charts
+    * Not started yet
+
+* Re:PhiEdit charts
+    * [x] BPM List *(Need test)*
+    * [x] Event Layers support  *(Need test)*
+    * [x] Custom judgeline texture *(Need test)*
+    * [ ] Judgeline cover type
+    * note features
+        * [x] Basic support
+        * [x] Fake note support
+        * [x] Note sprite scale
+        * [x] Custom note sprite texture *(Need test)*
+        * [x] Note alpha
+        * [ ] yOffset
+        * [ ] visible time
+
 ## Development
 
 You must have a Node.js enviorment to helping development.
