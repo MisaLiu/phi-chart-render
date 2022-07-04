@@ -250,9 +250,6 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.event[name] = calculateRealTime(rawChart.BPMList, judgeline.event[name]);
         }
 
-        // 计算 speedEvent 的 floorPosition
-        judgeline.event.speed = calculateSpeedEventFloorPosition(judgeline.event.speed);
-
         // 计算事件规范值
         judgeline.event.alpha.forEach((event) =>
         {
@@ -274,6 +271,14 @@ export default function RePhiEditChartConverter(_chart)
             event.start = -(Math.PI / 180) * event.start;
             event.end = -(Math.PI / 180) * event.end;
         });
+        judgeline.event.speed.forEach((event) =>
+        {
+            event.start = event.start * 120 / 900;
+            event.end = event.end * 120 / 900;
+        });
+
+        // 计算 speedEvent 的 floorPosition
+        judgeline.event.speed = calculateSpeedEventFloorPosition(judgeline.event.speed);
 
         // Note 的 Beat 转小数
         judgeline.notes = beat2Time(judgeline.notes ? judgeline.notes : []);
@@ -365,6 +370,8 @@ export default function RePhiEditChartConverter(_chart)
         }
     });
     chart.notes = notes;
+
+
 
     return chart;
 }
