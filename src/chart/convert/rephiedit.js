@@ -345,7 +345,7 @@ export default function RePhiEditChartConverter(_chart)
                 speed: note.speed,
                 floorPosition: note.floorPosition,
                 holdLength: note.holdLength,
-                positionX: (note.positionX / (670 / 9)),
+                positionX: (note.positionX / (670 * (9 / 80))),
                 basicAlpha: note.alpha / 255,
                 yOffset: note.yOffset,
                 xScale: note.size,
@@ -501,7 +501,7 @@ function calculateSpeedEventFloorPosition(events)
         let newEvent = JSON.parse(JSON.stringify(event));
         newEvent.endTime = index < events.length - 1 ? events[index + 1].startTime : 1e9;
 
-        newEvent.floorPosition = currentFloorPosition;
+        newEvent.floorPosition = Math.fround(currentFloorPosition);
         currentFloorPosition += (newEvent.endTime - newEvent.startTime) * newEvent.value;
 
         result.push(newEvent);
@@ -822,34 +822,4 @@ function calculateRealTime(_bpmList, events)
     });
 
     return result;
-}
-
-function calculateRealNoteTime(bpmList, notes)
-{
-    // let bpmList = JSON.parse(JSON.stringify(_bpmList));
-    // bpmList.sort((a, b) => b.startBeat - a.startBeat);
-
-    notes.forEach((note) =>
-    {
-        for (const bpm of bpmList)
-        {
-            if (note.time < bpm.startBeat) continue;
-            if (note.time > bpm.endBeat) break;
-
-            note.time = Number((bpm.startTime + ((note.time - bpm.startBeat) * bpm.beatTime)).toFixed(4));
-        }
-
-        if (note.type === 3)
-        {
-            for (const bpm of bpmList)
-            {
-                if (note.holdTime < bpm.startBeat) continue;
-                if (note.holdTime > bpm.endBeat) break;
-
-                note.holdTime = Number((bpm.startTime + ((note.holdTime - bpm.startBeat) * bpm.beatTime)).toFixed(4));
-            }
-        }
-    });
-
-    return notes;
 }

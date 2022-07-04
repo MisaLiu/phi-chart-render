@@ -135,7 +135,7 @@ export default class Render
         this.pixi.renderer.resize(this.parentNode.clientWidth, this.parentNode.clientHeight);
 
         this.renderSize.width = (this.parentNode.clientHeight / 9 * 16 < this.parentNode.clientWidth ? this.parentNode.clientHeight / 9 * 16 : this.parentNode.clientWidth);
-        this.renderSize.widthPercent = this.renderSize.width / 18;
+        this.renderSize.widthPercent = this.renderSize.width * (9 / 160);
         this.renderSize.widthOffset = (this.parentNode.clientWidth - this.renderSize.width) / 2;
         this.renderSize.height = this.parentNode.clientHeight;
 

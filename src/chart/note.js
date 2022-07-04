@@ -25,8 +25,8 @@ export default class Note
 
         if (!this.judgeline) throw new Error('Note must have a judgeline');
         
-        this.floorPosition = this.floorPosition;
-        this.endPosition   = (this.type === 3 && this.endPosition > 0) ? this.endPosition : 0;
+        this.floorPosition = Math.fround(this.floorPosition);
+        this.endPosition   = (this.type === 3 && this.endPosition > 0) ? Math.fround(this.endPosition) : 0;
 
         this.sprite = undefined;
     }

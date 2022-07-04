@@ -60,7 +60,7 @@ export default class Judgeline
             if (currentTime < i.startTime) break;
             if (currentTime > i.endTime) continue;
 
-            this.floorPosition = (currentTime - i.startTime) * i.value + i.floorPosition;
+            this.floorPosition = Math.fround((currentTime - i.startTime) * i.value + i.floorPosition);
         }
 
         for (const i of this.event.moveX)
