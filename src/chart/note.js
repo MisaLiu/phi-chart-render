@@ -17,7 +17,7 @@ export default class Note
         this.isAbove       = !!params.isAbove;
         this.isFake        = !!params.isFake;
         this.isMulti       = !!params.isMulti;
-        this.forceSpeed    = (this.type === 3 && (params.forceSpeed instanceof Boolean)) ? params.forceSpeed : false;
+        this.forceSpeed    = this.type === 3 ? !!params.forceSpeed : false;
         this.texture       = (params.texture && params.texture != '') ? params.texture : undefined;
         this.hitsound      = (params.hitsound && params.hitsound != '') ? params.hitsound : undefined;
         this.judgeline     = params.judgeline;
@@ -26,9 +26,6 @@ export default class Note
         
         this.floorPosition = this.floorPosition;
         this.endPosition   = (this.type === 3 && this.endPosition > 0) ? this.endPosition : 0;
-
-        this.outScreen     = this.type !== 3 ? true : false;
-
 
         this.sprite = undefined;
     }
@@ -108,6 +105,7 @@ export default class Note
         if (!this.isAbove) this.sprite.angle = 180;
         this.sprite.alpha = 1;
         this.sprite.visible = false;
+        this.sprite.outScreen = this.type !== 3 ? true : false;
 
         if (this.hitsound)
         {
@@ -175,9 +173,9 @@ export default class Note
                     (realX <= size.startX || realX >= size.endX) ||
                     (realY <= size.startY || realY >= size.endY)
                 ) &&
-                this.outScreen === false
+                this.sprite.outScreen === false
             ) {
-                this.outScreen = true;
+                this.sprite.outScreen = true;
                 this.sprite.visible = false;
             }
             else if (
@@ -186,15 +184,15 @@ export default class Note
                     (realX > size.startX && realX < size.endX) &&
                     (realY > size.startY && realY < size.endY)
                 ) &&
-                this.outScreen === true
+                this.sprite.outScreen === true
             ) {
-                this.outScreen = false;
+                this.sprite.outScreen = false;
                 this.sprite.visible = true;
             }
 
-            if (this.outScreen === false)
+            if (this.sprite.outScreen === false)
             {
-                if (this.type !== 3 && currentTime < this.time)
+                if (this.type !== 3 && (currentTime < this.time || this.isFake))
                 {
                     if (this.floorPosition < this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;
                     else if (this.floorPosition >= this.judgeline.floorPosition && this.sprite.visible === false) this.sprite.visible = true;
