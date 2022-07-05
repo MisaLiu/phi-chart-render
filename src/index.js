@@ -36,8 +36,13 @@ doms.file.chart.addEventListener('input', function () {
     let reader = new FileReader();
 
     reader.onload = function () {
-        files.rawChart = JSON.parse(this.result);
-        files.chart = Chart.from(JSON.parse(this.result));
+        try {
+            files.rawChart = JSON.parse(this.result);
+        } catch (e) {
+            files.rawChart = this.result;
+        }
+
+        files.chart = Chart.from(files.rawChart);
     };
 
     reader.readAsText(this.files[0]);

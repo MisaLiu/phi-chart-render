@@ -147,8 +147,13 @@ export default class Note
                 realY = 0;
 
             // Hold 的特殊位置写法
-            if (this.type === 3 && this.floorPosition < this.judgeline.floorPosition && this.endPosition >= this.judgeline.floorPosition)
-            {
+            if (
+                this.type === 3 &&
+                (
+                    (this.floorPosition < this.judgeline.floorPosition && this.endPosition > this.judgeline.floorPosition) ||
+                    (this.time < currentTime && this.holdTime > currentTime)
+                )
+            ) {
                 originY = 0;
 
                 if (this.sprite.children[0].visible === true) this.sprite.children[0].visible = false;
