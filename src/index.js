@@ -100,7 +100,7 @@ doms.startBtn.addEventListener('click', () => {
         if (note.type !== 3 && note.sprite.alpha != 0)
         {
             note.sprite.alpha = 0;
-            console.log(note);
+            // console.log(note);
         }
         // note.sprite.alpha = 1 - (currentTime - note.time) / 0.2;
     });

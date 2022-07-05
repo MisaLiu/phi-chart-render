@@ -207,41 +207,19 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.event.speed = newSpeedEvents;
         }
 
+        // speedEvents 时间连续性计算
+        if (judgeline.event.speed[0].startTime != 0 && judgeline.event.speed[0].start != 1 && judgeline.event.speed[0].end != 1)
         {
-            // speedEvents 时间连续性计算
-            {
-                let newSpeedEvents = [];
-
-                if (judgeline.event.speed[0].startTime != 0 && judgeline.event.speed[0].start != 1 && judgeline.event.speed[0].end != 1)
-                {
-                    newSpeedEvents.push({
-                        startTime: 0,
-                        endTime: judgeline.event.speed[0].startTime,
-                        start: 1,
-                        end: 1
-                    });
-                }
-                else if (judgeline.event.speed[0].startTime != 0)
-                {
-                    newSpeedEvents.push({
-                        startTime: 0,
-                        endTime: judgeline.event.speed[0].startTime,
-                        start: 1,
-                        end: judgeline.event.speed[0].start
-                    });
-                }
-
-                judgeline.event.speed.forEach((_event, index) =>
-                {
-                    let event = JSON.parse(JSON.stringify(_event));
-                    let nextEvent = judgeline.event.speed[index + 1];
-                    event.endTime = nextEvent ? nextEvent.startTime : 1e9;
-                    newSpeedEvents.push(event);
-                });
-
-                newSpeedEvents.sort((a, b) => a.startTime - b.startTime);
-                judgeline.event.speed = JSON.parse(JSON.stringify(newSpeedEvents));
-            }
+            judgeline.event.speed.unshift({
+                startTime: 0,
+                endTime: judgeline.event.speed[0].startTime,
+                start: 1,
+                end: 1
+            });
+        }
+        else if (judgeline.event.speed[0].startTime != 0)
+        {
+            judgeline.event.speed[0].startTime = 0;
         }
 
         // 计算事件的真实时间
@@ -253,8 +231,16 @@ export default function RePhiEditChartConverter(_chart)
         // 计算事件规范值
         judgeline.event.alpha.forEach((event) =>
         {
-            event.start = event.start / 255;
-            event.end = event.end / 255;
+            event.start = (
+                event.start > 255 ? 1 :
+                event.start < 0 ? 0 :
+                event.start / 255
+            );
+            event.end = (
+                event.end > 255 ? 1 :
+                event.end < 0 ? 0 :
+                event.end / 255
+            );
         });
         judgeline.event.moveX.forEach((event) =>
         {
@@ -326,6 +312,7 @@ export default function RePhiEditChartConverter(_chart)
         let judgeline = new Judgeline({ id: index });
 
         judgeline.texture = _judgeline.Texture != 'line.png' ? _judgeline.Texture : 'judgeline';
+        judgeline.parentLine =_judgeline.father;
         judgeline.event = _judgeline.event;
         
         judgeline.sortEvent();
@@ -383,10 +370,20 @@ export default function RePhiEditChartConverter(_chart)
 function convertChartFormat(rawChart)
 {
     let chart = JSON.parse(JSON.stringify(rawChart));
-
+    
     switch (chart.META.RPEVersion)
     {
         case 100:
+        {
+            chart.judgeLineList.forEach((judgeline) =>
+            {
+                judgeline.bpmfactor = 1;
+                judgeline.father = -1;
+                judgeline.zOrder = 0;
+            });
+            break;
+        }
+        case 105:
         {
             break;
         }
@@ -460,7 +457,7 @@ function separateSpeedEvent(event)
 
     for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
     {
-        let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
+        let timePercentStart = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
 
         if (event.start != event.end)
         {

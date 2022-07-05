@@ -1,4 +1,4 @@
-import { Sprite } from 'pixi.js-legacy';
+import { Sprite, Text } from 'pixi.js-legacy';
 
 export default class Judgeline
 {
@@ -6,6 +6,7 @@ export default class Judgeline
     {
         this.id = !isNaN(params.id) ? Number(params.id) : -1;
         this.texture = 'judgeline';
+        this.parentLine = params.parentLine ? params.parentLine : null;
         this.event = {
             speed: [],
             moveX: [],
@@ -50,6 +51,16 @@ export default class Judgeline
         this.sprite.anchor.set(0.5);
         this.sprite.alpha = 1;
 
+        // For debug propose
+        /*
+        let lineId = new Text(this.id, {
+            fontSize: 24,
+            fill: 0xFF0000
+        });
+        this.sprite.addChild(lineId);
+        lineId.anchor.set(0.5);
+        lineId.position.set(0);
+        */
         return this.sprite;
     }
 
