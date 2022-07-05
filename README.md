@@ -9,7 +9,8 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesone [sim-p
 ## Currently supported chart features
 
 * Official charts
-    * [x] Full support
+    * [x] Basic support
+    * [ ] Custom judgeline texture
 
 * PhiEdit charts
     * Not started yet
