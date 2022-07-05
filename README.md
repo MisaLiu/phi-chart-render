@@ -19,6 +19,9 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesone [sim-p
     * [x] Event Layers support  *(Need test)*
     * [x] Custom judgeline texture *(Need test)*
     * [ ] Judgeline cover type
+    * [ ] Parent judgeline
+    * [ ] BPM factor
+    * [ ] Extend events
     * note features
         * [x] Basic support
         * [x] Fake note support
