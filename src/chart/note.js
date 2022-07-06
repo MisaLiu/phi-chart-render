@@ -198,6 +198,9 @@ export default class Note
 
             if (this.sprite.outScreen === false)
             {
+                if (this.judgeline.alpha < 0 && this.sprite.visible === true) this.sprite.visible = false;
+                else if (this.judgeline.alpha >= 0 && this.sprite.visible === false) this.sprite.visible = true;
+
                 if (this.type !== 3 && (currentTime < this.time || this.isFake))
                 {
                     if (this.floorPosition < this.judgeline.floorPosition && this.sprite.visible === true) this.sprite.visible = false;

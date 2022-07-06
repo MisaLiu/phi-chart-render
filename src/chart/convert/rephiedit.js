@@ -231,16 +231,8 @@ export default function RePhiEditChartConverter(_chart)
         // 计算事件规范值
         judgeline.event.alpha.forEach((event) =>
         {
-            event.start = (
-                event.start > 255 ? 1 :
-                event.start < 0 ? 0 :
-                event.start / 255
-            );
-            event.end = (
-                event.end > 255 ? 1 :
-                event.end < 0 ? 0 :
-                event.end / 255
-            );
+            event.start = event.start > 255 ? 1 : event.start / 255;
+            event.end = event.end > 255 ? 1 : event.end / 255;
         });
         judgeline.event.moveX.forEach((event) =>
         {

@@ -142,7 +142,7 @@ export default class Judgeline
             this.alpha = i.start * time1 + i.end * time2;
 
             if (this.sprite) {
-                this.sprite.alpha = this.alpha;
+                this.sprite.alpha = this.alpha >= 0 ? this.alpha : 0;
             }
         }
         /**
