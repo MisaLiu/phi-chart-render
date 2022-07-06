@@ -86,7 +86,7 @@ export default class Judgeline
 
             if (this.parentLine)
             {
-                this.x += (this.parentLine.x - 0.5) * 2;
+                this.x += this.x * (this.parentLine.x - 0.5) * 2;
             }
 
             if (this.sprite) {
@@ -106,7 +106,7 @@ export default class Judgeline
 
             if (this.parentLine)
             {
-                this.y += (this.parentLine.y - 0.5) * 2;
+                this.y += this.y * (this.parentLine.y - 0.5) * 2;
             }
 
             if (this.sprite) {
