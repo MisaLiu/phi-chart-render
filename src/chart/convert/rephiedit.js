@@ -348,6 +348,7 @@ export default function RePhiEditChartConverter(_chart)
         });
     });
     
+    chart.judgelines.sort((a, b) => a.id - b.id);
     notes.sort((a, b) => a.time - b.time);
     notes.forEach((note, index) =>
     {
@@ -361,9 +362,19 @@ export default function RePhiEditChartConverter(_chart)
         }
     });
     chart.notes = notes;
-
-
-
+    
+    chart.judgelines.forEach((judgeline) =>
+    {
+        if (judgeline.parentLine && judgeline.parentLine >= 0)
+        {
+            judgeline.parentLine = chart.judgelines[judgeline.parentLine];
+        }
+        else
+        {
+            judgeline.parentLine = undefined;
+        }
+    });
+    
     return chart;
 }
 

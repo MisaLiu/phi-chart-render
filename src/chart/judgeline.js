@@ -84,6 +84,11 @@ export default class Judgeline
 
             this.x = i.start * time1 + i.end * time2;
 
+            if (this.parentLine)
+            {
+                this.x += (this.parentLine.x - 0.5) * 2;
+            }
+
             if (this.sprite) {
                 this.sprite.position.x = this.x * size.width;
             }
@@ -98,6 +103,11 @@ export default class Judgeline
             let time1 = 1 - time2;
 
             this.y = 1 - (i.start * time1 + i.end * time2);
+
+            if (this.parentLine)
+            {
+                this.y += (this.parentLine.y - 0.5) * 2;
+            }
 
             if (this.sprite) {
                 this.sprite.position.y = this.y * size.height;
