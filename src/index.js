@@ -122,18 +122,18 @@ doms.startBtn.addEventListener('click', () => {
 
 window.addEventListener('load', () => {
     loader.add([
-        { name: 'tap', url: '/assets/Tap.png' },
-        { name: 'tapHL', url: '/assets/TapHL.png' },
-        { name: 'drag', url: '/assets/Drag.png' },
-        { name: 'dragHL', url: '/assets/DragHL.png' },
-        { name: 'flick', url: '/assets/Flick.png' },
-        { name: 'flickHL', url: '/assets/FlickHL.png' },
-        { name: 'holdHead', url: '/assets/HoldHead.png' },
-        { name: 'holdHeadHL', url: '/assets/HoldHeadHL.png' },
-        { name: 'holdBody', url: '/assets/Hold.png' },
-        { name: 'holdBodyHL', url: '/assets/HoldHL.png' },
-        { name: 'holdEnd', url: '/assets/HoldEnd.png' },
-        { name: 'judgeline', url: '/assets/JudgeLine.png' }
+        { name: 'tap', url: './assets/Tap.png' },
+        { name: 'tapHL', url: './assets/TapHL.png' },
+        { name: 'drag', url: './assets/Drag.png' },
+        { name: 'dragHL', url: './assets/DragHL.png' },
+        { name: 'flick', url: './assets/Flick.png' },
+        { name: 'flickHL', url: './assets/FlickHL.png' },
+        { name: 'holdHead', url: './assets/HoldHead.png' },
+        { name: 'holdHeadHL', url: './assets/HoldHeadHL.png' },
+        { name: 'holdBody', url: './assets/Hold.png' },
+        { name: 'holdBodyHL', url: './assets/HoldHL.png' },
+        { name: 'holdEnd', url: './assets/HoldEnd.png' },
+        { name: 'judgeline', url: './assets/JudgeLine.png' }
     ]).load((loader, resources) => {
         for (const name in resources) {
             textures[name] = resources[name].texture;
