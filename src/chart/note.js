@@ -151,7 +151,7 @@ export default class Note
                 this.type === 3 &&
                 (
                     (this.floorPosition < this.judgeline.floorPosition && this.endPosition > this.judgeline.floorPosition) ||
-                    (this.time < currentTime && this.holdTime > currentTime)
+                    (this.time <= currentTime && this.holdTime > currentTime)
                 )
             ) {
                 originY = 0;
