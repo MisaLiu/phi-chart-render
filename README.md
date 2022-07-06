@@ -24,6 +24,7 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
     * [x] Easing start/end point
     * [ ] BPM factor
     * [ ] Extend events
+    * [ ] Event link group
     * note features
         * [x] Basic support
         * [x] Fake note support
