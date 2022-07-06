@@ -380,6 +380,18 @@ function convertChartFormat(rawChart)
                 judgeline.bpmfactor = 1;
                 judgeline.father = -1;
                 judgeline.zOrder = 0;
+
+                judgeline.eventLayers.forEach((eventLayer) =>
+                {
+                    for (const name in eventLayer)
+                    {
+                        eventLayer[name].forEach((event) =>
+                        {
+                            event.easingLeft = 0;
+                            event.easingRight = 1;
+                        });
+                    }
+                });
             });
             break;
         }
@@ -415,6 +427,7 @@ function calculateEventEase(event, forceLinear = false)
 
     for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
     {
+        let easeBetween = event.easingRight - event.easingLeft;
         let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
         let timePercentEnd = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
 
@@ -426,10 +439,10 @@ function calculateEventEase(event, forceLinear = false)
                     timeIndex + 1 == timeCount && event.startTime + (timeIndex + 1) * calcBetweenTime != event.endTime ?
                     event.endTime : event.startTime + (timeIndex + 1) * calcBetweenTime
                 ),
-                start: event.start + valueBetween * Easing[event.easingType - 1](timePercentStart),
+                start: event.start + valueBetween * Easing[event.easingType - 1](event.easingLeft + easeBetween * timePercentStart),
                 end: (
-                    timeIndex + 1 == timeCount && event.start + valueBetween * Easing[event.easingType - 1](timePercentEnd) != event.end ?
-                    event.end : event.start + valueBetween * Easing[event.easingType - 1](timePercentEnd)
+                    timeIndex + 1 == timeCount && event.start + valueBetween * Easing[event.easingType - 1](event.easingLeft + easeBetween * timePercentEnd) != event.end ?
+                    event.end : event.start + valueBetween * Easing[event.easingType - 1](event.easingLeft + easeBetween * timePercentEnd)
                 )
             });
         }
