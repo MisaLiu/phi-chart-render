@@ -73,8 +73,8 @@ export default function PhiEditChartConverter(_chart)
             // bpm 列表
             case 'bp': {
                 commands.bpm.push({
-                    startBeat: command[1],
-                    bpm: command[2]
+                    startBeat : !isNaN(Number(command[1])) ? Number(command[1]) : 0,
+                    bpm       : !isNaN(Number(command[2])) && Number(command[2]) >= 1 ? Number(command[2]) : 120
                 });
                 break;
             }
@@ -195,14 +195,98 @@ export default function PhiEditChartConverter(_chart)
             }
             case 'cr':
             { // rotate
+                commands.judgelineEvent.rotate.push({
+                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
+                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
+                    endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
+                    start      : null,
+                    end        : !isNaN(Number(command[4])) ? Number(command[4]) : 0,
+                    easingType : !isNaN(Number(command[5])) && Number(command[5]) >= 1 ? Number(command[5]) : 1
+                });
                 break;
             }
             case 'cd':
             { // rotate（瞬时）
+                commands.judgelineEvent.rotate.push({
+                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
+                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
+                    endTime    : null,
+                    start      : !isNaN(Number(command[3])) ? Number(command[3]) : 0,
+                    end        : !isNaN(Number(command[3])) ? Number(command[3]) : 0,
+                    easingType : 1
+                });
                 break;
+            }
+            case 'cf':
+            { // alpha
+                commands.judgelineEvent.alpha.push({
+                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
+                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
+                    endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
+                    satrt      : null,
+                    end        : !isNaN(Number(command[4])) ? Number(command[4]) : 1,
+                    easingType : 1
+                });
+                break;
+            }
+            case 'ca':
+            { // alpha（瞬时）
+                commands.judgelineEvent.alpha.push({
+                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
+                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
+                    endTime    : null,
+                    satrt      : !isNaN(Number(command[3])) ? Number(command[3]) : 1,
+                    end        : !isNaN(Number(command[3])) ? Number(command[3]) : 1,
+                    easingType : 1
+                });
+                break;
+            }
+            default :
+            {
+                console.warn('Unsupported command: ' + command[0] + ', ignoring.');
             }
         }
     });
+
+    // note 和 bpm 按时间排序
+    commands.bpm.sort(sortTime);
+    commands.note.sort(sortTime);
+
+    if (commands.bpm.length <= 0)
+    {
+        commands.bpm.push({
+            startBeat : 0,
+            endBeat   : 1e9,
+            bpm       : 120
+        });
+    }
+
+    { // 将 Beat 计算为对应的时间（秒）
+        let currentBeatRealTime = 0.5; // 当前每个 Beat 的实际时长（秒）
+        let bpmChangedBeat = 0; // 当前 BPM 是在什么时候被更改的（Beat）
+        let bpmChangedTime = 0; // 当前 BPM 是在什么时候被更改的（秒）
+
+        commands.bpm.forEach((bpm, index) =>
+        {   
+            if (index < commands.bpm.length - 1)
+            {
+                bpm.endBeat = commands.bpm[index + 1].startBeat;
+            }
+            else
+            {
+                bpm.endBeat = 1e9;
+            }
+
+            bpmChangedTime += currentBeatRealTime * (bpm.startBeat - bpmChangedBeat);
+            bpm.startTime = bpmChangedTime;
+            bpm.endTime = currentBeatRealTime * (bpm.endBeat - bpmChangedBeat);
+
+            bpmChangedBeat += (bpm.startBeat - bpmChangedBeat);
+            
+            currentBeatRealTime = 60 / bpm.bpm;
+            bpm.beatTime = 60 / bpm.bpm;
+        });
+    }
 
     
     console.log(chart);
@@ -212,4 +296,9 @@ export default function PhiEditChartConverter(_chart)
     console.log(judgelines);
     console.log(notes);
     */
+
+    function sortTime(a, b)
+    {
+        return a.startTime - b.startTime || a.startBeat - b.startBeat;
+    }
 }
