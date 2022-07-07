@@ -18,7 +18,7 @@ export default class Chart
     {
         let chart;
 
-        if (rawChart instanceof Object)
+        if (typeof rawChart == 'object')
         {
             if (!isNaN(Number(rawChart.formatVersion)))
             {
@@ -29,9 +29,9 @@ export default class Chart
                 chart = Convert.RePhiEdit(rawChart);
             }
         }
-        else if (rawChart instanceof String)
+        else if (typeof rawChart == 'string')
         {
-            
+            chart = Convert.PhiEdit(rawChart);
         }
 
         if (!chart) throw new Error('Unsupported chart format');
