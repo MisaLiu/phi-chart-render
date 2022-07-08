@@ -13,7 +13,13 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
     * [ ] Custom judgeline texture
 
 * PhiEdit charts
-    * Not started yet
+    * [x] Basic support
+    * [x] BPM List
+    * [ ] Custom judgeline texture
+    * note features
+        * [x] Basic support
+        * [x] Fake note support
+        * [x] Note scale support
 
 * Re:PhiEdit charts
     * [x] BPM List *(Need test)*
