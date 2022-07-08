@@ -39,7 +39,6 @@ export default function PhiEditChartConverter(_chart)
 {
     let rawChart = _chart.split(/[(\r\n)\r\n]+/);
     let chart = new Chart();
-    let bpmList = [];
     let judgelines = [];
     let notes = [];
     let commands = {
@@ -78,7 +77,6 @@ export default function PhiEditChartConverter(_chart)
                 });
                 break;
             }
-
             // note
             case 'n1':
             { // tap
@@ -129,7 +127,6 @@ export default function PhiEditChartConverter(_chart)
                 });
                 break;
             }
-
             // note 附加信息
             case '#':
             { // 速度
@@ -141,7 +138,6 @@ export default function PhiEditChartConverter(_chart)
                 commands.note[commands.note.length - 1].xScale = !isNaN(Number(command[1])) ? Number(command[1]) : 1;
                 break;
             }
-
             // 判定线事件相关
             case 'cv':
             { // speed
@@ -160,7 +156,7 @@ export default function PhiEditChartConverter(_chart)
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
                     start      : null,
-                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 1024 : 0.5,
+                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 2048 : 0.5,
                     easingType : !isNaN(Number(command[6])) && Number(command[6]) >= 1 ? Number(command[6]) : 1
                 });
                 commands.judgelineEvent.moveY.push({
@@ -168,7 +164,7 @@ export default function PhiEditChartConverter(_chart)
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
                     start      : null,
-                    end        : !isNaN(Number(command[5])) ? Number(command[5]) / 700 : 0.5,
+                    end        : !isNaN(Number(command[5])) ? Number(command[5]) / 1400 : 0.5,
                     easingType : !isNaN(Number(command[6])) && Number(command[6]) >= 1 ? Number(command[6]) : 1
                 });
                 break;
@@ -179,16 +175,16 @@ export default function PhiEditChartConverter(_chart)
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : null,
-                    start      : !isNaN(Number(command[3])) ? Number(command[3]) / 1024 : 0.5,
-                    end        : !isNaN(Number(command[3])) ? Number(command[3]) / 1024 : 0.5,
+                    start      : !isNaN(Number(command[3])) ? Number(command[3]) / 2048 : 0.5,
+                    end        : !isNaN(Number(command[3])) ? Number(command[3]) / 2048 : 0.5,
                     easingType : 1
                 });
                 commands.judgelineEvent.moveY.push({
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : null,
-                    start      : !isNaN(Number(command[4])) ? Number(command[4]) / 700 : 0.5,
-                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 700 : 0.5,
+                    start      : !isNaN(Number(command[4])) ? Number(command[4]) / 1400 : 0.5,
+                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 1400 : 0.5,
                     easingType : 1
                 });
                 break;
@@ -223,8 +219,8 @@ export default function PhiEditChartConverter(_chart)
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
-                    satrt      : null,
-                    end        : !isNaN(Number(command[4])) ? Number(command[4]) : 1,
+                    start      : null,
+                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 255 : 1,
                     easingType : 1
                 });
                 break;
@@ -235,8 +231,8 @@ export default function PhiEditChartConverter(_chart)
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : null,
-                    satrt      : !isNaN(Number(command[3])) ? Number(command[3]) : 1,
-                    end        : !isNaN(Number(command[3])) ? Number(command[3]) : 1,
+                    start      : !isNaN(Number(command[3])) ? Number(command[3]) / 255 : 1,
+                    end        : !isNaN(Number(command[3])) ? Number(command[3]) / 255 : 1,
                     easingType : 1
                 });
                 break;
@@ -288,17 +284,306 @@ export default function PhiEditChartConverter(_chart)
         });
     }
 
+    for (const eventName in commands.judgelineEvent)
+    {
+        let events = commands.judgelineEvent[eventName];
+        
+        events.forEach((event) =>
+        {
+            if (event.lineId < 0)
+            {
+                console.warn('Invaild line ID: ' + event.lineId + ', ignoring');
+                return;
+            }
+            if (!judgelines[event.lineId]) judgelines[event.lineId] = new Judgeline({ id: event.lineId });
+
+            judgelines[event.lineId].event[eventName].push(event);
+        });
+    }
+
+    judgelines.forEach((judgeline) =>
+    {
+        judgeline.sortEvent();
+
+        judgeline.event.alpha.unshift({
+            startTime  : 0,
+            endTime    : judgeline.event.alpha[0] ? judgeline.event.alpha[0].startTime : 1e9,
+            start      : judgeline.event.alpha[0] ? judgeline.event.alpha[0].start : 0,
+            end        : judgeline.event.alpha[0] ? judgeline.event.alpha[0].start : 0,
+            easingType : 1
+        });
+        judgeline.event.moveX.unshift({
+            startTime  : 0,
+            endTime    : judgeline.event.moveX[0] ? judgeline.event.moveX[0].startTime : 1e9,
+            start      : judgeline.event.moveX[0] ? judgeline.event.moveX[0].start : 0.5,
+            end        : judgeline.event.moveX[0] ? judgeline.event.moveX[0].start : 0.5,
+            easingType : 1
+        });
+        judgeline.event.moveY.unshift({
+            startTime  : 0,
+            endTime    : judgeline.event.moveY[0] ? judgeline.event.moveY[0].startTime : 0,
+            start      : judgeline.event.moveY[0] ? judgeline.event.moveY[0].start : 0.5,
+            end        : judgeline.event.moveY[0] ? judgeline.event.moveY[0].start : 0.5,
+            easingType : 1
+        });
+        judgeline.event.rotate.unshift({
+            startTime  : 0,
+            endTime    : judgeline.event.rotate[0] ? judgeline.event.rotate[0].startTime : 0,
+            start      : judgeline.event.rotate[0] ? judgeline.event.rotate[0].start : 0,
+            end        : judgeline.event.rotate[0] ? judgeline.event.rotate[0].start : 0,
+            easingType : 1
+        });
+        judgeline.event.speed.unshift({
+            startTime: 0,
+            endTime: 0,
+            value: 1
+        });
+
+        judgeline.sortEvent();
+
+        // 事件参数补齐
+        judgeline.event.alpha.forEach((event, eventIndex, array) =>
+        {
+            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
+            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 1;
+        });
+        judgeline.event.moveX.forEach((event, eventIndex, array) =>
+        {
+            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
+            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0.5;
+        });
+        judgeline.event.moveY.forEach((event, eventIndex, array) =>
+        {
+            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
+            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0.5;
+        });
+        judgeline.event.rotate.forEach((event, eventIndex, array) =>
+        {
+            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
+            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0;
+
+            event.start = event.start * (Math.PI / 180);
+            event.end = event.end * (Math.PI / 180);
+        });
+        judgeline.event.speed.forEach((event, eventIndex, array) =>
+        {
+            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
+        });
+
+        judgeline.sortEvent();
+
+        // 拆分缓动
+        judgeline.event.alpha = calculateEventEase(judgeline.event.alpha);
+        judgeline.event.moveX = calculateEventEase(judgeline.event.moveX);
+        judgeline.event.moveY = calculateEventEase(judgeline.event.moveY);
+        judgeline.event.rotate = calculateEventEase(judgeline.event.rotate);
+        
+        // 合并相同变化量事件
+        for (const name in judgeline.event)
+        {
+            if (name != 'speed')
+            {
+                judgeline.event[name] = arrangeSameValueEvent(judgeline.event[name]);
+            }
+            else
+            {
+                judgeline.event[name] = arrangeSameValueSpeedEvent(judgeline.event[name]);
+            }
+        }
+
+        judgeline.sortEvent();
+
+        // 计算事件真实时间
+        for (const name in judgeline.event)
+        {
+            judgeline.event[name] = calculateRealTime(commands.bpm, judgeline.event[name]);
+        }
+
+        judgeline.event.speed = calculateSpeedEventFloorPosition(judgeline.event.speed);
+        
+    });
+
     
     console.log(chart);
     console.log(commands);
-    console.log(bpmList);
-    /*
     console.log(judgelines);
+    /*
     console.log(notes);
     */
+
+    chart.judgelines = judgelines;
+
+    return chart;
 
     function sortTime(a, b)
     {
         return a.startTime - b.startTime || a.startBeat - b.startBeat;
     }
+}
+
+function arrangeSameValueEvent(_events)
+{
+    let events = JSON.parse(JSON.stringify(_events));
+    let eventIndexOffset = 0;
+    let result = [];
+
+    for (let eventIndex = 0, eventLength = events.length; eventIndex + eventIndexOffset < eventLength; eventIndex++)
+    {
+        let event = events[eventIndex + eventIndexOffset];
+        result.push({
+            startTime  : event.startTime,
+            endTime    : event.endTime,
+            start      : event.start,
+            end        : event.end
+        });
+
+        if (event.start != event.end) continue;
+
+        for (let nextEventIndex = eventIndex + eventIndexOffset + 1; nextEventIndex < eventLength; nextEventIndex++)
+        {
+            let nextEvent = events[nextEventIndex];
+
+            if (nextEvent.startTime < event.startTime && nextEvent.endTime < event.startTime) continue;
+            if (nextEvent.start != event.start || nextEvent.end != event.end) break;
+
+            result[result.length - 1].endTime = nextEvent.endTime;
+            eventIndexOffset++;
+        }
+    }
+
+    return JSON.parse(JSON.stringify(result));
+}
+
+function arrangeSameValueSpeedEvent(_events)
+{
+    let events = JSON.parse(JSON.stringify(_events));
+    let eventIndexOffset = 0;
+    let result = [];
+
+    for (let eventIndex = 0, eventLength = events.length; eventIndex + eventIndexOffset < eventLength; eventIndex++)
+    {
+        let event = events[eventIndex + eventIndexOffset];
+        result.push({
+            startTime  : event.startTime,
+            endTime    : event.endTime,
+            value      : event.value
+        });
+
+        for (let nextEventIndex = eventIndex + eventIndexOffset + 1; nextEventIndex < eventLength; nextEventIndex++)
+        {
+            let nextEvent = events[nextEventIndex];
+
+            if (nextEvent.startTime < event.startTime && nextEvent.endTime < event.startTime) continue;
+            if (nextEvent.value != event.value) break;
+
+            result[result.length - 1].endTime = nextEvent.endTime;
+            eventIndexOffset++;
+        }
+    }
+
+    return JSON.parse(JSON.stringify(result));
+}
+
+function calculateEventEase(events, forceLinear = false)
+{
+    const calcBetweenTime = 0.125;
+    let result = [];
+
+    events.forEach((event) =>
+    {
+        let timeBetween = event.endTime - event.startTime;
+        let valueBetween = event.end - event.start;
+
+        for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
+        {
+            let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
+            let timePercentEnd = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
+
+            if (event.easingType && (event.easingType !== 1 || forceLinear))
+            {
+                result.push({
+                    startTime: event.startTime + timeIndex * calcBetweenTime,
+                    endTime: (
+                        timeIndex + 1 == timeCount && event.startTime + (timeIndex + 1) * calcBetweenTime != event.endTime ?
+                        event.endTime : event.startTime + (timeIndex + 1) * calcBetweenTime
+                    ),
+                    start: event.start + valueBetween * Easing[event.easingType](timePercentStart),
+                    end: (
+                        timeIndex + 1 == timeCount && event.start + valueBetween * Easing[event.easingType](timePercentEnd) != event.end ?
+                        event.end : event.start + valueBetween * Easing[event.easingType](timePercentEnd)
+                    )
+                });
+            }
+            else
+            {
+                result.push({
+                    startTime: event.startTime,
+                    endTime: event.endTime,
+                    start: event.start,
+                    end: event.end
+                });
+                break;
+            }
+        }
+    });
+    
+    return result;
+}
+
+function calculateRealTime(_bpmList, events)
+{
+    let bpmList = JSON.parse(JSON.stringify(_bpmList));
+    let result = [];
+
+    bpmList.sort((a, b) => b.startBeat - a.startBeat);
+
+    events.forEach((event) =>
+    {
+        let newEvent = JSON.parse(JSON.stringify(event));
+
+        for (let bpmIndex = 0, bpmLength = bpmList.length; bpmIndex < bpmLength; bpmIndex++)
+        {
+            let bpm = bpmList[bpmIndex];
+
+            if (bpm.startBeat > newEvent.endTime) continue;
+            newEvent.endTime = Number((bpm.startTime + ((newEvent.endTime - bpm.startBeat) * bpm.beatTime)).toFixed(4));
+
+            for (let nextBpmIndex = bpmIndex; nextBpmIndex < bpmLength; nextBpmIndex++)
+            {
+                let nextBpm = bpmList[nextBpmIndex];
+
+                if (nextBpm.startBeat > newEvent.startTime) continue;
+                newEvent.startTime = Number((nextBpm.startTime + ((newEvent.startTime - nextBpm.startBeat) * nextBpm.beatTime)).toFixed(4));
+                break;
+            }
+
+            result.push(newEvent);
+            break;
+        }
+    });
+
+    return result;
+}
+
+function calculateSpeedEventFloorPosition(events)
+{
+    let currentFloorPosition = 0;
+    let result = [];
+
+    // bpmList.sort((a, b) => b.startTime - a.startTime);
+
+    events.forEach((event, index) =>
+    {
+        let newEvent = JSON.parse(JSON.stringify(event));
+        newEvent.endTime = index < events.length - 1 ? events[index + 1].startTime : 1e9;
+
+        newEvent.floorPosition = Math.fround(currentFloorPosition);
+        currentFloorPosition += (newEvent.endTime - newEvent.startTime) * newEvent.value;
+
+        result.push(newEvent);
+    });
+
+    result.sort((a, b) => a.startTime - b.startTime);
+
+    return result;
 }

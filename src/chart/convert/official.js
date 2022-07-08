@@ -32,28 +32,28 @@ export default function OfficialChartConverter(_chart)
                 end           : e.end
             });
             judgeline.event.moveY.push({
-                startTime     : calcRealTime(e.startTime, _judgeline.bpm),
-                endTime       : calcRealTime(e.endTime, _judgeline.bpm),
-                start         : e.start2,
-                end           : e.end2
+                startTime : calcRealTime(e.startTime, _judgeline.bpm),
+                endTime   : calcRealTime(e.endTime, _judgeline.bpm),
+                start     : e.start2,
+                end       : e.end2
             });
         });
         _judgeline.judgeLineRotateEvents.forEach((e) => 
         {
             judgeline.event.rotate.push({
-                startTime     : calcRealTime(e.startTime, _judgeline.bpm),
-                endTime       : calcRealTime(e.endTime, _judgeline.bpm),
-                start      : -(Math.PI / 180) * e.start,
-                end        : -(Math.PI / 180) * e.end
+                startTime : calcRealTime(e.startTime, _judgeline.bpm),
+                endTime   : calcRealTime(e.endTime, _judgeline.bpm),
+                start     : -(Math.PI / 180) * e.start,
+                end       : -(Math.PI / 180) * e.end
             });
         });
         _judgeline.judgeLineDisappearEvents.forEach((e) =>
         {
             judgeline.event.alpha.push({
-                startTime     : calcRealTime(e.startTime, _judgeline.bpm),
-                endTime       : calcRealTime(e.endTime, _judgeline.bpm),
-                start         : e.start,
-                end           : e.end
+                startTime : calcRealTime(e.startTime, _judgeline.bpm),
+                endTime   : calcRealTime(e.endTime, _judgeline.bpm),
+                start     : e.start,
+                end       : e.end
             });
         });
         judgeline.sortEvent();

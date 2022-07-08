@@ -26,7 +26,7 @@ export default class Judgeline
         this.sprite = undefined;
     }
 
-    sortEvent()
+    sortEvent(withEndTime = false)
     {
         this.event.speed.sort(_sort);
         this.event.moveX.sort(_sort);
@@ -35,7 +35,14 @@ export default class Judgeline
         this.event.alpha.sort(_sort);
 
         function _sort(a, b) {
-            return a.startTime - b.startTime;
+            if (withEndTime)
+            {
+                return (a.startTime - b.startTime) + (a.endTime - b.endTime);
+            }
+            else
+            {
+                return a.startTime - b.startTime;
+            }
         }
     }
 
@@ -52,7 +59,7 @@ export default class Judgeline
         this.sprite.alpha = 1;
 
         // For debug propose
-        /*
+        
         let lineId = new Text(this.id, {
             fontSize: 24,
             fill: 0xFF0000
@@ -60,7 +67,7 @@ export default class Judgeline
         this.sprite.addChild(lineId);
         lineId.anchor.set(0.5);
         lineId.position.set(0);
-        */
+        
         return this.sprite;
     }
 
