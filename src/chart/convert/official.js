@@ -6,7 +6,6 @@ export default function OfficialChartConverter(_chart)
 {
     let chart = new Chart();
     let rawChart = convertOfficialVersion(_chart);
-    let notes = [];
 
     chart.offset = rawChart.offset;
 
