@@ -305,42 +305,6 @@ export default function PhiEditChartConverter(_chart)
     {
         judgeline.sortEvent();
 
-        judgeline.event.alpha.unshift({
-            startTime  : 0,
-            endTime    : judgeline.event.alpha[0] ? judgeline.event.alpha[0].startTime : 1e9,
-            start      : judgeline.event.alpha[0] ? judgeline.event.alpha[0].start : 0,
-            end        : judgeline.event.alpha[0] ? judgeline.event.alpha[0].start : 0,
-            easingType : 1
-        });
-        judgeline.event.moveX.unshift({
-            startTime  : 0,
-            endTime    : judgeline.event.moveX[0] ? judgeline.event.moveX[0].startTime : 1e9,
-            start      : judgeline.event.moveX[0] ? judgeline.event.moveX[0].start : 0.5,
-            end        : judgeline.event.moveX[0] ? judgeline.event.moveX[0].start : 0.5,
-            easingType : 1
-        });
-        judgeline.event.moveY.unshift({
-            startTime  : 0,
-            endTime    : judgeline.event.moveY[0] ? judgeline.event.moveY[0].startTime : 0,
-            start      : judgeline.event.moveY[0] ? judgeline.event.moveY[0].start : 0.5,
-            end        : judgeline.event.moveY[0] ? judgeline.event.moveY[0].start : 0.5,
-            easingType : 1
-        });
-        judgeline.event.rotate.unshift({
-            startTime  : 0,
-            endTime    : judgeline.event.rotate[0] ? judgeline.event.rotate[0].startTime : 0,
-            start      : judgeline.event.rotate[0] ? judgeline.event.rotate[0].start : 0,
-            end        : judgeline.event.rotate[0] ? judgeline.event.rotate[0].start : 0,
-            easingType : 1
-        });
-        judgeline.event.speed.unshift({
-            startTime: 0,
-            endTime: 0,
-            value: 1
-        });
-
-        judgeline.sortEvent();
-
         // 事件参数补齐
         judgeline.event.alpha.forEach((event, eventIndex, array) =>
         {
