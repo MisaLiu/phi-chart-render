@@ -145,7 +145,7 @@ export default function PhiEditChartConverter(_chart)
                     lineId    : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime   : null,
-                    value     : !isNaN(Number(command[3])) ? Number(command[3]) : 1
+                    value     : !isNaN(Number(command[3])) ? Number(command[3]) / 7 : 1
                 });
                 break;
             }
@@ -284,6 +284,7 @@ export default function PhiEditChartConverter(_chart)
         });
     }
 
+    // 将事件推送给对应的判定线
     for (const eventName in commands.judgelineEvent)
     {
         let events = commands.judgelineEvent[eventName];
@@ -364,18 +365,85 @@ export default function PhiEditChartConverter(_chart)
         }
 
         judgeline.event.speed = calculateSpeedEventFloorPosition(judgeline.event.speed);
-        
     });
 
-    
-    console.log(chart);
-    console.log(commands);
-    console.log(judgelines);
-    /*
-    console.log(notes);
-    */
+    // 计算 note 的真实时间
+    commands.note = calculateRealTime(commands.bpm, commands.note);
+
+    commands.note.forEach((note) =>
+    {
+        let judgeline = judgelines[note.lineId];
+
+        if (!judgeline)
+        {
+            console.warn('Judgeline ' + note.lineId + ' doesn\'t exist, ignoring.');
+            return;
+        }
+
+        { // 计算 Note 的 floorPosition
+            let noteStartSpeedEvent;
+            let noteEndSpeedEvent;
+
+            for (const event of judgeline.event.speed)
+            {
+                if (note.startTime > event.startTime && note.startTime > event.endTime) continue;
+                if (note.startTime < event.startTime && note.startTime < event.endTime) break;
+
+                noteStartSpeedEvent = event;
+            }
+
+            note.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (note.startTime - noteStartSpeedEvent.startTime) : 0;
+
+            if (note.type == 3)
+            {
+                for (const event of judgeline.event.speed)
+                {
+                    if (note.endTime > event.startTime && note.endTime > event.endTime) continue;
+                    if (note.endTime < event.startTime && note.endTime < event.endTime) break;
+
+                    noteEndSpeedEvent = event;
+                }
+
+                note.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (note.endTime - noteEndSpeedEvent.startTime) : 0) - note.floorPosition;
+            }
+            else
+            {
+                note.holdLength = 0;
+            }
+        }
+
+        // 推送 Note
+        notes.push(new Note({
+            type          : note.type,
+            time          : note.startTime,
+            holdTime      : note.endTime,
+            speed         : note.speed,
+            isAbove       : note.isAbove,
+            isFake        : note.isFake,
+            positionX     : note.positionX * 9 / 1024,
+            floorPosition : note.floorPosition,
+            holdLength    : note.holdLength,
+            xScale        : note.xScale,
+            judgeline     : judgeline
+        }));
+    });
+
+    notes.sort((a, b) => a.time - b.time);
 
     chart.judgelines = judgelines;
+    chart.notes = notes;
+
+    chart.notes.forEach((note, index) =>
+    {
+        let nextNote = chart.notes[index + 1];
+        if (!nextNote) return;
+
+        if (note.time == nextNote.time)
+        {
+            note.isMulti = true;
+            nextNote.isMulti = true;
+        }
+    })
 
     return chart;
 
