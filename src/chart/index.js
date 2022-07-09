@@ -2,19 +2,35 @@ import * as Convert from './convert';
 
 export default class Chart
 {
-    constructor()
+    constructor(params = {})
     {
         this.judgelines = [];
-        this.notes = [];
-        this.offset = 0;
+        this.notes      = [];
+        this.offset     = 0;
+        this.music      = params.music ? params.music : null;
+        this.bg         = params.bg ? params.bg : null;
+        this.info       = {
+            name      : params.name ? params.name : 'Untitled',
+            artist    : params.artist ? params.artist : 'Unknown',
+            author    : params.author ? params.author : 'Unknown',
+            bgAuthor  : params.bgAuthor ? params.bgAuthor : 'Unknown',
+            difficult : params.difficult ? params.difficult : 'SP Lv.?'
+        };
+        this.url = {
+            chart: null,
+            music: null,
+            bg: null
+        };
 
+        this._music = null;
+        this.sprites = {};
         this.function = {
             judgeline: [],
             note: []
         }
     }
 
-    static from(rawChart)
+    static from(rawChart, chartInfo = {})
     {
         let chart;
 
@@ -36,6 +52,14 @@ export default class Chart
 
         if (!chart) throw new Error('Unsupported chart format');
 
+        chart.info = {
+            name      : chartInfo.name ? chartInfo.name : 'Untitled',
+            artist    : chartInfo.artist ? chartInfo.artist : 'Unknown',
+            author    : chartInfo.author ? chartInfo.author : 'Unknown',
+            bgAuthor  : chartInfo.bgAuthor ? chartInfo.bgAuthor : 'Unknown',
+            difficult : chartInfo.difficult ? chartInfo.difficult : 'SP Lv.?'
+        };
+
         chart.judgelines.forEach((judgeline) =>
         {
             judgeline.event.speed = arrangeSpeedEvents(judgeline.event.speed);
@@ -54,6 +78,11 @@ export default class Chart
     {
         if (!this.function[type]) throw new Error('Invaild function type');
         this.function[type].push(func);
+    }
+
+    createSprite(stage, textures)
+    {
+
     }
 
     calcTime(currentTime, size)

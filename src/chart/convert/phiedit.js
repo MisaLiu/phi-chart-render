@@ -325,7 +325,7 @@ export default function PhiEditChartConverter(_chart)
         judgeline.event.rotate.forEach((event, eventIndex, array) =>
         {
             if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
-            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0;
+            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end / (Math.PI / 180) : 0;
 
             event.start = event.start * (Math.PI / 180);
             event.end = event.end * (Math.PI / 180);
