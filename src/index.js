@@ -82,6 +82,9 @@ doms.file.bg.addEventListener('input', function () {
 });
 
 doms.startBtn.addEventListener('click', () => {
+    files.chart.music = files.music;
+    files.chart.bg = files.bg;
+
     window.render = Render.from({
         chart: files.chart,
         music: files.music,

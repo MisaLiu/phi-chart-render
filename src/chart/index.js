@@ -1,4 +1,5 @@
 import * as Convert from './convert';
+import { Sprite, Graphics } from 'pixi.js-legacy';
 
 export default class Chart
 {
@@ -23,11 +24,14 @@ export default class Chart
         };
 
         this._music = null;
+        this._audioOffset = 0;
         this.sprites = {};
         this.function = {
             judgeline: [],
             note: []
         }
+
+        this._calcTick = this._calcTick.bind(this);
     }
 
     static from(rawChart, chartInfo = {})
@@ -80,16 +84,113 @@ export default class Chart
         this.function[type].push(func);
     }
 
-    createSprite(stage, textures)
+    createSprites(stage, size, textures, zipFiles)
     {
+        if (this.bg)
+        {
+            this.sprites.bg = new Sprite(this.bg);
 
+            let bgCover = new Graphics();
+
+            bgCover.beginFill(0x000000);
+            bgCover.drawRect(0, 0, this.sprites.bg.texture.width, this.sprites.bg.texture.height);
+            bgCover.endFill();
+
+            bgCover.position.x = -this.sprites.bg.width / 2;
+            bgCover.position.y = -this.sprites.bg.height / 2;
+            bgCover.alpha = 1 - this.bgDim;
+
+            this.sprites.bg.addChild(bgCover);
+            this.sprites.bg.anchor.set(0.5);
+
+            stage.addChild(this.sprites.bg);
+        }
+
+        this.judgelines.forEach((judgeline, index) =>
+        {
+            judgeline.createSprite(textures, zipFiles);
+
+            judgeline.sprite.position.x = size.width / 2;
+            judgeline.sprite.position.y = size.height / 2;
+            judgeline.sprite.zIndex = index + 1;
+
+            stage.addChild(judgeline.sprite);
+        });
+        this.notes.forEach((note, index) =>
+        {
+            note.createSprite(textures, zipFiles);
+
+            note.sprite.zIndex = this.judgelines.length + (note.type === 3 ? index : index + 10) + 1;
+
+            stage.addChild(note.sprite);
+        });
+
+        
     }
 
-    calcTime(currentTime, size)
+    resizeSprites(size)
+    {
+        this.renderSize = size;
+
+        if (this.sprites.bg)
+        {
+            let bgScaleWidth = this.renderSize.width / this.sprites.bg.texture.width;
+            let bgScaleHeight = this.renderSize.height / this.sprites.bg.texture.height;
+            let bgScale = bgScaleWidth > bgScaleHeight ? bgScaleWidth : bgScaleHeight;
+
+            this.sprites.bg.scale.set(bgScale);
+            this.sprites.bg.position.set(this.renderSize.width / 2, this.renderSize.height / 2);
+        }
+
+        if (this.judgelines && this.judgelines.length > 0)
+        {
+            this.judgelines.forEach((judgeline) =>
+            {
+                if (!judgeline.sprite) return;
+
+                judgeline.sprite.height = this.renderSize.lineScale * 18.75 * 0.008;
+                judgeline.sprite.width = judgeline.sprite.height * judgeline.sprite.texture.width / judgeline.sprite.texture.height * 1.042;
+            });
+        }
+
+        if (this.notes && this.notes.length > 0)
+        {
+            this.notes.forEach((note) =>
+            {
+                if (note.type === 3)
+                {
+                    note.sprite.children[1].height = note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale;
+                    note.sprite.children[2].position.y = -(note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale);
+                }
+
+                note.sprite.scale.set(this.renderSize.noteScale * note.xScale, this.renderSize.noteScale);
+            });
+        }
+    }
+
+    async start(ticker)
+    {
+        if (!this.music)
+        {
+            throw new Error('You must choose a music for this chart!');
+        }
+
+        this._music = await this.music.play();
+
+        ticker.add(this._calcTick);
+    }
+
+    _calcTick()
+    {
+        let currentTime = (this._music.progress * this.music.duration) - this._audioOffset - this.offset;
+        this.calcTime(currentTime);
+    }
+
+    calcTime(currentTime)
     {
         this.judgelines.forEach((judgeline) =>
         {
-            judgeline.calcTime(currentTime, size);
+            judgeline.calcTime(currentTime, this.renderSize);
             /*
             this.function.judgeline.forEach((func) =>
             {
@@ -99,7 +200,7 @@ export default class Chart
         });
         this.notes.forEach((note) =>
         {
-            note.calcTime(currentTime, size);
+            note.calcTime(currentTime, this.renderSize);
             this.function.note.forEach((func) =>
             {
                 func(currentTime, note);
