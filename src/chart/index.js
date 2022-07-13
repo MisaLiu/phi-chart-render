@@ -1,5 +1,5 @@
 import * as Convert from './convert';
-import { Sprite, Graphics } from 'pixi.js-legacy';
+import { Sprite, Graphics, Text } from 'pixi.js-legacy';
 
 export default class Chart
 {
@@ -125,7 +125,24 @@ export default class Chart
             stage.addChild(note.sprite);
         });
 
-        
+        this.sprites.info = {};
+
+        this.sprites.info.songName = new Text(this.info.name, {
+            fill: 0xFFFFFF
+        });
+        this.sprites.info.songName.anchor.set(0, 1);
+        this.sprites.info.songName.zIndex = 9999;
+
+        stage.addChild(this.sprites.info.songName);
+
+
+        this.sprites.info.songDiff = new Text(this.info.difficult, {
+            fill: 0xFFFFFF
+        });
+        this.sprites.info.songDiff.anchor.set(0, 1);
+        this.sprites.info.songDiff.zIndex = 9999;
+
+        stage.addChild(this.sprites.info.songDiff);
     }
 
     resizeSprites(size)
@@ -166,6 +183,14 @@ export default class Chart
                 note.sprite.scale.set(this.renderSize.noteScale * note.xScale, this.renderSize.noteScale);
             });
         }
+
+        this.sprites.info.songName.style.fontSize = size.lineScale * 0.468750;
+        this.sprites.info.songName.position.x = size.lineScale * 0.989583;
+        this.sprites.info.songName.position.y = size.height - size.lineScale * 1.076389;
+
+        this.sprites.info.songDiff.style.fontSize = size.lineScale * 0.347222;
+        this.sprites.info.songDiff.position.x = size.lineScale * 0.989583;
+        this.sprites.info.songDiff.position.y = size.height - size.lineScale * 0.746528;
     }
 
     async start(ticker)
