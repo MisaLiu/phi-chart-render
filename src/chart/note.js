@@ -164,6 +164,11 @@ export default class Note
             {
                 this.sprite.children[0].visible = true;
             }
+            else if (this.type === 3 && this.endPosition <= this.judgeline.floorPosition && this.holdTime <= currentTime && this.sprite.outScreen === false)
+            {
+            	this.sprite.outScreen = true;
+            	this.sprite.visible = false;
+            }
 
             realX = originX * this.judgeline.cosr - originY * this.judgeline.sinr + this.judgeline.sprite.position.x;
             realY = originY * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
