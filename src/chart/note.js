@@ -198,7 +198,7 @@ export default class Note
             }
 
             // 针对 Hold 的 Fake note 的渲染思路优化
-            if (this.type !== 3 && this.isFake === true && this.time <= currentTime && this.sprite.outScreen !== true)
+            if (this.type !== 3 && this.isFake === true && this.floorPosition <= this.judgeline.floorPosition && this.time <= currentTime && this.sprite.outScreen === false)
             {
                 this.sprite.outScreen = true;
                 this.sprite.visible = false;
@@ -209,7 +209,6 @@ export default class Note
                 this.sprite.outScreen = true;
                 this.sprite.visible = false;
             }
-
 
             if (this.sprite.outScreen === false)
             {
