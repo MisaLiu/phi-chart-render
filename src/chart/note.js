@@ -25,8 +25,9 @@ export default class Note
 
         if (!this.judgeline) throw new Error('Note must have a judgeline');
         
-        this.floorPosition = Math.fround(this.floorPosition);
-        this.endPosition   = (this.type === 3 && this.endPosition > 0) ? Math.fround(this.endPosition) : 0;
+        this.floorPosition  = Math.fround(this.floorPosition);
+        this.endPosition    = (this.type === 3 && this.endPosition > 0) ? Math.fround(this.endPosition) : 0;
+        this.holdTimeLength = this.type === 3 ? this.time + this.holdTime : 0;
 
         this.sprite = undefined;
     }
@@ -164,11 +165,6 @@ export default class Note
             {
                 this.sprite.children[0].visible = true;
             }
-            else if (this.type === 3 && this.endPosition <= this.judgeline.floorPosition && this.holdTime <= currentTime && this.sprite.outScreen === false)
-            {
-            	this.sprite.outScreen = true;
-            	this.sprite.visible = false;
-            }
 
             realX = originX * this.judgeline.cosr - originY * this.judgeline.sinr + this.judgeline.sprite.position.x;
             realY = originY * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
@@ -200,6 +196,20 @@ export default class Note
                 this.sprite.outScreen = false;
                 this.sprite.visible = true;
             }
+
+            // 针对 Hold 的 Fake note 的渲染思路优化
+            if (this.type !== 3 && this.isFake === true && this.time <= currentTime && this.sprite.outScreen !== true)
+            {
+                this.sprite.outScreen = true;
+                this.sprite.visible = false;
+            }
+            else if (
+                this.type === 3 && this.endPosition <= this.judgeline.floorPosition && this.holdTimeLength <= currentTime && this.sprite.outScreen === false)
+            {
+                this.sprite.outScreen = true;
+                this.sprite.visible = false;
+            }
+
 
             if (this.sprite.outScreen === false)
             {
