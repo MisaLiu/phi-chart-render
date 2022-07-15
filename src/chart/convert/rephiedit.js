@@ -408,7 +408,7 @@ function convertChartFormat(rawChart)
         }
     }
 
-    return JSON.parse(JSON.stringify(chart));
+    return chart;
 }
 
 function beat2Time(event)
