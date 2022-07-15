@@ -94,10 +94,14 @@ const Easing = [
 export default function RePhiEditChartConverter(_chart)
 {
     let notes = [];
-    let chart = new Chart();
     let rawChart = convertChartFormat(_chart);
-
-    chart.offset = rawChart.META.offset / 1000;
+    let chart = new Chart({
+        name      : rawChart.META.name,
+        artist    : rawChart.META.composer,
+        author    : rawChart.META.charter,
+        difficult : rawChart.META.level,
+        offset    : rawChart.META.offset / 1000
+    });
 
     { // 将 Beat 计算为对应的时间（秒）
         let currentBeatRealTime = 0.5; // 当前每个 Beat 的实际时长（秒）

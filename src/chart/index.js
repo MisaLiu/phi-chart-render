@@ -7,7 +7,7 @@ export default class Chart
     {
         this.judgelines = [];
         this.notes      = [];
-        this.offset     = 0;
+        this.offset     = !isNaN(Number(params.offset)) ? Number(Number(params.offset).toFixed(4)) : 0;
         this.music      = params.music ? params.music : null;
         this.bg         = params.bg ? params.bg : null;
         this.info       = {
@@ -34,9 +34,10 @@ export default class Chart
         this._calcTick = this._calcTick.bind(this);
     }
 
-    static from(rawChart, chartInfo = {})
+    static from(rawChart, _chartInfo = {})
     {
         let chart;
+        let chartInfo = _chartInfo;
 
         if (typeof rawChart == 'object')
         {
@@ -47,6 +48,7 @@ export default class Chart
             else if (!isNaN(Number(rawChart.META.RPEVersion)))
             {
                 chart = Convert.RePhiEdit(rawChart);
+                chartInfo = chart.info;
             }
         }
         else if (typeof rawChart == 'string')
