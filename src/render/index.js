@@ -67,11 +67,10 @@ export default class Render
         this.resize();
     }
 
-    addSprite(sprite, name)
+    addSprite(sprite)
     {
         if (this.sprites.mainContainer)
         {
-            if (name) this.sprites[name] = sprite;
             this.sprites.mainContainer.addChild(sprite);
         }
     }
@@ -81,12 +80,6 @@ export default class Render
         this.pixi.view.style.backgroundColor = '#000000';
         this.chart.start(this.pixi.ticker);
         this.resize();
-    }
-
-    tick()
-    {
-        let currentTime = (this.audioContext.progress * this.music.duration) - this.audioOffset - this.chart.offset;
-        this.chart.calcTime(currentTime, this.renderSize);
     }
     
     resize()
