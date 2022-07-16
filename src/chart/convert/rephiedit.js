@@ -314,32 +314,29 @@ export default function RePhiEditChartConverter(_chart)
         judgeline.sortEvent();
         chart.judgelines.push(judgeline);
         
-        _judgeline.notes.forEach((note) =>
+        _judgeline.notes.forEach((note, noteIndex) =>
         {
             notes.push(new Note({
-                type: (
+                id            : noteIndex,
+                type          : (
                     note.type == 1 ? 1 :
                     note.type == 2 ? 3 :
                     note.type == 3 ? 4 :
                     note.type == 4 ? 2 : 1
                 ),
-                time: note.startTime,
-                holdTime: note.endTime,
-                speed: note.speed,
-                floorPosition: note.floorPosition,
-                holdLength: note.holdLength,
-                positionX: (note.positionX / (670 * (9 / 80))),
-                basicAlpha: note.alpha / 255,
-                yOffset: note.yOffset,
-                xScale: note.size,
-                isAbove: (
-                    note.above == 1 ? true :
-                    note.above == 2 ? false : 
-                    note.above == 0 ? false : true
-                ),
-                isMulti: false,
-                isFake: note.isFake == 1 ? true : false,
-                judgeline: judgeline
+                time          : note.startTime,
+                holdTime      : note.endTime,
+                speed         : note.speed,
+                floorPosition : note.floorPosition,
+                holdLength    : note.holdLength,
+                positionX     : (note.positionX / (670 * (9 / 80))),
+                basicAlpha    : note.alpha / 255,
+                yOffset       : note.yOffset,
+                xScale        : note.size,
+                isAbove       : note.above == 1 ? true : false,
+                isMulti       : false,
+                isFake        : note.isFake == 1 ? true : false,
+                judgeline     : judgeline
             }));
         });
     });
@@ -518,8 +515,8 @@ function calculateSpeedEventFloorPosition(events)
         let newEvent = JSON.parse(JSON.stringify(event));
         newEvent.endTime = index < events.length - 1 ? events[index + 1].startTime : 1e9;
 
-        newEvent.floorPosition = Math.fround(currentFloorPosition);
-        currentFloorPosition += (newEvent.endTime - newEvent.startTime) * newEvent.value;
+        newEvent.floorPosition = currentFloorPosition;
+        currentFloorPosition += Math.fround((newEvent.endTime - newEvent.startTime) * newEvent.value);
 
         result.push(newEvent);
     });
@@ -822,14 +819,14 @@ function calculateRealTime(_bpmList, events)
             let bpm = bpmList[bpmIndex];
 
             if (bpm.startBeat > newEvent.endTime) continue;
-            newEvent.endTime = Number((bpm.startTime + ((newEvent.endTime - bpm.startBeat) * bpm.beatTime)).toFixed(4));
+            newEvent.endTime = Math.fround(bpm.startTime + (newEvent.endTime - bpm.startBeat) * bpm.beatTime);
 
             for (let nextBpmIndex = bpmIndex; nextBpmIndex < bpmLength; nextBpmIndex++)
             {
                 let nextBpm = bpmList[nextBpmIndex];
 
                 if (nextBpm.startBeat > newEvent.startTime) continue;
-                newEvent.startTime = Number((nextBpm.startTime + ((newEvent.startTime - nextBpm.startBeat) * nextBpm.beatTime)).toFixed(4));
+                newEvent.startTime = Math.fround(nextBpm.startTime + (newEvent.startTime - nextBpm.startBeat) * nextBpm.beatTime);
                 break;
             }
 

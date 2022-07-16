@@ -178,8 +178,8 @@ export default class Chart
             {
                 if (note.type === 3)
                 {
-                    note.sprite.children[1].height = note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale;
-                    note.sprite.children[2].position.y = -(note.holdLength * this.renderSize.noteSpeed / this.renderSize.noteScale);
+                    note.sprite.children[1].height = note.holdLength * note.speed * this.renderSize.noteSpeed / this.renderSize.noteScale;
+                    note.sprite.children[2].position.y = -(note.holdLength * note.speed * this.renderSize.noteSpeed / this.renderSize.noteScale);
                 }
 
                 note.sprite.scale.set(this.renderSize.noteScale * note.xScale, this.renderSize.noteScale);
@@ -203,13 +203,14 @@ export default class Chart
         }
 
         this._music = await this.music.play();
+        this._audioOffset = this._music._source.context.baseLatency;
 
         ticker.add(this._calcTick);
     }
 
     _calcTick()
     {
-        let currentTime = (this._music.progress * this.music.duration) - this._audioOffset - this.offset;
+        let currentTime = Math.fround(this._music.progress * this.music.duration - this._audioOffset - this.offset);
         this.calcTime(currentTime);
     }
 
