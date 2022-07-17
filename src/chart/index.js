@@ -22,6 +22,7 @@ export default class Chart
             music: null,
             bg: null
         };
+        this.bgDim = 0.5;
 
         this._music = null;
         this._audioOffset = 0;
