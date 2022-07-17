@@ -1,6 +1,6 @@
 import Chart from './chart';
 import Game from './game';
-import { Loader, Texture } from 'pixi.js-legacy';
+import { Loader, Texture, Rectangle } from 'pixi.js-legacy';
 import { Sound } from '@pixi/sound';
 import * as StackBlur from 'stackblur-canvas';
 
@@ -10,6 +10,10 @@ const doms = {
         chart: document.querySelector('input#file-chart'),
         music: document.querySelector('input#file-music'),
         bg: document.querySelector('input#file-bg')
+    },
+    settings: {
+        autoPlay: document.querySelector('input#settings-autoplay'),
+        offset: document.querySelector('input#settings-offset')
     },
     startBtn : document.querySelector('button#start'),
     canvas : document.querySelector('canvas#canvas'),
@@ -134,10 +138,25 @@ window.addEventListener('load', () => {
         { name: 'holdBody', url: './assets/Hold.png' },
         { name: 'holdBodyHL', url: './assets/HoldHL.png' },
         { name: 'holdEnd', url: './assets/HoldEnd.png' },
-        { name: 'judgeline', url: './assets/JudgeLine.png' }
+        { name: 'judgeline', url: './assets/JudgeLine.png' },
+        { name: 'clickRaw', url: './assets/clickRaw128.png' }
     ]).load((loader, resources) => {
         for (const name in resources) {
             textures[name] = resources[name].texture;
+
+            if (name == 'clickRaw')
+            {
+                let _clickTextures = [];
+                
+                for (let i = 0; i < Math.floor(textures[name].height / textures[name].width); i++) {
+                    let rectangle = new Rectangle(0, i * textures[name].width, textures[name].width, textures[name].width);
+                    let texture = new Texture(textures[name].baseTexture, rectangle);
+                    
+                    _clickTextures.push(texture);
+                }
+                
+                textures[name] = _clickTextures;
+            }
         }
     });
 });

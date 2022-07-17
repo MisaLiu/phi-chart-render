@@ -19,9 +19,10 @@ export default class Game
             bgDim     : params.render.bgDim
         });
         this.judgement = new Judgement({
-            chart  : params.chart,
-            stage  : this.render.sprites.mainContainer,
-            canvas : params.render.canvas
+            chart   : params.chart,
+            stage   : this.render.sprites.mainContainer,
+            canvas  : params.render.canvas,
+            texture : params.texture.clickRaw
         });
         this.chart    = params.chart;
         this.texture  = params.texture;
@@ -54,6 +55,7 @@ export default class Game
     start()
     {
         this.resizeRender();
+        this.chart.addFunction('note', this.judgement.calcNote);
         this.render.start();
         this.render.pixi.ticker.add(this.judgement.calcTick);
         this.chart.start(this.render.pixi.ticker);

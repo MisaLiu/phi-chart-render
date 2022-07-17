@@ -25,6 +25,8 @@ export default class Note
         this.judgeline     = params.judgeline;
 
         if (!this.judgeline) throw new Error('Note must have a judgeline');
+
+        this.isScored = false;
         
         this.holdTimeLength = this.type === 3 ? Math.fround(this.time + this.holdTime) : 0;
 

@@ -94,6 +94,7 @@ export default class Render
 
         this.renderSize.noteSpeed = this.renderSize.height * 0.6;
         this.renderSize.noteScale = this.renderSize.width / this.noteScale;
+        this.renderSize.noteWidth = this.renderSize.width * 0.117775;
         this.renderSize.lineScale = this.renderSize.height > this.renderSize.height * 0.75 ? this.renderSize.height / 18.75 : this.renderSize.width / 14.0625;
         this.renderSize.heightPercent = this.renderSize.height / 1080;
 
