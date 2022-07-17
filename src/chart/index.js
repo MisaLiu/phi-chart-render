@@ -86,7 +86,7 @@ export default class Chart
         this.function[type].push(func);
     }
 
-    createSprites(stage, size, textures, zipFiles)
+    createSprites(stage, size, bgDim = 0.5, textures, zipFiles)
     {
         if (this.bg)
         {
@@ -100,7 +100,7 @@ export default class Chart
 
             bgCover.position.x = -this.sprites.bg.width / 2;
             bgCover.position.y = -this.sprites.bg.height / 2;
-            bgCover.alpha = 1 - this.bgDim;
+            bgCover.alpha = 1 - bgDim;
 
             this.sprites.bg.addChild(bgCover);
             this.sprites.bg.anchor.set(0.5);
@@ -186,13 +186,13 @@ export default class Chart
             });
         }
 
-        this.sprites.info.songName.style.fontSize = size.lineScale * 0.468750;
-        this.sprites.info.songName.position.x = size.lineScale * 0.989583;
-        this.sprites.info.songName.position.y = size.height - size.lineScale * 1.076389;
+        this.sprites.info.songName.style.fontSize = size.heightPercent * 27;
+        this.sprites.info.songName.position.x = size.heightPercent * 57;
+        this.sprites.info.songName.position.y = size.height - size.heightPercent * 62;
 
-        this.sprites.info.songDiff.style.fontSize = size.lineScale * 0.347222;
-        this.sprites.info.songDiff.position.x = size.lineScale * 0.989583;
-        this.sprites.info.songDiff.position.y = size.height - size.lineScale * 0.746528;
+        this.sprites.info.songDiff.style.fontSize = size.heightPercent * 20;
+        this.sprites.info.songDiff.position.x = size.heightPercent * 57;
+        this.sprites.info.songDiff.position.y = size.height - size.heightPercent * 43;
     }
 
     async start(ticker)

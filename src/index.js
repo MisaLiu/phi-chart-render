@@ -1,5 +1,5 @@
 import Chart from './chart';
-import Render from './render';
+import Game from './game';
 import { Loader, Texture } from 'pixi.js-legacy';
 import { Sound } from '@pixi/sound';
 import * as StackBlur from 'stackblur-canvas';
@@ -85,22 +85,20 @@ doms.startBtn.addEventListener('click', () => {
     files.chart.music = files.music;
     files.chart.bg = files.bg;
 
-    window.render = Render.from({
+    window._game = new Game({
         chart: files.chart,
-        music: files.music,
-        bg: files.bg,
+        texture: textures,
         render: {
             canvas: doms.canvas,
             resizeTo: document.documentElement,
-            texture: textures
+            
         }
     });
 
-    render.debug = doms.debug;
+    _game.createSprites();
     
-    render.createSprites();
-    
-    render.chart.addFunction('note', (currentTime, note) =>
+    /*
+    _game.chart.addFunction('note', (currentTime, note) =>
     {
         if (note.isFake) return;
         if (currentTime < note.time) return;
@@ -112,8 +110,8 @@ doms.startBtn.addEventListener('click', () => {
         }
         // note.sprite.alpha = 1 - (currentTime - note.time) / 0.2;
     });
-
-    render.start();
+    */
+    _game.start();
 
     doms.fileSelect.style.display = 'none';
 });
