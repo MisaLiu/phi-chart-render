@@ -2,7 +2,7 @@ export default class Score
 {
     constructor(notesCount, isChallengeMode = false)
     {
-        this.scorePerNote = isChallengeMode ? 1000000 / notesCount : 900000 / notesCount;
+        this.scorePerNote  = isChallengeMode ? 1000000 / notesCount : 900000 / notesCount;
         this.scorePerCombo = isChallengeMode ? 0 : 100000 / notesCount;
         
         this.score    = 0;
