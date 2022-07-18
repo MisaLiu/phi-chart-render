@@ -52,7 +52,7 @@ export default class Judgeline
 
         this.sprite = new Sprite(
             (this.texture && this.texture != '' && this.texture != 'judgeline') ?
-            zipFiles[judgeline.texture] :
+            zipFiles[this.texture] :
             texture.judgeline
         );
         this.sprite.anchor.set(0.5);

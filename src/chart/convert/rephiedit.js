@@ -403,6 +403,10 @@ function convertChartFormat(rawChart)
         {
             break;
         }
+        case 113:
+        {
+            break;
+        }
         default :
         {
             throw new Error('Unsupported chart version: ' + chart.META.RPEVersion);
@@ -512,7 +516,7 @@ function calculateSpeedEventFloorPosition(events)
 
     events.forEach((event, index) =>
     {
-        let newEvent = JSON.parse(JSON.stringify(event));
+        let newEvent = event;
         newEvent.endTime = index < events.length - 1 ? events[index + 1].startTime : 1e9;
 
         newEvent.floorPosition = currentFloorPosition;
@@ -641,7 +645,7 @@ function separateEvent(basedEvent, addedEvent)
 
 function addEventsBefore(events, basedEventIndex, _addedResults)
 {
-    let addedResults = JSON.parse(JSON.stringify(_addedResults));
+    let addedResults = _addedResults.slice();
     let extraDeleteEventCount = 0;
 
     for (let extraIndex = basedEventIndex - 1; extraIndex >= 0; extraIndex--)
@@ -671,7 +675,7 @@ function addEventsBefore(events, basedEventIndex, _addedResults)
 
 function addEventsAfter(events, basedEventIndex, _addedResults)
 {
-    let addedResults = JSON.parse(JSON.stringify(_addedResults));
+    let addedResults = _addedResults.slice();
     let extraDeleteEventCount = 0;
 
     for (let extraIndex = basedEventIndex + 1, extraLength = events.length; extraIndex < extraLength; extraIndex++)
@@ -700,7 +704,7 @@ function addEventsAfter(events, basedEventIndex, _addedResults)
 
 function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
 {
-    let result = JSON.parse(JSON.stringify(currentEvents));
+    let result = currentEvents.slice();
 
     eventLayer.forEach((addedEvent, addedEventIndex) =>
     {
@@ -710,7 +714,7 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
             return;
         }
 
-        let _result = JSON.parse(JSON.stringify(result));
+        let _result = result.slice();
         let extraDeleteEventCount = 0;
         let mergedLayer = false;
 
@@ -720,7 +724,7 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
 
             // 不处理完全不与其重叠的事件
             if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime < basedEvent.startTime) continue;
-            if (addedEvent.startTime > basedEvent.endTime && addedEvent.endTime > basedEvent.endTime) continue;
+            if (addedEvent.startTime > basedEvent.endTime && addedEvent.endTime > basedEvent.endTime) break;
 
             let addedResult = [];
 
@@ -769,7 +773,7 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
 
         if (!mergedLayer) _result.push(addedEvent);
 
-        result = JSON.parse(JSON.stringify(_result));
+        result = _result;
     });
 
     // 事件排序
@@ -799,20 +803,20 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
             result.splice(index, 1);
         }
     });
-
+    
     return result;
 }
 
 function calculateRealTime(_bpmList, events)
 {
-    let bpmList = JSON.parse(JSON.stringify(_bpmList));
+    let bpmList = _bpmList.slice();
     let result = [];
 
     bpmList.sort((a, b) => b.startBeat - a.startBeat);
 
     events.forEach((event) =>
     {
-        let newEvent = JSON.parse(JSON.stringify(event));
+        let newEvent = event;
 
         for (let bpmIndex = 0, bpmLength = bpmList.length; bpmIndex < bpmLength; bpmIndex++)
         {
