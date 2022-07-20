@@ -189,10 +189,15 @@ export default function RePhiEditChartConverter(_chart)
         }
 
         // events 连续性保证，只保证第一层的就行了
-        for (const name in judgeline.eventLayers[0])
         {
-            judgeline.eventLayers[0][name] = arrangeEvents(judgeline.eventLayers[0][name]);
+            let firstEventLayer = judgeline.eventLayers[0];
+            for (const name in firstEventLayer)
+            {
+                firstEventLayer[name] = arrangeEvents(firstEventLayer[name]);
+            }
+            judgeline.eventLayers[0] = firstEventLayer;
         }
+        
 
         { // 多层 EventLayer 叠加
             let finalEvent = {
@@ -561,6 +566,19 @@ function arrangeEvents(events)
         endTime   : 1e5,
         start     : result[result.length - 1].end,
         end       : result[result.length - 1].end
+    });
+
+    result.forEach((event, eventIndex) =>
+    {
+        let nextEvent = result[eventIndex + 1];
+
+        if (!nextEvent) return;
+
+        if (event.start == nextEvent.start && event.end == nextEvent.end)
+        {
+            event.endTime = nextEvent.endTime;
+            result.splice(eventIndex + 1, 1);
+        }
     });
 
     return result.slice();
