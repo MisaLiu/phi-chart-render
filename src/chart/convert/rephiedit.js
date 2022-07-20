@@ -188,16 +188,11 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.extended[name] = newEvents;
         }
 
-        // events 连续性保证
-        judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
+        // events 连续性保证，只保证第一层的就行了
+        for (const name in judgeline.eventLayers[0])
         {
-            for (const name in eventLayer)
-            {
-                eventLayer[name] = arrangeEvents(eventLayer[name]);
-            }
-
-            judgeline.eventLayers[eventLayerIndex] = eventLayer;
-        });
+            judgeline.eventLayers[0][name] = arrangeEvents(judgeline.eventLayers[0][name]);
+        }
 
         { // 多层 EventLayer 叠加
             let finalEvent = {
@@ -521,81 +516,54 @@ function calculateEventEase(event, forceLinear = false)
 
 function arrangeEvents(events)
 {
-    let oldEvents = events.slice();
-    let newEvents2 = [];
-    let newEvents = [{ // 以 1-1e6 开始
+    let result = [];
+
+    result.push({
         startTime : 0,
-        endTime   : 0,
-        start     : oldEvents[0] ? oldEvents[0].start : 0,
-        end       : oldEvents[0] ? oldEvents[0].start : 0
-    }];
-    
-    oldEvents.push({ // 以 1e9 结束
-        startTime : 0,
-        endTime   : 1e5,
-        start     : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0,
-        end       : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0
+        endTime   : events[0].startTime,
+        start     : events[0].start,
+        end       : events[0].start
     });
-    
-    // 保证时间连续性
-    for (let oldEvent of oldEvents) {
-        let lastNewEvent = newEvents[newEvents.length - 1];
-        
-        if (lastNewEvent.endTime > oldEvent.endTime)
+
+    events.forEach((event, eventIndex) =>
+    {
+        let preEvent = result[result.length - 1];
+
+        if (event.startTime == preEvent.endTime)
         {
-            // 忽略此分支
+            result.push(event);
         }
-        else if (lastNewEvent.endTime == oldEvent.startTime)
+        else if (event.startTime > preEvent.endTime)
         {
-            newEvents.push(oldEvent);
+            result.push(
+                {
+                    startTime : preEvent.endTime,
+                    endTime   : event.startTime,
+                    start     : preEvent.end,
+                    end       : preEvent.end
+                },
+                event
+            );
         }
-        else if (lastNewEvent.endTime < oldEvent.startTime)
+        else if (event.startTime < preEvent.endTime)
         {
-            newEvents.push({
-                startTime : lastNewEvent.endTime,
-                endTime   : oldEvent.startTime,
-                start     : lastNewEvent.end,
-                end       : lastNewEvent.end
-            }, oldEvent);
-        }
-        else if (lastNewEvent.endTime > oldEvent.startTime)
-        {
-            newEvents.push({
-                startTime : lastNewEvent.endTime,
-                endTime   : oldEvent.endTime,
-                start     : (oldEvent.start * (oldEvent.endTime - lastNewEvent.endTime) + oldEvent.end * (lastNewEvent.endTime - oldEvent.startTime)) / (oldEvent.endTime - oldEvent.startTime),
-                end       : lastNewEvent.end
+            result.push({
+                startTime : preEvent.endTime,
+                endTime   : event.endTime,
+                start     : (event.start * (event.endTime - preEvent.endTime) + event.end * (preEvent.endTime - event.startTime)) / (event.endTime - event.startTime),
+                end       : preEvent.end
             });
         }
-    }
-    
-    // 合并相同变化率事件
-    newEvents2 = [ newEvents.shift() ];
-    for (let newEvent of newEvents)
-    {
-        let lastNewEvent2 = newEvents2[newEvents2.length - 1];
-        let duration1 = lastNewEvent2.endTime - lastNewEvent2.startTime;
-        let duration2 = newEvent.endTime - newEvent.startTime;
-        
-        if (newEvent.startTime == newEvent.endTime)
-        {
-            // 忽略此分支    
-        }
-        else if (
-            lastNewEvent2.end == newEvent.start &&
-            (lastNewEvent2.end - lastNewEvent2.start) * duration2 == (newEvent.end - newEvent.start) * duration1
-        )
-        {
-            lastNewEvent2.endTime = newEvent.endTime;
-            lastNewEvent2.end     = newEvent.end;
-        }
-        else
-        {
-            newEvents2.push(newEvent);
-        }
-    }
-    
-    return newEvents2.slice();
+    });
+
+    result.push({
+        startTime : result[result.length - 1].endTime,
+        endTime   : 1e5,
+        start     : result[result.length - 1].end,
+        end       : result[result.length - 1].end
+    });
+
+    return result.slice();
 }
 
 function separateSpeedEvent(event)
@@ -907,16 +875,6 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
 
     // 事件排序
     result.sort((a, b) => a.startTime - b.startTime);
-
-    result.forEach((event, index) =>
-    { // 去除 startTime == endTime 且 start == end 的事件 
-        if (
-            event.startTime == event.endTime &&
-            event.start == event.end
-        ) {
-            result.splice(index, 1);
-        }
-    });
 
     result.forEach((event, index) =>
     { // 事件去重
