@@ -43,6 +43,7 @@ doms.file.chart.addEventListener('input', function () {
         try {
             files.rawChart = JSON.parse(this.result);
         } catch (e) {
+            console.log(e);
             files.rawChart = this.result;
         }
 

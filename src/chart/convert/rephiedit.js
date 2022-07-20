@@ -188,6 +188,17 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.extended[name] = newEvents;
         }
 
+        // events 连续性保证
+        judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
+        {
+            for (const name in eventLayer)
+            {
+                eventLayer[name] = arrangeEvents(eventLayer[name]);
+            }
+
+            judgeline.eventLayers[eventLayerIndex] = eventLayer;
+        });
+
         { // 多层 EventLayer 叠加
             let finalEvent = {
                 speed: [],
@@ -454,8 +465,8 @@ function beat2Time(event)
 {
     event.forEach((e) =>
     {
-        e.startTime = e.startTime[0] + e.startTime[1] / e.startTime[2];
-        e.endTime = e.endTime[0] + e.endTime[1] / e.endTime[2];
+        e.startTime = Math.fround(e.startTime[0] + e.startTime[1] / e.startTime[2]);
+        e.endTime = Math.fround(e.endTime[0] + e.endTime[1] / e.endTime[2]);
     });
     return event;
 }
@@ -506,6 +517,85 @@ function calculateEventEase(event, forceLinear = false)
     }
 
     return result;
+}
+
+function arrangeEvents(events)
+{
+    let oldEvents = events.slice();
+    let newEvents2 = [];
+    let newEvents = [{ // 以 1-1e6 开始
+        startTime : 0,
+        endTime   : 0,
+        start     : oldEvents[0] ? oldEvents[0].start : 0,
+        end       : oldEvents[0] ? oldEvents[0].start : 0
+    }];
+    
+    oldEvents.push({ // 以 1e9 结束
+        startTime : 0,
+        endTime   : 1e5,
+        start     : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0,
+        end       : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0
+    });
+    
+    // 保证时间连续性
+    for (let oldEvent of oldEvents) {
+        let lastNewEvent = newEvents[newEvents.length - 1];
+        
+        if (lastNewEvent.endTime > oldEvent.endTime)
+        {
+            // 忽略此分支
+        }
+        else if (lastNewEvent.endTime == oldEvent.startTime)
+        {
+            newEvents.push(oldEvent);
+        }
+        else if (lastNewEvent.endTime < oldEvent.startTime)
+        {
+            newEvents.push({
+                startTime : lastNewEvent.endTime,
+                endTime   : oldEvent.startTime,
+                start     : lastNewEvent.end,
+                end       : lastNewEvent.end
+            }, oldEvent);
+        }
+        else if (lastNewEvent.endTime > oldEvent.startTime)
+        {
+            newEvents.push({
+                startTime : lastNewEvent.endTime,
+                endTime   : oldEvent.endTime,
+                start     : (oldEvent.start * (oldEvent.endTime - lastNewEvent.endTime) + oldEvent.end * (lastNewEvent.endTime - oldEvent.startTime)) / (oldEvent.endTime - oldEvent.startTime),
+                end       : lastNewEvent.end
+            });
+        }
+    }
+    
+    // 合并相同变化率事件
+    newEvents2 = [ newEvents.shift() ];
+    for (let newEvent of newEvents)
+    {
+        let lastNewEvent2 = newEvents2[newEvents2.length - 1];
+        let duration1 = lastNewEvent2.endTime - lastNewEvent2.startTime;
+        let duration2 = newEvent.endTime - newEvent.startTime;
+        
+        if (newEvent.startTime == newEvent.endTime)
+        {
+            // 忽略此分支    
+        }
+        else if (
+            lastNewEvent2.end == newEvent.start &&
+            (lastNewEvent2.end - lastNewEvent2.start) * duration2 == (newEvent.end - newEvent.start) * duration1
+        )
+        {
+            lastNewEvent2.endTime = newEvent.endTime;
+            lastNewEvent2.end     = newEvent.end;
+        }
+        else
+        {
+            newEvents2.push(newEvent);
+        }
+    }
+    
+    return newEvents2.slice();
 }
 
 function separateSpeedEvent(event)

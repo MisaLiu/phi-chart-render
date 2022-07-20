@@ -260,7 +260,7 @@ export default class Chart
 
 
 function arrangeLineEvents(events) {
-    let oldEvents = JSON.parse(JSON.stringify(events));
+    let oldEvents = events.slice();
     let newEvents2 = [];
     let newEvents = [{ // 以 1-1e6 开始
         startTime : 1 - 1e6,
@@ -334,7 +334,7 @@ function arrangeLineEvents(events) {
         }
     }
     
-    return JSON.parse(JSON.stringify(newEvents2));
+    return newEvents2.slice();
 }
 
 function arrangeSpeedEvents(events)
