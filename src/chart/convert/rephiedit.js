@@ -143,6 +143,10 @@ export default function RePhiEditChartConverter(_chart)
                 eventLayer[name] = beat2Time(eventLayer[name]);
             }
         });
+        for (const name in judgeline.extended)
+        {
+            judgeline.extended[name] = beat2Time(judgeline.extended[name]);
+        }
 
         // 拆分缓动
         judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
@@ -165,6 +169,24 @@ export default function RePhiEditChartConverter(_chart)
 
             judgeline.eventLayers[eventLayerIndex] = newEvents;
         });
+        for (const name in judgeline.extended)
+        {
+            let newEvents = [];
+
+            if (judgeline.extended[name].length <= 0) continue;
+
+            judgeline.extended[name].forEach((event) =>
+            {
+                calculateEventEase(event)
+                    .forEach((event) =>
+                    {
+                        newEvents.push(event);
+                    }
+                );
+            });
+
+            judgeline.extended[name] = newEvents;
+        }
 
         { // 多层 EventLayer 叠加
             let finalEvent = {
@@ -230,6 +252,10 @@ export default function RePhiEditChartConverter(_chart)
         for (const name in judgeline.event)
         {
             judgeline.event[name] = calculateRealTime(rawChart.BPMList, judgeline.event[name]);
+        }
+        for (const name in judgeline.extended)
+        {
+            judgeline.extended[name] = calculateRealTime(rawChart.BPMList, judgeline.extended[name]);
         }
 
         // 计算事件规范值
@@ -310,6 +336,14 @@ export default function RePhiEditChartConverter(_chart)
         judgeline.texture = _judgeline.Texture != 'line.png' ? _judgeline.Texture : 'judgeline';
         judgeline.parentLine =_judgeline.father;
         judgeline.event = _judgeline.event;
+
+        for (const name in _judgeline.extended)
+        {
+            if (name == 'scaleXEvents')
+                judgeline.extendEvent.scaleX = _judgeline.extended[name];
+            if (name == 'scaleYEvents')
+                judgeline.extendEvent.scaleY = _judgeline.extended[name];
+        }
         
         judgeline.sortEvent();
         chart.judgelines.push(judgeline);
@@ -433,13 +467,18 @@ function calculateEventEase(event, forceLinear = false)
     let timeBetween = event.endTime - event.startTime;
     let valueBetween = event.end - event.start;
 
+    if (!event)
+    {
+        return [];
+    }
+
     for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
     {
         let easeBetween = event.easingRight - event.easingLeft;
         let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
         let timePercentEnd = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
 
-        if (event.easingType && (event.easingType !== 1 || forceLinear))
+        if (event.easingType && (event.easingType !== 1 || forceLinear) && event.easingType <= Easing.length)
         {
             result.push({
                 startTime: event.startTime + timeIndex * calcBetweenTime,

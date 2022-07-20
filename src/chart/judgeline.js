@@ -14,6 +14,12 @@ export default class Judgeline
             rotate: [],
             alpha: []
         };
+        this.extendEvent = {
+            color: [],
+            scaleX: [],
+            scaleY: []
+        };
+        this.isText = false;
 
         this.floorPosition = 0;
         this.alpha = 1;
@@ -23,16 +29,23 @@ export default class Judgeline
         this.sinr = 0;
         this.cosr = 1;
 
+        this.scaleX = 1;
+        this.scaleY = 1;
+
         this.sprite = undefined;
     }
 
     sortEvent(withEndTime = false)
     {
-        this.event.speed.sort(_sort);
-        this.event.moveX.sort(_sort);
-        this.event.moveY.sort(_sort);
-        this.event.rotate.sort(_sort);
-        this.event.alpha.sort(_sort);
+        for (const name in this.event)
+        {
+            this.event[name].sort(_sort);
+        }
+
+        for (const name in this.extendEvent)
+        {
+            this.extendEvent[name].sort(_sort);
+        }
 
         function _sort(a, b) {
             if (withEndTime)
@@ -94,7 +107,7 @@ export default class Judgeline
 
             if (this.parentLine)
             {
-                this.x += this.x * (this.parentLine.x - 0.5) * 2;
+                this.x = (this.x + this.parentLine.x) * 2 - 1.5;
             }
 
             if (this.sprite) {
@@ -114,7 +127,7 @@ export default class Judgeline
 
             if (this.parentLine)
             {
-                this.y += this.y * (this.parentLine.y - 0.5) * 2;
+                this.y = (this.y + this.parentLine.y) * 2 - 1.5;
             }
 
             if (this.sprite) {
@@ -131,6 +144,12 @@ export default class Judgeline
             let time1 = 1 - time2;
 
             this.deg = i.start * time1 + i.end * time2;
+
+            if (this.parentLine)
+            {
+                this.deg += this.parentLine.deg;
+            }
+
             this.cosr = Math.cos(this.deg);
             this.sinr = Math.sin(this.deg);
 
@@ -151,6 +170,38 @@ export default class Judgeline
 
             if (this.sprite) {
                 this.sprite.alpha = this.alpha >= 0 ? this.alpha : 0;
+            }
+        }
+
+        for (const i of this.extendEvent.scaleX)
+        {
+            if (currentTime < i.startTime) break;
+            if (currentTime > i.endTime) continue;
+
+            let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
+            let time1 = 1 - time2;
+
+            this.scaleX = i.start * time1 + i.end * time2;
+
+            if (this.sprite)
+            {
+                this.sprite.scale.x = this.scaleX;
+            }
+        }
+
+        for (const i of this.extendEvent.scaleY)
+        {
+            if (currentTime < i.startTime) break;
+            if (currentTime > i.endTime) continue;
+
+            let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
+            let time1 = 1 - time2;
+
+            this.scaleY = i.start * time1 + i.end * time2;
+
+            if (this.sprite)
+            {
+                this.sprite.scale.y = this.scaleY;
             }
         }
         /**
