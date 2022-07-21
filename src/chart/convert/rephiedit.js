@@ -188,17 +188,6 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.extended[name] = newEvents;
         }
 
-        // events 连续性保证，只保证第一层的就行了
-        {
-            let firstEventLayer = judgeline.eventLayers[0];
-            for (const name in firstEventLayer)
-            {
-                firstEventLayer[name] = arrangeEvents(firstEventLayer[name]);
-            }
-            judgeline.eventLayers[0] = firstEventLayer;
-        }
-        
-
         { // 多层 EventLayer 叠加
             let finalEvent = {
                 speed: [],
@@ -519,71 +508,6 @@ function calculateEventEase(event, forceLinear = false)
     return result;
 }
 
-function arrangeEvents(events)
-{
-    let result = [];
-
-    result.push({
-        startTime : 0,
-        endTime   : events[0].startTime,
-        start     : events[0].start,
-        end       : events[0].start
-    });
-
-    events.forEach((event, eventIndex) =>
-    {
-        let preEvent = result[result.length - 1];
-
-        if (event.startTime == preEvent.endTime)
-        {
-            result.push(event);
-        }
-        else if (event.startTime > preEvent.endTime)
-        {
-            result.push(
-                {
-                    startTime : preEvent.endTime,
-                    endTime   : event.startTime,
-                    start     : preEvent.end,
-                    end       : preEvent.end
-                },
-                event
-            );
-        }
-        else if (event.startTime < preEvent.endTime)
-        {
-            result.push({
-                startTime : preEvent.endTime,
-                endTime   : event.endTime,
-                start     : (event.start * (event.endTime - preEvent.endTime) + event.end * (preEvent.endTime - event.startTime)) / (event.endTime - event.startTime),
-                end       : preEvent.end
-            });
-        }
-    });
-
-    result.push({
-        startTime : result[result.length - 1].endTime,
-        endTime   : 1e5,
-        start     : result[result.length - 1].end,
-        end       : result[result.length - 1].end
-    });
-
-    result.forEach((event, eventIndex) =>
-    {
-        let nextEvent = result[eventIndex + 1];
-
-        if (!nextEvent) return;
-
-        if (event.start == nextEvent.start && event.end == nextEvent.end)
-        {
-            event.endTime = nextEvent.endTime;
-            result.splice(eventIndex + 1, 1);
-        }
-    });
-
-    return result.slice();
-}
-
 function separateSpeedEvent(event)
 {
     const calcBetweenTime = 0.125;
@@ -655,168 +579,6 @@ function valueCalculator(event, currentTime)
     return event.start * time1 + event.end * time2;
 }
 
-function separateEvent(basedEvent, addedEvent)
-{
-    let result = [];
-
-    if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime < basedEvent.startTime) return result;
-    if (addedEvent.startTime > basedEvent.endTime && addedEvent.endTime > basedEvent.endTime) return result;
-
-    if (basedEvent.startTime <= addedEvent.startTime && basedEvent.endTime >= addedEvent.endTime)
-    { // 叠加事件在基础事件的时间范围内
-        result.push({
-            startTime: basedEvent.startTime,
-            endTime: addedEvent.startTime,
-            start: basedEvent.start,
-            end: valueCalculator(basedEvent, addedEvent.startTime)
-        });
-
-        result.push({
-            startTime: addedEvent.startTime,
-            endTime: addedEvent.endTime,
-            start: valueCalculator(basedEvent, addedEvent.startTime) + addedEvent.start,
-            end: valueCalculator(basedEvent, addedEvent.endTime) + addedEvent.end
-        });
-
-        result.push({
-            startTime: addedEvent.endTime,
-            endTime: basedEvent.endTime,
-            start: valueCalculator(basedEvent, addedEvent.endTime),
-            end: basedEvent.end
-        });
-    }
-    else if (basedEvent.startTime <= addedEvent.startTime && basedEvent.endTime < addedEvent.endTime)
-    { // 叠加事件的开始时间在基础事件时间范围内，结束时间在范围外
-        result.push({
-            startTime: basedEvent.startTime,
-            endTime: addedEvent.startTime,
-            start: basedEvent.start,
-            end: valueCalculator(basedEvent, addedEvent.startTime)
-        });
-
-        result.push({
-            startTime: addedEvent.startTime,
-            endTime: basedEvent.endTime,
-            start: valueCalculator(basedEvent, addedEvent.startTime) + addedEvent.start,
-            end: basedEvent.end + valueCalculator(addedEvent, basedEvent.endTime)
-        });
-
-        result.push({
-            startTime: basedEvent.endTime,
-            endTime: addedEvent.endTime,
-            start: valueCalculator(addedEvent, basedEvent.endTime),
-            end: addedEvent.end
-        });
-    }
-    else if (basedEvent.startTime > addedEvent.startTime && basedEvent.endTime >= addedEvent.endTime)
-    { // 叠加事件的开始时间在基础事件时间范围外，结束时间在范围内
-        result.push({
-            startTime: addedEvent.startTime,
-            endTime: basedEvent.startTime,
-            start: addedEvent.start,
-            end: valueCalculator(addedEvent, basedEvent.startTime)
-        });
-
-        result.push({
-            startTime: basedEvent.startTime,
-            endTime: addedEvent.endTime,
-            start: basedEvent.start + valueCalculator(addedEvent, basedEvent.startTime),
-            end: valueCalculator(basedEvent, addedEvent.endTime) + addedEvent.end
-        });
-
-        result.push({
-            startTime: addedEvent.endTime,
-            endTime: basedEvent.endTime,
-            start: valueCalculator(basedEvent, addedEvent.endTime),
-            end: basedEvent.end
-        });
-    }
-    else if (basedEvent.startTime > addedEvent.startTime && basedEvent.endTime < addedEvent.endTime)
-    { // 叠加事件在基础事件的时间范围外
-        result.push({
-            startTime: addedEvent.startTime,
-            endTime: basedEvent.startTime,
-            start: addedEvent.start,
-            end: valueCalculator(addedEvent, basedEvent.startTime)
-        });
-
-        result.push({
-            startTime: basedEvent.startTime,
-            endTime: basedEvent.endTime,
-            start: valueCalculator(addedEvent, basedEvent.startTime) + basedEvent.start,
-            end: valueCalculator(addedEvent, basedEvent.endTime) + basedEvent.end
-        });
-
-        result.push({
-            startTime: basedEvent.endTime,
-            endTime: addedEvent.endTime,
-            start: valueCalculator(addedEvent, basedEvent.endTime),
-            end: addedEvent.end
-        });
-    }
-
-    return result;
-}
-
-function addEventsBefore(events, basedEventIndex, _addedResults)
-{
-    let addedResults = _addedResults.slice();
-    let extraDeleteEventCount = 0;
-
-    for (let extraIndex = basedEventIndex - 1; extraIndex >= 0; extraIndex--)
-    {
-        let extraEvent = events[extraIndex];
-
-        if (extraEvent.endTime < addedResults[0].startTime && extraEvent.startTime < addedResults[0].startTime) break;
-
-        let _events = separateEvent(extraEvent, addedResults[0]);
-
-        if (_events.length >= 1)
-        {
-            addedResults.splice(addedResults.length - 1, 1);
-            _events.forEach((_event) =>
-            {
-                addedResults.unshift(_event);
-            });
-            extraDeleteEventCount++;
-        }
-    }
-
-    return {
-        addedResults,
-        extraDeleteEventCount
-    };
-}
-
-function addEventsAfter(events, basedEventIndex, _addedResults)
-{
-    let addedResults = _addedResults.slice();
-    let extraDeleteEventCount = 0;
-
-    for (let extraIndex = basedEventIndex + 1, extraLength = events.length; extraIndex < extraLength; extraIndex++)
-    {
-        let extraEvent = events[extraIndex];
-
-        if (extraEvent.startTime > addedResults[addedResults.length - 1].endTime && extraEvent.endTime > addedResults[addedResults.length - 1].endTime) break;
-
-        let _events = separateEvent(extraEvent, addedResults[addedResults.length - 1]);
-        if (_events.length >= 1)
-        {
-            addedResults.splice(addedResults.length - 1, 1);
-            _events.forEach((_event) =>
-            {
-                addedResults.push(_event);
-            });
-            extraDeleteEventCount++;
-        }
-    }
-
-    return {
-        addedResults,
-        extraDeleteEventCount
-    };
-}
-
 function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
 {
     let result = currentEvents.slice();
@@ -838,40 +600,49 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
             let basedEvent = result[basedEventIndex];
 
             // 不处理完全不与其重叠的事件
-            if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime < basedEvent.startTime) continue;
-            if (addedEvent.startTime > basedEvent.endTime && addedEvent.endTime > basedEvent.endTime) break;
+            /*
+            if (addedEvent.startTime < basedEvent.startTime) continue;
+            if (addedEvent.endTime > basedEvent.startTime) continue;
+            */
+            if (addedEvent.startTime < basedEvent.startTime) continue;
 
             let addedResult = [];
 
-            if (addedEvent.startTime >= basedEvent.startTime && addedEvent.endTime <= basedEvent.endTime)
-            { // 叠加事件在基础事件的时间范围内
+            if (addedEvent.startTime >= basedEvent.startTime && addedEvent.startTime <= basedEvent.endTime)
+            {
                 addedResult = separateEvent(basedEvent, addedEvent);
-            }
-            else if (addedEvent.startTime >= basedEvent.startTime && addedEvent.endTime > basedEvent.endTime)
-            { // 叠加事件的开始时间在基础事件时间范围内，结束时间在范围外
-                addedResult = separateEvent(basedEvent, addedEvent);
-                let extraEventsInfo = addEventsAfter(result, basedEventIndex, addedResult);
 
-                addedResult = extraEventsInfo.addedResults;
-                extraDeleteEventCount += extraEventsInfo.extraDeleteEventCount;
-            }
-            else if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime <= basedEvent.endTime)
-            { // 叠加事件的开始时间在基础事件时间范围外，结束时间在范围内
-                addedResult = separateEvent(basedEvent, addedEvent);
-                let extraEventsInfo = addEventsBefore(result, basedEventIndex, addedResult);
                 
-                addedResult = extraEventsInfo.addedResults;
-                extraDeleteEventCount += extraEventsInfo.extraDeleteEventCount;
-            }
-            else if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime > basedEvent.endTime)
-            { // 叠加事件在基础事件的时间范围外
-                addedResult = separateEvent(basedEvent, addedEvent);
+                if (addedEvent.endTime <= basedEvent.endTime)
+                { // 叠加事件在基础事件的时间范围内
+                    
+                }
+                else if (addedEvent.endTime > basedEvent.endTime)
+                { // 叠加事件的开始时间在基础事件时间范围内，结束时间在范围外
 
-                let extraEventsInfoBefore = addEventsBefore(result, basedEventIndex, addedResult);
-                extraDeleteEventCount += extraEventsInfoBefore.extraDeleteEventCount;
+                    for (let extraEventIndex = basedEventIndex + 1; extraEventIndex < baseEventsLength; extraEventIndex++)
+                    {
+                        let extraEvent = result[extraEventIndex];
+                        let lastAddedResult = addedResult[addedResult.length - 1];
 
-                let extraEventsInfoAfter = addEventsAfter(result, basedEventIndex, extraEventsInfoBefore.addedResults);
-                extraDeleteEventCount += extraEventsInfoAfter.extraDeleteEventCount;
+                        if (extraEvent.startTime > lastAddedResult.endTime) break;
+
+                        let extraAddedResult = separateEvent(extraEvent, lastAddedResult);
+
+                        if (extraAddedResult.length <= 0)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            addedResult.splice(addedResult.length - 1, 1);
+                            extraAddedResult.forEach((event) =>
+                            {
+                                addedResult.push(event);
+                            });
+                        }
+                    }
+                }
             }
 
             if (addedResult.length >= 1)
@@ -888,7 +659,7 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
 
         if (!mergedLayer) _result.push(addedEvent);
 
-        result = _result;
+        result = _result.slice();
     });
 
     // 事件排序
@@ -909,7 +680,207 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
         }
     });
     
+    // events 连续性保证，只保证第一层的就行了
+    if (eventLayerIndex <= 0)
+    {
+        result = arrangeEvents(result);
+    }
+
+    // result = arrangeSameValueEvents(result);
+
     return result;
+
+    function separateEvent(basedEvent, addedEvent)
+    {
+        let result = [];
+
+        if (addedEvent.startTime < basedEvent.startTime && addedEvent.endTime < basedEvent.startTime) return result;
+        if (addedEvent.startTime > basedEvent.endTime && addedEvent.endTime > basedEvent.endTime) return result;
+
+        if (basedEvent.startTime <= addedEvent.startTime && basedEvent.endTime >= addedEvent.endTime)
+        { // 叠加事件在基础事件的时间范围内
+            result.push({
+                startTime: basedEvent.startTime,
+                endTime: addedEvent.startTime,
+                start: basedEvent.start,
+                end: valueCalculator(basedEvent, addedEvent.startTime)
+            }, {
+                startTime: addedEvent.startTime,
+                endTime: addedEvent.endTime,
+                start: valueCalculator(basedEvent, addedEvent.startTime) + addedEvent.start,
+                end: valueCalculator(basedEvent, addedEvent.endTime) + addedEvent.end
+            }, {
+                startTime: addedEvent.endTime,
+                endTime: basedEvent.endTime,
+                start: valueCalculator(basedEvent, addedEvent.endTime),
+                end: basedEvent.end
+            });
+        }
+        else if (basedEvent.startTime <= addedEvent.startTime && basedEvent.endTime < addedEvent.endTime)
+        { // 叠加事件的开始时间在基础事件时间范围内，结束时间在范围外
+            result.push({
+                startTime: basedEvent.startTime,
+                endTime: addedEvent.startTime,
+                start: basedEvent.start,
+                end: valueCalculator(basedEvent, addedEvent.startTime)
+            }, {
+                startTime: addedEvent.startTime,
+                endTime: basedEvent.endTime,
+                start: valueCalculator(basedEvent, addedEvent.startTime) + addedEvent.start,
+                end: basedEvent.end + valueCalculator(addedEvent, basedEvent.endTime)
+            }, {
+                startTime: basedEvent.endTime,
+                endTime: addedEvent.endTime,
+                start: valueCalculator(addedEvent, basedEvent.endTime),
+                end: addedEvent.end
+            });
+        }
+
+        return result;
+    }
+
+    function addEventsBefore(events, basedEventIndex, _addedResults)
+    {
+        let addedResults = _addedResults.slice();
+        let extraDeleteEventCount = 0;
+
+        for (let extraIndex = basedEventIndex - 1; extraIndex >= 0; extraIndex--)
+        {
+            let extraEvent = events[extraIndex];
+
+            if (extraEvent.endTime < addedResults[0].startTime && extraEvent.startTime < addedResults[0].startTime) break;
+
+            let _events = separateEvent(extraEvent, addedResults[0]);
+
+            if (_events.length >= 1)
+            {
+                addedResults.splice(addedResults.length - 1, 1);
+                _events.forEach((_event) =>
+                {
+                    addedResults.unshift(_event);
+                });
+                extraDeleteEventCount++;
+            }
+        }
+
+        return {
+            addedResults,
+            extraDeleteEventCount
+        };
+    }
+
+    function addEventsAfter(events, basedEventIndex, _addedResults)
+    {
+        let addedResults = _addedResults.slice();
+        let extraDeleteEventCount = 0;
+
+        for (let extraIndex = basedEventIndex + 1, extraLength = events.length; extraIndex < extraLength; extraIndex++)
+        {
+            let extraEvent = events[extraIndex];
+
+            if (extraEvent.startTime > addedResults[addedResults.length - 1].endTime && extraEvent.endTime > addedResults[addedResults.length - 1].endTime) break;
+
+            let _events = separateEvent(extraEvent, addedResults[addedResults.length - 1]);
+            if (_events.length >= 1)
+            {
+                addedResults.splice(addedResults.length - 1, 1);
+                _events.forEach((_event) =>
+                {
+                    addedResults.push(_event);
+                });
+                extraDeleteEventCount++;
+            }
+        }
+
+        return {
+            addedResults,
+            extraDeleteEventCount
+        };
+    }
+
+    function arrangeEvents(events)
+    {
+        let oldEvents = events.slice();
+        let newEvents = [{ // 以 1-1e6 开始
+            startTime : 0,
+            endTime   : 0,
+            start     : oldEvents[0] ? oldEvents[0].start : 0,
+            end       : oldEvents[0] ? oldEvents[0].start : 0
+        }];
+        
+        oldEvents.push({ // 以 1e9 结束
+            startTime : 0,
+            endTime   : 1e5,
+            start     : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0,
+            end       : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0
+        });
+        
+        // 保证时间连续性
+        for (let oldEvent of oldEvents) {
+            let lastNewEvent = newEvents[newEvents.length - 1];
+            
+            if (lastNewEvent.endTime > oldEvent.endTime)
+            {
+                // 忽略此分支
+            }
+            else if (lastNewEvent.endTime == oldEvent.startTime)
+            {
+                newEvents.push(oldEvent);
+            }
+            else if (lastNewEvent.endTime < oldEvent.startTime)
+            {
+                newEvents.push({
+                    startTime : lastNewEvent.endTime,
+                    endTime   : oldEvent.startTime,
+                    start     : lastNewEvent.end,
+                    end       : lastNewEvent.end
+                }, oldEvent);
+            }
+            else if (lastNewEvent.endTime > oldEvent.startTime)
+            {
+                newEvents.push({
+                    startTime : lastNewEvent.endTime,
+                    endTime   : oldEvent.endTime,
+                    start     : (oldEvent.start * (oldEvent.endTime - lastNewEvent.endTime) + oldEvent.end * (lastNewEvent.endTime - oldEvent.startTime)) / (oldEvent.endTime - oldEvent.startTime),
+                    end       : lastNewEvent.end
+                });
+            }
+        }
+        
+        return newEvents.slice();
+    }
+
+    // 合并相同变化率事件
+    function arrangeSameValueEvents(events)
+    {
+        let newEvents = [ events.shift() ];
+
+        events.forEach((event) =>
+        {
+            let lastNewEvent = newEvents[newEvents.length - 1];
+            let duration1 = lastNewEvent.endTime - lastNewEvent.startTime;
+            let duration2 = event.endTime - event.startTime;
+            
+            if (event.startTime == event.endTime)
+            {
+                // 忽略此分支    
+            }
+            else if (
+                lastNewEvent.end == event.start &&
+                (lastNewEvent.end - lastNewEvent.start) * duration2 == (event.end - event.start) * duration1
+            )
+            {
+                lastNewEvent.endTime = event.endTime;
+                lastNewEvent.end     = event.end;
+            }
+            else
+            {
+                newEvents.push(event);
+            }
+        });
+
+        return newEvents.slice();
+    }
 }
 
 function calculateRealTime(_bpmList, events)
