@@ -604,7 +604,7 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
             if (addedEvent.startTime < basedEvent.startTime) continue;
             if (addedEvent.endTime > basedEvent.startTime) continue;
             */
-            if (addedEvent.startTime < basedEvent.startTime) continue;
+            if (addedEvent.startTime > basedEvent.endTime) continue;
 
             let addedResult = [];
 
