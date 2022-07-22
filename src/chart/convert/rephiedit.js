@@ -2,6 +2,7 @@ import Chart from '../index';
 import Judgeline from '../judgeline';
 import Note from '../note';
 
+const calcBetweenTime = 0.125;
 const Easing = [
     (x) => { return x; },
     (x) => { return Math.sin((x * Math.PI) / 2); },
@@ -462,7 +463,6 @@ function beat2Time(event)
 
 function calculateEventEase(event, forceLinear = false)
 {
-    const calcBetweenTime = 0.125;
     let result = [];
     let timeBetween = event.endTime - event.startTime;
     let valueBetween = event.end - event.start;
@@ -510,7 +510,6 @@ function calculateEventEase(event, forceLinear = false)
 
 function separateSpeedEvent(event)
 {
-    const calcBetweenTime = 0.125;
     let result = [];
     let timeBetween = event.endTime - event.startTime;
     let valueBetween = event.end - event.start;
@@ -606,53 +605,123 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
             */
             if (addedEvent.startTime > basedEvent.endTime) continue;
 
+            let basedEventGroup = [];
+            let addedEventGroup = [];
             let addedResult = [];
 
             if (addedEvent.startTime >= basedEvent.startTime && addedEvent.startTime <= basedEvent.endTime)
             {
-                addedResult = separateEvent(basedEvent, addedEvent);
+                basedEventGroup.push({
+                    startTime : basedEvent.startTime,
+                    endTime   : addedEvent.startTime,
+                    start     : basedEvent.start,
+                    end       : valueCalculator(basedEvent, addedEvent.startTime)
+                });
 
-                
+                breakEvent(addedEvent)
+                    .forEach((event) =>
+                    {
+                        addedEventGroup.push(event);
+                    }
+                );
+
+                // addedResult = separateEvent(basedEvent, addedEvent);
+
                 if (addedEvent.endTime <= basedEvent.endTime)
                 { // 叠加事件在基础事件的时间范围内
+
+                    breakEvent({
+                        startTime : addedEvent.startTime,
+                        endTime   : addedEvent.endTime,
+                        start     : valueCalculator(basedEvent, addedEvent.startTime),
+                        end       : valueCalculator(basedEvent, addedEvent.endTime)
+                    }).forEach((event) =>
+                    {
+                        basedEventGroup.push(event);
+                    });
                     
+                    if (addedEvent.endTime != basedEvent.endTime)
+                    {
+                        basedEventGroup.push({
+                            startTime : addedEvent.endTime,
+                            endTime   : basedEvent.endTime,
+                            start     : valueCalculator(basedEvent, addedEvent.endTime),
+                            end       : basedEvent.end
+                        });
+                    }
+
                 }
                 else if (addedEvent.endTime > basedEvent.endTime)
                 { // 叠加事件的开始时间在基础事件时间范围内，结束时间在范围外
 
+                    breakEvent({
+                        startTime : addedEvent.startTime,
+                        endTime   : basedEvent.endTime,
+                        start     : valueCalculator(basedEvent, addedEvent.startTime),
+                        end       : basedEvent.endTime
+                    }).forEach((event) =>
+                    {
+                        basedEventGroup.push(event);
+                    });
+
                     for (let extraEventIndex = basedEventIndex + 1; extraEventIndex < baseEventsLength; extraEventIndex++)
                     {
                         let extraEvent = result[extraEventIndex];
-                        let lastAddedResult = addedResult[addedResult.length - 1];
 
-                        if (extraEvent.startTime > lastAddedResult.endTime) break;
+                        if (extraEvent.startTime > addedEvent.endTime) break;
 
-                        let extraAddedResult = separateEvent(extraEvent, lastAddedResult);
-
-                        if (extraAddedResult.length <= 0)
+                        if (extraEvent.endTime <= addedEvent.endTime)
                         {
-                            break;
+                            breakEvent(extraEvent)
+                                .forEach((event) =>
+                                {
+                                    basedEventGroup.push(event);
+                                }
+                            );
                         }
                         else
                         {
-                            addedResult.splice(addedResult.length - 1, 1);
-                            extraAddedResult.forEach((event) =>
-                            {
-                                addedResult.push(event);
+                            breakEvent({
+                                startTime : extraEvent.startTime,
+                                endTime   : addedEvent.endTime,
+                                start     : extraEvent.start,
+                                end       : valueCalculator(extraEvent, addedEvent.endTime)
+                            }).forEach((event) =>
+                                {
+                                    basedEventGroup.push(event);
+                                }
+                            );
+
+                            basedEventGroup.push({
+                                startTime : addedEvent.endTime,
+                                endTime   : extraEvent.endTime,
+                                start     : valueCalculator(extraEvent, addedEvent.endTime),
+                                end       : extraEvent.end
                             });
-                            extraDeleteEventCount++;
                         }
+                        
+                        extraDeleteEventCount++;
                     }
                 }
+
+                basedEventGroup.sort((a, b) => a.startTime - b.startTime);
+                addedEventGroup.sort((a, b) => a.startTime - b.startTime);
+
+                mergeEvents(basedEventGroup, addedEventGroup)
+                    .forEach((event) =>
+                    {
+                        addedResult.push(event);
+                    }
+                )
             }
 
             if (addedResult.length >= 1)
             {
                 mergedLayer = true;
-                _result.splice(addedEventIndex, 1 + extraDeleteEventCount);
+                _result.splice(basedEventIndex, 1 + extraDeleteEventCount);
                 addedResult.forEach((event, index) =>
                 {
-                    _result.splice(addedEventIndex + index, 0, event);
+                    _result.splice(basedEventIndex + index, 0, event);
                 });
                 break;
             }
@@ -690,6 +759,70 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
     // result = arrangeSameValueEvents(result);
 
     return result;
+
+    function breakEvent(event)
+    {
+        let result = [];
+        let timeBetween = event.endTime - event.startTime;
+        let valueBetween = event.end - event.start;
+
+        if (!event)
+        {
+            return [];
+        }
+
+        for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
+        {
+            let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
+            let timePercentEnd = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
+
+            result.push({
+                startTime: event.startTime + timeIndex * calcBetweenTime,
+                endTime: (
+                    timeIndex + 1 == timeCount && event.startTime + (timeIndex + 1) * calcBetweenTime != event.endTime ?
+                    event.endTime : event.startTime + (timeIndex + 1) * calcBetweenTime
+                ),
+                start: event.start + valueBetween * timePercentStart,
+                end: (
+                    timeIndex + 1 == timeCount && event.start + valueBetween * timePercentEnd != event.end ?
+                    event.end : event.start + valueBetween * timePercentEnd
+                )
+            });
+        }
+
+        return result;
+    }
+
+    function mergeEvents(basedEvents, addedEvents)
+    {
+        let result = [];
+
+        basedEvents.forEach((basedEvent) =>
+        {
+            let eventMerged = false;
+
+            for (let addedEvent of addedEvents)
+            {
+                if (addedEvent.startTime == basedEvent.startTime && addedEvent.endTime == basedEvent.endTime)
+                {
+                    result.push({
+                        startTime : basedEvent.startTime,
+                        endTime   : basedEvent.endTime,
+                        start     : basedEvent.start + addedEvent.start,
+                        end       : basedEvent.end + addedEvent.end
+                    });
+                    eventMerged = true;
+                    break;
+                }
+            }
+
+            if (!eventMerged) result.push(basedEvent);
+        });
+
+        result.sort((a, b) => a.startTime - b.startTime);
+
+        return result.slice();
+    }
 
     function separateEvent(basedEvent, addedEvent)
     {
