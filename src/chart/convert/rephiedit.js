@@ -640,6 +640,7 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
                             {
                                 addedResult.push(event);
                             });
+                            extraDeleteEventCount++;
                         }
                     }
                 }
