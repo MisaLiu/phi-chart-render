@@ -189,6 +189,11 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.extended[name] = newEvents;
         }
 
+        /*
+        judgeline.eventLayers = preCalcEventLayers(judgeline.eventLayers);
+        console.log(judgeline.eventLayers);
+        */
+        
         { // 多层 EventLayer 叠加
             let finalEvent = {
                 speed: [],
@@ -584,10 +589,13 @@ function preCalcEventLayers(_eventLayers)
 
     let eventLayers = _eventLayers.slice();
 
-    for (let eventLayerIndex = eventLayers.length; eventLayerIndex > 0; eventLayerIndex--)
+    for (let eventLayerIndex = eventLayers.length - 1; eventLayerIndex >= 0; eventLayerIndex--)
     {
         let eventLayer = eventLayers[eventLayerIndex];
         let nextEventLayer = eventLayers[eventLayerIndex - 1];
+
+        if (!eventLayer) continue;
+        if (!nextEventLayer) break;
 
         for (const name in eventLayer)
         {
@@ -597,19 +605,79 @@ function preCalcEventLayers(_eventLayers)
                 break;
             }
 
-            
+            eventLayer[name].forEach((event, eventIndex) =>
+            {
+                let isEventBroke = false;
+
+                for (let nextEventIndex = 0, nextEventLength = nextEventLayer.length; nextEventIndex < nextEventLength; nextEventIndex++)
+                {
+                    let nextEvent = nextEventLayer[name][nextEventIndex];
+
+                    if (event.endTime < nextEvent.startTime) continue;
+                    if (event.startTime > nextEvent.endTime) break;
+
+                    if (event.startTime < nextEvent.startTime)
+                    {
+                        nextEventLayer[name].splice(nextEventIndex, 0, {
+                            startTime : event.startTime,
+                            endTime   : nextEvent.startTime,
+                            start     : event.start,
+                            end       : valueCalculator(event, nextEvent.startTime)
+                        });
+
+                        event.start = valueCalculator(event, nextEvent.startTime);
+                        event.startTime = nextEvent.startTime;
+
+                        eventLayer[name][eventIndex] = event;
+
+                        isEventBroke = true;
+                    }
+
+                    if (event.endTime > nextEvent.endTime)
+                    {
+                        nextEventLayer[name].splice(nextEventIndex + 1, 0, {
+                            startTime : nextEvent.endTime,
+                            endTime   : event.endTime,
+                            start     : valueCalculator(event, nextEvent.endTime),
+                            end       : event.end
+                        });
+
+                        event.end = valueCalculator(event, nextEvent.endTime);
+                        event.endTime = nextEvent.endTime;
+
+                        eventLayer[name][eventIndex] = event;
+
+                        isEventBroke = true;
+                    }
+                }
+
+                if (!isEventBroke)
+                {
+                    nextEventLayer[name].push(event);
+                }
+            });
+
+            eventLayer[name].sort((a, b) => a.startTime - b.startTime);
+            nextEventLayer[name].sort((a, b) => a.startTime - b.startTime);
         }
+
+        
 
         eventLayers[eventLayerIndex] = eventLayer;
         eventLayers[eventLayerIndex - 1] = nextEventLayer;
     }
 
-
+    return eventLayers;
 }
 
 function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
 {
     let result = currentEvents.slice();
+
+    result.forEach((event, eventIndex) =>
+    {
+        if (event.isLongEvent) result.splice(eventIndex, 1);
+    });
 
     eventLayer.forEach((addedEvent, addedEventIndex) =>
     {
@@ -639,7 +707,6 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
             let addedEventGroup = [];
             let addedResult = [];
 
-            
             // 处理叠加事件开始时间在基础事件内/外
             if (addedEvent.startTime >= basedEvent.startTime)
             {
@@ -726,7 +793,7 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
 
                     if (extraEvent.startTime < addedEvent.startTime || extraEvent.endTime < addedEvent.startTime) continue;
                     if (extraEvent.startTime > addedEvent.endTime) break;
-
+                    
                     if (extraEvent.startTime < lastExtraEvent.endTime)
                     {
                         basedEventGroup.push({
@@ -930,14 +997,11 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
         }
     });
     
-    // events 连续性保证，只保证第一层的就行了
-    if (eventLayerIndex <= 0)
-    {
-        result = arrangeEvents(result);
-    }
+    // events 连续性保证
+    result = arrangeEvents(result);
+    result = arrangeSameValueEvents(result);
 
-    // result = arrangeSameValueEvents(result);
-
+    console.log(result);
     return result;
 
     function breakEvent(event)
@@ -1008,17 +1072,19 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
     {
         let oldEvents = events.slice();
         let newEvents = [{ // 以 1-1e6 开始
-            startTime : 0,
-            endTime   : 0,
-            start     : oldEvents[0] ? oldEvents[0].start : 0,
-            end       : oldEvents[0] ? oldEvents[0].start : 0
+            startTime   : 0,
+            endTime     : oldEvents[0] ? oldEvents[0].startTime : 0,
+            start       : oldEvents[0] ? oldEvents[0].start : 0,
+            end         : oldEvents[0] ? oldEvents[0].start : 0,
+            isLongEvent : true
         }];
         
         oldEvents.push({ // 以 1e9 结束
-            startTime : 0,
-            endTime   : 1e5,
-            start     : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0,
-            end       : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0
+            startTime   : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].endTime : 0,
+            endTime     : 1e5,
+            start       : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0,
+            end         : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0,
+            isLongEvent : true
         });
         
         // 保证时间连续性
@@ -1036,10 +1102,11 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
             else if (lastNewEvent.endTime < oldEvent.startTime)
             {
                 newEvents.push({
-                    startTime : lastNewEvent.endTime,
-                    endTime   : oldEvent.startTime,
-                    start     : lastNewEvent.end,
-                    end       : lastNewEvent.end
+                    startTime   : lastNewEvent.endTime,
+                    endTime     : oldEvent.startTime,
+                    start       : lastNewEvent.end,
+                    end         : lastNewEvent.end,
+                    isLongEvent : true
                 }, oldEvent);
             }
             else if (lastNewEvent.endTime > oldEvent.startTime)
@@ -1072,6 +1139,7 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
                 // 忽略此分支    
             }
             else if (
+                lastNewEvent.isLongEvent === event.isLongEvent &&
                 lastNewEvent.end == event.start &&
                 (lastNewEvent.end - lastNewEvent.start) * duration2 == (event.end - event.start) * duration1
             )
