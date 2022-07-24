@@ -193,7 +193,41 @@ export default function RePhiEditChartConverter(_chart)
         judgeline.eventLayers = preCalcEventLayers(judgeline.eventLayers);
         console.log(judgeline.eventLayers);
         */
+
+        { // 多层 EventLayer 叠加
+            let finalEvent = {
+                speed: [],
+                moveX: [],
+                moveY: [],
+                rotate: [],
+                alpha: []
+            };
+    
+            judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
+            {
+                for (const name in eventLayer)
+                {
+                    if (name == 'alphaEvents')
+                        finalEvent.alpha = newMergeEventLayers(eventLayer[name], eventLayerIndex, finalEvent.alpha);
+                    if (name == 'moveXEvents')
+                        finalEvent.moveX = newMergeEventLayers(eventLayer[name], eventLayerIndex, finalEvent.moveX);
+                    if (name == 'moveYEvents')
+                        finalEvent.moveY = newMergeEventLayers(eventLayer[name], eventLayerIndex, finalEvent.moveY);
+                    if (name == 'rotateEvents')
+                        finalEvent.rotate = newMergeEventLayers(eventLayer[name], eventLayerIndex, finalEvent.rotate);
+                    if (name == 'speedEvents')
+                        finalEvent.speed = newMergeEventLayers(eventLayer[name], eventLayerIndex, finalEvent.speed);
+                }
+            });
+
+            console.log(finalEvent);
+            
+            judgeline.event = finalEvent;
+            judgeline.eventLayers = undefined;
+            
+        }
         
+        /*
         { // 多层 EventLayer 叠加
             let finalEvent = {
                 speed: [],
@@ -223,7 +257,8 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.event = finalEvent;
             judgeline.eventLayers = undefined;
         }
-
+        */
+        
         { // 拆分 speedEvents
             let newSpeedEvents = [];
             judgeline.event.speed.forEach((event) =>
@@ -576,6 +611,7 @@ function calculateSpeedEventFloorPosition(events)
 function valueCalculator(event, currentTime)
 {
     if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
+    if (event.endTime < currentTime) throw new Error('currentTime must smaller than endTime');
 
     let time2 = (currentTime - event.startTime) / (event.endTime - event.startTime);
     let time1 = 1 - time2;
@@ -668,6 +704,416 @@ function preCalcEventLayers(_eventLayers)
     }
 
     return eventLayers;
+}
+
+function newMergeEventLayers(eventLayer, eventLayerIndex = -1, currentEvents)
+{
+    let result = currentEvents.slice();
+
+    eventLayer.forEach((addedEvent, addedEventIndex) =>
+    {
+        if (eventLayerIndex <= 0)
+        {
+            result.push(addedEvent);
+            return;
+        }
+
+        let _result = result.slice();
+        let extraDeleteEventCount = 0;
+        let deleteEventOffset = 0;
+        let mergedLayer = false;
+        
+        for (let basedEventIndex = 0, basedEventLength = result.length; basedEventIndex < basedEventLength; basedEventIndex++)
+        {
+            let basedEvent = result[basedEventIndex];
+            let basedEventGroup = [];
+            let addedEventGroup = [];
+            let addedResult = [];
+
+            if (basedEvent.endTime < addedEvent.startTime) continue;
+            if (addedEvent.endTime < basedEvent.startTime) break;
+            
+            if (addedEvent.startTime >= basedEvent.startTime)
+            {
+                if (addedEvent.startTime != basedEvent.startTime)
+                {
+                    basedEventGroup.push(
+                        {
+                            startTime : basedEvent.startTime,
+                            endTime   : addedEvent.endTime,
+                            start     : basedEvent.start,
+                            end       : valueCalculator(basedEvent, addedEvent.startTime)
+                        }
+                    );
+                }
+            }
+            else if (addedEvent.startTime < basedEvent.startTime)
+            {
+                let lastExtraEvent = basedEvent;
+                let gotExtraEvent = false;
+
+                for (let extraEventIndex = basedEventIndex - 1; extraEventIndex >= 0; extraEventIndex--)
+                {
+                    let extraEvent = result[extraEventIndex];
+
+                    if (extraEvent.endTime < addedEvent.startTime) break;
+
+                    if (extraEvent.endTime < lastExtraEvent.startTime)
+                    {
+                        basedEventGroup.push(
+                            {
+                                startTime : extraEvent.endTime,
+                                endTime   : lastExtraEvent.startTime,
+                                start     : valueCalculator(addedEvent, extraEvent.endTime),
+                                end       : valueCalculator(addedEvent, lastExtraEvent.startTime)
+                            }
+                        );
+                    }
+
+                    if (extraEvent.startTime > addedEvent.startTime)
+                    {
+                        breakEvent(extraEvent)
+                            .forEach((event) =>
+                            {
+                                basedEventGroup.push(event);
+                            }
+                        );
+
+                        breakEvent(
+                            {
+                                startTime : extraEvent.startTime,
+                                endTime   : extraEvent.endTime,
+                                start     : valueCalculator(addedEvent, extraEvent.startTime),
+                                end       : valueCalculator(addedEvent, extraEvent.endTime)
+                            }
+                        ).forEach((event) =>
+                        {
+                            addedEventGroup.push(event);
+                        });
+
+                        gotExtraEvent = true;
+                    }
+                    else if (extraEvent.startTime <= addedEvent.startTime)
+                    {
+                        if (extraEvent.startTime < addedEvent.startTime)
+                        {
+                            basedEventGroup.push(
+                                {
+                                    startTime : extraEvent.startTime,
+                                    endTime   : addedEvent.startTime,
+                                    start     : extraEvent.start,
+                                    end       : valueCalculator(extraEvent, addedEvent.startTime)
+                                }
+                            );
+                        }
+
+                        breakEvent(
+                            {
+                                startTime : addedEvent.startTime,
+                                endTime   : extraEvent.endTime,
+                                start     : valueCalculator(extraEvent, addedEvent.startTime),
+                                end       : extraEvent.end
+                            }
+                        ).forEach((event) =>
+                        {
+                            basedEventGroup.push(event);
+                        });
+
+                        breakEvent(
+                            {
+                                startTime : addedEvent.startTime,
+                                endTime   : extraEvent.endTime,
+                                start     : addedEvent.start,
+                                end       : valueCalculator(addedEvent, extraEvent.endTime)
+                            }
+                        ).forEach((event) =>
+                        {
+                            addedEventGroup.push(event);
+                        });
+
+                        gotExtraEvent = true;
+                        deleteEventOffset++;
+                        extraDeleteEventCount++;
+                        break;
+                    }
+
+                    lastExtraEvent = extraEvent;
+                    deleteEventOffset++;
+                    extraDeleteEventCount++;
+                }
+
+                if (!gotExtraEvent)
+                {
+                    basedEventGroup.push(
+                        {
+                            startTime : addedEvent.startTime,
+                            endTime   : basedEvent.startTime,
+                            start     : addedEvent.start,
+                            end       : valueCalculator(addedEvent, basedEvent.startTime)
+                        }
+                    );
+                }
+            }
+
+            if (addedEvent.endTime <= basedEvent.endTime)
+            {
+                breakEvent(
+                    {
+                        startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
+                        endTime   : addedEvent.endTime,
+                        start     : valueCalculator(basedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime),
+                        end       : basedEvent.end
+                    }
+                ).forEach((event) =>
+                {
+                    basedEventGroup.push(event);
+                });
+
+                breakEvent(
+                    {
+                        startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
+                        endTime   : addedEvent.endTime,
+                        start     : valueCalculator(addedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime),
+                        end       : addedEvent.end
+                    }
+                ).forEach((event) =>
+                {
+                    addedEventGroup.push(event);
+                });
+
+                if (addedEvent.endTime < basedEvent.endTime)
+                {
+                    basedEventGroup.push(
+                        {
+                            startTime : addedEvent.endTime,
+                            endTime   : basedEvent.endTime,
+                            start     : valueCalculator(basedEvent, addedEvent.endTime),
+                            end       : basedEvent.end
+                        }
+                    );
+                }
+            }
+            else if (addedEvent.endTime > basedEvent.endTime)
+            {
+                let lastExtraEvent = basedEvent;
+                let gotExtraEvent = false;
+
+                for (let extraEventIndex = basedEventIndex + 1; extraEventIndex < basedEventLength; extraEventIndex++)
+                {
+                    let extraEvent = result[extraEventIndex];
+
+                    if (extraEvent.startTime > addedEvent.endTime) break;
+
+                    if (extraEvent.startTime > lastExtraEvent.endTime)
+                    {
+                        basedEventGroup.push(
+                            {
+                                startTime : lastExtraEvent.endTime,
+                                endTime   : extraEvent.startTime,
+                                start     : valueCalculator(addedEvent, lastExtraEvent.endTime),
+                                end       : valueCalculator(addedEvent, extraEvent.startTime)
+                            }
+                        );
+                    }
+
+                    if (extraEvent.endTime < addedEvent.endTime)
+                    {
+                        breakEvent(extraEvent)
+                            .forEach((event) =>
+                            {
+                                basedEventGroup.push(event);
+                            }
+                        );
+
+                        breakEvent(
+                            {
+                                startTime : extraEvent.startTime,
+                                endTime   : extraEvent.endTime,
+                                start     : valueCalculator(addedEvent, extraEvent.startTime),
+                                end       : valueCalculator(addedEvent, extraEvent.endTime)
+                            }
+                        ).forEach((event) =>
+                        {
+                            addedEventGroup.push(event);
+                        });
+
+                        gotExtraEvent = true;
+                    }
+                    else if (extraEvent.endTime >= addedEvent.endTime)
+                    {
+                        if (extraEvent.endTime > addedEvent.endTime)
+                        {
+                            basedEventGroup.push(
+                                {
+                                    startTime : addedEvent.endTime,
+                                    endTime   : extraEvent.endTime,
+                                    start     : valueCalculator(extraEvent, addedEvent.endTime),
+                                    end       : extraEvent.end
+                                }
+                            );
+                        }
+
+                        breakEvent(
+                            {
+                                startTime : extraEvent.endTime,
+                                endTime   : addedEvent.endTime,
+                                start     : valueCalculator(extraEvent, addedEvent.endTime),
+                                end       : extraEvent.end
+                            }
+                        ).forEach((event) =>
+                        {
+                            basedEventGroup.push(event);
+                        });
+
+                        breakEvent(
+                            {
+                                startTime : extraEvent.endTime,
+                                endTime   : addedEvent.endTime,
+                                start     : valueCalculator(addedEvent, extraEvent.endTime),
+                                end       : addedEvent.end
+                            }
+                        ).forEach((event) =>
+                        {
+                            addedEventGroup.push(event);
+                        });
+
+                        gotExtraEvent = true;
+                        extraDeleteEventCount++;
+                        break;
+                    }
+
+                    lastExtraEvent = extraEvent;
+                    extraDeleteEventCount++;
+                }
+
+                if (!gotExtraEvent)
+                {
+                    basedEventGroup.push(
+                        {
+                            startTime : basedEvent.endTime,
+                            endTime   : addedEvent.endTime,
+                            start     : valueCalculator(addedEvent, basedEvent.endTime),
+                            end       : addedEvent.end
+                        }
+                    );
+                }
+            }
+
+            if (basedEventGroup.length > 0 && addedEventGroup.length > 0)
+            {
+                basedEventGroup.sort((a, b) => a.startTime - b.startTime);
+                addedEventGroup.sort((a, b) => a.startTime - b.startTime);
+
+                mergeEvents(basedEventGroup, addedEventGroup)
+                    .forEach((event) =>
+                    {
+                        addedResult.push(event);
+                    }
+                );
+            }
+
+            if (addedResult.length >= 1)
+            {
+                mergedLayer = true;
+                _result.splice(basedEventIndex - deleteEventOffset, 1 + extraDeleteEventCount);
+                addedResult.forEach((event, index) =>
+                {
+                    _result.splice(basedEventIndex - deleteEventOffset + index, 0, event);
+                });
+                break;
+            }
+        }
+
+        result = _result.slice();
+        
+        if (!mergedLayer)
+        {
+            result.push(addedEvent);
+        }
+    });
+
+    result.sort((a, b) => a.startTime - b.startTime);
+
+    console.log(result);
+
+    return result.slice();
+
+    /**
+     * 将事件一点点切开
+     * 
+     * @param {Object} [event] 欲切开的事件
+     * @return {Array} 返回被切开的事件数组
+     */
+    function breakEvent(event)
+    {
+        let result = [];
+        let timeBetween = event.endTime - event.startTime;
+        let valueBetween = event.end - event.start;
+
+        if (!event)
+        {
+            return [];
+        }
+
+        for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
+        {
+            let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
+            let timePercentEnd = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
+
+            result.push({
+                startTime: event.startTime + timeIndex * calcBetweenTime,
+                endTime: (
+                    timeIndex + 1 == timeCount && event.startTime + (timeIndex + 1) * calcBetweenTime != event.endTime ?
+                    event.endTime : event.startTime + (timeIndex + 1) * calcBetweenTime
+                ),
+                start: event.start + valueBetween * timePercentStart,
+                end: (
+                    timeIndex + 1 == timeCount && event.start + valueBetween * timePercentEnd != event.end ?
+                    event.end : event.start + valueBetween * timePercentEnd
+                )
+            });
+        }
+
+        return result;
+    }
+
+    /**
+     * 将拥有相同开始和结束时间的两个事件数组合并至一个
+     * 
+     * @param {Array} [basedEvents] 基础事件数组
+     * @param {Array} [addedEvents] 合并事件数组
+     * @return {Array} 返回合并完毕的数组
+     */
+    function mergeEvents(basedEvents, addedEvents)
+    {
+        let result = [];
+
+        basedEvents.forEach((basedEvent) =>
+        {
+            let eventMerged = false;
+
+            for (let addedEvent of addedEvents)
+            {
+                if (addedEvent.startTime == basedEvent.startTime && addedEvent.endTime == basedEvent.endTime)
+                {
+                    result.push({
+                        startTime : basedEvent.startTime,
+                        endTime   : basedEvent.endTime,
+                        start     : basedEvent.start + addedEvent.start,
+                        end       : basedEvent.end + addedEvent.end
+                    });
+                    eventMerged = true;
+                    break;
+                }
+            }
+
+            if (!eventMerged) result.push(basedEvent);
+        });
+
+        result.sort((a, b) => a.startTime - b.startTime);
+
+        return result.slice();
+    }
 }
 
 function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
@@ -1001,7 +1447,6 @@ function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
     result = arrangeEvents(result);
     result = arrangeSameValueEvents(result);
 
-    console.log(result);
     return result;
 
     function breakEvent(event)
