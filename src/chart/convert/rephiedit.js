@@ -189,45 +189,23 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.extended[name] = newEvents;
         }
 
-        /*
-        judgeline.eventLayers = preCalcEventLayers(judgeline.eventLayers);
-        console.log(judgeline.eventLayers);
-        */
-
-        { // 多层 EventLayer 叠加
-            let finalEvent = {
-                speed: [],
-                moveX: [],
-                moveY: [],
-                rotate: [],
-                alpha: []
-            };
-    
-            judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
+        judgeline.eventLayers.forEach((_eventLayer, eventLayerIndex) =>
+        {
+            let eventLayer = _eventLayer;
+            for (const name in eventLayer)
             {
-                for (const name in eventLayer)
-                {
-                    if (name == 'alphaEvents')
-                        finalEvent.alpha = newMergeEventLayers(eventLayer[name], eventLayerIndex, finalEvent.alpha);
-                    if (name == 'moveXEvents')
-                        finalEvent.moveX = newMergeEventLayers(eventLayer[name], eventLayerIndex, finalEvent.moveX);
-                    if (name == 'moveYEvents')
-                        finalEvent.moveY = newMergeEventLayers(eventLayer[name], eventLayerIndex, finalEvent.moveY);
-                    if (name == 'rotateEvents')
-                        finalEvent.rotate = newMergeEventLayers(eventLayer[name], eventLayerIndex, finalEvent.rotate);
-                    if (name == 'speedEvents')
-                        finalEvent.speed = newMergeEventLayers(eventLayer[name], eventLayerIndex, finalEvent.speed);
-                }
-            });
+                eventLayer[name].unshift(
+                    {
+                        startTime : 0,
+                        endTime   : eventLayer[name][0].startTime,
+                        start     : 0,
+                        end       : 0 + eventLayer[name][0].start
+                    }
+                );
+            }
+            judgeline.eventLayers[eventLayerIndex] = eventLayer;
+        });
 
-            console.log(finalEvent);
-            
-            judgeline.event = finalEvent;
-            judgeline.eventLayers = undefined;
-            
-        }
-        
-        /*
         { // 多层 EventLayer 叠加
             let finalEvent = {
                 speed: [],
@@ -257,7 +235,6 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.event = finalEvent;
             judgeline.eventLayers = undefined;
         }
-        */
         
         { // 拆分 speedEvents
             let newSpeedEvents = [];
@@ -610,8 +587,8 @@ function calculateSpeedEventFloorPosition(events)
 
 function valueCalculator(event, currentTime)
 {
-    if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
-    if (event.endTime < currentTime) throw new Error('currentTime must smaller than endTime');
+    if (event.startTime > currentTime) return event.start;
+    if (event.endTime < currentTime) return event.end;
 
     let time2 = (currentTime - event.startTime) / (event.endTime - event.startTime);
     let time1 = 1 - time2;
@@ -706,32 +683,62 @@ function preCalcEventLayers(_eventLayers)
     return eventLayers;
 }
 
-function newMergeEventLayers(eventLayer, eventLayerIndex = -1, currentEvents)
+function MergeEventLayer(_eventLayer, eventLayerIndex = -1, currentEvents)
 {
     let result = currentEvents.slice();
-
-    eventLayer.forEach((addedEvent, addedEventIndex) =>
+    let eventLayer = _eventLayer.slice();
+    
+    if (eventLayerIndex <= 0)
     {
-        if (eventLayerIndex <= 0)
+        eventLayer.forEach((event) =>
         {
-            result.push(addedEvent);
-            return;
+            result.push(event);
+        });
+    }
+    
+    if (eventLayerIndex <= 0)
+    {
+        return result;
+    }
+    
+    let basedEventEndValues = {};
+    result
+        .sort((a, b) => b.endTime - a.endTime)
+        .forEach((event) =>
+        {
+            basedEventEndValues[event.endTime] = event.end;
         }
+    );
+    result.sort((a, b) => a.startTime - b.startTime);
+    
+    let _result = result.slice();
+    let currentBasedEventEndValue = NaN;
+    let currentAddedEventEndValue = NaN;
+    let extraEventDeleteCount = 0;
+    let eventIndexOffset = 0;
+    
+    for (let basedEventIndex = 0, basedEventLength = result.length; basedEventIndex < basedEventLength; basedEventIndex++)
+    {
+        let basedEvent = result[basedEventIndex];
+        let hasProcessedEvent = false;
 
-        let _result = result.slice();
-        let extraDeleteEventCount = 0;
-        let deleteEventOffset = 0;
-        let mergedLayer = false;
-        
-        for (let basedEventIndex = 0, basedEventLength = result.length; basedEventIndex < basedEventLength; basedEventIndex++)
+        if (extraEventDeleteCount > 0)
         {
-            let basedEvent = result[basedEventIndex];
+            currentBasedEventEndValue = basedEvent.end;
+            extraEventDeleteCount--;
+            continue;
+        }
+        
+        for (let addedEventIndex = 0, addedEventLength = eventLayer.length; addedEventIndex < addedEventLength; addedEventIndex++)
+        {
+            let addedEvent = eventLayer[addedEventIndex];
+            
+            if (addedEvent.endTime < basedEvent.startTime) continue;
+            if (basedEvent.endTime < addedEvent.startTime) break;
+
             let basedEventGroup = [];
             let addedEventGroup = [];
             let addedResult = [];
-
-            if (basedEvent.endTime < addedEvent.startTime) continue;
-            if (addedEvent.endTime < basedEvent.startTime) break;
             
             if (addedEvent.startTime >= basedEvent.startTime)
             {
@@ -740,715 +747,264 @@ function newMergeEventLayers(eventLayer, eventLayerIndex = -1, currentEvents)
                     basedEventGroup.push(
                         {
                             startTime : basedEvent.startTime,
-                            endTime   : addedEvent.endTime,
-                            start     : basedEvent.start,
-                            end       : valueCalculator(basedEvent, addedEvent.startTime)
+                            endTime   : addedEvent.startTime,
+                            start     : basedEvent.start + (!isNaN(currentAddedEventEndValue) ? currentAddedEventEndValue : 0),
+                            end       : valueCalculator(basedEvent, addedEvent.startTime) + (!isNaN(currentAddedEventEndValue) ? currentAddedEventEndValue : 0)
                         }
                     );
                 }
             }
-            else if (addedEvent.startTime < basedEvent.startTime)
+            else
             {
-                let lastExtraEvent = basedEvent;
-                let gotExtraEvent = false;
-
-                for (let extraEventIndex = basedEventIndex - 1; extraEventIndex >= 0; extraEventIndex--)
+                basedEventGroup.push(
+                    {
+                        startTime : addedEvent.startTime,
+                        endTime   : basedEvent.startTime,
+                        start     : addedEvent.start + (!isNaN(currentBasedEventEndValue) ? currentBasedEventEndValue : 0),
+                        end       : valueCalculator(addedEvent, basedEvent.startTime) + (!isNaN(currentBasedEventEndValue) ? currentBasedEventEndValue : 0)
+                    }
+                );
+            }
+            
+            if (addedEvent.endTime <= basedEvent.endTime)
+            {
+                if (basedEvent.start != basedEvent.end && addedEvent.start != addedEvent.end)
                 {
-                    let extraEvent = result[extraEventIndex];
-
-                    if (extraEvent.endTime < addedEvent.startTime) break;
-
-                    if (extraEvent.endTime < lastExtraEvent.startTime)
-                    {
-                        basedEventGroup.push(
-                            {
-                                startTime : extraEvent.endTime,
-                                endTime   : lastExtraEvent.startTime,
-                                start     : valueCalculator(addedEvent, extraEvent.endTime),
-                                end       : valueCalculator(addedEvent, lastExtraEvent.startTime)
-                            }
-                        );
-                    }
-
-                    if (extraEvent.startTime > addedEvent.startTime)
-                    {
-                        breakEvent(extraEvent)
-                            .forEach((event) =>
-                            {
-                                basedEventGroup.push(event);
-                            }
-                        );
-
-                        breakEvent(
-                            {
-                                startTime : extraEvent.startTime,
-                                endTime   : extraEvent.endTime,
-                                start     : valueCalculator(addedEvent, extraEvent.startTime),
-                                end       : valueCalculator(addedEvent, extraEvent.endTime)
-                            }
-                        ).forEach((event) =>
+                    breakEvent(
                         {
-                            addedEventGroup.push(event);
-                        });
-
-                        gotExtraEvent = true;
-                    }
-                    else if (extraEvent.startTime <= addedEvent.startTime)
-                    {
-                        if (extraEvent.startTime < addedEvent.startTime)
-                        {
-                            basedEventGroup.push(
-                                {
-                                    startTime : extraEvent.startTime,
-                                    endTime   : addedEvent.startTime,
-                                    start     : extraEvent.start,
-                                    end       : valueCalculator(extraEvent, addedEvent.startTime)
-                                }
-                            );
+                            startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
+                            endTime   : addedEvent.endTime,
+                            start     : valueCalculator(basedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime),
+                            end       : valueCalculator(basedEvent, addedEvent.endTime)
                         }
-
-                        breakEvent(
-                            {
-                                startTime : addedEvent.startTime,
-                                endTime   : extraEvent.endTime,
-                                start     : valueCalculator(extraEvent, addedEvent.startTime),
-                                end       : extraEvent.end
-                            }
-                        ).forEach((event) =>
+                    ).forEach((event) =>
+                    {
+                        basedEventGroup.push(event);
+                    });
+    
+                    breakEvent(
                         {
-                            basedEventGroup.push(event);
-                        });
-
-                        breakEvent(
-                            {
-                                startTime : addedEvent.startTime,
-                                endTime   : extraEvent.endTime,
-                                start     : addedEvent.start,
-                                end       : valueCalculator(addedEvent, extraEvent.endTime)
-                            }
-                        ).forEach((event) =>
-                        {
-                            addedEventGroup.push(event);
-                        });
-
-                        gotExtraEvent = true;
-                        deleteEventOffset++;
-                        extraDeleteEventCount++;
-                        break;
-                    }
-
-                    lastExtraEvent = extraEvent;
-                    deleteEventOffset++;
-                    extraDeleteEventCount++;
+                            startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
+                            endTime   : addedEvent.endTime,
+                            start     : valueCalculator(addedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime),
+                            end       : addedEvent.end
+                        }
+                    ).forEach((event) =>
+                    {
+                        addedEventGroup.push(event);
+                    });
                 }
-
-                if (!gotExtraEvent)
+                else
                 {
                     basedEventGroup.push(
                         {
-                            startTime : addedEvent.startTime,
-                            endTime   : basedEvent.startTime,
-                            start     : addedEvent.start,
-                            end       : valueCalculator(addedEvent, basedEvent.startTime)
+                            startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
+                            endTime   : addedEvent.endTime,
+                            start     : valueCalculator(basedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime) + valueCalculator(addedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime),
+                            end       : valueCalculator(basedEvent, addedEvent.endTime) + addedEvent.end
                         }
                     );
                 }
-            }
 
-            if (addedEvent.endTime <= basedEvent.endTime)
-            {
-                breakEvent(
-                    {
-                        startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
-                        endTime   : addedEvent.endTime,
-                        start     : valueCalculator(basedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime),
-                        end       : basedEvent.end
-                    }
-                ).forEach((event) =>
-                {
-                    basedEventGroup.push(event);
-                });
-
-                breakEvent(
-                    {
-                        startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
-                        endTime   : addedEvent.endTime,
-                        start     : valueCalculator(addedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime),
-                        end       : addedEvent.end
-                    }
-                ).forEach((event) =>
-                {
-                    addedEventGroup.push(event);
-                });
-
-                if (addedEvent.endTime < basedEvent.endTime)
+                if (basedEvent.endTime != addedEvent.endTime)
                 {
                     basedEventGroup.push(
                         {
                             startTime : addedEvent.endTime,
                             endTime   : basedEvent.endTime,
-                            start     : valueCalculator(basedEvent, addedEvent.endTime),
-                            end       : basedEvent.end
+                            start     : valueCalculator(basedEvent, addedEvent.endTime) + addedEvent.end,
+                            end       : basedEvent.end + addedEvent.end
                         }
                     );
                 }
             }
-            else if (addedEvent.endTime > basedEvent.endTime)
+            else
             {
-                let lastExtraEvent = basedEvent;
-                let gotExtraEvent = false;
+                if (basedEvent.start != basedEvent.end && addedEvent.start != addedEvent.end)
+                {
+                    breakEvent(
+                        {
+                            startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
+                            endTime   : basedEvent.endTime,
+                            start     : valueCalculator(basedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime),
+                            end       : basedEvent.end
+                        }
+                    ).forEach((event) =>
+                    {
+                        basedEventGroup.push(event);
+                    });
+    
+                    breakEvent(
+                        {
+                            startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
+                            endTime   : basedEvent.endTime,
+                            start     : valueCalculator(addedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime),
+                            end       : valueCalculator(addedEvent, basedEvent.endTime)
+                        }
+                    ).forEach((event) =>
+                    {
+                        addedEventGroup.push(event);
+                    });
+                }
+                else
+                {
+                    basedEventGroup.push(
+                        {
+                            startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
+                            endTime   : basedEvent.endTime,
+                            start     : valueCalculator(basedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime) + valueCalculator(addedEvent, addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime),
+                            end       : basedEvent.end + valueCalculator(addedEvent, basedEvent.endTime)
+                        }
+                    );
+                }
 
+                let lastExtraEvent = basedEvent;
                 for (let extraEventIndex = basedEventIndex + 1; extraEventIndex < basedEventLength; extraEventIndex++)
                 {
                     let extraEvent = result[extraEventIndex];
 
-                    if (extraEvent.startTime > addedEvent.endTime) break;
+                    if (extraEvent.endTime < addedEvent.startTime) continue;
+                    if (addedEvent.endTime < extraEvent.startTime) break;
 
-                    if (extraEvent.startTime > lastExtraEvent.endTime)
+                    if (lastExtraEvent.endTime != extraEvent.startTime)
                     {
                         basedEventGroup.push(
                             {
                                 startTime : lastExtraEvent.endTime,
                                 endTime   : extraEvent.startTime,
-                                start     : valueCalculator(addedEvent, lastExtraEvent.endTime),
-                                end       : valueCalculator(addedEvent, extraEvent.startTime)
+                                start     : lastExtraEvent.end + valueCalculator(addedEvent, lastExtraEvent.endTime),
+                                end       : lastExtraEvent.end + valueCalculator(addedEvent, extraEvent.startTime)
                             }
                         );
                     }
 
-                    if (extraEvent.endTime < addedEvent.endTime)
+                    if (addedEvent.start != addedEvent.end && extraEvent.start != extraEvent.end)
                     {
-                        breakEvent(extraEvent)
-                            .forEach((event) =>
-                            {
-                                basedEventGroup.push(event);
-                            }
-                        );
-
                         breakEvent(
                             {
                                 startTime : extraEvent.startTime,
-                                endTime   : extraEvent.endTime,
-                                start     : valueCalculator(addedEvent, extraEvent.startTime),
-                                end       : valueCalculator(addedEvent, extraEvent.endTime)
-                            }
-                        ).forEach((event) =>
-                        {
-                            addedEventGroup.push(event);
-                        });
-
-                        gotExtraEvent = true;
-                    }
-                    else if (extraEvent.endTime >= addedEvent.endTime)
-                    {
-                        if (extraEvent.endTime > addedEvent.endTime)
-                        {
-                            basedEventGroup.push(
-                                {
-                                    startTime : addedEvent.endTime,
-                                    endTime   : extraEvent.endTime,
-                                    start     : valueCalculator(extraEvent, addedEvent.endTime),
-                                    end       : extraEvent.end
-                                }
-                            );
-                        }
-
-                        breakEvent(
-                            {
-                                startTime : extraEvent.endTime,
-                                endTime   : addedEvent.endTime,
-                                start     : valueCalculator(extraEvent, addedEvent.endTime),
-                                end       : extraEvent.end
+                                endTime   : extraEvent.endTime <= addedEvent.endTime ? extraEvent.endTime : addedEvent.endTime,
+                                start     : extraEvent.start,
+                                end       : valueCalculator(extraEvent, extraEvent.endTime <= addedEvent.endTime ? extraEvent.endTime : addedEvent.endTime)
                             }
                         ).forEach((event) =>
                         {
                             basedEventGroup.push(event);
                         });
-
+    
                         breakEvent(
                             {
-                                startTime : extraEvent.endTime,
-                                endTime   : addedEvent.endTime,
-                                start     : valueCalculator(addedEvent, extraEvent.endTime),
-                                end       : addedEvent.end
+                                startTime : extraEvent.startTime,
+                                endTime   : extraEvent.endTime <= addedEvent.endTime ? extraEvent.endTime : addedEvent.endTime,
+                                start     : valueCalculator(addedEvent, extraEvent.startTime),
+                                end       : valueCalculator(addedEvent, extraEvent.endTime <= addedEvent.endTime ? extraEvent.endTime : addedEvent.endTime)
                             }
                         ).forEach((event) =>
                         {
                             addedEventGroup.push(event);
                         });
-
-                        gotExtraEvent = true;
-                        extraDeleteEventCount++;
-                        break;
+                    }
+                    else
+                    {
+                        basedEventGroup.push(
+                            {
+                                startTime : extraEvent.startTime,
+                                endTime   : extraEvent.endTime <= addedEvent.endTime ? extraEvent.endTime : addedEvent.endTime,
+                                start     : extraEvent.start + valueCalculator(addedEvent, extraEvent.startTime),
+                                end       : valueCalculator(extraEvent, extraEvent.endTime <= addedEvent.endTime ? extraEvent.endTime : addedEvent.endTime) + valueCalculator(addedEvent, extraEvent.endTime <= addedEvent.endTime ? extraEvent.endTime : addedEvent.endTime)
+                            }
+                        );
                     }
 
                     lastExtraEvent = extraEvent;
-                    extraDeleteEventCount++;
+                    currentBasedEventEndValue = extraEvent.end;
+                    extraEventDeleteCount++;
                 }
 
-                if (!gotExtraEvent)
+                if (lastExtraEvent.endTime >= addedEvent.endTime)
                 {
                     basedEventGroup.push(
                         {
-                            startTime : basedEvent.endTime,
+                            startTime : addedEvent.endTime,
+                            endTime   : lastExtraEvent.endTime,
+                            start     : addedEvent.end + valueCalculator(lastExtraEvent, addedEvent.endTime),
+                            end       : addedEvent.end + lastExtraEvent.end
+                        }
+                    );
+                }
+                else
+                {
+                    basedEventGroup.push(
+                        {
+                            startTime : lastExtraEvent.endTime,
                             endTime   : addedEvent.endTime,
-                            start     : valueCalculator(addedEvent, basedEvent.endTime),
-                            end       : addedEvent.end
+                            start     : lastExtraEvent.end + valueCalculator(addedEvent, lastExtraEvent.endTime),
+                            end       : lastExtraEvent.end + addedEvent.end
                         }
                     );
                 }
             }
 
-            if (basedEventGroup.length > 0 && addedEventGroup.length > 0)
+            if (basedEventGroup.length > 0 || addedEventGroup.length > 0)
             {
                 basedEventGroup.sort((a, b) => a.startTime - b.startTime);
                 addedEventGroup.sort((a, b) => a.startTime - b.startTime);
 
-                mergeEvents(basedEventGroup, addedEventGroup)
-                    .forEach((event) =>
-                    {
-                        addedResult.push(event);
-                    }
-                );
+                addedResult = mergeEvents(basedEventGroup, addedEventGroup);
             }
 
-            if (addedResult.length >= 1)
-            {
-                mergedLayer = true;
-                _result.splice(basedEventIndex - deleteEventOffset, 1 + extraDeleteEventCount);
-                addedResult.forEach((event, index) =>
-                {
-                    _result.splice(basedEventIndex - deleteEventOffset + index, 0, event);
-                });
-                break;
-            }
-        }
-
-        result = _result.slice();
-        
-        if (!mergedLayer)
-        {
-            result.push(addedEvent);
-        }
-    });
-
-    result.sort((a, b) => a.startTime - b.startTime);
-
-    console.log(result);
-
-    return result.slice();
-
-    /**
-     * 将事件一点点切开
-     * 
-     * @param {Object} [event] 欲切开的事件
-     * @return {Array} 返回被切开的事件数组
-     */
-    function breakEvent(event)
-    {
-        let result = [];
-        let timeBetween = event.endTime - event.startTime;
-        let valueBetween = event.end - event.start;
-
-        if (!event)
-        {
-            return [];
-        }
-
-        for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
-        {
-            let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
-            let timePercentEnd = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
-
-            result.push({
-                startTime: event.startTime + timeIndex * calcBetweenTime,
-                endTime: (
-                    timeIndex + 1 == timeCount && event.startTime + (timeIndex + 1) * calcBetweenTime != event.endTime ?
-                    event.endTime : event.startTime + (timeIndex + 1) * calcBetweenTime
-                ),
-                start: event.start + valueBetween * timePercentStart,
-                end: (
-                    timeIndex + 1 == timeCount && event.start + valueBetween * timePercentEnd != event.end ?
-                    event.end : event.start + valueBetween * timePercentEnd
-                )
-            });
-        }
-
-        return result;
-    }
-
-    /**
-     * 将拥有相同开始和结束时间的两个事件数组合并至一个
-     * 
-     * @param {Array} [basedEvents] 基础事件数组
-     * @param {Array} [addedEvents] 合并事件数组
-     * @return {Array} 返回合并完毕的数组
-     */
-    function mergeEvents(basedEvents, addedEvents)
-    {
-        let result = [];
-
-        basedEvents.forEach((basedEvent) =>
-        {
-            let eventMerged = false;
-
-            for (let addedEvent of addedEvents)
-            {
-                if (addedEvent.startTime == basedEvent.startTime && addedEvent.endTime == basedEvent.endTime)
-                {
-                    result.push({
-                        startTime : basedEvent.startTime,
-                        endTime   : basedEvent.endTime,
-                        start     : basedEvent.start + addedEvent.start,
-                        end       : basedEvent.end + addedEvent.end
-                    });
-                    eventMerged = true;
-                    break;
-                }
-            }
-
-            if (!eventMerged) result.push(basedEvent);
-        });
-
-        result.sort((a, b) => a.startTime - b.startTime);
-
-        return result.slice();
-    }
-}
-
-function MergeEventLayer(eventLayer, eventLayerIndex, currentEvents)
-{
-    let result = currentEvents.slice();
-
-    result.forEach((event, eventIndex) =>
-    {
-        if (event.isLongEvent) result.splice(eventIndex, 1);
-    });
-
-    eventLayer.forEach((addedEvent, addedEventIndex) =>
-    {
-        if (eventLayerIndex <= 0)
-        {
-            result.push(addedEvent);
-            return;
-        }
-
-        let _result = result.slice();
-        let extraDeleteEventCount = 0;
-        let mergedLayer = false;
-
-        for (let basedEventIndex = 0, baseEventsLength = result.length; basedEventIndex < baseEventsLength; basedEventIndex++)
-        {
-            let basedEvent = result[basedEventIndex];
-
-            // 不处理完全不与其重叠的事件
-            /*
-            if (addedEvent.startTime < basedEvent.startTime) continue;
-            if (addedEvent.endTime > basedEvent.startTime) continue;
-            */
-            if (addedEvent.startTime > basedEvent.endTime) continue;
-            if (addedEvent.endTime < basedEvent.startTime) break;
-
-            let basedEventGroup = [];
-            let addedEventGroup = [];
-            let addedResult = [];
-
-            // 处理叠加事件开始时间在基础事件内/外
-            if (addedEvent.startTime >= basedEvent.startTime)
-            {
-                breakEvent(addedEvent)
-                    .forEach((event) =>
-                    {
-                        addedEventGroup.push(event);
-                    }
-                );
-                
-                if (addedEvent.startTime != basedEvent.startTime)
-                {
-                    basedEventGroup.push({
-                        startTime : basedEvent.startTime,
-                        endTime   : addedEvent.startTime,
-                        start     : basedEvent.start,
-                        end       : valueCalculator(basedEvent, addedEvent.startTime)
-                    });
-                }
-            }
-            else if (addedEvent.startTime < basedEvent.startTime)
-            {
-                breakEvent({
-                    startTime : basedEvent.startTime,
-                    endTime   : addedEvent.endTime,
-                    start     : valueCalculator(addedEvent, basedEvent.startTime),
-                    end       : addedEvent.endTime
-                })
-                    .forEach((event) =>
-                    {
-                        addedEventGroup.push(event);
-                    }
-                );
-
-                basedEventGroup.push({
-                    startTime : addedEvent.startTime,
-                    endTime   : basedEvent.startTime,
-                    start     : addedEvent.start,
-                    end       : valueCalculator(addedEvent, basedEvent.startTime)
-                });
-            }
-
-            // 处理叠加事件结束时间在基础事件时间内/外
-            if (addedEvent.endTime <= basedEvent.endTime)
-            {
-                breakEvent({
-                    startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
-                    endTime   : addedEvent.endTime,
-                    start     : addedEvent.startTime >= basedEvent.startTime ? valueCalculator(basedEvent, addedEvent.startTime) : basedEvent.start,
-                    end       : valueCalculator(basedEvent, addedEvent.endTime)
-                }).forEach((event) =>
-                {
-                    basedEventGroup.push(event);
-                });
-                
-                if (addedEvent.endTime != basedEvent.endTime)
-                {
-                    basedEventGroup.push({
-                        startTime : addedEvent.endTime,
-                        endTime   : basedEvent.endTime,
-                        start     : valueCalculator(basedEvent, addedEvent.endTime),
-                        end       : basedEvent.end
-                    });
-                }
-            }
-            else if (addedEvent.endTime > basedEvent.endTime)
-            {
-                breakEvent({
-                    startTime : addedEvent.startTime >= basedEvent.startTime ? addedEvent.startTime : basedEvent.startTime,
-                    endTime   : basedEvent.endTime,
-                    start     : addedEvent.startTime >= basedEvent.startTime ? valueCalculator(basedEvent, addedEvent.startTime) : basedEvent.start,
-                    end       : basedEvent.endTime
-                }).forEach((event) =>
-                {
-                    basedEventGroup.push(event);
-                });
-
-                let lastExtraEvent = basedEvent;
-                let gotExtraEvents = false;
-
-                for (let extraEventIndex = basedEventIndex + 1; extraEventIndex < baseEventsLength; extraEventIndex++)
-                {
-                    let extraEvent = result[extraEventIndex];
-
-                    if (extraEvent.startTime < addedEvent.startTime || extraEvent.endTime < addedEvent.startTime) continue;
-                    if (extraEvent.startTime > addedEvent.endTime) break;
-                    
-                    if (extraEvent.startTime < lastExtraEvent.endTime)
-                    {
-                        basedEventGroup.push({
-                            startTime : lastExtraEvent.endTime,
-                            endTime   : extraEvent.startTime,
-                            start     : valueCalculator(addedEvent, lastExtraEvent.endTime),
-                            end       : valueCalculator(addedEvent, extraEvent.startTime)
-                        });
-                    }
-
-                    if (extraEvent.endTime <= addedEvent.endTime)
-                    {
-                        breakEvent(extraEvent)
-                            .forEach((event) =>
-                            {
-                                basedEventGroup.push(event);
-                            }
-                        );
-                    }
-                    else
-                    {
-                        breakEvent({
-                            startTime : extraEvent.startTime,
-                            endTime   : addedEvent.endTime,
-                            start     : extraEvent.start,
-                            end       : valueCalculator(extraEvent, addedEvent.endTime)
-                        }).forEach((event) =>
-                            {
-                                basedEventGroup.push(event);
-                            }
-                        );
-                        
-                        basedEventGroup.push({
-                            startTime : addedEvent.endTime,
-                            endTime   : extraEvent.endTime,
-                            start     : valueCalculator(extraEvent, addedEvent.endTime),
-                            end       : extraEvent.end
-                        });
-                    }
-                    
-                    lastExtraEvent = extraEvent;
-                    gotExtraEvents = true;
-                    extraDeleteEventCount++;
-                }
-
-                if (!gotExtraEvents)
-                {
-                    basedEventGroup.push({
-                        startTime : basedEvent.endTime,
-                        endTime   : addedEvent.endTime,
-                        start     : valueCalculator(addedEvent, basedEvent.endTime),
-                        end       : addedEvent.end
-                    });
-                }
-            }
+            currentAddedEventEndValue = addedEvent.end;
             
-
-            /*
-            if (addedEvent.startTime >= basedEvent.startTime && addedEvent.startTime <= basedEvent.endTime)
+            if (addedResult.length > 0)
             {
-                basedEventGroup.push({
-                    startTime : basedEvent.startTime,
-                    endTime   : addedEvent.startTime,
-                    start     : basedEvent.start,
-                    end       : valueCalculator(basedEvent, addedEvent.startTime)
-                });
-
-                breakEvent(addedEvent)
-                    .forEach((event) =>
-                    {
-                        addedEventGroup.push(event);
-                    }
-                );
-
-                // addedResult = separateEvent(basedEvent, addedEvent);
-
-                if (addedEvent.endTime <= basedEvent.endTime)
-                { // 叠加事件在基础事件的时间范围内
-
-                    breakEvent({
-                        startTime : addedEvent.startTime,
-                        endTime   : addedEvent.endTime,
-                        start     : valueCalculator(basedEvent, addedEvent.startTime),
-                        end       : valueCalculator(basedEvent, addedEvent.endTime)
-                    }).forEach((event) =>
-                    {
-                        basedEventGroup.push(event);
-                    });
-                    
-                    if (addedEvent.endTime != basedEvent.endTime)
-                    {
-                        basedEventGroup.push({
-                            startTime : addedEvent.endTime,
-                            endTime   : basedEvent.endTime,
-                            start     : valueCalculator(basedEvent, addedEvent.endTime),
-                            end       : basedEvent.end
-                        });
-                    }
-
-                }
-                else if (addedEvent.endTime > basedEvent.endTime)
-                { // 叠加事件的开始时间在基础事件时间范围内，结束时间在范围外
-
-                    breakEvent({
-                        startTime : addedEvent.startTime,
-                        endTime   : basedEvent.endTime,
-                        start     : valueCalculator(basedEvent, addedEvent.startTime),
-                        end       : basedEvent.endTime
-                    }).forEach((event) =>
-                    {
-                        basedEventGroup.push(event);
-                    });
-
-                    for (let extraEventIndex = basedEventIndex + 1; extraEventIndex < baseEventsLength; extraEventIndex++)
-                    {
-                        let extraEvent = result[extraEventIndex];
-
-                        if (extraEvent.startTime > addedEvent.endTime) break;
-
-                        if (extraEvent.endTime <= addedEvent.endTime)
-                        {
-                            breakEvent(extraEvent)
-                                .forEach((event) =>
-                                {
-                                    basedEventGroup.push(event);
-                                }
-                            );
-                        }
-                        else
-                        {
-                            breakEvent({
-                                startTime : extraEvent.startTime,
-                                endTime   : addedEvent.endTime,
-                                start     : extraEvent.start,
-                                end       : valueCalculator(extraEvent, addedEvent.endTime)
-                            }).forEach((event) =>
-                                {
-                                    basedEventGroup.push(event);
-                                }
-                            );
-
-                            basedEventGroup.push({
-                                startTime : addedEvent.endTime,
-                                endTime   : extraEvent.endTime,
-                                start     : valueCalculator(extraEvent, addedEvent.endTime),
-                                end       : extraEvent.end
-                            });
-                        }
-                        
-                        extraDeleteEventCount++;
-                    }
-                }
-            }
-            */
-
-            if (basedEventGroup.length > 0 && addedEventGroup.length > 0)
-            {
-                basedEventGroup.sort((a, b) => a.startTime - b.startTime);
-                addedEventGroup.sort((a, b) => a.startTime - b.startTime);
-
-                mergeEvents(basedEventGroup, addedEventGroup)
-                    .forEach((event) =>
-                    {
-                        addedResult.push(event);
-                    }
-                );
-            }
-
-            if (addedResult.length >= 1)
-            {
-                mergedLayer = true;
-                _result.splice(basedEventIndex, 1 + extraDeleteEventCount);
-                addedResult.forEach((event, index) =>
+                _result.splice(basedEventIndex + eventIndexOffset, 1 + extraEventDeleteCount);
+                addedResult.forEach((event, eventIndex) =>
                 {
-                    _result.splice(basedEventIndex + index, 0, event);
+                    _result.splice(basedEventIndex + eventIndexOffset + eventIndex, 0, event);
                 });
+                eventLayer[addedEventIndex].isMerged = true;
+                eventIndexOffset += addedResult.length - extraEventDeleteCount - 1;
+                hasProcessedEvent = true;
                 break;
             }
         }
 
-        if (!mergedLayer) _result.push(addedEvent);
-
-        result = _result.slice();
-    });
-
-    // 事件排序
-    result.sort((a, b) => a.startTime - b.startTime);
-
-    result.forEach((event, index) =>
-    { // 事件去重
-        let nextEvent = result[index + 1];
-        if (!nextEvent) return;
-
-        if (
-            event.startTime == nextEvent.startTime &&
-            event.endTime == nextEvent.endTime &&
-            event.start == nextEvent.start &&
-            event.end == nextEvent.end
-        ) {
-            result.splice(index, 1);
+        if (!hasProcessedEvent && !isNaN(currentAddedEventEndValue))
+        {
+            let currentEventIndex = basedEventIndex + eventIndexOffset < _result.length ? basedEventIndex + eventIndexOffset : _result.length - 1;
+            _result[currentEventIndex].start += currentAddedEventEndValue;
+            _result[currentEventIndex].end += currentAddedEventEndValue;
         }
-    });
+
+        currentBasedEventEndValue = basedEvent.end;
+    }
+
+    for (const addedEvent of eventLayer)
+    {
+        if (!addedEvent.isMerged)
+        {
+            for (const basedEventEndTime in basedEventEndValues)
+            {
+                if (basedEventEndTime > addedEvent.startTime) continue;
+                
+                _result.push(
+                    {
+                        startTime : addedEvent.startTime,
+                        endTime   : addedEvent.endTime,
+                        start     : addedEvent.start + basedEventEndValues[basedEventEndTime],
+                        end       : addedEvent.end + basedEventEndValues[basedEventEndTime]
+                    }
+                );
+                break;
+            }
+        }
+    }
+
+    _result.sort((a, b) => a.startTime - b.startTime);
+    result = _result.slice();
     
-    // events 连续性保证
-    result = arrangeEvents(result);
-    result = arrangeSameValueEvents(result);
-
     return result;
-
+    
     function breakEvent(event)
     {
         let result = [];
