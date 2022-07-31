@@ -495,7 +495,7 @@ function calculateEventEase(event, forceLinear = false)
         let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
         let timePercentEnd = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
 
-        if (event.easingType && (event.easingType !== 1 || forceLinear) && event.easingType <= Easing.length)
+        if (event.easingType && (event.easingType !== 1 || forceLinear) && event.easingType <= Easing.length && event.start != event.end)
         {
             result.push({
                 startTime: event.startTime + timeIndex * calcBetweenTime,
@@ -587,8 +587,9 @@ function calculateSpeedEventFloorPosition(events)
 
 function valueCalculator(event, currentTime)
 {
-    if (event.startTime > currentTime) return event.start;
-    if (event.endTime < currentTime) return event.end;
+    if (event.start == event.end) return event.start;
+    if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
+    if (event.endTime < currentTime) throw new Error('currentTime must smaller than endTime');
 
     let time2 = (currentTime - event.startTime) / (event.endTime - event.startTime);
     let time1 = 1 - time2;
