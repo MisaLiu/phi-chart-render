@@ -233,7 +233,7 @@ export default class Judgement
 
         let timeBetween = note.time - currentTime,
             timeBetweenReal = timeBetween > 0 ? timeBetween : timeBetween * -1,
-            notePosition = note.sprite.position,
+            notePosition = { x: note.sprite.judgelineX, y: note.sprite.judgelineY },
             judgeline = note.judgeline;
 
         if (note.type !== 3 && timeBetween <= 0 && timeBetweenReal <= JudgeTimes.bad && !note.isScored)
