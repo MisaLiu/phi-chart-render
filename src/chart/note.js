@@ -157,7 +157,9 @@ export default class Note
             let originX = size.widthPercent * this.positionX,
                 originY = (this.floorPosition - this.judgeline.floorPosition) * this.speed * (this.isAbove ? -1 : 1) * size.noteSpeed,
                 realX = 0,
-                realY = 0;
+                realY = 0,
+                holdEndX = originX,
+                holdEndY = this.type === 3 ? this.holdLength * this.speed * size.noteSpeed / size.noteScale : 0;
 
             // Hold 的特殊位置写法
             if (
@@ -182,31 +184,27 @@ export default class Note
             realX = originX * this.judgeline.cosr - originY * this.judgeline.sinr + this.judgeline.sprite.position.x;
             realY = originY * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
 
+            holdEndX = holdEndX * this.judgeline.cosr - (holdEndY + originY) * this.judgeline.sinr + this.judgeline.sprite.position.x;
+            holdEndY = (holdEndY + originY) * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
+            
             this.sprite.position.x = realX;
             this.sprite.position.y = realY;
+            this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
             this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
 
             // 不渲染在屏幕外边的 Note
-            if (
-                this.type !== 3 && // 思来想去还是没有想到一个针对 Hold 的适配方案，就先行略过8
-                (
-                    (realX <= size.startX || realX >= size.endX) ||
-                    (realY <= size.startY || realY >= size.endY)
-                )
-            ) {
-                this.sprite.outScreen = true;
-                this.sprite.visible = false;
-            }
-            else if (
-                this.type !== 3 &&
-                (
-                    (realX > size.startX && realX < size.endX) &&
-                    (realY > size.startY && realY < size.endY)
-                )
-            ) {
-                this.sprite.outScreen = false;
-                this.sprite.visible = true;
-            }
+            this.sprite.outScreen = !isInArea({
+                startX : realX,
+                endX   : holdEndX,
+                startY : realY,
+                endY   : holdEndY
+            }, {
+                startX : size.startX,
+                endX   : size.endX,
+                startY : size.startY,
+                endY   : size.endY
+            });
+            this.sprite.visible = !this.sprite.outScreen;
 
             // 针对 Hold 和 Fake note 的渲染思路优化
             if (
@@ -246,3 +244,36 @@ export default class Note
         }
     }
 };
+
+
+function isInArea(sprite, area)
+{
+    if (
+        (
+            isInValueArea(sprite.startX, area.startX, area.endX) ||
+            isInValueArea(sprite.endX, area.startX, area.endX)
+        ) &&
+        (
+            isInValueArea(sprite.startY, area.startY, area.endY) ||
+            isInValueArea(sprite.endY, area.startY, area.endY)
+        )
+    ) {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+    function isInValueArea(value, start, end)
+    {
+        if (value >= start && value <= end)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
