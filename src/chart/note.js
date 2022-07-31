@@ -181,16 +181,18 @@ export default class Note
                 this.sprite.children[0].visible = true;
             }
 
-            realX = originX * this.judgeline.cosr - originY * this.judgeline.sinr + this.judgeline.sprite.position.x;
-            realY = originY * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
+            this.sprite.judgelineX = originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
+            this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
+
+            realX = this.sprite.judgelineX - originY * this.judgeline.sinr;
+            realY = this.sprite.judgelineY + originY * this.judgeline.cosr;
 
             holdEndX = holdEndX * this.judgeline.cosr - (holdEndY + originY) * this.judgeline.sinr + this.judgeline.sprite.position.x;
             holdEndY = (holdEndY + originY) * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
             
             this.sprite.position.x = realX;
             this.sprite.position.y = realY;
-            this.sprite.judgelineX = originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
-            this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
+            
             this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
 
             // 不渲染在屏幕外边的 Note
