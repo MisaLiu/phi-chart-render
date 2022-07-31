@@ -189,6 +189,7 @@ export default class Note
             
             this.sprite.position.x = realX;
             this.sprite.position.y = realY;
+            this.sprite.judgelineX = originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
             this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
             this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
 
