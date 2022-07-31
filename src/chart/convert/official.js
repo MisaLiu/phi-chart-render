@@ -57,6 +57,17 @@ export default function OfficialChartConverter(_chart)
         });
         judgeline.sortEvent();
 
+        { // 考虑到 js 精度，此处重新计算 Speed 事件的 floorPosition 值
+            let currentFloorPosiiton = 0;
+
+            judgeline.event.speed.forEach((event) =>
+            {
+                if (event.startTime < 0) event.startTime = 0;
+                event.floorPosition = currentFloorPosiiton;
+                currentFloorPosiiton = Math.fround(currentFloorPosiiton + (event.endTime - event.startTime) * event.value);
+            });
+        }
+
         _judgeline.notesAbove.forEach((rawNote) =>
         {
             let note = pushNote(rawNote, judgeline, _judgeline.bpm, true);
@@ -87,11 +98,44 @@ export default function OfficialChartConverter(_chart)
     {
         rawNote.isAbove = isAbove;
         rawNote.time = calcRealTime(rawNote.time, bpm);
+        rawNote.holdTime = calcRealTime(rawNote.holdTime, bpm);
+        rawNote.holdEndTime = rawNote.time + rawNote.holdTime;
+
         if (rawNote.type == 3)
         {
-            rawNote.holdTime = calcRealTime(rawNote.holdTime, bpm);
-            rawNote.holdLength = rawNote.holdTime * rawNote.speed;
             rawNote.speed = 1;
+        }
+
+        {  // 考虑到 js 精度，此处重新计算 Note 的 floorPosition 值
+            let noteStartSpeedEvent;
+            let noteEndSpeedEvent;
+
+            for (const event of judgeline.event.speed)
+            {
+                if (rawNote.time > event.startTime && rawNote.time > event.endTime) continue;
+                if (rawNote.time < event.startTime && rawNote.time < event.endTime) break;
+
+                noteStartSpeedEvent = event;
+            }
+
+            rawNote.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (rawNote.time - noteStartSpeedEvent.startTime) : 0;
+
+            if (rawNote.type == 3)
+            {
+                for (const event of judgeline.event.speed)
+                {
+                    if (rawNote.holdEndTime > event.startTime && rawNote.holdEndTime > event.endTime) continue;
+                    if (rawNote.holdEndTime < event.startTime && rawNote.holdEndTime < event.endTime) break;
+
+                    noteEndSpeedEvent = event;
+                }
+
+                rawNote.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (rawNote.holdEndTime - noteEndSpeedEvent.startTime) : 0) - rawNote.floorPosition;
+            }
+            else
+            {
+                rawNote.holdLength = 0;
+            }
         }
 
         return new Note({
