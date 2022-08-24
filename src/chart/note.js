@@ -108,7 +108,7 @@ export default class Note
         if (!this.isAbove) this.sprite.angle = 180;
         this.sprite.alpha = this.basicAlpha;
         this.sprite.visible = false;
-        this.sprite.outScreen = this.type !== 3 ? true : false;
+        this.sprite.outScreen = true;
 
         if (this.hitsound)
         {
@@ -158,8 +158,8 @@ export default class Note
                 originY = (this.floorPosition - this.judgeline.floorPosition) * this.speed * (this.isAbove ? -1 : 1) * size.noteSpeed,
                 realX = 0,
                 realY = 0,
-                holdEndX = originX,
-                holdEndY = this.type === 3 ? this.holdLength * this.speed * size.noteSpeed / size.noteScale : 0;
+                holdEndX = 0,
+                holdEndY = this.type === 3 ? this.holdLength * this.speed * size.noteSpeed / size.noteScale * (this.isAbove ? -1 : 1) : 0;
 
             // Hold 的特殊位置写法
             if (
@@ -187,7 +187,7 @@ export default class Note
             realX = this.sprite.judgelineX - originY * this.judgeline.sinr;
             realY = this.sprite.judgelineY + originY * this.judgeline.cosr;
 
-            holdEndX = holdEndX * this.judgeline.cosr - (holdEndY + originY) * this.judgeline.sinr + this.judgeline.sprite.position.x;
+            holdEndX = originX * this.judgeline.cosr - (holdEndY + originY) * this.judgeline.sinr + this.judgeline.sprite.position.x;
             holdEndY = (holdEndY + originY) * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
             
             this.sprite.position.x = realX;
@@ -251,6 +251,11 @@ export default class Note
 
 function isInArea(sprite, area)
 {
+    let startX = sprite.startX <= sprite.endX ? sprite.startX : sprite.endX,
+        endX = sprite.startX <= sprite.endX ? sprite.endX : sprite.startX,
+        startY = sprite.startY <= sprite.endY ? sprite.startY : sprite.endY,
+        endY = sprite.startY <= sprite.endY ? sprite.endY : sprite.startY;
+    /*
     if (
         (
             isInValueArea(sprite.startX, area.startX, area.endX) ||
@@ -263,10 +268,29 @@ function isInArea(sprite, area)
     ) {
         return true;
     }
+    else 
+    {
+        return false;
+    }
+    */
+    
+    if (
+        (
+            startX >= area.startX && startY >= area.startY &&
+            endX <= area.endX && endY <= area.endY
+        ) ||
+        (
+            endX >= area.startX && endY >= area.startY &&
+            startX <= area.endX && startY <= area.endY
+        )
+    ) {
+        return true;
+    }
     else
     {
         return false;
     }
+    
 
     function isInValueArea(value, start, end)
     {

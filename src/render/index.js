@@ -87,10 +87,10 @@ export default class Render
         this.renderSize.widthOffset = (this.parentNode.clientWidth - this.renderSize.width) / 2;
         this.renderSize.height = this.parentNode.clientHeight;
 
-        this.renderSize.startX = -this.renderSize.width / 5;
-        this.renderSize.endX = this.renderSize.width + this.renderSize.width / 5;
-        this.renderSize.startY = -this.renderSize.height / 5;
-        this.renderSize.endY = this.renderSize.height + this.renderSize.height / 5;
+        this.renderSize.startX = -this.renderSize.width / 4;
+        this.renderSize.endX = this.renderSize.width + this.renderSize.width / 4;
+        this.renderSize.startY = -this.renderSize.height / 4;
+        this.renderSize.endY = this.renderSize.height + this.renderSize.height / 4;
 
         this.renderSize.noteSpeed = this.renderSize.height * 0.6;
         this.renderSize.noteScale = this.renderSize.width / this.noteScale;

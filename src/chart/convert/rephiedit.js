@@ -149,6 +149,23 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.extended[name] = beat2Time(judgeline.extended[name]);
         }
 
+        judgeline.eventLayers.forEach((_eventLayer, eventLayerIndex) =>
+        {
+            let eventLayer = _eventLayer;
+            for (const name in eventLayer)
+            {
+                if (eventLayer[name][0].start != eventLayer[name][0].end)
+                {
+                    let eventChangedValue = eventLayer[name][0].end - eventLayer[name][0].start;
+                    let eventChangedTime = eventLayer[name][0].endTime - eventLayer[name][0].startTime;
+
+                    eventLayer[name][0].start = eventLayer[name][0].start - (eventLayer[name][0].startTime / eventChangedTime) * eventChangedValue;
+                    eventLayer[name][0].startTime = 0;
+                }
+            }
+            judgeline.eventLayers[eventLayerIndex] = eventLayer;
+        });
+
         // 拆分缓动
         judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
         {
@@ -188,23 +205,6 @@ export default function RePhiEditChartConverter(_chart)
 
             judgeline.extended[name] = newEvents;
         }
-
-        judgeline.eventLayers.forEach((_eventLayer, eventLayerIndex) =>
-        {
-            let eventLayer = _eventLayer;
-            for (const name in eventLayer)
-            {
-                eventLayer[name].unshift(
-                    {
-                        startTime : 0,
-                        endTime   : eventLayer[name][0].startTime,
-                        start     : 0,
-                        end       : 0 + eventLayer[name][0].start
-                    }
-                );
-            }
-            judgeline.eventLayers[eventLayerIndex] = eventLayer;
-        });
 
         { // 多层 EventLayer 叠加
             let finalEvent = {
