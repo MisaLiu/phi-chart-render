@@ -217,8 +217,11 @@ export default function RePhiEditChartConverter(_chart)
     
             judgeline.eventLayers.forEach((eventLayer, eventLayerIndex) =>
             {
+
                 for (const name in eventLayer)
                 {
+                    console.log(new EventLayer(eventLayer[name]));
+
                     if (name == 'alphaEvents')
                         finalEvent.alpha = MergeEventLayer(eventLayer[name], eventLayerIndex, finalEvent.alpha);
                     if (name == 'moveXEvents')
@@ -525,6 +528,47 @@ function calculateEventEase(event, forceLinear = false)
     return result;
 }
 
+function separateEvent(event, forceLinear = false)
+{
+    let result = [];
+    let realStartTime = Math.fround(event.startTime[0] + event.startTime[1] / event.startTime[2]);
+    let realEndTime = Math.fround(event.endTime[0] + event.endTime[1] / event.endTime[2]);
+    let timeBetween = realEndTime - realStartTime;
+    let valueBetween = event.end - event.start;
+
+    if (isNaN(realStartTime) || isNaN(realEndTime))
+    {
+        throw new Error('Time cannot be NaN');
+    }
+
+    if (realEndTime < realStartTime)
+    {
+        let _realStartTime = realEndTime;
+
+        realEndTime = realStartTime;
+        realStartTime = _realStartTime;
+    }
+
+    if (timeBetween < 0) timeBetween = timeBetween * -1;
+
+    if (
+        event.startTime[1] > 0 &&
+        event.startTime[2] > 1 &&
+        ( // 判断小节分割是否为 2 的整次幂
+            event.startTime[2] % 2 !== 0 ||
+            event.startTime[2] % 3 === 0 ||
+            /* event.startTime[2] % 5 === 0 || */
+            event.startTime[2] % 7 === 0
+        )
+    ) {
+        let _startTime = event.startTime.slice();
+        let _realStartTime = NaN;
+
+        _startTime[1] += 1;
+    }
+}
+
+
 function separateSpeedEvent(event)
 {
     let result = [];
@@ -597,91 +641,72 @@ function valueCalculator(event, currentTime)
     return event.start * time1 + event.end * time2;
 }
 
-function preCalcEventLayers(_eventLayers)
+function newValueCalculator(event, currentTime)
 {
-    if (_eventLayers.length <= 1) return _eventLayers;
+    if (event.start == event.end) return event.start;
+    if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
+    if (event.endTime < currentTime) throw new Error('currentTime must smaller than endTime');
 
-    let eventLayers = _eventLayers.slice();
+    let timePercentStart = (currentTime - event.startTime) / (event.endTime - event.startTime);
+    let timePercentEnd = 1 - timePercentStart;
+    let easeFunction = Easing[event.easingType - 1] ? Easing[event.easingType - 1] : Easing[0];
+    let easePercent = easeFunction(event.easingLeft * timePercentEnd + event.easingRight * timePercentStart);
+    let easePercentStart = easeFunction(event.easingLeft);
+    let easePercentEnd = easeFunction(event.easingRight);
 
-    for (let eventLayerIndex = eventLayers.length - 1; eventLayerIndex >= 0; eventLayerIndex--)
+    easePercent = (easePercent - easePercentStart) / (easePercentEnd - easePercentStart);
+
+    return Math.fround(event.start * (1 - easePercent) + event.end * easePercent);
+}
+
+function newMergeEventLayer(_eventLayer, eventLayerIndex = -1, _basedEvents)
+{
+    let eventLayer = _eventLayer.slice();
+    let basedEvents = _basedEvents.slice();
+    let result = [];
+
+    eventLayer.sort((a, b) => a.startTime - b.startTime);
+    basedEvents.sort((a, b) => a.startTime - b.startTime);
+
+    if (eventLayerIndex <= 1)
     {
-        let eventLayer = eventLayers[eventLayerIndex];
-        let nextEventLayer = eventLayers[eventLayerIndex - 1];
-
-        if (!eventLayer) continue;
-        if (!nextEventLayer) break;
-
-        for (const name in eventLayer)
-        {
-            if (!nextEventLayer[name] || nextEventLayer[name].length <= 0)
-            {
-                nextEventLayer[name] = eventLayer[name];
-                break;
-            }
-
-            eventLayer[name].forEach((event, eventIndex) =>
-            {
-                let isEventBroke = false;
-
-                for (let nextEventIndex = 0, nextEventLength = nextEventLayer.length; nextEventIndex < nextEventLength; nextEventIndex++)
-                {
-                    let nextEvent = nextEventLayer[name][nextEventIndex];
-
-                    if (event.endTime < nextEvent.startTime) continue;
-                    if (event.startTime > nextEvent.endTime) break;
-
-                    if (event.startTime < nextEvent.startTime)
-                    {
-                        nextEventLayer[name].splice(nextEventIndex, 0, {
-                            startTime : event.startTime,
-                            endTime   : nextEvent.startTime,
-                            start     : event.start,
-                            end       : valueCalculator(event, nextEvent.startTime)
-                        });
-
-                        event.start = valueCalculator(event, nextEvent.startTime);
-                        event.startTime = nextEvent.startTime;
-
-                        eventLayer[name][eventIndex] = event;
-
-                        isEventBroke = true;
-                    }
-
-                    if (event.endTime > nextEvent.endTime)
-                    {
-                        nextEventLayer[name].splice(nextEventIndex + 1, 0, {
-                            startTime : nextEvent.endTime,
-                            endTime   : event.endTime,
-                            start     : valueCalculator(event, nextEvent.endTime),
-                            end       : event.end
-                        });
-
-                        event.end = valueCalculator(event, nextEvent.endTime);
-                        event.endTime = nextEvent.endTime;
-
-                        eventLayer[name][eventIndex] = event;
-
-                        isEventBroke = true;
-                    }
-                }
-
-                if (!isEventBroke)
-                {
-                    nextEventLayer[name].push(event);
-                }
-            });
-
-            eventLayer[name].sort((a, b) => a.startTime - b.startTime);
-            nextEventLayer[name].sort((a, b) => a.startTime - b.startTime);
-        }
-
-        
-
-        eventLayers[eventLayerIndex] = eventLayer;
-        eventLayers[eventLayerIndex - 1] = nextEventLayer;
+        return basedEvents.slice();
     }
 
-    return eventLayers;
+    basedEvents.forEach((basedEvent, basedEventIndex) =>
+    {
+        /*
+        if (eventLayerIndex <= 1)
+        {
+            result.push(basedEvent);
+            return;
+        }
+        */
+
+
+    });
+
+    result.sort((a, b) => a.startTime - b.startTime);
+    return result.slice();
+
+    function mergeEvent(basedEvents, addedEvents, basedEventStartValue = 0, addedEventStartValue = 0)
+    {
+        
+        const eventsStartTime = basedEvents[0].startTime <= addedEvents[0].startTime ? basedEvents[0].startTime : addedEvents[0].startTime;
+        const eventsEndTime = basedEvents[0].endTime >= addedEvents[0].endTime ? basedEvents[0].endTime : addedEvents[0].endTime;
+        const eventsTotalTime = eventsEndTime - eventsStartTime;
+        const eventsCount = Math.ceil(eventsTotalTime / calcBetweenTime);
+        let result = [];
+
+
+        for (let newEventIndex = 0; ;newEventIndex++)
+        {
+
+        }
+        
+        result.sort((a, b) => a.startTime - b.startTime);
+        return result.slice();
+    }
 }
 
 function MergeEventLayer(_eventLayer, eventLayerIndex = -1, currentEvents)
@@ -1193,3 +1218,199 @@ function calculateRealTime(_bpmList, events)
 
     return result;
 }
+
+class EventLayer extends Array
+{
+    constructor(events)
+    {
+        super(events.length);
+        
+        events.forEach((event) =>
+        {
+            this.push(new Event(event));
+        });
+
+        this.sortEvents();
+    }
+
+    sortEvents()
+    {
+        this.sort((a, b) => a.startTime - b.startTime);
+        return this;
+    }
+
+    mergeEvents(_addedEvents)
+    {
+        let addedEvents = _addedEvents.slice().sort((a, b) => a.startTime - b.startTime);
+        let lastAddedEventValue = NaN;
+        let basedEventIndexOffset = 0;
+        let addedEventIndexOffset = 0;
+
+        /** 只是个备忘录，我怕我又忘了
+         * > var arr = [1, 2, 3, 4]
+         * < undefined
+         * > arr.splice(1, 0, 1.5)
+         * < []
+         * > arr
+         * < (5) [1, 1.5, 2, 3, 4]
+         */
+
+        for (let basedEventIndex = 0; basedEventIndex < this.length; basedEventIndex++)
+        {
+            let basedEvent = this[basedEventIndex];
+            let eventAdded = false;
+
+            for (let addedEventIndex = 0; addedEventIndex < addedEvents.length; addedEventIndex++)
+            {
+                let addedEvent = addedEvents[addedEventIndex];
+
+                if (addedEvent.endTime < basedEvent.startTime) continue;
+                if (addedEvent.startTime > basedEvent.endTime) break;
+
+                if (addedEvent.startTime > basedEvent.startTime)
+                {
+
+                }
+
+                if (addedEvent.endTime < basedEvent.endTime)
+                {
+
+                }
+
+
+            }
+
+            if (!eventAdded && !isNaN(lastAddedEventValue))
+            {
+                this[basedEventIndex].start += lastAddedEventValue;
+                this[basedEventIndex].end += lastAddedEventValue;
+            }
+        }
+
+        return this;
+    }
+}
+
+// 测试用，记得删
+(() =>
+{
+    let arr = [1, 2, 3, 4, 5];
+
+    for (let index = 0; index < arr.length; index++)
+    {
+        let num = arr[index];
+
+        console.log(num);
+
+        if (index == 1)
+        {
+            arr[index] = 1.5;
+            arr.splice(1, 0, 1.6, 1.7);
+        }
+    }
+
+    console.log(arr);
+})();
+
+class Event
+{
+    constructor(event)
+    {
+        this.startTime = event.startTime instanceof Array ? (event.startTime[0] + event.startTime[1] / event.startTime[2]) : Number(event.startTime);
+        this.endTime = event.endTime instanceof Array ? (event.endTime[0] + event.endTime[1] / event.endTime[2]) : Number(event.endTime);
+        this.start = Number(event.start);
+        this.end = Number(event.end);
+
+        if (isNaN(this.startTime) || isNaN(this.endTime))
+        {
+            throw new Error('Time cannot be NaN');
+        }
+        if (isNaN(this.start) || isNaN(this.end))
+        {
+            throw new Error('Value cannot be NaN');
+        }
+
+        if (this.endTime < this.startTime)
+        {
+            let newStartTime = this.endTime;
+
+            this.endTime = this.startTime;
+            this.startTime = newStartTime;
+        }
+
+        this._start = this.start;
+        this._end = this.end;
+    }
+
+    isInEvent(currentTime)
+    {
+        return this.startTime <= currentTime && currentTime <= this.endTime;
+    }
+}
+
+function newMergeEvent(basedEvent, addedEvent, basedEventExtraValue = 0, addedEventExtraValue = 0)
+{
+    let result = [];
+    let eventsStartTime = basedEvent.startTime < addedEvent.startTime ? basedEvent.startTime : addedEvent.startTime;
+    let eventsEndTime = basedEvent.endTime > addedEvent.endTime ? basedEvent.endTime : addedEvent.endTime;
+    const totalLoopTime = Math.ceil((eventsEndTime - eventsStartTime) / calcBetweenTime);
+
+    for (let loopTime = 0; loopTime < totalLoopTime; loopTime++)
+    {
+        let currentTime = eventsStartTime + calcBetweenTime * loopTime;
+        let nextTime = (eventsStartTime + calcBetweenTime * (loopTime + 1)) <= eventsEndTime ? (eventsStartTime + calcBetweenTime * (loopTime + 1)) : eventsEndTime;
+        let currentEvent = {
+            startTime : currentTime,
+            endTime   : nextTime
+        };
+
+        if (currentTime >= eventsEndTime) break;
+
+        currentEvent.start = getEventValue(basedEvent, currentTime, basedEventExtraValue);
+        currentEvent.start += getEventValue(addedEvent, currentTime, addedEventExtraValue);
+        
+        currentEvent.end = getEventValue(basedEvent, nextTime);
+        currentEvent.end += getEventValue(addedEvent, nextTime);
+
+        result.push(currentEvent);
+    }
+
+    return result.slice();
+
+    function getEventValue(event, currentTime, extraValue = 0)
+    {
+        if (event.startTime > currentTime)
+        {
+            return extraValue;
+        }
+        else if (event.endTime < currentTime)
+        {
+            return event.end;
+        }
+
+        return newValueCalculator(event, currentTime);
+    }
+}
+
+(() =>
+{
+    console.log(newMergeEvent({
+        "easingLeft" : 0.0,
+        "easingRight" : 1.0,
+        "easingType" : 2,
+        "end" : 30.0,
+        "endTime" : 3 + (0 / 1),
+        "linkgroup" : 0,
+        "start" : 0.0,
+        "startTime" : 2 + (0 / 1)
+    }, {
+        "easingLeft" : 0.0,
+        "easingRight" : 1.0,
+        "easingType" : 4,
+        "end" : -45.0,
+        "endTime" : 2 + (2 / 3),
+        "linkgroup" : 0,
+        "start" : 0.0,
+        "startTime" : 2 + (1 / 3)
+    }));
+})();
