@@ -7,13 +7,14 @@ export default class Judgeline
         this.id = !isNaN(params.id) ? Number(params.id) : -1;
         this.texture = 'judgeline';
         this.parentLine = params.parentLine ? params.parentLine : null;
-        this.event = {
+        this.events = []; /* {
             speed: [],
             moveX: [],
             moveY: [],
             rotate: [],
             alpha: []
-        };
+        }; */
+        
         this.extendEvent = {
             color: [],
             scaleX: [],
@@ -21,22 +22,32 @@ export default class Judgeline
         };
         this.isText = false;
 
-        this.floorPosition = 0;
+        this.speed = 1;
+        this.x     = 0.5;
+        this.y     = 0.5;
         this.alpha = 1;
-        this.x = 0.5;
-        this.y = 0.5;
-        this.deg = 0;
-        this.sinr = 0;
-        this.cosr = 1;
+        this.deg   = 0;
+        this.sinr  = 0;
+        this.cosr  = 1;
+
+        this.floorPosition = 0;
 
         this.scaleX = 1;
         this.scaleY = 1;
 
         this.sprite = undefined;
+        
+        this._lastCalcTime = 0;
     }
 
     sortEvent(withEndTime = false)
     {
+        this.events.forEach((events) =>
+        {
+            events.sort();
+        });
+
+        /*
         for (const name in this.event)
         {
             this.event[name].sort(_sort);
@@ -57,6 +68,7 @@ export default class Judgeline
                 return a.startTime - b.startTime;
             }
         }
+        */
     }
 
     createSprite(texture, zipFiles)
@@ -87,6 +99,45 @@ export default class Judgeline
 
     calcTime(currentTime, size)
     {
+        if (currentTime < this._lastCalcTime)
+        {
+            console.warn('I can\'t believe you done this.\nIf currentTime smaller than lastCalcTime, it may cause floorPosition problem.');
+        }
+
+        this.speed = 0;
+        this.x     = 0;
+        this.y     = 0;
+        this.alpha = 0;
+        this.deg   = 0;
+
+        this.events.forEach((events) =>
+        {
+            events.calcTime(currentTime);
+
+            this.speed  += events._speed;
+            this.x      += events._posX;
+            this.y      += events._posY;
+            this.alpha  += events._alpha;
+            this.deg    += events._rotate;
+        });
+
+        this.cosr = Math.cos(this.deg);
+        this.sinr = Math.sin(this.deg);
+
+        if (this.parentLine)
+        {
+
+        }
+
+        if (this.sprite)
+        {
+            this.sprite.position.x = this.x * size.width;
+            this.sprite.position.y = (1 - this.y) * size.height;
+            this.sprite.alpha      = this.alpha >= 0 ? this.alpha : 0;
+            this.sprite.rotation   = this.deg;
+        }
+        
+        /*
         for (const i of this.event.speed)
         {
             if (currentTime < i.startTime) break;
@@ -204,6 +255,8 @@ export default class Judgeline
                 this.sprite.scale.y = this.scaleY;
             }
         }
+        */
+        
         /**
         this.notes.forEach((note) =>
         {

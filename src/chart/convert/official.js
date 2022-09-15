@@ -1,5 +1,6 @@
 import Chart from '../index';
 import Judgeline from '../judgeline';
+import Events from '../events';
 import Note from '../note';
 
 export default function OfficialChartConverter(_chart)

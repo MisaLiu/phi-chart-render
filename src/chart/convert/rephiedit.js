@@ -1360,8 +1360,12 @@ function newMergeEvent(basedEvent, addedEvent, basedEventExtraValue = 0, addedEv
         let currentTime = eventsStartTime + calcBetweenTime * loopTime;
         let nextTime = (eventsStartTime + calcBetweenTime * (loopTime + 1)) <= eventsEndTime ? (eventsStartTime + calcBetweenTime * (loopTime + 1)) : eventsEndTime;
         let currentEvent = {
-            startTime : currentTime,
-            endTime   : nextTime
+            startTime   : currentTime,
+            endTime     : nextTime,
+            easingLeft  : 0,
+            easingRight : 1,
+            easingType  : 1,
+            linkgroup   : 0
         };
 
         if (currentTime >= eventsEndTime) break;
@@ -1371,8 +1375,21 @@ function newMergeEvent(basedEvent, addedEvent, basedEventExtraValue = 0, addedEv
         
         currentEvent.end = getEventValue(basedEvent, nextTime);
         currentEvent.end += getEventValue(addedEvent, nextTime);
-
-        result.push(currentEvent);
+        
+        if (
+            result.length > 0 &&
+            (
+                (nextTime < basedEvent.startTime || nextTime < addedEvent.startTime) ||
+                (currentTime > basedEvent.endTime || currentTime > addedEvent.endTime)
+            )
+        ) {
+            result[result.length - 1].endTime = currentEvent.endTime;
+            result[result.length - 1].end = currentEvent.end;
+        }
+        else
+        {
+            result.push(currentEvent);
+        }
     }
 
     return result.slice();
