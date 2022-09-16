@@ -69,12 +69,14 @@ export default class Chart
 
         chart.judgelines.forEach((judgeline) =>
         {
+            /*
             judgeline.event.speed = arrangeSpeedEvents(judgeline.event.speed);
             judgeline.event.moveX = arrangeLineEvents(judgeline.event.moveX);
             judgeline.event.moveY = arrangeLineEvents(judgeline.event.moveY);
             judgeline.event.rotate = arrangeLineEvents(judgeline.event.rotate);
             judgeline.event.alpha = arrangeLineEvents(judgeline.event.alpha);
-
+            */
+            
             judgeline.sortEvent();
         });
 

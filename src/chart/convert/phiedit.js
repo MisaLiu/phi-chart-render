@@ -1,5 +1,6 @@
 import Chart from '../index';
 import Judgeline from '../judgeline';
+import EventLayer from '../eventlayer';
 import Note from '../note';
 
 const Easing = [
@@ -239,7 +240,7 @@ export default function PhiEditChartConverter(_chart)
             }
             default :
             {
-                console.warn('Unsupported command: ' + command[0] + ', ignoring.');
+                console.warn('Unsupported command: ' + command[0] + ', ignoring.\nAt line ' + (commandIndex + 1) + ':\n' + command.join(' '));
             }
         }
     });
@@ -602,17 +603,16 @@ function calculateSpeedEventFloorPosition(events)
     let currentFloorPosition = 0;
     let result = [];
 
-    // bpmList.sort((a, b) => b.startTime - a.startTime);
-
     events.forEach((event, index) =>
     {
-        let newEvent = JSON.parse(JSON.stringify(event));
-        newEvent.endTime = index < events.length - 1 ? events[index + 1].startTime : 1e9;
+        result.push({
+            startTime     : event.startTime,
+            endTime       : index < events.length - 1 ? events[index + 1].startTime : 1e9,
+            floorPosition : Math.fround(currentFloorPosition),
+            value         : event.value
+        });
 
-        newEvent.floorPosition = Math.fround(currentFloorPosition);
-        currentFloorPosition += (newEvent.endTime - newEvent.startTime) * newEvent.value;
-
-        result.push(newEvent);
+        currentFloorPosition += ((index < events.length - 1 ? events[index + 1].startTime : 1e9) - event.startTime) * event.value;
     });
 
     result.sort((a, b) => a.startTime - b.startTime);

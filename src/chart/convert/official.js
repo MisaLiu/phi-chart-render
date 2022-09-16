@@ -1,6 +1,6 @@
 import Chart from '../index';
 import Judgeline from '../judgeline';
-import Events from '../events';
+import EventLayer from '../eventlayer';
 import Note from '../note';
 
 export default function OfficialChartConverter(_chart)
@@ -13,25 +13,25 @@ export default function OfficialChartConverter(_chart)
     rawChart.judgeLineList.forEach((_judgeline, index) =>
     {
         let judgeline = new Judgeline({ id: index });
+        let events = new EventLayer();
 
         _judgeline.speedEvents.forEach((e) =>
         {
-            judgeline.event.speed.push({
+            events.speed.push({
                 startTime     : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime       : calcRealTime(e.endTime, _judgeline.bpm),
-                value         : e.value,
-                floorPosition : e.floorPosition
+                value         : e.value
             });
         });
         _judgeline.judgeLineMoveEvents.forEach((e) => 
         {
-            judgeline.event.moveX.push({
+            events.moveX.push({
                 startTime     : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime       : calcRealTime(e.endTime, _judgeline.bpm),
                 start         : e.start,
                 end           : e.end
             });
-            judgeline.event.moveY.push({
+            events.moveY.push({
                 startTime : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime   : calcRealTime(e.endTime, _judgeline.bpm),
                 start     : e.start2,
@@ -40,7 +40,7 @@ export default function OfficialChartConverter(_chart)
         });
         _judgeline.judgeLineRotateEvents.forEach((e) => 
         {
-            judgeline.event.rotate.push({
+            events.rotate.push({
                 startTime : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime   : calcRealTime(e.endTime, _judgeline.bpm),
                 start     : -(Math.PI / 180) * e.start,
@@ -49,25 +49,17 @@ export default function OfficialChartConverter(_chart)
         });
         _judgeline.judgeLineDisappearEvents.forEach((e) =>
         {
-            judgeline.event.alpha.push({
+            events.alpha.push({
                 startTime : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime   : calcRealTime(e.endTime, _judgeline.bpm),
                 start     : e.start,
                 end       : e.end
             });
         });
+
+        judgeline.eventLayers.push(events);
         judgeline.sortEvent();
-
-        { // 考虑到 js 精度，此处重新计算 Speed 事件的 floorPosition 值
-            let currentFloorPosiiton = 0;
-
-            judgeline.event.speed.forEach((event) =>
-            {
-                if (event.startTime < 0) event.startTime = 0;
-                event.floorPosition = currentFloorPosiiton;
-                currentFloorPosiiton = Math.fround(currentFloorPosiiton + (event.endTime - event.startTime) * event.value);
-            });
-        }
+        judgeline.calcFloorPosition();
 
         _judgeline.notesAbove.forEach((rawNote) =>
         {
@@ -108,30 +100,13 @@ export default function OfficialChartConverter(_chart)
         }
 
         {  // 考虑到 js 精度，此处重新计算 Note 的 floorPosition 值
-            let noteStartSpeedEvent;
-            let noteEndSpeedEvent;
-
-            for (const event of judgeline.event.speed)
-            {
-                if (rawNote.time > event.startTime && rawNote.time > event.endTime) continue;
-                if (rawNote.time < event.startTime && rawNote.time < event.endTime) break;
-
-                noteStartSpeedEvent = event;
-            }
-
-            rawNote.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (rawNote.time - noteStartSpeedEvent.startTime) : 0;
+            let noteStartSpeedEvent = judgeline.getFloorPosition(rawNote.time);
+            rawNote.floorPosition = noteStartSpeedEvent ? Math.fround(noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (rawNote.time - noteStartSpeedEvent.startTime)) : 0;
 
             if (rawNote.type == 3)
             {
-                for (const event of judgeline.event.speed)
-                {
-                    if (rawNote.holdEndTime > event.startTime && rawNote.holdEndTime > event.endTime) continue;
-                    if (rawNote.holdEndTime < event.startTime && rawNote.holdEndTime < event.endTime) break;
-
-                    noteEndSpeedEvent = event;
-                }
-
-                rawNote.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (rawNote.holdEndTime - noteEndSpeedEvent.startTime) : 0) - rawNote.floorPosition;
+                let noteEndSpeedEvent = judgeline.getFloorPosition(rawNote.holdEndTime);
+                rawNote.holdLength = Math.fround((noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (rawNote.holdEndTime - noteEndSpeedEvent.startTime) : 0) - rawNote.floorPosition);
             }
             else
             {
