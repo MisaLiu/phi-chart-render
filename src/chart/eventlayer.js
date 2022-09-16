@@ -27,10 +27,10 @@ export default class EventLayer
 
     calcTime(currentTime)
     {
-        this._posX   = valueCalculator(this.moveX, currentTime);
-        this._posY   = valueCalculator(this.moveY, currentTime);
-        this._alpha  = valueCalculator(this.alpha, currentTime);
-        this._rotate = valueCalculator(this.rotate, currentTime);
+        this._posX   = valueCalculator(this.moveX, currentTime, this._posX);
+        this._posY   = valueCalculator(this.moveY, currentTime, this._posY);
+        this._alpha  = valueCalculator(this.alpha, currentTime, this._alpha);
+        this._rotate = valueCalculator(this.rotate, currentTime, this._rotate);
 
         for (const event of this.speed)
         {
@@ -58,7 +58,7 @@ export default class EventLayer
         }
         */
 
-        function valueCalculator(events, currentTime)
+        function valueCalculator(events, currentTime, originValue = 0)
         {
             for (const event of events)
             {
@@ -70,6 +70,7 @@ export default class EventLayer
 
                 return Math.fround(event.start * timePercentStart + event.end * timePercentEnd);
             }
+            return originValue;
         }
     }
 }

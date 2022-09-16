@@ -297,9 +297,13 @@ export default function PhiEditChartConverter(_chart)
                 console.warn('Invaild line ID: ' + event.lineId + ', ignoring');
                 return;
             }
-            if (!judgelines[event.lineId]) judgelines[event.lineId] = new Judgeline({ id: event.lineId });
+            if (!judgelines[event.lineId])
+            {
+                judgelines[event.lineId] = new Judgeline({ id: event.lineId });
+                judgelines[event.lineId].eventLayers.push(new EventLayer());
+            }
 
-            judgelines[event.lineId].event[eventName].push(event);
+            judgelines[event.lineId].eventLayers[0][eventName].push(event);
         });
     }
 
@@ -308,22 +312,22 @@ export default function PhiEditChartConverter(_chart)
         judgeline.sortEvent();
 
         // 事件参数补齐
-        judgeline.event.alpha.forEach((event, eventIndex, array) =>
+        judgeline.eventLayers[0].alpha.forEach((event, eventIndex, array) =>
         {
             if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
             if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 1;
         });
-        judgeline.event.moveX.forEach((event, eventIndex, array) =>
+        judgeline.eventLayers[0].moveX.forEach((event, eventIndex, array) =>
         {
             if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
             if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0.5;
         });
-        judgeline.event.moveY.forEach((event, eventIndex, array) =>
+        judgeline.eventLayers[0].moveY.forEach((event, eventIndex, array) =>
         {
             if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
             if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0.5;
         });
-        judgeline.event.rotate.forEach((event, eventIndex, array) =>
+        judgeline.eventLayers[0].rotate.forEach((event, eventIndex, array) =>
         {
             if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
             if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end / (Math.PI / 180) : 0;
@@ -331,41 +335,38 @@ export default function PhiEditChartConverter(_chart)
             event.start = event.start * (Math.PI / 180);
             event.end = event.end * (Math.PI / 180);
         });
-        judgeline.event.speed.forEach((event, eventIndex, array) =>
+        judgeline.eventLayers[0].speed.forEach((event, eventIndex, array) =>
         {
             if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
         });
 
-        judgeline.sortEvent();
-
         // 拆分缓动
-        judgeline.event.alpha = calculateEventEase(judgeline.event.alpha);
-        judgeline.event.moveX = calculateEventEase(judgeline.event.moveX);
-        judgeline.event.moveY = calculateEventEase(judgeline.event.moveY);
-        judgeline.event.rotate = calculateEventEase(judgeline.event.rotate);
+        judgeline.eventLayers[0].alpha = calculateEventEase(judgeline.eventLayers[0].alpha);
+        judgeline.eventLayers[0].moveX = calculateEventEase(judgeline.eventLayers[0].moveX);
+        judgeline.eventLayers[0].moveY = calculateEventEase(judgeline.eventLayers[0].moveY);
+        judgeline.eventLayers[0].rotate = calculateEventEase(judgeline.eventLayers[0].rotate);
         
         // 合并相同变化量事件
-        for (const name in judgeline.event)
+        for (const name in judgeline.eventLayers[0])
         {
-            if (name != 'speed')
+            if (name != 'speed' && (judgeline.eventLayers[0][name] instanceof Array))
             {
-                judgeline.event[name] = arrangeSameValueEvent(judgeline.event[name]);
-            }
-            else
-            {
-                judgeline.event[name] = arrangeSameValueSpeedEvent(judgeline.event[name]);
+                judgeline.eventLayers[0][name] = arrangeSameValueEvent(judgeline.eventLayers[0][name]);
             }
         }
+        judgeline.eventLayers[0].speed = arrangeSameValueSpeedEvent(judgeline.eventLayers[0].speed);
 
         judgeline.sortEvent();
 
         // 计算事件真实时间
-        for (const name in judgeline.event)
+        for (const name in judgeline.eventLayers[0])
         {
-            judgeline.event[name] = calculateRealTime(commands.bpm, judgeline.event[name]);
+            if (!(judgeline.eventLayers[0][name] instanceof Array)) continue;
+            judgeline.eventLayers[0][name] = calculateRealTime(commands.bpm, judgeline.eventLayers[0][name]);
         }
 
-        judgeline.event.speed = calculateSpeedEventFloorPosition(judgeline.event.speed);
+        // judgeline.eventLayers[0].speed = calculateSpeedEventFloorPosition(judgeline.event.speed);
+        judgeline.calcFloorPosition();
     });
 
     // 计算 note 的真实时间
@@ -381,31 +382,14 @@ export default function PhiEditChartConverter(_chart)
             return;
         }
 
-        { // 计算 Note 的 floorPosition
-            let noteStartSpeedEvent;
-            let noteEndSpeedEvent;
-
-            for (const event of judgeline.event.speed)
-            {
-                if (note.startTime > event.startTime && note.startTime > event.endTime) continue;
-                if (note.startTime < event.startTime && note.startTime < event.endTime) break;
-
-                noteStartSpeedEvent = event;
-            }
-
-            note.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (note.startTime - noteStartSpeedEvent.startTime) : 0;
+        {  // 计算 Note 的 floorPosition
+            let noteStartSpeedEvent = judgeline.getFloorPosition(note.startTime);
+            note.floorPosition = noteStartSpeedEvent ? Math.fround(noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (note.startTime - noteStartSpeedEvent.startTime)) : 0;
 
             if (note.type == 3)
             {
-                for (const event of judgeline.event.speed)
-                {
-                    if (note.endTime > event.startTime && note.endTime > event.endTime) continue;
-                    if (note.endTime < event.startTime && note.endTime < event.endTime) break;
-
-                    noteEndSpeedEvent = event;
-                }
-
-                note.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (note.endTime - noteEndSpeedEvent.startTime) : 0) - note.floorPosition;
+                let noteEndSpeedEvent = judgeline.getFloorPosition(note.endTime);
+                note.holdLength = Math.fround((noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (note.endTime - noteEndSpeedEvent.startTime) : 0) - note.floorPosition);
             }
             else
             {
@@ -456,7 +440,7 @@ export default function PhiEditChartConverter(_chart)
 
 function arrangeSameValueEvent(_events)
 {
-    let events = JSON.parse(JSON.stringify(_events));
+    let events = _events.slice();
     let eventIndexOffset = 0;
     let result = [];
 
@@ -484,12 +468,12 @@ function arrangeSameValueEvent(_events)
         }
     }
 
-    return JSON.parse(JSON.stringify(result));
+    return result.slice();
 }
 
 function arrangeSameValueSpeedEvent(_events)
 {
-    let events = JSON.parse(JSON.stringify(_events));
+    let events = _events.slice();
     let eventIndexOffset = 0;
     let result = [];
 
@@ -514,7 +498,7 @@ function arrangeSameValueSpeedEvent(_events)
         }
     }
 
-    return JSON.parse(JSON.stringify(result));
+    return result.slice();
 }
 
 function calculateEventEase(events, forceLinear = false)
@@ -565,10 +549,10 @@ function calculateEventEase(events, forceLinear = false)
 
 function calculateRealTime(_bpmList, events)
 {
-    let bpmList = JSON.parse(JSON.stringify(_bpmList));
+    let bpmList = _bpmList.slice();
     let result = [];
 
-    bpmList.sort((a, b) => b.startBeat - a.startBeat);
+    // bpmList.sort((a, b) => b.startBeat - a.startBeat);
 
     events.forEach((event) =>
     {
@@ -594,28 +578,6 @@ function calculateRealTime(_bpmList, events)
             break;
         }
     });
-
-    return result;
-}
-
-function calculateSpeedEventFloorPosition(events)
-{
-    let currentFloorPosition = 0;
-    let result = [];
-
-    events.forEach((event, index) =>
-    {
-        result.push({
-            startTime     : event.startTime,
-            endTime       : index < events.length - 1 ? events[index + 1].startTime : 1e9,
-            floorPosition : Math.fround(currentFloorPosition),
-            value         : event.value
-        });
-
-        currentFloorPosition += ((index < events.length - 1 ? events[index + 1].startTime : 1e9) - event.startTime) * event.value;
-    });
-
-    result.sort((a, b) => a.startTime - b.startTime);
 
     return result;
 }
