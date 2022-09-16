@@ -563,14 +563,14 @@ function calculateRealTime(_bpmList, events)
             let bpm = bpmList[bpmIndex];
 
             if (bpm.startBeat > newEvent.endTime) continue;
-            newEvent.endTime = Number((bpm.startTime + ((newEvent.endTime - bpm.startBeat) * bpm.beatTime)).toFixed(4));
+            newEvent.endTime = Math.fround(bpm.startTime + ((newEvent.endTime - bpm.startBeat) * bpm.beatTime));
 
             for (let nextBpmIndex = bpmIndex; nextBpmIndex < bpmLength; nextBpmIndex++)
             {
                 let nextBpm = bpmList[nextBpmIndex];
 
                 if (nextBpm.startBeat > newEvent.startTime) continue;
-                newEvent.startTime = Number((nextBpm.startTime + ((newEvent.startTime - nextBpm.startBeat) * nextBpm.beatTime)).toFixed(4));
+                newEvent.startTime = Math.fround(nextBpm.startTime + ((newEvent.startTime - nextBpm.startBeat) * nextBpm.beatTime));
                 break;
             }
 

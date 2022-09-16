@@ -80,6 +80,7 @@ export default class Chart
             judgeline.sortEvent();
         });
 
+        console.log(chart);
         return chart;
     }
 

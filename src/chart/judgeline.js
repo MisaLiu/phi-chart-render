@@ -94,11 +94,18 @@ export default class Judgeline
             });
         });
 
-        if (floorPositions.length <= 0) throw new Error('No any speed event in this judgeline');
+        // if (floorPositions.length <= 0) throw new Error('No any speed event in this judgeline');
 
         floorPositions.sort((a, b) => a.startTime - b.startTime);
 
-        for (let floorPositionIndex = 0; floorPositionIndex < floorPositions.length; floorPositionIndex++)
+        floorPositions.unshift({
+            startTime     : 1 - 10,
+            endTime       : floorPositions[0] ? floorPositions[0].startTime : 1e4,
+            floorPosition : 0
+        });
+        currentFloorPosition += (floorPositions[0].endTime - floorPositions[0].startTime) * 1;
+        
+        for (let floorPositionIndex = 1; floorPositionIndex < floorPositions.length; floorPositionIndex++)
         {
             let currentEvent = floorPositions[floorPositionIndex];
             let nextEvent = floorPositionIndex < floorPositions.length - 1 ? floorPositions[floorPositionIndex + 1] : { startTime: 1e9 };
