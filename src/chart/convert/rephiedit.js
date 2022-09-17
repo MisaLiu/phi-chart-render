@@ -463,37 +463,3 @@ function valueCalculator(event, currentTime)
     return Math.fround(event.start * (1 - easePercent) + event.end * easePercent);
 }
 
-function calculateRealTime(_bpmList, events)
-{
-    let bpmList = _bpmList.slice();
-    let result = [];
-
-    // bpmList.sort((a, b) => b.startBeat - a.startBeat);
-
-    events.forEach((event) =>
-    {
-        let newEvent = JSON.parse(JSON.stringify(event));
-
-        for (let bpmIndex = 0, bpmLength = bpmList.length; bpmIndex < bpmLength; bpmIndex++)
-        {
-            let bpm = bpmList[bpmIndex];
-
-            if (bpm.startBeat > newEvent.endTime) continue;
-            newEvent.endTime = Math.fround(bpm.startTime + ((newEvent.endTime - bpm.startBeat) * bpm.beatTime));
-
-            for (let nextBpmIndex = bpmIndex; nextBpmIndex < bpmLength; nextBpmIndex++)
-            {
-                let nextBpm = bpmList[nextBpmIndex];
-
-                if (nextBpm.startBeat > newEvent.startTime) continue;
-                newEvent.startTime = Math.fround(nextBpm.startTime + ((newEvent.startTime - nextBpm.startBeat) * nextBpm.beatTime));
-                break;
-            }
-
-            result.push(newEvent);
-            break;
-        }
-    });
-
-    return result;
-}
