@@ -1,70 +1,64 @@
 import * as PIXI from 'pixi.js-legacy';
+import { Sprite, Graphics } from 'pixi.js-legacy';
 
 export default class Render
 {
     constructor(params)
     {
-        if (!params.texture) throw new Error('Render must use a texture object for creating sprites.');
-
-        this.chart = undefined;
-        this.music = undefined;
-        this.bg = undefined;
-
         this.noteScale = !isNaN(Number(params.noteScale)) ? Number(params.noteScale) : 8000;
         this.audioOffset = 0;
-        this.bgDim = 0.5;
+        this.bgDim = !isNaN(Number(params.bgDim)) ? Number(params.bgDim) : 0.5;
         
         this.parentNode = params.resizeTo ? params.resizeTo : (params.canvas ? params.canvas.parentNode : document.documentElement);
         this.pixi = new PIXI.Application({
             width           : !isNaN(Number(params.width)) ? Number(params.width) : document.documentElement.clientWidth,
             height          : !isNaN(Number(params.height)) ? Number(params.height) : document.documentElement.clientHeight,
             resolution      : !isNaN(Number(params.resolution)) ? Number(params.resolution) : window.devicePixelRatio,
-            autoDensity     : params.autoDensity instanceof Boolean ? params.autoDensity : true,
-            antialias       : params.antialias instanceof Boolean ? params.antialias : true,
-            forceCanvas     : params.forceCanvas instanceof Boolean ? params.forceCanvas : false,
+            autoDensity     : params.autoDensity ? !!params.autoDensity : true,
+            antialias       : params.antialias ? !!params.antialias : true,
+            forceCanvas     : params.forceCanvas ? !!params.forceCanvas : false,
             view            : params.canvas ? params.canvas : undefined,
             backgroundAlpha : 1
         });
 
-        this.texture = params.texture;
-        this.zipFiles = params.zipFiles;
-
         this.sprites = {};
-        this.audioContext = undefined;
-
         this.renderSize = {};
 
-        this.resize();
-        window.addEventListener('resize', () => { this.resize() });
+        this.resize = this.resize.bind(this);
 
-        this.tick = this.tick.bind(this);
-    }
-
-    static from (params)
-    {
-        if (!params) throw new Error('Please input an argument');
-        if (!params.chart) throw new Error('You must input a chart');
-        if (!params.music) throw new Error('You must input a music');
-        if (!params.render || !params.render.canvas) throw new Error('You must input a canvas as stage');
-
-        let render = new Render(params.render);
-
-        render.chart = params.chart;
-        render.music = params.music;
-        render.bg = params.bg;
-
-        return render;
-    }
-
-    createSprites()
-    {
         this.sprites.mainContainer = new PIXI.Container();
+        this.sprites.mainContainer.zIndex = 10;
         this.pixi.stage.addChild(this.sprites.mainContainer);
 
-        this.chart.createSprites(this.sprites.mainContainer, this.renderSize, this.texture, this.zipFiles);
+        this.sprites.mainContainerMask = new PIXI.Graphics();
+        this.sprites.mainContainer.mask = this.sprites.mainContainerMask;
 
-        this.sprites.mainContainer.sortChildren();
         this.resize();
+    }
+
+    createBgSprites(bg)
+    {
+        if (!this.sprites.bg && bg)
+        {
+            this.sprites.bg = new Sprite(bg);
+
+            let bgCover = new Graphics();
+
+            bgCover.beginFill(0x000000);
+            bgCover.drawRect(0, 0, this.sprites.bg.texture.width, this.sprites.bg.texture.height);
+            bgCover.endFill();
+
+            bgCover.position.x = -this.sprites.bg.width / 2;
+            bgCover.position.y = -this.sprites.bg.height / 2;
+            bgCover.alpha = 0.5;
+
+            this.sprites.bg.addChild(bgCover);
+            this.sprites.bg.anchor.set(0.5);
+
+            this.pixi.stage.addChild(this.sprites.bg);
+
+            this.pixi.stage.sortChildren();
+        }
     }
 
     addSprite(sprite)
@@ -72,13 +66,13 @@ export default class Render
         if (this.sprites.mainContainer)
         {
             this.sprites.mainContainer.addChild(sprite);
+            this.sprites.mainContainer.sortChildren();
         }
     }
 
     start()
     {
         this.pixi.view.style.backgroundColor = '#000000';
-        this.chart.start(this.pixi.ticker);
         this.resize();
     }
     
@@ -93,26 +87,43 @@ export default class Render
         this.renderSize.widthOffset = (this.parentNode.clientWidth - this.renderSize.width) / 2;
         this.renderSize.height = this.parentNode.clientHeight;
 
-        this.renderSize.startX = -this.renderSize.width / 5;
-        this.renderSize.endX = this.renderSize.width + this.renderSize.width / 5;
-        this.renderSize.startY = -this.renderSize.height / 5;
-        this.renderSize.endY = this.renderSize.height + this.renderSize.height / 5;
+        this.renderSize.startX = -this.renderSize.width / 4;
+        this.renderSize.endX = this.renderSize.width + this.renderSize.width / 4;
+        this.renderSize.startY = -this.renderSize.height / 4;
+        this.renderSize.endY = this.renderSize.height + this.renderSize.height / 4;
 
         this.renderSize.noteSpeed = this.renderSize.height * 0.6;
         this.renderSize.noteScale = this.renderSize.width / this.noteScale;
+        this.renderSize.noteWidth = this.renderSize.width * 0.117775;
         this.renderSize.lineScale = this.renderSize.height > this.renderSize.height * 0.75 ? this.renderSize.height / 18.75 : this.renderSize.width / 14.0625;
-
-        if (this.chart)
-        {
-            this.chart.resizeSprites(this.renderSize);
-        }
-        
+        this.renderSize.heightPercent = this.renderSize.height / 1080;
 
         if (this.sprites)
         {
             if (this.sprites.mainContainer)
             {
                 this.sprites.mainContainer.position.x = this.renderSize.widthOffset;
+            }
+
+            if (this.sprites.mainContainerMask)
+            {
+                this.sprites.mainContainerMask.clear();
+                this.sprites.mainContainerMask.beginFill(0xFFFFFF)
+                    .drawRect(this.renderSize.widthOffset, 0, this.renderSize.width, this.renderSize.height)
+                    .endFill();
+            }
+
+            if (this.sprites.bg)
+            {
+                let bgScaleWidth = this.pixi.screen.width / this.sprites.bg.texture.width;
+                let bgScaleHeight = this.pixi.screen.height / this.sprites.bg.texture.height;
+                let bgScale = bgScaleWidth > bgScaleHeight ? bgScaleWidth : bgScaleHeight;
+
+                this.sprites.bg.scale.set(bgScale);
+                this.sprites.bg.position.set(this.pixi.screen.width / 2, this.pixi.screen.height / 2);
+
+                if (this.renderSize.widthOffset <= 0) this.sprites.bg.visible = false;
+                else this.sprites.bg.visible = true;
             }
         }
     }

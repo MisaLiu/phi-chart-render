@@ -22,6 +22,7 @@ export default class Chart
             music: null,
             bg: null
         };
+        this.bgDim = 0.5;
 
         this._music = null;
         this._audioOffset = 0;
@@ -68,15 +69,26 @@ export default class Chart
 
         chart.judgelines.forEach((judgeline) =>
         {
+            judgeline.eventLayers.forEach((eventLayer) =>
+            {
+                eventLayer.speed = arrangeSpeedEvents(eventLayer.speed);
+                eventLayer.moveX = arrangeLineEvents(eventLayer.moveX);
+                eventLayer.moveY = arrangeLineEvents(eventLayer.moveY);
+                eventLayer.rotate = arrangeLineEvents(eventLayer.rotate);
+                eventLayer.alpha = arrangeLineEvents(eventLayer.alpha);
+            });
+            /*
             judgeline.event.speed = arrangeSpeedEvents(judgeline.event.speed);
             judgeline.event.moveX = arrangeLineEvents(judgeline.event.moveX);
             judgeline.event.moveY = arrangeLineEvents(judgeline.event.moveY);
             judgeline.event.rotate = arrangeLineEvents(judgeline.event.rotate);
             judgeline.event.alpha = arrangeLineEvents(judgeline.event.alpha);
-
+            */
+            
             judgeline.sortEvent();
         });
 
+        console.log(chart);
         return chart;
     }
 
@@ -86,7 +98,7 @@ export default class Chart
         this.function[type].push(func);
     }
 
-    createSprites(stage, size, textures, zipFiles)
+    createSprites(stage, size, bgDim = 0.5, textures, zipFiles)
     {
         if (this.bg)
         {
@@ -100,7 +112,7 @@ export default class Chart
 
             bgCover.position.x = -this.sprites.bg.width / 2;
             bgCover.position.y = -this.sprites.bg.height / 2;
-            bgCover.alpha = 1 - this.bgDim;
+            bgCover.alpha = 1 - bgDim;
 
             this.sprites.bg.addChild(bgCover);
             this.sprites.bg.anchor.set(0.5);
@@ -186,13 +198,13 @@ export default class Chart
             });
         }
 
-        this.sprites.info.songName.style.fontSize = size.lineScale * 0.468750;
-        this.sprites.info.songName.position.x = size.lineScale * 0.989583;
-        this.sprites.info.songName.position.y = size.height - size.lineScale * 1.076389;
+        this.sprites.info.songName.style.fontSize = size.heightPercent * 27;
+        this.sprites.info.songName.position.x = size.heightPercent * 57;
+        this.sprites.info.songName.position.y = size.height - size.heightPercent * 62;
 
-        this.sprites.info.songDiff.style.fontSize = size.lineScale * 0.347222;
-        this.sprites.info.songDiff.position.x = size.lineScale * 0.989583;
-        this.sprites.info.songDiff.position.y = size.height - size.lineScale * 0.746528;
+        this.sprites.info.songDiff.style.fontSize = size.heightPercent * 20;
+        this.sprites.info.songDiff.position.x = size.heightPercent * 57;
+        this.sprites.info.songDiff.position.y = size.height - size.heightPercent * 43;
     }
 
     async start(ticker)
@@ -259,7 +271,7 @@ export default class Chart
 
 
 function arrangeLineEvents(events) {
-    let oldEvents = JSON.parse(JSON.stringify(events));
+    let oldEvents = events.slice();
     let newEvents2 = [];
     let newEvents = [{ // 以 1-1e6 开始
         startTime : 1 - 1e6,
@@ -333,10 +345,10 @@ function arrangeLineEvents(events) {
         }
     }
     
-    return JSON.parse(JSON.stringify(newEvents2));
+    return newEvents2.slice();
 }
 
-function arrangeSpeedEvents(events)
+function arrangeSpeedEvents(events, eventLayerIndex = 0)
 {
     let newEvents = [];
     for (let i of events) {
@@ -349,5 +361,5 @@ function arrangeSpeedEvents(events)
         }
     }
     
-    return JSON.parse(JSON.stringify(newEvents));
+    return newEvents.slice();
 }

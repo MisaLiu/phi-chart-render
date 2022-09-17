@@ -7,43 +7,158 @@ export default class Judgeline
         this.id = !isNaN(params.id) ? Number(params.id) : -1;
         this.texture = 'judgeline';
         this.parentLine = params.parentLine ? params.parentLine : null;
-        this.event = {
-            speed: [],
-            moveX: [],
-            moveY: [],
-            rotate: [],
-            alpha: []
+
+        this.eventLayers = [];
+        this.floorPositions = [];
+        
+        this.extendEvent = {
+            color: [],
+            scaleX: [],
+            scaleY: []
         };
+        this.isText = false;
+
+        this.speed = 1;
+        this.x     = 0.5;
+        this.y     = 0.5;
+        this.alpha = 1;
+        this.deg   = 0;
+        this.sinr  = 0;
+        this.cosr  = 1;
 
         this.floorPosition = 0;
-        this.alpha = 1;
-        this.x = 0.5;
-        this.y = 0.5;
-        this.deg = 0;
-        this.sinr = 0;
-        this.cosr = 1;
+
+        this.scaleX = 1;
+        this.scaleY = 1;
 
         this.sprite = undefined;
     }
 
     sortEvent(withEndTime = false)
     {
-        this.event.speed.sort(_sort);
-        this.event.moveX.sort(_sort);
-        this.event.moveY.sort(_sort);
-        this.event.rotate.sort(_sort);
-        this.event.alpha.sort(_sort);
+        this.eventLayers.forEach((eventLayer) =>
+        {
+            eventLayer.sort();
+        });
 
-        function _sort(a, b) {
-            if (withEndTime)
-            {
-                return (a.startTime - b.startTime) + (a.endTime - b.endTime);
-            }
-            else
-            {
-                return a.startTime - b.startTime;
-            }
+        for (const name in this.eventLayers[0])
+        {
+            if (name == 'speed' || !(this.eventLayers[0][name] instanceof Array)) continue;
+            this.eventLayers[0][name].unshift({
+                startTime : 1 - 100,
+                endTime   : this.eventLayers[0][name][0].startTime,
+                start     : this.eventLayers[0][name][0].start,
+                end       : this.eventLayers[0][name][0].start
+            });
         }
+    }
+
+    calcFloorPosition()
+    {
+        if (this.eventLayers.length <= 0) throw new Error('No event layer in this judgeline');
+
+        let sameTimeSpeedEventAlreadyExist = {};
+        let currentFloorPosition = 0;
+        let floorPositions = [];
+
+        this.floorPositions = [];
+
+        this.eventLayers.forEach((eventLayer, eventLayerIndex) =>
+        {
+            eventLayer.speed.forEach((event, eventIndex) =>
+            {
+                event.endTime = eventLayer.speed[eventIndex + 1] ? eventLayer.speed[eventIndex + 1].startTime : 1e4;
+
+                let eventTime = (event.startTime).toFixed(3);
+
+                if (!sameTimeSpeedEventAlreadyExist[eventTime])
+                {
+                    floorPositions.push({
+                        startTime     : event.startTime,
+                        endTime       : NaN,
+                        floorPosition : NaN
+                    });
+                }
+
+                sameTimeSpeedEventAlreadyExist[eventTime] = true;
+            });
+
+            if (eventLayerIndex === 0)
+            {
+                eventLayer.speed.unshift({
+                    startTime : 1 - 100,
+                    endTime   : eventLayer.speed[0] ? eventLayer.speed[0].startTime : 1e4,
+                    value     : eventLayer.speed[0] ? eventLayer.speed[0].value : 1
+                });
+            }
+        });
+
+        // if (floorPositions.length <= 0) throw new Error('No any speed event in this judgeline');
+
+        floorPositions.sort((a, b) => a.startTime - b.startTime);
+
+        floorPositions.unshift({
+            startTime     : 1 - 100,
+            endTime       : floorPositions[0] ? floorPositions[0].startTime : 1e4,
+            floorPosition : 1 - 100
+        });
+        currentFloorPosition += floorPositions[0].endTime;
+        
+        for (let floorPositionIndex = 1; floorPositionIndex < floorPositions.length; floorPositionIndex++)
+        {
+            let currentEvent = floorPositions[floorPositionIndex];
+            let nextEvent = floorPositionIndex < floorPositions.length - 1 ? floorPositions[floorPositionIndex + 1] : { startTime: 1e9 };
+            let currentTime = currentEvent.startTime;
+
+            floorPositions[floorPositionIndex].floorPosition = Math.fround(currentFloorPosition);
+            floorPositions[floorPositionIndex].endTime = nextEvent.startTime;
+
+            currentFloorPosition += (nextEvent.startTime - currentEvent.startTime) * this._calcSpeedValue(currentTime);
+        }
+
+        this.floorPositions = floorPositions;
+    }
+
+    getFloorPosition(currentTime)
+    {
+        if (this.floorPositions.length <= 0) throw new Error('No floorPosition created, please call calcFloorPosition() first');
+
+        let result = {};
+
+        for (const floorPosition of this.floorPositions)
+        {
+            if (floorPosition.endTime < currentTime) continue;
+            if (floorPosition.startTime > currentTime) break;
+
+            result.startTime     = floorPosition.startTime;
+            result.endTime       = floorPosition.endTime;
+            result.floorPosition = floorPosition.floorPosition;
+        }
+
+        result.value = this._calcSpeedValue(currentTime);
+
+        return result;
+    }
+
+    _calcSpeedValue(currentTime)
+    {
+        let result = 0;
+
+        this.eventLayers.forEach((eventLayer) =>
+        {
+            let currentValue = 0;
+
+            for (const event of eventLayer.speed)
+            {
+                if (event.endTime < currentTime) continue;
+                if (event.startTime > currentTime) break;
+                currentValue = event.value;
+            }
+
+            result += currentValue;
+        });
+
+        return result;
     }
 
     createSprite(texture, zipFiles)
@@ -52,7 +167,7 @@ export default class Judgeline
 
         this.sprite = new Sprite(
             (this.texture && this.texture != '' && this.texture != 'judgeline') ?
-            zipFiles[judgeline.texture] :
+            zipFiles[this.texture] :
             texture.judgeline
         );
         this.sprite.anchor.set(0.5);
@@ -74,6 +189,55 @@ export default class Judgeline
 
     calcTime(currentTime, size)
     {
+        /*
+        if (currentTime < this._lastCalcTime)
+        {
+            console.warn('I can\'t believe you done this.\nIf currentTime smaller than lastCalcTime, it may cause floorPosition problem.');
+        }
+        */
+
+        this.speed = 0;
+        this.x     = 0;
+        this.y     = 0;
+        this.alpha = 0;
+        this.deg   = 0;
+
+        this.eventLayers.forEach((eventLayer) =>
+        {
+            eventLayer.calcTime(currentTime);
+
+            this.speed  += eventLayer._speed;
+            this.x      += eventLayer._posX;
+            this.y      += eventLayer._posY;
+            this.alpha  += eventLayer._alpha;
+            this.deg    += eventLayer._rotate;
+        });
+
+        for (const event of this.floorPositions)
+        {
+            if (event.endTime < currentTime) continue;
+            if (event.startTime > currentTime) break;
+
+            this.floorPosition = Math.fround((currentTime - event.startTime) * this.speed + event.floorPosition);
+        };
+
+        this.cosr = Math.cos(this.deg);
+        this.sinr = Math.sin(this.deg);
+
+        if (this.parentLine)
+        {
+
+        }
+
+        if (this.sprite)
+        {
+            this.sprite.position.x = (this.x + 0.5) * size.width;
+            this.sprite.position.y = (0.5 - this.y) * size.height;
+            this.sprite.alpha      = this.alpha >= 0 ? this.alpha : 0;
+            this.sprite.rotation   = this.deg;
+        }
+        
+        /*
         for (const i of this.event.speed)
         {
             if (currentTime < i.startTime) break;
@@ -94,7 +258,7 @@ export default class Judgeline
 
             if (this.parentLine)
             {
-                this.x += this.x * (this.parentLine.x - 0.5) * 2;
+                this.x = (this.x + this.parentLine.x) * 2 - 1.5;
             }
 
             if (this.sprite) {
@@ -114,7 +278,7 @@ export default class Judgeline
 
             if (this.parentLine)
             {
-                this.y += this.y * (this.parentLine.y - 0.5) * 2;
+                this.y = (this.y + this.parentLine.y) * 2 - 1.5;
             }
 
             if (this.sprite) {
@@ -131,6 +295,12 @@ export default class Judgeline
             let time1 = 1 - time2;
 
             this.deg = i.start * time1 + i.end * time2;
+
+            if (this.parentLine)
+            {
+                this.deg += this.parentLine.deg;
+            }
+
             this.cosr = Math.cos(this.deg);
             this.sinr = Math.sin(this.deg);
 
@@ -153,6 +323,40 @@ export default class Judgeline
                 this.sprite.alpha = this.alpha >= 0 ? this.alpha : 0;
             }
         }
+
+        for (const i of this.extendEvent.scaleX)
+        {
+            if (currentTime < i.startTime) break;
+            if (currentTime > i.endTime) continue;
+
+            let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
+            let time1 = 1 - time2;
+
+            this.scaleX = i.start * time1 + i.end * time2;
+
+            if (this.sprite)
+            {
+                this.sprite.scale.x = this.scaleX;
+            }
+        }
+
+        for (const i of this.extendEvent.scaleY)
+        {
+            if (currentTime < i.startTime) break;
+            if (currentTime > i.endTime) continue;
+
+            let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
+            let time1 = 1 - time2;
+
+            this.scaleY = i.start * time1 + i.end * time2;
+
+            if (this.sprite)
+            {
+                this.sprite.scale.y = this.scaleY;
+            }
+        }
+        */
+        
         /**
         this.notes.forEach((note) =>
         {

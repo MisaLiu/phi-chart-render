@@ -6,8 +6,8 @@ export default class Note
     {
         this.id            = !isNaN(Number(params.id)) ? Number(params.id) : -1;
         this.type          = !isNaN(Number(params.type)) ? Number(params.type) : 1;
-        this.time          = !isNaN(Number(params.time)) ? Number(params.time.toPrecision(5)) : -1;
-        this.holdTime      = (this.type === 3 && !isNaN(Number(params.holdTime))) ? Number(params.holdTime.toPrecision(5)) : 0;
+        this.time          = !isNaN(Number(params.time)) ? Number(params.time) : -1;
+        this.holdTime      = (this.type === 3 && !isNaN(Number(params.holdTime))) ? Number(params.holdTime) : 0;
         this.speed         = !isNaN(Number(params.speed)) ? Number(params.speed) : 1;
         this.floorPosition = !isNaN(Number(params.floorPosition)) ? Math.fround(params.floorPosition) : this.time;
         this.holdLength    = (this.type === 3 && !isNaN(Number(params.holdLength))) ? Math.fround(params.holdLength) : 0;
@@ -25,6 +25,8 @@ export default class Note
         this.judgeline     = params.judgeline;
 
         if (!this.judgeline) throw new Error('Note must have a judgeline');
+
+        this.isScored = false;
         
         this.holdTimeLength = this.type === 3 ? Math.fround(this.time + this.holdTime) : 0;
 
@@ -106,7 +108,7 @@ export default class Note
         if (!this.isAbove) this.sprite.angle = 180;
         this.sprite.alpha = this.basicAlpha;
         this.sprite.visible = false;
-        this.sprite.outScreen = this.type !== 3 ? true : false;
+        this.sprite.outScreen = true;
 
         if (this.hitsound)
         {
@@ -155,7 +157,9 @@ export default class Note
             let originX = size.widthPercent * this.positionX,
                 originY = (this.floorPosition - this.judgeline.floorPosition) * this.speed * (this.isAbove ? -1 : 1) * size.noteSpeed,
                 realX = 0,
-                realY = 0;
+                realY = 0,
+                holdEndX = 0,
+                holdEndY = this.type === 3 ? this.holdLength * this.speed * size.noteSpeed / size.noteScale * (this.isAbove ? -1 : 1) : 0;
 
             // Hold 的特殊位置写法
             if (
@@ -177,34 +181,33 @@ export default class Note
                 this.sprite.children[0].visible = true;
             }
 
-            realX = originX * this.judgeline.cosr - originY * this.judgeline.sinr + this.judgeline.sprite.position.x;
-            realY = originY * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
+            this.sprite.judgelineX = originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
+            this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
 
+            realX = this.sprite.judgelineX - originY * this.judgeline.sinr;
+            realY = this.sprite.judgelineY + originY * this.judgeline.cosr;
+
+            holdEndX = originX * this.judgeline.cosr - (holdEndY + originY) * this.judgeline.sinr + this.judgeline.sprite.position.x;
+            holdEndY = (holdEndY + originY) * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
+            
             this.sprite.position.x = realX;
             this.sprite.position.y = realY;
+            
             this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
 
             // 不渲染在屏幕外边的 Note
-            if (
-                this.type !== 3 && // 思来想去还是没有想到一个针对 Hold 的适配方案，就先行略过8
-                (
-                    (realX <= size.startX || realX >= size.endX) ||
-                    (realY <= size.startY || realY >= size.endY)
-                )
-            ) {
-                this.sprite.outScreen = true;
-                this.sprite.visible = false;
-            }
-            else if (
-                this.type !== 3 &&
-                (
-                    (realX > size.startX && realX < size.endX) &&
-                    (realY > size.startY && realY < size.endY)
-                )
-            ) {
-                this.sprite.outScreen = false;
-                this.sprite.visible = true;
-            }
+            this.sprite.outScreen = !isInArea({
+                startX : realX,
+                endX   : holdEndX,
+                startY : realY,
+                endY   : holdEndY
+            }, {
+                startX : size.startX,
+                endX   : size.endX,
+                startY : size.startY,
+                endY   : size.endY
+            });
+            this.sprite.visible = !this.sprite.outScreen;
 
             // 针对 Hold 和 Fake note 的渲染思路优化
             if (
@@ -244,3 +247,60 @@ export default class Note
         }
     }
 };
+
+
+function isInArea(sprite, area)
+{
+    let startX = sprite.startX <= sprite.endX ? sprite.startX : sprite.endX,
+        endX = sprite.startX <= sprite.endX ? sprite.endX : sprite.startX,
+        startY = sprite.startY <= sprite.endY ? sprite.startY : sprite.endY,
+        endY = sprite.startY <= sprite.endY ? sprite.endY : sprite.startY;
+    /*
+    if (
+        (
+            isInValueArea(sprite.startX, area.startX, area.endX) ||
+            isInValueArea(sprite.endX, area.startX, area.endX)
+        ) &&
+        (
+            isInValueArea(sprite.startY, area.startY, area.endY) ||
+            isInValueArea(sprite.endY, area.startY, area.endY)
+        )
+    ) {
+        return true;
+    }
+    else 
+    {
+        return false;
+    }
+    */
+    
+    if (
+        (
+            startX >= area.startX && startY >= area.startY &&
+            endX <= area.endX && endY <= area.endY
+        ) ||
+        (
+            endX >= area.startX && endY >= area.startY &&
+            startX <= area.endX && startY <= area.endY
+        )
+    ) {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    
+
+    function isInValueArea(value, start, end)
+    {
+        if (value >= start && value <= end)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}

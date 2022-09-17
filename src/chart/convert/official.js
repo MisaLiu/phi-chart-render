@@ -1,5 +1,6 @@
 import Chart from '../index';
 import Judgeline from '../judgeline';
+import EventLayer from '../eventlayer';
 import Note from '../note';
 
 export default function OfficialChartConverter(_chart)
@@ -12,34 +13,34 @@ export default function OfficialChartConverter(_chart)
     rawChart.judgeLineList.forEach((_judgeline, index) =>
     {
         let judgeline = new Judgeline({ id: index });
+        let events = new EventLayer();
 
         _judgeline.speedEvents.forEach((e) =>
         {
-            judgeline.event.speed.push({
+            events.speed.push({
                 startTime     : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime       : calcRealTime(e.endTime, _judgeline.bpm),
-                value         : e.value,
-                floorPosition : e.floorPosition
+                value         : e.value
             });
         });
         _judgeline.judgeLineMoveEvents.forEach((e) => 
         {
-            judgeline.event.moveX.push({
+            events.moveX.push({
                 startTime     : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime       : calcRealTime(e.endTime, _judgeline.bpm),
-                start         : e.start,
-                end           : e.end
+                start         : e.start - 0.5,
+                end           : e.end - 0.5
             });
-            judgeline.event.moveY.push({
+            events.moveY.push({
                 startTime : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime   : calcRealTime(e.endTime, _judgeline.bpm),
-                start     : e.start2,
-                end       : e.end2
+                start     : e.start2 - 0.5,
+                end       : e.end2 - 0.5
             });
         });
         _judgeline.judgeLineRotateEvents.forEach((e) => 
         {
-            judgeline.event.rotate.push({
+            events.rotate.push({
                 startTime : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime   : calcRealTime(e.endTime, _judgeline.bpm),
                 start     : -(Math.PI / 180) * e.start,
@@ -48,14 +49,17 @@ export default function OfficialChartConverter(_chart)
         });
         _judgeline.judgeLineDisappearEvents.forEach((e) =>
         {
-            judgeline.event.alpha.push({
+            events.alpha.push({
                 startTime : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime   : calcRealTime(e.endTime, _judgeline.bpm),
                 start     : e.start,
                 end       : e.end
             });
         });
+
+        judgeline.eventLayers.push(events);
         judgeline.sortEvent();
+        judgeline.calcFloorPosition();
 
         _judgeline.notesAbove.forEach((rawNote) =>
         {
@@ -87,11 +91,27 @@ export default function OfficialChartConverter(_chart)
     {
         rawNote.isAbove = isAbove;
         rawNote.time = calcRealTime(rawNote.time, bpm);
+        rawNote.holdTime = calcRealTime(rawNote.holdTime, bpm);
+        rawNote.holdEndTime = rawNote.time + rawNote.holdTime;
+
         if (rawNote.type == 3)
         {
-            rawNote.holdTime = calcRealTime(rawNote.holdTime, bpm);
-            rawNote.holdLength = rawNote.holdTime * rawNote.speed;
             rawNote.speed = 1;
+        }
+
+        {  // 考虑到 js 精度，此处重新计算 Note 的 floorPosition 值
+            let noteStartSpeedEvent = judgeline.getFloorPosition(rawNote.time);
+            rawNote.floorPosition = noteStartSpeedEvent ? Math.fround(noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (rawNote.time - noteStartSpeedEvent.startTime)) : 0;
+
+            if (rawNote.type == 3)
+            {
+                let noteEndSpeedEvent = judgeline.getFloorPosition(rawNote.holdEndTime);
+                rawNote.holdLength = Math.fround((noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (rawNote.holdEndTime - noteEndSpeedEvent.startTime) : 0) - rawNote.floorPosition);
+            }
+            else
+            {
+                rawNote.holdLength = 0;
+            }
         }
 
         return new Note({
