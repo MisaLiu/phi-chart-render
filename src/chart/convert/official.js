@@ -28,14 +28,14 @@ export default function OfficialChartConverter(_chart)
             events.moveX.push({
                 startTime     : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime       : calcRealTime(e.endTime, _judgeline.bpm),
-                start         : e.start,
-                end           : e.end
+                start         : e.start - 0.5,
+                end           : e.end - 0.5
             });
             events.moveY.push({
                 startTime : calcRealTime(e.startTime, _judgeline.bpm),
                 endTime   : calcRealTime(e.endTime, _judgeline.bpm),
-                start     : e.start2,
-                end       : e.end2
+                start     : e.start2 - 0.5,
+                end       : e.end2 - 0.5
             });
         });
         _judgeline.judgeLineRotateEvents.forEach((e) => 
