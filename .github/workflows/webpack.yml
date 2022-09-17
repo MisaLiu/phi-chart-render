@@ -1,4 +1,4 @@
-name: NodeJS with Webpack
+name: Build test page to GitHub Pages
 
 on:
   push:
