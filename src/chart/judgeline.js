@@ -93,8 +93,6 @@ export default class Judgeline
             }
         });
 
-        // if (floorPositions.length <= 0) throw new Error('No any speed event in this judgeline');
-
         floorPositions.sort((a, b) => a.startTime - b.startTime);
 
         floorPositions.unshift({
@@ -102,7 +100,7 @@ export default class Judgeline
             endTime       : floorPositions[0] ? floorPositions[0].startTime : 1e4,
             floorPosition : 1 - 100
         });
-        currentFloorPosition += floorPositions[0].endTime;
+        currentFloorPosition += Math.fround(floorPositions[0].endTime);
         
         for (let floorPositionIndex = 1; floorPositionIndex < floorPositions.length; floorPositionIndex++)
         {
@@ -113,7 +111,7 @@ export default class Judgeline
             floorPositions[floorPositionIndex].floorPosition = Math.fround(currentFloorPosition);
             floorPositions[floorPositionIndex].endTime = nextEvent.startTime;
 
-            currentFloorPosition += (nextEvent.startTime - currentEvent.startTime) * this._calcSpeedValue(currentTime);
+            currentFloorPosition += Math.fround((nextEvent.startTime - currentEvent.startTime) * this._calcSpeedValue(currentTime));
         }
 
         this.floorPositions = floorPositions;
@@ -189,13 +187,6 @@ export default class Judgeline
 
     calcTime(currentTime, size)
     {
-        /*
-        if (currentTime < this._lastCalcTime)
-        {
-            console.warn('I can\'t believe you done this.\nIf currentTime smaller than lastCalcTime, it may cause floorPosition problem.');
-        }
-        */
-
         this.speed = 0;
         this.x     = 0;
         this.y     = 0;
@@ -236,132 +227,5 @@ export default class Judgeline
             this.sprite.alpha      = this.alpha >= 0 ? this.alpha : 0;
             this.sprite.rotation   = this.deg;
         }
-        
-        /*
-        for (const i of this.event.speed)
-        {
-            if (currentTime < i.startTime) break;
-            if (currentTime > i.endTime) continue;
-
-            this.floorPosition = Math.fround((currentTime - i.startTime) * i.value + i.floorPosition);
-        }
-
-        for (const i of this.event.moveX)
-        {
-            if (currentTime < i.startTime) break;
-            if (currentTime > i.endTime) continue;
-            
-            let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
-            let time1 = 1 - time2;
-
-            this.x = i.start * time1 + i.end * time2;
-
-            if (this.parentLine)
-            {
-                this.x = (this.x + this.parentLine.x) * 2 - 1.5;
-            }
-
-            if (this.sprite) {
-                this.sprite.position.x = this.x * size.width;
-            }
-        }
-
-        for (const i of this.event.moveY)
-        {
-            if (currentTime < i.startTime) break;
-            if (currentTime > i.endTime) continue;
-            
-            let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
-            let time1 = 1 - time2;
-
-            this.y = 1 - (i.start * time1 + i.end * time2);
-
-            if (this.parentLine)
-            {
-                this.y = (this.y + this.parentLine.y) * 2 - 1.5;
-            }
-
-            if (this.sprite) {
-                this.sprite.position.y = this.y * size.height;
-            }
-        }
-
-        for (const i of this.event.rotate)
-        {
-            if (currentTime < i.startTime) break;
-            if (currentTime > i.endTime) continue;
-
-            let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
-            let time1 = 1 - time2;
-
-            this.deg = i.start * time1 + i.end * time2;
-
-            if (this.parentLine)
-            {
-                this.deg += this.parentLine.deg;
-            }
-
-            this.cosr = Math.cos(this.deg);
-            this.sinr = Math.sin(this.deg);
-
-            if (this.sprite) {
-                this.sprite.rotation = this.deg;
-            }
-        }
-
-        for (const i of this.event.alpha)
-        {
-            if (currentTime < i.startTime) break;
-            if (currentTime > i.endTime) continue;
-
-            let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
-            let time1 = 1 - time2;
-
-            this.alpha = i.start * time1 + i.end * time2;
-
-            if (this.sprite) {
-                this.sprite.alpha = this.alpha >= 0 ? this.alpha : 0;
-            }
-        }
-
-        for (const i of this.extendEvent.scaleX)
-        {
-            if (currentTime < i.startTime) break;
-            if (currentTime > i.endTime) continue;
-
-            let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
-            let time1 = 1 - time2;
-
-            this.scaleX = i.start * time1 + i.end * time2;
-
-            if (this.sprite)
-            {
-                this.sprite.scale.x = this.scaleX;
-            }
-        }
-
-        for (const i of this.extendEvent.scaleY)
-        {
-            if (currentTime < i.startTime) break;
-            if (currentTime > i.endTime) continue;
-
-            let time2 = (currentTime - i.startTime) / (i.endTime - i.startTime);
-            let time1 = 1 - time2;
-
-            this.scaleY = i.start * time1 + i.end * time2;
-
-            if (this.sprite)
-            {
-                this.sprite.scale.y = this.scaleY;
-            }
-        }
-        */
-        
-        /**
-        this.notes.forEach((note) =>
-        {
-            note.calcTime(currentTime, this, size);
-        });
-        **/
     }
 }

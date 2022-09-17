@@ -426,7 +426,7 @@ function separateSpeedEvent(event)
         result.push({
             startTime: event.startTime,
             endTime: event.endTime,
-            value: event.start
+            value: Math.fround(event.start)
         });
     }
 
