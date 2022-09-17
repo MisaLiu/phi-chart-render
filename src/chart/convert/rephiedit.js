@@ -2,6 +2,7 @@ import Chart from '../index';
 import Judgeline from '../judgeline';
 import EventLayer from '../eventlayer';
 import Note from '../note';
+import utils from './utils';
 
 const calcBetweenTime = 0.125;
 const Easing = [
@@ -118,63 +119,61 @@ export default function RePhiEditChartConverter(_chart)
         judgeline.texture = _judgeline.Texture != 'line.png' ? _judgeline.Texture : 'judgeline';
 
         // 处理 EventLayer
-        _judgeline.eventLayers.forEach((_eventLayer, eventLayerIndex) =>
+        _judgeline.eventLayers.forEach((_oldEventLayer, eventLayerIndex) =>
         {
+            let _eventLayer = {};
             let eventLayer = new EventLayer();
 
-            // Beat 数组转换为小数
-            for (const _eventName in _eventLayer)
+            for (const eventName in _oldEventLayer)
             {
-                _eventLayer[_eventName] = beat2Time(_eventLayer[_eventName]);
-
-                if (_eventName != 'speedEvents')
+                _oldEventLayer[eventName].forEach((event) =>
                 {
-                    // 拆分缓动并将结果直接 push 进新的 eventLayer 中
-                    let newEvents = [];
-                    if (!(_eventLayer[_eventName] instanceof Array)) _eventLayer[_eventName] = [];
+                    if (!(_eventLayer[eventName] instanceof Array)) _eventLayer[eventName] = [];
+                    _eventLayer[eventName].push(utils.calculateEventBeat(event));
+                });
 
-                    _eventLayer[_eventName].forEach((event) =>
+                // 拆分缓动并将结果直接 push 进新的 eventLayer 中
+                if (eventName != 'speedEvents')
+                {
+                    _eventLayer[eventName].forEach((event) =>
                     {
                         calculateEventEase(event)
                             .forEach((newEvent) =>
                             {
-                                newEvents.push(newEvent);
+                                switch (eventName)
+                                {
+                                    case 'moveXEvents':
+                                    {
+                                        eventLayer.moveX.push(newEvent);
+                                        break;
+                                    }
+                                    case 'moveYEvents':
+                                    {
+                                        eventLayer.moveY.push(newEvent);
+                                        break;
+                                    }
+                                    case 'alphaEvents':
+                                    {
+                                        eventLayer.alpha.push(newEvent);
+                                        break;
+                                    }
+                                    case 'rotateEvents':
+                                    {
+                                        eventLayer.rotate.push(newEvent);
+                                        break;
+                                    }
+                                    default :
+                                    {
+                                        console.warn('Unsupported event name \'' + eventName + '\', ignoring');
+                                    }
+                                }
                             }
                         );
                     });
-
-                    switch (_eventName)
-                    {
-                        case 'moveXEvents':
-                        {
-                            eventLayer.moveX = newEvents;
-                            break;
-                        }
-                        case 'moveYEvents':
-                        {
-                            eventLayer.moveY = newEvents;
-                            break;
-                        }
-                        case 'alphaEvents':
-                        {
-                            eventLayer.alpha = newEvents;
-                            break;
-                        }
-                        case 'rotateEvents':
-                        {
-                            eventLayer.rotate = newEvents;
-                            break;
-                        }
-                        default :
-                        {
-                            console.warn('Unsupported event name \'' + _eventName + '\', ignoring');
-                        }
-                    }
                 }
                 else
                 {
                     // 拆分 speedEvent
-                    if (judgelineIndex == 0) console.log(_eventLayer.speedEvents.slice());
                     _eventLayer.speedEvents.forEach((event) =>
                     {
                         separateSpeedEvent(event)
@@ -184,15 +183,15 @@ export default function RePhiEditChartConverter(_chart)
                             }
                         );
                     });
-                    if (judgelineIndex == 0) console.log(eventLayer.speed.slice());
                 }
             }
+            eventLayer.sort();
 
             // 计算事件的真实时间
             for (const name in eventLayer)
             {
                 if (!(eventLayer[name] instanceof Array)) continue;
-                eventLayer[name] = calculateRealTime(rawChart.BPMList, eventLayer[name]);
+                eventLayer[name] = utils.calculateRealTime(rawChart.BPMList, eventLayer[name]);
             }
 
             // 计算事件规范值
@@ -202,13 +201,13 @@ export default function RePhiEditChartConverter(_chart)
             });
             eventLayer.moveX.forEach((event) =>
             {
-                event.start = event.start / 1340 + 0.5;
-                event.end = event.end / 1340 + 0.5;
+                event.start = event.start / 1340;
+                event.end = event.end / 1340;
             });
             eventLayer.moveY.forEach((event) =>
             {
-                event.start = event.start / 900 + 0.5;
-                event.end = event.end / 900 + 0.5;
+                event.start = event.start / 900;
+                event.end = event.end / 900;
             });
             eventLayer.alpha.forEach((event) =>
             {
@@ -221,8 +220,7 @@ export default function RePhiEditChartConverter(_chart)
                 event.end = (Math.PI / 180) * event.end;
             });
 
-            if (judgelineIndex == 0) console.log(eventLayer.speed.slice());
-
+            eventLayer.sort();
             judgeline.eventLayers.push(eventLayer);
         });
 
@@ -232,7 +230,7 @@ export default function RePhiEditChartConverter(_chart)
 
         // 计算 Note 真实时间
         _judgeline.notes = beat2Time(_judgeline.notes ? _judgeline.notes : []);
-        _judgeline.notes = calculateRealTime(rawChart.BPMList, _judgeline.notes);
+        _judgeline.notes = utils.calculateRealTime(rawChart.BPMList, _judgeline.notes);
 
         _judgeline.notes.forEach((_note, noteIndex) =>
         {
@@ -283,13 +281,13 @@ export default function RePhiEditChartConverter(_chart)
 
     chart.notes.forEach((note, index) =>
     {
-        let nextNote = notes[index + 1];
+        let nextNote = chart.notes[index + 1];
         if (!nextNote) return;
 
-        if ((note.time).toFixed(3) == (nextNote.time).toFixed(3))
+        if (note.time.toFixed(3) == nextNote.time.toFixed(3))
         {
             note.isMulti = true;
-            notes[index + 1].isMulti = true;
+            chart.notes[index + 1].isMulti = true;
         }
     });
     

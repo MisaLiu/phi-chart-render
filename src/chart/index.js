@@ -69,6 +69,14 @@ export default class Chart
 
         chart.judgelines.forEach((judgeline) =>
         {
+            judgeline.eventLayers.forEach((eventLayer) =>
+            {
+                eventLayer.speed = arrangeSpeedEvents(eventLayer.speed);
+                eventLayer.moveX = arrangeLineEvents(eventLayer.moveX);
+                eventLayer.moveY = arrangeLineEvents(eventLayer.moveY);
+                eventLayer.rotate = arrangeLineEvents(eventLayer.rotate);
+                eventLayer.alpha = arrangeLineEvents(eventLayer.alpha);
+            });
             /*
             judgeline.event.speed = arrangeSpeedEvents(judgeline.event.speed);
             judgeline.event.moveX = arrangeLineEvents(judgeline.event.moveX);
@@ -340,7 +348,7 @@ function arrangeLineEvents(events) {
     return newEvents2.slice();
 }
 
-function arrangeSpeedEvents(events)
+function arrangeSpeedEvents(events, eventLayerIndex = 0)
 {
     let newEvents = [];
     for (let i of events) {
@@ -353,5 +361,5 @@ function arrangeSpeedEvents(events)
         }
     }
     
-    return JSON.parse(JSON.stringify(newEvents));
+    return newEvents.slice();
 }

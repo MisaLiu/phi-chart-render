@@ -41,28 +41,16 @@ export default class Judgeline
             eventLayer.sort();
         });
 
-        /*
-        for (const name in this.event)
+        for (const name in this.eventLayers[0])
         {
-            this.event[name].sort(_sort);
+            if (name == 'speed' || !(this.eventLayers[0][name] instanceof Array)) continue;
+            this.eventLayers[0][name].unshift({
+                startTime : 1 - 100,
+                endTime   : this.eventLayers[0][name][0].startTime,
+                start     : this.eventLayers[0][name][0].start,
+                end       : this.eventLayers[0][name][0].start
+            });
         }
-
-        for (const name in this.extendEvent)
-        {
-            this.extendEvent[name].sort(_sort);
-        }
-
-        function _sort(a, b) {
-            if (withEndTime)
-            {
-                return (a.startTime - b.startTime) + (a.endTime - b.endTime);
-            }
-            else
-            {
-                return a.startTime - b.startTime;
-            }
-        }
-        */
     }
 
     calcFloorPosition()
@@ -75,10 +63,12 @@ export default class Judgeline
 
         this.floorPositions = [];
 
-        this.eventLayers.forEach((eventLayer) =>
+        this.eventLayers.forEach((eventLayer, eventLayerIndex) =>
         {
-            eventLayer.speed.forEach((event) =>
+            eventLayer.speed.forEach((event, eventIndex) =>
             {
+                event.endTime = eventLayer.speed[eventIndex + 1] ? eventLayer.speed[eventIndex + 1].startTime : 1e4;
+
                 let eventTime = (event.startTime).toFixed(3);
 
                 if (!sameTimeSpeedEventAlreadyExist[eventTime])
@@ -92,6 +82,15 @@ export default class Judgeline
 
                 sameTimeSpeedEventAlreadyExist[eventTime] = true;
             });
+
+            if (eventLayerIndex === 0)
+            {
+                eventLayer.speed.unshift({
+                    startTime : 1 - 100,
+                    endTime   : eventLayer.speed[0] ? eventLayer.speed[0].startTime : 1e4,
+                    value     : eventLayer.speed[0] ? eventLayer.speed[0].value : 1
+                });
+            }
         });
 
         // if (floorPositions.length <= 0) throw new Error('No any speed event in this judgeline');
@@ -99,11 +98,11 @@ export default class Judgeline
         floorPositions.sort((a, b) => a.startTime - b.startTime);
 
         floorPositions.unshift({
-            startTime     : 1 - 10,
+            startTime     : 1 - 100,
             endTime       : floorPositions[0] ? floorPositions[0].startTime : 1e4,
-            floorPosition : 0
+            floorPosition : 1 - 100
         });
-        currentFloorPosition += (floorPositions[0].endTime - floorPositions[0].startTime) * 1;
+        currentFloorPosition += floorPositions[0].endTime;
         
         for (let floorPositionIndex = 1; floorPositionIndex < floorPositions.length; floorPositionIndex++)
         {
@@ -232,8 +231,8 @@ export default class Judgeline
 
         if (this.sprite)
         {
-            this.sprite.position.x = this.x * size.width;
-            this.sprite.position.y = (1 - this.y) * size.height;
+            this.sprite.position.x = (this.x + 0.5) * size.width;
+            this.sprite.position.y = (0.5 - this.y) * size.height;
             this.sprite.alpha      = this.alpha >= 0 ? this.alpha : 0;
             this.sprite.rotation   = this.deg;
         }

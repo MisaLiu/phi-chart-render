@@ -8,10 +8,10 @@ export default class EventLayer
         this.alpha  = [];
         this.rotate = [];
 
-        this._speed  = 1;
-        this._posX   = 0.5;
-        this._posY   = 0.5;
-        this._alpha  = 1;
+        this._speed  = 0;
+        this._posX   = 0;
+        this._posY   = 0;
+        this._alpha  = 0;
         this._rotate = 0;
     }
 
@@ -39,24 +39,6 @@ export default class EventLayer
 
             this._speed = event.value;
         }
-
-        /*
-        for (const name in this)
-        {
-            if (name.indexOf('_') === 0) continue;
-
-            for (const event of this[name])
-            {
-                if (event.startTime < currentTime) continue;
-                if (event.endTime > currentTime) break;
-
-                let timePercentEnd = (currentTime - event.startTime) / (event.endTime - event.startTime);
-                let timePercentStart = 1 - timePercentEnd;
-
-                this['_' + name] = Math.fround(event.start * timePercentStart + event.end * timePercentEnd);
-            };
-        }
-        */
     }
 }
 

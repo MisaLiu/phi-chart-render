@@ -6,8 +6,8 @@ export default class Note
     {
         this.id            = !isNaN(Number(params.id)) ? Number(params.id) : -1;
         this.type          = !isNaN(Number(params.type)) ? Number(params.type) : 1;
-        this.time          = !isNaN(Number(params.time)) ? Number(params.time.toFixed(3)) : -1;
-        this.holdTime      = (this.type === 3 && !isNaN(Number(params.holdTime))) ? Number(params.holdTime.toFixed(3)) : 0;
+        this.time          = !isNaN(Number(params.time)) ? Number(params.time) : -1;
+        this.holdTime      = (this.type === 3 && !isNaN(Number(params.holdTime))) ? Number(params.holdTime) : 0;
         this.speed         = !isNaN(Number(params.speed)) ? Number(params.speed) : 1;
         this.floorPosition = !isNaN(Number(params.floorPosition)) ? Math.fround(params.floorPosition) : this.time;
         this.holdLength    = (this.type === 3 && !isNaN(Number(params.holdLength))) ? Math.fround(params.holdLength) : 0;

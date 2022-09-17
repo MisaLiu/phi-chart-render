@@ -157,7 +157,7 @@ export default function PhiEditChartConverter(_chart)
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
                     start      : null,
-                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 2048 : 0.5,
+                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 2048 - 0.5 : 0,
                     easingType : !isNaN(Number(command[6])) && Number(command[6]) >= 1 ? Number(command[6]) : 1
                 });
                 commands.judgelineEvent.moveY.push({
@@ -165,7 +165,7 @@ export default function PhiEditChartConverter(_chart)
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
                     start      : null,
-                    end        : !isNaN(Number(command[5])) ? Number(command[5]) / 1400 : 0.5,
+                    end        : !isNaN(Number(command[5])) ? Number(command[5]) / 1400 - 0.5 : 0,
                     easingType : !isNaN(Number(command[6])) && Number(command[6]) >= 1 ? Number(command[6]) : 1
                 });
                 break;
@@ -176,16 +176,16 @@ export default function PhiEditChartConverter(_chart)
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : null,
-                    start      : !isNaN(Number(command[3])) ? Number(command[3]) / 2048 : 0.5,
-                    end        : !isNaN(Number(command[3])) ? Number(command[3]) / 2048 : 0.5,
+                    start      : !isNaN(Number(command[3])) ? Number(command[3]) / 2048 - 0.5 : 0,
+                    end        : !isNaN(Number(command[3])) ? Number(command[3]) / 2048 - 0.5 : 0,
                     easingType : 1
                 });
                 commands.judgelineEvent.moveY.push({
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : null,
-                    start      : !isNaN(Number(command[4])) ? Number(command[4]) / 1400 : 0.5,
-                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 1400 : 0.5,
+                    start      : !isNaN(Number(command[4])) ? Number(command[4]) / 1400 - 0.5 : 0,
+                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 1400 - 0.5 : 0,
                     easingType : 1
                 });
                 break;
@@ -320,12 +320,12 @@ export default function PhiEditChartConverter(_chart)
         judgeline.eventLayers[0].moveX.forEach((event, eventIndex, array) =>
         {
             if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
-            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0.5;
+            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0;
         });
         judgeline.eventLayers[0].moveY.forEach((event, eventIndex, array) =>
         {
             if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
-            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0.5;
+            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0;
         });
         judgeline.eventLayers[0].rotate.forEach((event, eventIndex, array) =>
         {
