@@ -107,7 +107,7 @@ export default function RePhiEditChartConverter(_chart)
             bpm.beatTime = 60 / bpm.bpm;
         });
 
-        rawChart.BPMList.sort((a, b) => a.startBeat - b.startBeat);
+        rawChart.BPMList.sort((a, b) => b.startBeat - a.startBeat);
     }
 
     rawChart.judgeLineList.forEach((_judgeline, judgelineIndex) =>

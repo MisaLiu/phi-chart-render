@@ -2,6 +2,7 @@ import Chart from '../index';
 import Judgeline from '../judgeline';
 import EventLayer from '../eventlayer';
 import Note from '../note';
+import utils from './utils';
 
 const Easing = [
     pos => pos, //0
@@ -245,15 +246,11 @@ export default function PhiEditChartConverter(_chart)
         }
     });
 
-    // note 和 bpm 按时间排序
-    commands.bpm.sort(sortTime);
-    commands.note.sort(sortTime);
-
     if (commands.bpm.length <= 0)
     {
         commands.bpm.push({
             startBeat : 0,
-            endBeat   : 1e9,
+            endBeat   : 1e4,
             bpm       : 120
         });
     }
@@ -265,14 +262,8 @@ export default function PhiEditChartConverter(_chart)
 
         commands.bpm.forEach((bpm, index) =>
         {   
-            if (index < commands.bpm.length - 1)
-            {
-                bpm.endBeat = commands.bpm[index + 1].startBeat;
-            }
-            else
-            {
-                bpm.endBeat = 1e9;
-            }
+
+            bpm.endBeat = commands.bpm[index + 1] ? commands.bpm[index + 1].startBeat : 1e4;
 
             bpmChangedTime += currentBeatRealTime * (bpm.startBeat - bpmChangedBeat);
             bpm.startTime = bpmChangedTime;
@@ -284,6 +275,12 @@ export default function PhiEditChartConverter(_chart)
             bpm.beatTime = 60 / bpm.bpm;
         });
     }
+
+    // note 和 bpm 按时间排序
+    commands.bpm.sort((a, b) => b.startBeat - a.startBeat);
+    commands.note.sort(sortTime);
+
+    console.log(commands.bpm.slice());
 
     // 将事件推送给对应的判定线
     for (const eventName in commands.judgelineEvent)
@@ -337,7 +334,7 @@ export default function PhiEditChartConverter(_chart)
         });
         judgeline.eventLayers[0].speed.forEach((event, eventIndex, array) =>
         {
-            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
+            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e4;
         });
 
         // 拆分缓动
@@ -356,21 +353,20 @@ export default function PhiEditChartConverter(_chart)
         }
         judgeline.eventLayers[0].speed = arrangeSameValueSpeedEvent(judgeline.eventLayers[0].speed);
 
-        judgeline.sortEvent();
-
         // 计算事件真实时间
         for (const name in judgeline.eventLayers[0])
         {
             if (!(judgeline.eventLayers[0][name] instanceof Array)) continue;
-            judgeline.eventLayers[0][name] = calculateRealTime(commands.bpm, judgeline.eventLayers[0][name]);
+            judgeline.eventLayers[0][name] = utils.calculateRealTime(commands.bpm, judgeline.eventLayers[0][name]);
         }
 
         // judgeline.eventLayers[0].speed = calculateSpeedEventFloorPosition(judgeline.event.speed);
+        judgeline.sortEvent();
         judgeline.calcFloorPosition();
     });
 
     // 计算 note 的真实时间
-    commands.note = calculateRealTime(commands.bpm, commands.note);
+    commands.note = utils.calculateRealTime(commands.bpm, commands.note);
 
     commands.note.forEach((note) =>
     {
@@ -544,40 +540,5 @@ function calculateEventEase(events, forceLinear = false)
         }
     });
     
-    return result;
-}
-
-function calculateRealTime(_bpmList, events)
-{
-    let bpmList = _bpmList.slice();
-    let result = [];
-
-    // bpmList.sort((a, b) => b.startBeat - a.startBeat);
-
-    events.forEach((event) =>
-    {
-        let newEvent = JSON.parse(JSON.stringify(event));
-
-        for (let bpmIndex = 0, bpmLength = bpmList.length; bpmIndex < bpmLength; bpmIndex++)
-        {
-            let bpm = bpmList[bpmIndex];
-
-            if (bpm.startBeat > newEvent.endTime) continue;
-            newEvent.endTime = Math.fround(bpm.startTime + ((newEvent.endTime - bpm.startBeat) * bpm.beatTime));
-
-            for (let nextBpmIndex = bpmIndex; nextBpmIndex < bpmLength; nextBpmIndex++)
-            {
-                let nextBpm = bpmList[nextBpmIndex];
-
-                if (nextBpm.startBeat > newEvent.startTime) continue;
-                newEvent.startTime = Math.fround(nextBpm.startTime + ((newEvent.startTime - nextBpm.startBeat) * nextBpm.beatTime));
-                break;
-            }
-
-            result.push(newEvent);
-            break;
-        }
-    });
-
     return result;
 }

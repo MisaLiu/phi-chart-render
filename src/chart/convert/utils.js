@@ -51,7 +51,7 @@ function calculateRealTime(_bpmList, _events)
         }
     });
 
-    return events;
+    return events.slice();
 }
 
 export default {
