@@ -35,6 +35,9 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v2
       
+      - name: Test git commands
+        run: git log -n 1 --pretty=format:"%H"
+      
       - name: Build
         run: |
           npm install
