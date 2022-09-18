@@ -133,10 +133,12 @@ export default class Judgement
         this.sprites.combo.container.zIndex = 99999;
 
         this.sprites.combo.number = new Text('0', {
+            fontFamily: 'A-OTF Shin Go Pr6N H',
             fill: 0xFFFFFF
         });
         this.sprites.combo.number.alpha = 0.81;
         this.sprites.combo.text = new Text('COMBO', {
+            fontFamily: 'MiSans',
             fill: 0xFFFFFF
         });
         this.sprites.combo.text.alpha = 0.55;
@@ -144,6 +146,7 @@ export default class Judgement
         this.stage.addChild(this.sprites.combo.container);
 
         this.sprites.acc = new Text('ACCURACY 0.00%', {
+            fontFamily: 'MiSans',
             fill: 0xFFFFFF
         });
         this.sprites.acc.alpha = 0.63;
@@ -151,6 +154,7 @@ export default class Judgement
         this.stage.addChild(this.sprites.acc);
 
         this.sprites.score = new Text('00000000', {
+            fontFamily: 'A-OTF Shin Go Pr6N H',
             fill: 0xFFFFFF
         });
         this.sprites.score.alpha = 0.58;
@@ -179,10 +183,10 @@ export default class Judgement
         this.sprites.combo.container.position.x = size.heightPercent * 72;
         this.sprites.combo.container.position.y = size.heightPercent * 41;
         this.sprites.combo.text.position.x = this.sprites.combo.number.width + size.heightPercent * 6;
-        this.sprites.combo.text.position.y = size.heightPercent * 20;
+        this.sprites.combo.text.position.y = size.heightPercent * 30;
 
         this.sprites.acc.position.x = size.heightPercent * 72;
-        this.sprites.acc.position.y = size.heightPercent * 116;
+        this.sprites.acc.position.y = size.heightPercent * 113;
 
         this.sprites.score.position.x = size.width - size.heightPercent * 139;
         this.sprites.score.position.y = size.heightPercent * 61;

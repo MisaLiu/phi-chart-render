@@ -1,8 +1,14 @@
 import Chart from './chart';
 import Game from './game';
+import FontFaceObserver from 'fontfaceobserver';
 import { Loader, Texture, Rectangle } from 'pixi.js-legacy';
 import { Sound } from '@pixi/sound';
 import * as StackBlur from 'stackblur-canvas';
+
+const fonts = {
+    'MiSans'               : new FontFaceObserver('MiSans'),
+    'A-OTF Shin Go Pr6N H' : new FontFaceObserver('A-OTF Shin Go Pr6N H')
+}
 
 const doms = {
     fileSelect: document.querySelector('div.file-select'),
@@ -127,6 +133,20 @@ doms.startBtn.addEventListener('click', () => {
 
 
 window.addEventListener('load', () => {
+    for (const name in fonts)
+    {
+        fonts[name].load()
+            .then((e) =>
+            {
+                console.log('[Font Loader] Font %s loaded successfully', e.family);
+            })
+            .catch((e) =>
+            {
+                console.error(e);
+            }
+        );
+    }
+
     loader.add([
         { name: 'tap', url: './assets/Tap.png' },
         { name: 'tapHL', url: './assets/TapHL.png' },

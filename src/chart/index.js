@@ -143,6 +143,7 @@ export default class Chart
         this.sprites.info = {};
 
         this.sprites.info.songName = new Text(this.info.name, {
+            fontFamily: 'A-OTF Shin Go Pr6N H',
             fill: 0xFFFFFF
         });
         this.sprites.info.songName.anchor.set(0, 1);
@@ -152,6 +153,7 @@ export default class Chart
 
 
         this.sprites.info.songDiff = new Text(this.info.difficult, {
+            fontFamily: 'MiSans',
             fill: 0xFFFFFF
         });
         this.sprites.info.songDiff.anchor.set(0, 1);
