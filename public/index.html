@@ -31,14 +31,15 @@
 
             div.watermark {
                 position: absolute;
-                right: 0;
-                bottom: 0;
+                right: 4px;
+                bottom: 4px;
                 color: white;
             }
         </style>
     </head>
     <body>
         <canvas id="canvas"></canvas>
+        <div class="watermark">github/MisaLiu/phi-chart-render {{CURRENT_HASH}}</div>
         <div class="file-select">
             <label>Chart: <input type="file" id="file-chart" /></label><br>
             <label>Music: <input type="file" id="file-music" /></label><br>
