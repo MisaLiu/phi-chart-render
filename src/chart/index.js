@@ -1,4 +1,5 @@
 import * as Convert from './convert';
+import utils from './convert/utils';
 import { Sprite, Graphics, Text } from 'pixi.js-legacy';
 
 export default class Chart
@@ -71,7 +72,7 @@ export default class Chart
         {
             judgeline.eventLayers.forEach((eventLayer) =>
             {
-                eventLayer.speed = arrangeSpeedEvents(eventLayer.speed);
+                eventLayer.speed = utils.arrangeSameValueSpeedEvent(eventLayer.speed);
                 eventLayer.moveX = arrangeLineEvents(eventLayer.moveX);
                 eventLayer.moveY = arrangeLineEvents(eventLayer.moveY);
                 eventLayer.rotate = arrangeLineEvents(eventLayer.rotate);
@@ -346,20 +347,4 @@ function arrangeLineEvents(events) {
     }
     
     return newEvents2.slice();
-}
-
-function arrangeSpeedEvents(events, eventLayerIndex = 0)
-{
-    let newEvents = [];
-    for (let i of events) {
-        let lastEvent = newEvents[newEvents.length - 1];
-        
-        if (!lastEvent || lastEvent.value != i.value) {
-            newEvents.push(i);
-        } else {
-            lastEvent.endTime = i.endTime;
-        }
-    }
-    
-    return newEvents.slice();
 }

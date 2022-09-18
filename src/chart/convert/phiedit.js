@@ -5,7 +5,6 @@ import Note from '../note';
 import utils from './utils';
 
 const Easing = [
-    pos => pos, //0
     pos => pos, //1
 	pos => Math.sin(pos * Math.PI / 2), //2
 	pos => 1 - Math.cos(pos * Math.PI / 2), //3
@@ -32,14 +31,14 @@ const Easing = [
 	pos => 1 - 2 ** (-10 * pos) * Math.cos(pos * Math.PI / .15), //24
 	pos => 2 ** (10 * (pos - 1)) * Math.cos((pos - 1) * Math.PI / .15), //25
 	pos => ((pos *= 11) < 4 ? pos ** 2 : pos < 8 ? (pos - 6) ** 2 + 12 : pos < 10 ? (pos - 9) ** 2 + 15 : (pos - 10.5) ** 2 + 15.75) / 16, //26
-	pos => 1 - Easing[26](1 - pos), //27
-	pos => (pos *= 2) < 1 ? Easing[26](pos) / 2 : Easing[27](pos - 1) / 2 + .5, //28
+	pos => 1 - Easing[25](1 - pos), //27
+	pos => (pos *= 2) < 1 ? Easing[25](pos) / 2 : Easing[26](pos - 1) / 2 + .5, //28
 	pos => pos < 0.5 ? 2 ** (20 * pos - 11) * Math.sin((160 * pos + 1) * Math.PI / 18) : 1 - 2 ** (9 - 20 * pos) * Math.sin((160 * pos + 1) * Math.PI / 18) //29
 ];
 
 export default function PhiEditChartConverter(_chart)
 {
-    let rawChart = _chart.split(/[(\r\n)\r\n]+/);
+    let rawChart = _chart.split(/\r\n|\n\r/);
     let chart = new Chart();
     let judgelines = [];
     let notes = [];
@@ -241,7 +240,7 @@ export default function PhiEditChartConverter(_chart)
             }
             default :
             {
-                console.warn('Unsupported command: ' + command[0] + ', ignoring.\nAt line ' + (commandIndex + 1) + ':\n' + command.join(' '));
+                console.warn('Unsupported command: ' + command[0] + ', ignoring.\nAt line ' + (commandIndex + 2) + ':\n' + command.join(' '));
             }
         }
     });
@@ -278,9 +277,7 @@ export default function PhiEditChartConverter(_chart)
 
     // note 和 bpm 按时间排序
     commands.bpm.sort((a, b) => b.startBeat - a.startBeat);
-    commands.note.sort(sortTime);
-
-    console.log(commands.bpm.slice());
+    commands.note.sort((a, b) => a.startTime - b.startTime);
 
     // 将事件推送给对应的判定线
     for (const eventName in commands.judgelineEvent)
@@ -338,20 +335,31 @@ export default function PhiEditChartConverter(_chart)
         });
 
         // 拆分缓动
-        judgeline.eventLayers[0].alpha = calculateEventEase(judgeline.eventLayers[0].alpha);
-        judgeline.eventLayers[0].moveX = calculateEventEase(judgeline.eventLayers[0].moveX);
-        judgeline.eventLayers[0].moveY = calculateEventEase(judgeline.eventLayers[0].moveY);
-        judgeline.eventLayers[0].rotate = calculateEventEase(judgeline.eventLayers[0].rotate);
+        for (const name in judgeline.eventLayers[0])
+        {
+            if (name == 'speed' || !(judgeline.eventLayers[0][name] instanceof Array)) continue;
+            let newEvents = [];
+            judgeline.eventLayers[0][name].forEach((event) =>
+            {
+                utils.calculateEventEase(event, Easing)
+                    .forEach((newEvent) =>
+                    {
+                        newEvents.push(newEvent);
+                    }
+                );
+            });
+            judgeline.eventLayers[0][name] = newEvents;
+        }
         
         // 合并相同变化量事件
         for (const name in judgeline.eventLayers[0])
         {
             if (name != 'speed' && (judgeline.eventLayers[0][name] instanceof Array))
             {
-                judgeline.eventLayers[0][name] = arrangeSameValueEvent(judgeline.eventLayers[0][name]);
+                judgeline.eventLayers[0][name] = utils.arrangeSameValueEvent(judgeline.eventLayers[0][name]);
             }
         }
-        judgeline.eventLayers[0].speed = arrangeSameValueSpeedEvent(judgeline.eventLayers[0].speed);
+        judgeline.eventLayers[0].speed = utils.arrangeSameValueSpeedEvent(judgeline.eventLayers[0].speed);
 
         // 计算事件真实时间
         for (const name in judgeline.eventLayers[0])
@@ -360,7 +368,6 @@ export default function PhiEditChartConverter(_chart)
             judgeline.eventLayers[0][name] = utils.calculateRealTime(commands.bpm, judgeline.eventLayers[0][name]);
         }
 
-        // judgeline.eventLayers[0].speed = calculateSpeedEventFloorPosition(judgeline.event.speed);
         judgeline.sortEvent();
         judgeline.calcFloorPosition();
     });
@@ -427,118 +434,4 @@ export default function PhiEditChartConverter(_chart)
     })
 
     return chart;
-
-    function sortTime(a, b)
-    {
-        return a.startTime - b.startTime || a.startBeat - b.startBeat;
-    }
-}
-
-function arrangeSameValueEvent(_events)
-{
-    let events = _events.slice();
-    let eventIndexOffset = 0;
-    let result = [];
-
-    for (let eventIndex = 0, eventLength = events.length; eventIndex + eventIndexOffset < eventLength; eventIndex++)
-    {
-        let event = events[eventIndex + eventIndexOffset];
-        result.push({
-            startTime  : event.startTime,
-            endTime    : event.endTime,
-            start      : event.start,
-            end        : event.end
-        });
-
-        if (event.start != event.end) continue;
-
-        for (let nextEventIndex = eventIndex + eventIndexOffset + 1; nextEventIndex < eventLength; nextEventIndex++)
-        {
-            let nextEvent = events[nextEventIndex];
-
-            if (nextEvent.startTime < event.startTime && nextEvent.endTime < event.startTime) continue;
-            if (nextEvent.start != event.start || nextEvent.end != event.end) break;
-
-            result[result.length - 1].endTime = nextEvent.endTime;
-            eventIndexOffset++;
-        }
-    }
-
-    return result.slice();
-}
-
-function arrangeSameValueSpeedEvent(_events)
-{
-    let events = _events.slice();
-    let eventIndexOffset = 0;
-    let result = [];
-
-    for (let eventIndex = 0, eventLength = events.length; eventIndex + eventIndexOffset < eventLength; eventIndex++)
-    {
-        let event = events[eventIndex + eventIndexOffset];
-        result.push({
-            startTime  : event.startTime,
-            endTime    : event.endTime,
-            value      : event.value
-        });
-
-        for (let nextEventIndex = eventIndex + eventIndexOffset + 1; nextEventIndex < eventLength; nextEventIndex++)
-        {
-            let nextEvent = events[nextEventIndex];
-
-            if (nextEvent.startTime < event.startTime && nextEvent.endTime < event.startTime) continue;
-            if (nextEvent.value != event.value) break;
-
-            result[result.length - 1].endTime = nextEvent.endTime;
-            eventIndexOffset++;
-        }
-    }
-
-    return result.slice();
-}
-
-function calculateEventEase(events, forceLinear = false)
-{
-    const calcBetweenTime = 0.125;
-    let result = [];
-
-    events.forEach((event) =>
-    {
-        let timeBetween = event.endTime - event.startTime;
-        let valueBetween = event.end - event.start;
-
-        for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
-        {
-            let timePercentStart = (timeIndex * calcBetweenTime) / timeBetween;
-            let timePercentEnd = ((timeIndex + 1) * calcBetweenTime) / timeBetween;
-
-            if (event.easingType && (event.easingType !== 1 || forceLinear))
-            {
-                result.push({
-                    startTime: event.startTime + timeIndex * calcBetweenTime,
-                    endTime: (
-                        timeIndex + 1 == timeCount && event.startTime + (timeIndex + 1) * calcBetweenTime != event.endTime ?
-                        event.endTime : event.startTime + (timeIndex + 1) * calcBetweenTime
-                    ),
-                    start: event.start + valueBetween * Easing[event.easingType](timePercentStart),
-                    end: (
-                        timeIndex + 1 == timeCount && event.start + valueBetween * Easing[event.easingType](timePercentEnd) != event.end ?
-                        event.end : event.start + valueBetween * Easing[event.easingType](timePercentEnd)
-                    )
-                });
-            }
-            else
-            {
-                result.push({
-                    startTime: event.startTime,
-                    endTime: event.endTime,
-                    start: event.start,
-                    end: event.end
-                });
-                break;
-            }
-        }
-    });
-    
-    return result;
 }

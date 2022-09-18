@@ -84,15 +84,8 @@ export default function RePhiEditChartConverter(_chart)
         let bpmChangedTime = 0; // 当前 BPM 是在什么时候被更改的（秒）
 
         rawChart.BPMList.forEach((bpm, index) =>
-        {   
-            if (index < rawChart.BPMList.length - 1)
-            {
-                bpm.endTime = rawChart.BPMList[index + 1].startTime;
-            }
-            else
-            {
-                bpm.endTime = [1e9, 0, 1];
-            }
+        {
+            bpm.endTime = rawChart.BPMList[index + 1] ? rawChart.BPMList[index + 1].startTime : [ 1e4, 0, 1 ];
 
             bpm.startBeat = bpm.startTime[0] + bpm.startTime[1] / bpm.startTime[2];
             bpm.endBeat = bpm.endTime[0] + bpm.endTime[1] / bpm.endTime[2];
@@ -119,25 +112,21 @@ export default function RePhiEditChartConverter(_chart)
         judgeline.texture = _judgeline.Texture != 'line.png' ? _judgeline.Texture : 'judgeline';
 
         // 处理 EventLayer
-        _judgeline.eventLayers.forEach((_oldEventLayer, eventLayerIndex) =>
+        _judgeline.eventLayers.forEach((_eventLayer) =>
         {
-            let _eventLayer = {};
             let eventLayer = new EventLayer();
 
-            for (const eventName in _oldEventLayer)
+            for (const eventName in _eventLayer)
             {
-                _oldEventLayer[eventName].forEach((event) =>
-                {
-                    if (!(_eventLayer[eventName] instanceof Array)) _eventLayer[eventName] = [];
-                    _eventLayer[eventName].push(utils.calculateEventBeat(event));
-                });
+                // 拍数数组转小数
+                _eventLayer[eventName] = utils.calculateEventsBeat(_eventLayer[eventName] ? _eventLayer[eventName] : []);
 
                 // 拆分缓动并将结果直接 push 进新的 eventLayer 中
                 if (eventName != 'speedEvents')
                 {
                     _eventLayer[eventName].forEach((event) =>
                     {
-                        calculateEventEase(event)
+                        utils.calculateEventEase(event, Easing)
                             .forEach((newEvent) =>
                             {
                                 switch (eventName)
@@ -229,7 +218,7 @@ export default function RePhiEditChartConverter(_chart)
         judgeline.calcFloorPosition();
 
         // 计算 Note 真实时间
-        _judgeline.notes = beat2Time(_judgeline.notes ? _judgeline.notes : []);
+        _judgeline.notes = utils.calculateEventsBeat(_judgeline.notes ? _judgeline.notes : []);
         _judgeline.notes = utils.calculateRealTime(rawChart.BPMList, _judgeline.notes);
 
         _judgeline.notes.forEach((_note, noteIndex) =>
@@ -351,57 +340,6 @@ function convertChartFormat(rawChart)
     return chart;
 }
 
-function beat2Time(event)
-{
-    event.forEach((e) =>
-    {
-        e.startTime = Math.fround(e.startTime[0] + e.startTime[1] / e.startTime[2]);
-        e.endTime = Math.fround(e.endTime[0] + e.endTime[1] / e.endTime[2]);
-    });
-    return event;
-}
-
-function calculateEventEase(event, forceLinear = false)
-{
-    let result = [];
-    let timeBetween = event.endTime - event.startTime;
-
-    if (!event)
-    {
-        return [];
-    }
-
-    if (
-        event.easingType && (event.easingType !== 1 || forceLinear) &&
-        event.easingType <= Easing.length &&
-        event.start != event.end
-    ) {
-        for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
-        {
-            let currentTime = event.startTime + (timeIndex * calcBetweenTime);
-            let nextTime = event.startTime + ((timeIndex + 1) * calcBetweenTime) <= event.endTime ? event.startTime + ((timeIndex + 1) * calcBetweenTime) : event.endTime;
-
-            result.push({
-                startTime : currentTime,
-                endTime   : nextTime,
-                start     : valueCalculator(event, currentTime),
-                end       : valueCalculator(event, nextTime)
-            });
-        }
-    }
-    else
-    {
-        result.push({
-            startTime: event.startTime,
-            endTime: event.endTime,
-            start: event.start,
-            end: event.end
-        });
-    }
-
-    return result;
-}
-
 function separateSpeedEvent(event)
 {
     let result = [];
@@ -417,7 +355,7 @@ function separateSpeedEvent(event)
             result.push({
                 startTime : currentTime,
                 endTime   : nextTime,
-                value     : _valueCalculator(event, nextTime)
+                value     : utils.valueCalculator(event, Easing, nextTime)
             });
         }
     }
@@ -431,35 +369,4 @@ function separateSpeedEvent(event)
     }
 
     return result;
-
-    function _valueCalculator(event, currentTime)
-    {
-        if (event.start == event.end) return event.start;
-        if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
-        if (event.endTime < currentTime) throw new Error('currentTime must smaller than endTime');
-
-        let timePercentEnd = (currentTime - event.startTime) / (event.endTime - event.startTime);
-        let timePercentStart = 1 - timePercentEnd;
-
-        return Math.fround(event.start * timePercentStart + event.end * timePercentEnd);
-    }
 }
-
-function valueCalculator(event, currentTime)
-{
-    if (event.start == event.end) return event.start;
-    if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
-    if (event.endTime < currentTime) throw new Error('currentTime must smaller than endTime');
-
-    let timePercentStart = (currentTime - event.startTime) / (event.endTime - event.startTime);
-    let timePercentEnd = 1 - timePercentStart;
-    let easeFunction = Easing[event.easingType - 1] ? Easing[event.easingType - 1] : Easing[0];
-    let easePercent = easeFunction(event.easingLeft * timePercentEnd + event.easingRight * timePercentStart);
-    let easePercentStart = easeFunction(event.easingLeft);
-    let easePercentEnd = easeFunction(event.easingRight);
-
-    easePercent = (easePercent - easePercentStart) / (easePercentEnd - easePercentStart);
-
-    return Math.fround(event.start * (1 - easePercent) + event.end * easePercent);
-}
-
