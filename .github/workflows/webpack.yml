@@ -35,10 +35,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v2
       
-      - name: Test git commands
-        run: git log -n 1 --pretty=format:"%H"
+      - name: Replace current git hash to HTML
+        run: ls
       
-      - name: Build
+      - name: Build webpack
         run: |
           npm install
           npx webpack --output-path=./public/
