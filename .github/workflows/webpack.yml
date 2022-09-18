@@ -36,7 +36,7 @@ jobs:
         uses: actions/configure-pages@v2
       
       - name: Replace current git hash to HTML
-        run: ls
+        run: sed -i 's/{{CURRENT_HASH}}/${{ github.sha }}/g' ./public/index.html
       
       - name: Build webpack
         run: |
