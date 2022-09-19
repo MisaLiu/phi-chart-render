@@ -14,7 +14,7 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
 
 * PhiEdit charts
     * [x] Basic support
-    * [x] BPM List
+    * [x] BPM List *(Need test)*
     * [ ] Custom judgeline texture
     * note features
         * [x] Basic support
@@ -26,7 +26,7 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
     * [x] Event Layers support  *(Need test)*
     * [x] Custom judgeline texture *(Need test)*
     * [ ] Judgeline cover type
-    * [x] Parent judgeline
+    * [ ] Parent judgeline
     * [x] Easing start/end point
     * [ ] BPM factor
     * [ ] Extend events
@@ -35,7 +35,7 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
         * [x] Basic support
         * [x] Fake note support
         * [x] Note sprite scale
-        * [x] Custom note sprite texture *(Need test)*
+        * [ ] Custom note sprite texture *(Need test)*
         * [x] Note alpha
         * [ ] yOffset
         * [ ] visible time
