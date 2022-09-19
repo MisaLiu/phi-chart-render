@@ -22,6 +22,7 @@ const doms = {
         offset: document.querySelector('input#settings-offset')
     },
     startBtn : document.querySelector('button#start'),
+    loadingStatus : document.querySelector('div#loading-status'),
     canvas : document.querySelector('canvas#canvas'),
     debug: document.querySelector('div#debug')
 };
@@ -132,20 +133,25 @@ doms.startBtn.addEventListener('click', () => {
 
 
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
     for (const name in fonts)
     {
-        fonts[name].load(null, 30000)
-            .then((e) =>
-            {
-                console.log('[Font Loader] Font %s loaded successfully', e.family);
-            })
-            .catch((e) =>
-            {
-                console.error(e);
-            }
-        );
+        try
+        {
+            doms.loadingStatus.innerText = 'Loading font ' + name + ' ...';
+            await fonts[name].load(null, 30000);
+        }
+        catch (e)
+        {
+            console.error(e);
+        }
     }
+    document.body.classList.add('font-loaded');
+    
+    loader.onProgress.add((l, res) =>
+    {
+        doms.loadingStatus.innerText = 'Loading asset ' + res.name + ' ...';
+    });
 
     loader.add([
         { name: 'tap', url: './assets/Tap.png' },
@@ -179,6 +185,8 @@ window.addEventListener('load', () => {
                 textures[name] = _clickTextures;
             }
         }
+        
+        doms.loadingStatus.innerText = 'All done!';
     });
 });
 

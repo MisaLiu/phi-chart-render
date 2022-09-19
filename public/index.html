@@ -44,8 +44,9 @@
                 pointer-events: none;
             }
             
-            div.file-select, div.file-select *,
-            div.watermark {
+            .font-loaded div.file-select,
+            .font-loaded div.file-select *,
+            .font-loaded div.watermark {
                 font-family: 'MiSans';
             }
         </style>
@@ -60,6 +61,8 @@
             <label>Audio offset: <input type="number" id="settings-offset" value="0" style="width:4em" />ms</label><br>
             <label><input type="checkbox" id="settings-autoplay" />AutoPlay</label><br>
             <button id="start">Start</button>
+            <hr />
+            <div class="loading" id="loading-status">Loading scripts...</div>
             <hr />
             Current git hash: {{CURRENT_HASH}}<br>
             GitHub homepage: <a href="https://github.com/MisaLiu/phi-chart-render" target="_blank">https://github.com/MisaLiu/phi-chart-render</a><br>
