@@ -36,7 +36,8 @@ export default class Game
         if (!this.texture) throw new Error('Render must use a texture object for creating sprites.');
         if (!this.zipFiles) this.zipFiles = {};
 
-        this.resize = this.resize.bind(this)
+        this.resize = this.resize.bind(this);
+        this._tick = this._tick.bind(this);
 
         this.render.resize();
         window.addEventListener('resize', this.resize);
@@ -63,6 +64,11 @@ export default class Game
         this.render.start();
         this.render.pixi.ticker.add(this.judgement.calcTick);
         this.chart.start(this.render.pixi.ticker);
+    }
+
+    _tick()
+    {
+
     }
 
     resize()
