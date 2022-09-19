@@ -18,12 +18,6 @@ export default class Chart
             bgAuthor  : params.bgAuthor ? params.bgAuthor : 'Unknown',
             difficult : params.difficult ? params.difficult : 'SP Lv.?'
         };
-        this.url = {
-            chart: null,
-            music: null,
-            bg: null
-        };
-        this.bgDim = 0.5;
 
         this._music = null;
         this._audioOffset = 0;
@@ -89,7 +83,7 @@ export default class Chart
             judgeline.sortEvent();
         });
 
-        console.log(chart);
+        // console.log(chart);
         return chart;
     }
 

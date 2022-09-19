@@ -28,14 +28,18 @@ export default class Game
         this.texture  = params.texture;
         this.zipFiles = params.zipFiles;
 
+        this.sprites = {};
+
+        this._music = null;
+
         if (!this.chart) throw new Error('You must select a chart to play');
         if (!this.texture) throw new Error('Render must use a texture object for creating sprites.');
         if (!this.zipFiles) this.zipFiles = {};
 
-        this.resizeRender = this.resizeRender.bind(this)
+        this.resize = this.resize.bind(this)
 
         this.render.resize();
-        window.addEventListener('resize', this.resizeRender);
+        window.addEventListener('resize', this.resize);
     }
 
     createSprites()
@@ -61,7 +65,7 @@ export default class Game
         this.chart.start(this.render.pixi.ticker);
     }
 
-    resizeRender()
+    resize()
     {
         this.render.resize();
         this.judgement.resizeSprites(this.render.renderSize);
