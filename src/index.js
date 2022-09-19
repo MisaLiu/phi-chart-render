@@ -135,7 +135,7 @@ doms.startBtn.addEventListener('click', () => {
 window.addEventListener('load', () => {
     for (const name in fonts)
     {
-        fonts[name].load()
+        fonts[name].load(null, 30000)
             .then((e) =>
             {
                 console.log('[Font Loader] Font %s loaded successfully', e.family);
