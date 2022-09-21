@@ -49,10 +49,12 @@ export default class Game
     {
         // 创建舞台主渲染区
         this.render.mainContainer = new PIXI.Container();
+        this.render.mainContainer.zIndex = 10;
+        this.render.pixi.stage.addChild(this.render.mainContainer);
         
         // 创建舞台主渲染区可见范围
         this.render.mainContainerMask = new PIXI.Graphics();
-        this.render.mainContainer.mask = this.render.mainContainerMask;
+        // this.render.mainContainer.mask = this.render.mainContainerMask;
 
         if (this.chart.bg)
         { // 创建超宽屏舞台覆盖
@@ -67,21 +69,28 @@ export default class Game
             bgCover.position.y = -this.render.mainContainerCover.height / 2;
             bgCover.alpha = 0.5;
 
+            this.render.mainContainerCover.zIndex = 1;
             this.render.mainContainerCover.addChild(bgCover);
             this.render.mainContainerCover.anchor.set(0.5);
+
+            this.render.pixi.stage.addChild(this.render.mainContainerCover);
         }
 
         this.chart.createSprites(
-            this.render.sprites.mainContainer,
+            this.render.mainContainer,
             this.render.sizer,
             this.render.bgDim,
             this.texture,
             this.zipFiles
         );
+
+        this.judgement.stage = this.render.mainContainer;
         this.judgement.createSprites();
+
         this.render.createBgSprites(this.chart.bg);
 
         this.render.mainContainer.sortChildren();
+        this.render.pixi.stage.sortChildren();
         this.render.sprites.mainContainer.sortChildren();
     }
 
@@ -111,9 +120,21 @@ export default class Game
 
         // 主舞台区尺寸重计算
         this.render.mainContainer.position.x = this.render.sizer.widthOffset;
-        this.render.mainContainerMask.beginFill(0xFFFFFF)
-            .drawRect(this.render.sizer.widthOffset, 0, this.render.sizer.width, this.render.sizer.height)
-            .endFill();
+
+        if (this.render.sizer.widerScreen && this.render.mainContainer)
+        {
+            this.render.mainContainer.mask = this.render.mainContainerMask;
+
+            this.render.mainContainerMask.clear()
+                .beginFill(0xFFFFFF)
+                .drawRect(this.render.sizer.widthOffset, 0, this.render.sizer.width, this.render.sizer.height)
+                .endFill();
+        }
+        else
+        {
+            this.render.mainContainer.mask = null;
+        }
+        
         if (this.render.mainContainerCover)
         {
             let bgScaleWidth = this.render.pixi.screen.width / this.render.mainContainerCover.texture.width;
@@ -123,7 +144,7 @@ export default class Game
             this.render.mainContainerCover.scale.set(bgScale);
             this.render.mainContainerCover.position.set(this.render.pixi.screen.width / 2, this.render.pixi.screen.height / 2);
 
-            this.render.mainContainerCover.visible = !this.render.sizer.widerScreen;
+            this.render.mainContainerCover.visible = this.render.sizer.widerScreen;
         }
         
         this.render.resize();

@@ -27,7 +27,7 @@ export default class Render
 
         this.sprites.mainContainer = new PIXI.Container();
         this.sprites.mainContainer.zIndex = 10;
-        this.pixi.stage.addChild(this.sprites.mainContainer);
+        // this.pixi.stage.addChild(this.sprites.mainContainer);
 
         this.sprites.mainContainerMask = new PIXI.Graphics();
         this.sprites.mainContainer.mask = this.sprites.mainContainerMask;
@@ -54,7 +54,7 @@ export default class Render
             this.sprites.bg.addChild(bgCover);
             this.sprites.bg.anchor.set(0.5);
 
-            this.pixi.stage.addChild(this.sprites.bg);
+            // this.pixi.stage.addChild(this.sprites.bg);
 
             this.pixi.stage.sortChildren();
         }
