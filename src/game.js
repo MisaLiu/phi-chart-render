@@ -1,4 +1,3 @@
-import Render from './render';
 import Judgement from './judgement';
 
 import * as PIXI from 'pixi.js-legacy';
@@ -135,7 +134,7 @@ export default class Game
             this.render.mainContainer.mask = null;
         }
         
-        if (this.render.mainContainerCover)
+        if (this.render.sizer.widerScreen && this.render.mainContainerCover)
         {
             let bgScaleWidth = this.render.pixi.screen.width / this.render.mainContainerCover.texture.width;
             let bgScaleHeight = this.render.pixi.screen.height / this.render.mainContainerCover.texture.height;
@@ -144,7 +143,11 @@ export default class Game
             this.render.mainContainerCover.scale.set(bgScale);
             this.render.mainContainerCover.position.set(this.render.pixi.screen.width / 2, this.render.pixi.screen.height / 2);
 
-            this.render.mainContainerCover.visible = this.render.sizer.widerScreen;
+            this.render.mainContainerCover.visible = true;
+        }
+        else
+        {
+            this.render.mainContainerCover.visible = false;
         }
         
         this.render.resize();
