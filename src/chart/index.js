@@ -26,8 +26,6 @@ export default class Chart
             judgeline: [],
             note: []
         }
-
-        this._calcTick = this._calcTick.bind(this);
     }
 
     static from(rawChart, _chartInfo = {})
@@ -204,27 +202,10 @@ export default class Chart
         this.sprites.info.songDiff.position.y = size.height - size.heightPercent * 43;
     }
 
-    async start(ticker)
+    calcTime(_currentTime)
     {
-        if (!this.music)
-        {
-            throw new Error('You must choose a music for this chart!');
-        }
+        let currentTime = Math.fround(_currentTime - this.offset);
 
-        this._music = await this.music.play();
-        this._audioOffset = this._music._source.context.baseLatency;
-
-        ticker.add(this._calcTick);
-    }
-
-    _calcTick()
-    {
-        let currentTime = Math.fround(this._music.progress * this.music.duration - this._audioOffset - this.offset);
-        this.calcTime(currentTime);
-    }
-
-    calcTime(currentTime)
-    {
         this.judgelines.forEach((judgeline) =>
         {
             judgeline.calcTime(currentTime, this.renderSize);

@@ -18,7 +18,7 @@ export default class Game
             view            : params.render.canvas ? params.render.canvas : undefined,
             backgroundAlpha : 1
         });
-        this.render.parentNode = params.render.resizeTo ? params.render.resizeTo : (params.render.canvas ? params.render.canvas.parentNode : document.documentElement);
+        this.render.parentNode = params.render.resizeTo ? params.render.resizeTo : (params.render.canvas ? params.render.canvas.parentNode : this.render.view.parentElement);
 
         // 创建舞台主渲染区
         this.render.mainContainer = new PIXI.Container();
@@ -42,19 +42,21 @@ export default class Game
         this.zipFiles = params.zipFiles;
 
         /* ===== 用户设置暂存 ===== */
-        settings.noteScale = !isNaN(Number(params.render.noteScale)) ? Number(params.render.noteScale) : 8000;
-        settings.bgDim = !isNaN((Number(params.render.bgDim))) ? Number(params.render.bgDim) : 0.5;
+        settings.noteScale = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
+        settings.bgDim     = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
+        settings.offset    = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
 
         this.sprites = {};
 
         this._music = null;
+        this._audioOffset = 0;
 
         if (!this.chart) throw new Error('You must select a chart to play');
         if (!this.texture) throw new Error('Render must use a texture object for creating sprites.');
         if (!this.zipFiles) this.zipFiles = {};
 
         this.resize = this.resize.bind(this);
-        this._tick = this._tick.bind(this);
+        this._calcTick = this._calcTick.bind(this);
 
         this.resize(false);
         window.addEventListener('resize', this.resize);
@@ -99,16 +101,27 @@ export default class Game
 
     start()
     {
+        if (!this.render) return;
+        if (!this.chart.music) throw new Error('You must have a music to play');
+
         this.resize();
         this.chart.addFunction('note', this.judgement.calcNote);
-        this.render.start();
+
         this.render.ticker.add(this.judgement.calcTick);
-        this.chart.start(this.render.ticker);
+        this.render.ticker.add(this._calcTick);
+
+        setTimeout(async () =>
+        {
+            this._music = await this.chart.music.play();
+            this._audioOffset = this._music._source.context.baseLatency;
+        }, 100);
     }
 
-    _tick()
+    _calcTick()
     {
-
+        if (!this.chart) return;
+        if (!this._music) return;
+        this.chart.calcTime(this._music.progress * this.chart.music.duration - this._audioOffset - settings.offset);
     }
 
     resize(withChartSprites = true)
