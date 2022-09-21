@@ -2,32 +2,48 @@ import Judgement from './judgement';
 
 import * as PIXI from 'pixi.js-legacy';
 
+var settings = {}; // 用户渲染设置暂存区
 export default class Game
 {
     constructor(params)
     {
-        this.render = new Render({
-            width       : params.render.width,
-            height      : params.render.height,
-            resolution  : params.render.resolution,
-            autoDensity : params.render.autoDensity,
-            antialias   : params.render.antialias,
-            forceCanvas : params.render.forceCanvas,
-            canvas      : params.render.canvas,
-            resizeTo    : params.render.resizeTo,
-
-            noteScale : params.render.noteScale,
-            bgDim     : params.render.bgDim
+       /* ===== 创建 render ===== */
+        this.render = new PIXI.Application({
+            width           : !isNaN(Number(params.render.width)) ? Number(params.render.width) : document.documentElement.clientWidth,
+            height          : !isNaN(Number(params.render.height)) ? Number(params.render.height) : document.documentElement.clientHeight,
+            resolution      : !isNaN(Number(params.render.resolution)) ? Number(params.render.resolution) : window.devicePixelRatio,
+            autoDensity     : params.render.autoDensity ? !!params.render.autoDensity : true,
+            antialias       : params.render.antialias ? !!params.render.antialias : true,
+            forceCanvas     : params.render.forceCanvas ? !!params.render.forceCanvas : false,
+            view            : params.render.canvas ? params.render.canvas : undefined,
+            backgroundAlpha : 1
         });
+        this.render.parentNode = params.render.resizeTo ? params.render.resizeTo : (params.render.canvas ? params.render.canvas.parentNode : document.documentElement);
+
+        // 创建舞台主渲染区
+        this.render.mainContainer = new PIXI.Container();
+        this.render.mainContainer.zIndex = 10;
+        this.render.stage.addChild(this.render.mainContainer);
+
+        // 创建舞台主渲染区可见范围
+        this.render.mainContainerMask = new PIXI.Graphics();
+
+        /* ===== 创建判定 ===== */
         this.judgement = new Judgement({
             chart   : params.chart,
-            stage   : this.render.sprites.mainContainer,
+            stage   : this.render.mainContainer,
             canvas  : params.render.canvas,
             texture : params.texture.clickRaw
         });
+
+        /* ===== 加载谱面基本信息 ===== */
         this.chart    = params.chart;
         this.texture  = params.texture;
         this.zipFiles = params.zipFiles;
+
+        /* ===== 用户设置暂存 ===== */
+        settings.noteScale = !isNaN(Number(params.render.noteScale)) ? Number(params.render.noteScale) : 8000;
+        settings.bgDim = !isNaN((Number(params.render.bgDim))) ? Number(params.render.bgDim) : 0.5;
 
         this.sprites = {};
 
@@ -40,21 +56,12 @@ export default class Game
         this.resize = this.resize.bind(this);
         this._tick = this._tick.bind(this);
 
-        this.render.resize();
+        this.resize(false);
         window.addEventListener('resize', this.resize);
     }
 
     createSprites()
     {
-        // 创建舞台主渲染区
-        this.render.mainContainer = new PIXI.Container();
-        this.render.mainContainer.zIndex = 10;
-        this.render.pixi.stage.addChild(this.render.mainContainer);
-        
-        // 创建舞台主渲染区可见范围
-        this.render.mainContainerMask = new PIXI.Graphics();
-        // this.render.mainContainer.mask = this.render.mainContainerMask;
-
         if (this.chart.bg)
         { // 创建超宽屏舞台覆盖
             this.render.mainContainerCover = new PIXI.Sprite(this.chart.bg);
@@ -72,13 +79,13 @@ export default class Game
             this.render.mainContainerCover.addChild(bgCover);
             this.render.mainContainerCover.anchor.set(0.5);
 
-            this.render.pixi.stage.addChild(this.render.mainContainerCover);
+            this.render.stage.addChild(this.render.mainContainerCover);
         }
 
         this.chart.createSprites(
             this.render.mainContainer,
             this.render.sizer,
-            this.render.bgDim,
+            settings.bgDim,
             this.texture,
             this.zipFiles
         );
@@ -86,11 +93,8 @@ export default class Game
         this.judgement.stage = this.render.mainContainer;
         this.judgement.createSprites();
 
-        this.render.createBgSprites(this.chart.bg);
-
         this.render.mainContainer.sortChildren();
-        this.render.pixi.stage.sortChildren();
-        this.render.sprites.mainContainer.sortChildren();
+        this.render.stage.sortChildren();
     }
 
     start()
@@ -98,8 +102,8 @@ export default class Game
         this.resize();
         this.chart.addFunction('note', this.judgement.calcNote);
         this.render.start();
-        this.render.pixi.ticker.add(this.judgement.calcTick);
-        this.chart.start(this.render.pixi.ticker);
+        this.render.ticker.add(this.judgement.calcTick);
+        this.chart.start(this.render.ticker);
     }
 
     _tick()
@@ -107,19 +111,18 @@ export default class Game
 
     }
 
-    resize()
+    resize(withChartSprites = true)
     {
         if (!this.render) return;
 
-        // this.render.resize();
-        this.render.pixi.renderer.resize(this.render.parentNode.clientWidth, this.render.parentNode.clientHeight);
+        this.render.renderer.resize(this.render.parentNode.clientWidth, this.render.parentNode.clientHeight);
 
         // 计算新尺寸相关数据
-        this.render.sizer = calcResizer(this.render.parentNode.clientWidth, this.render.parentNode.clientHeight, this.render.noteScale);
+        this.render.sizer = calcResizer(this.render.screen.width, this.render.screen.height, settings.noteScale);
 
-        // 主舞台区尺寸重计算
+        // 主舞台区位置重计算
         this.render.mainContainer.position.x = this.render.sizer.widthOffset;
-
+        // 主舞台可视区域计算
         if (this.render.sizer.widerScreen && this.render.mainContainer)
         {
             this.render.mainContainer.mask = this.render.mainContainerMask;
@@ -133,27 +136,28 @@ export default class Game
         {
             this.render.mainContainer.mask = null;
         }
-        
+        // 主舞台超宽屏覆盖计算
         if (this.render.sizer.widerScreen && this.render.mainContainerCover)
         {
-            let bgScaleWidth = this.render.pixi.screen.width / this.render.mainContainerCover.texture.width;
-            let bgScaleHeight = this.render.pixi.screen.height / this.render.mainContainerCover.texture.height;
+            let bgScaleWidth = this.render.screen.width / this.render.mainContainerCover.texture.width;
+            let bgScaleHeight = this.render.screen.height / this.render.mainContainerCover.texture.height;
             let bgScale = bgScaleWidth > bgScaleHeight ? bgScaleWidth : bgScaleHeight;
 
             this.render.mainContainerCover.scale.set(bgScale);
-            this.render.mainContainerCover.position.set(this.render.pixi.screen.width / 2, this.render.pixi.screen.height / 2);
+            this.render.mainContainerCover.position.set(this.render.screen.width / 2, this.render.screen.height / 2);
 
             this.render.mainContainerCover.visible = true;
         }
-        else
+        else if (this.render.mainContainerCover)
         {
             this.render.mainContainerCover.visible = false;
         }
         
-        this.render.resize();
-
-        this.judgement.resizeSprites(this.render.sizer);
-        this.chart.resizeSprites(this.render.sizer);
+        if (withChartSprites)
+        {
+            this.judgement.resizeSprites(this.render.sizer);
+            this.chart.resizeSprites(this.render.sizer);
+        }
     }
 }
 
