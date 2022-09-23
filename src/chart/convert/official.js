@@ -63,12 +63,12 @@ export default function OfficialChartConverter(_chart)
 
         _judgeline.notesAbove.forEach((rawNote, rawNoteIndex) =>
         {
-            let note = pushNote(rawNote, judgeline, rawNoteIndex + 1, _judgeline.bpm, true);
+            let note = pushNote(rawNote, judgeline, rawNoteIndex, _judgeline.bpm, true);
             chart.notes.push(note);
         });
         _judgeline.notesBelow.forEach((rawNote, rawNoteIndex) =>
         {
-            let note = pushNote(rawNote, judgeline, rawNoteIndex + 1, _judgeline.bpm, false);
+            let note = pushNote(rawNote, judgeline, rawNoteIndex, _judgeline.bpm, false);
             chart.notes.push(note);
         });
 

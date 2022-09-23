@@ -402,7 +402,7 @@ export default function PhiEditChartConverter(_chart)
 
         // 推送 Note
         notes.push(new Note({
-            id            : noteIndex + 1,
+            id            : noteIndex,
             type          : note.type,
             time          : note.startTime,
             holdTime      : Math.fround(note.endTime - note.startTime),
