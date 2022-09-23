@@ -61,14 +61,14 @@ export default function OfficialChartConverter(_chart)
         judgeline.sortEvent();
         judgeline.calcFloorPosition();
 
-        _judgeline.notesAbove.forEach((rawNote) =>
+        _judgeline.notesAbove.forEach((rawNote, rawNoteIndex) =>
         {
-            let note = pushNote(rawNote, judgeline, _judgeline.bpm, true);
+            let note = pushNote(rawNote, judgeline, rawNoteIndex + 1, _judgeline.bpm, true);
             chart.notes.push(note);
         });
-        _judgeline.notesBelow.forEach((rawNote) =>
+        _judgeline.notesBelow.forEach((rawNote, rawNoteIndex) =>
         {
-            let note = pushNote(rawNote, judgeline, _judgeline.bpm, false);
+            let note = pushNote(rawNote, judgeline, rawNoteIndex + 1, _judgeline.bpm, false);
             chart.notes.push(note);
         });
 
@@ -87,7 +87,7 @@ export default function OfficialChartConverter(_chart)
 
     return chart;
 
-    function pushNote(rawNote, judgeline, bpm = 120, isAbove = true)
+    function pushNote(rawNote, judgeline, id = -1, bpm = 120, isAbove = true)
     {
         rawNote.isAbove = isAbove;
         rawNote.time = calcRealTime(rawNote.time, bpm);
@@ -115,6 +115,7 @@ export default function OfficialChartConverter(_chart)
         }
 
         return new Note({
+            id            : id,
             lineId        : rawNote.lineId,
             type          : rawNote.type,
             time          : rawNote.time,

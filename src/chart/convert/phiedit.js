@@ -375,7 +375,7 @@ export default function PhiEditChartConverter(_chart)
     // 计算 note 的真实时间
     commands.note = utils.calculateRealTime(commands.bpm, commands.note);
 
-    commands.note.forEach((note) =>
+    commands.note.forEach((note, noteIndex) =>
     {
         let judgeline = judgelines[note.lineId];
 
@@ -402,6 +402,7 @@ export default function PhiEditChartConverter(_chart)
 
         // 推送 Note
         notes.push(new Note({
+            id            : noteIndex + 1,
             type          : note.type,
             time          : note.startTime,
             holdTime      : Math.fround(note.endTime - note.startTime),

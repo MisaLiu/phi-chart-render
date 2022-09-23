@@ -20,7 +20,6 @@ export default class Note
         this.isAbove       = !!params.isAbove;
         this.isFake        = !!params.isFake;
         this.isMulti       = !!params.isMulti;
-        this.forceSpeed    = this.type === 3 ? !!params.forceSpeed : false;
         this.texture       = (params.texture && params.texture != '') ? params.texture : undefined;
         this.hitsound      = (params.hitsound && params.hitsound != '') ? params.hitsound : undefined;
         this.judgeline     = params.judgeline;
