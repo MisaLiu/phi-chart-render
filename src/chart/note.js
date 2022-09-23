@@ -162,23 +162,34 @@ export default class Note
                 holdEndY = this.type === 3 ? this.holdLength * this.speed * size.noteSpeed / size.noteScale * (this.isAbove ? -1 : 1) : 0;
 
             // Hold 的特殊位置写法
-            if (
-                this.type === 3 &&
-                (
-                    (this.floorPosition <= this.judgeline.floorPosition && this.endPosition > this.judgeline.floorPosition) ||
-                    (this.time <= currentTime && this.holdTime > currentTime)
-                )
-            ) {
-                let holdLength = Math.fround((this.endPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed / size.noteScale);
-                originY = 0;
-
-                this.sprite.children[0].visible = false;
-                this.sprite.children[1].height = holdLength;
-                this.sprite.children[2].position.y = holdLength * -1;
-            }
-            else if (this.type === 3 && this.floorPosition > this.judgeline.floorPosition)
+            if (this.type === 3)
             {
-                this.sprite.children[0].visible = true;
+                if (
+                    /* (this.floorPosition <= this.judgeline.floorPosition && this.endPosition > this.judgeline.floorPosition) && */
+                    (this.time <= currentTime && this.holdTimeLength > currentTime)
+                ) {
+                    let holdLength = Math.fround((this.endPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed / size.noteScale);
+                    originY = 0;
+
+                    this.sprite.children[0].visible = false;
+                    this.sprite.children[1].height = holdLength;
+                    this.sprite.children[2].position.y = holdLength * -1;
+                }
+                else if (currentTime < this.time)
+                {
+                    if (this.floorPosition >= this.judgeline.floorPosition)
+                    {
+                        this.sprite.visible = true;
+                    }
+                    else
+                    {
+                        this.sprite.visible = false;
+                    }
+                }
+                else
+                {
+                    this.sprite.visible = false;
+                }
             }
 
             this.sprite.judgelineX = originX * this.judgeline.cosr + this.judgeline.sprite.position.x;

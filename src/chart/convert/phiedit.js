@@ -404,7 +404,7 @@ export default function PhiEditChartConverter(_chart)
         notes.push(new Note({
             type          : note.type,
             time          : note.startTime,
-            holdTime      : note.endTime,
+            holdTime      : Math.fround(note.endTime - note.startTime),
             speed         : note.speed,
             isAbove       : note.isAbove,
             isFake        : note.isFake,

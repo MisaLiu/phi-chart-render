@@ -247,7 +247,7 @@ export default function RePhiEditChartConverter(_chart)
                     _note.type == 4 ? 2 : 1
                 ),
                 time          : _note.startTime,
-                holdTime      : _note.endTime,
+                holdTime      : Math.fround(_note.endTime - _note.startTime),
                 speed         : _note.speed,
                 floorPosition : _note.floorPosition,
                 holdLength    : _note.holdLength,

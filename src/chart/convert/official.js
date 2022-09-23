@@ -182,5 +182,5 @@ function convertOfficialVersion(chart)
 }
 
 function calcRealTime(time, bpm) {
-    return Number(Number(time / bpm * 1.875).toFixed(4));
+    return Math.fround(time / bpm * 1.875);
 }

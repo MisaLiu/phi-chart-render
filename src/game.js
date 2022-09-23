@@ -32,7 +32,7 @@ export default class Game
         this.judgement = new Judgement({
             chart   : params.chart,
             stage   : this.render.mainContainer,
-            canvas  : params.render.canvas,
+            canvas  : this.render.view,
             texture : params.texture.clickRaw
         });
 
@@ -42,9 +42,10 @@ export default class Game
         this.zipFiles = params.zipFiles;
 
         /* ===== 用户设置暂存 ===== */
-        settings.noteScale = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
-        settings.bgDim     = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
-        settings.offset    = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
+        this._settings = {};
+        this._settings.noteScale = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
+        this._settings.bgDim     = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
+        this._settings.offset    = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
 
         this.sprites = {};
 
@@ -87,7 +88,7 @@ export default class Game
         this.chart.createSprites(
             this.render.mainContainer,
             this.render.sizer,
-            settings.bgDim,
+            this._settings.bgDim,
             this.texture,
             this.zipFiles
         );
@@ -121,7 +122,7 @@ export default class Game
     {
         if (!this.chart) return;
         if (!this._music) return;
-        this.chart.calcTime(this._music.progress * this.chart.music.duration - this._audioOffset - settings.offset);
+        this.chart.calcTime(this._music.progress * this.chart.music.duration - this._audioOffset - this._settings.offset);
     }
 
     resize(withChartSprites = true)
@@ -131,7 +132,7 @@ export default class Game
         this.render.renderer.resize(this.render.parentNode.clientWidth, this.render.parentNode.clientHeight);
 
         // 计算新尺寸相关数据
-        this.render.sizer = calcResizer(this.render.screen.width, this.render.screen.height, settings.noteScale);
+        this.render.sizer = calcResizer(this.render.screen.width, this.render.screen.height, this._settings.noteScale);
 
         // 主舞台区位置重计算
         this.render.mainContainer.position.x = this.render.sizer.widthOffset;
