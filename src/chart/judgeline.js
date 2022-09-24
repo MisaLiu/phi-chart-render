@@ -1,3 +1,4 @@
+import utils from './convert/utils';
 import { Sprite, Text } from 'pixi.js-legacy';
 
 export default class Judgeline
@@ -57,6 +58,11 @@ export default class Judgeline
     {
         if (this.eventLayers.length <= 0) throw new Error('No event layer in this judgeline');
 
+        this.eventLayers.forEach((eventLayer) =>
+        {
+            eventLayer.speed = utils.arrangeSameValueSpeedEvent(eventLayer.speed);
+        });
+
         let sameTimeSpeedEventAlreadyExist = {};
         let currentFloorPosition = 0;
         let floorPositions = [];
@@ -105,7 +111,7 @@ export default class Judgeline
         for (let floorPositionIndex = 1; floorPositionIndex < floorPositions.length; floorPositionIndex++)
         {
             let currentEvent = floorPositions[floorPositionIndex];
-            let nextEvent = floorPositionIndex < floorPositions.length - 1 ? floorPositions[floorPositionIndex + 1] : { startTime: 1e9 };
+            let nextEvent = floorPositionIndex < floorPositions.length - 1 ? floorPositions[floorPositionIndex + 1] : { startTime: 1e4 };
             let currentTime = currentEvent.startTime;
 
             floorPositions[floorPositionIndex].floorPosition = Math.fround(currentFloorPosition);
