@@ -109,7 +109,7 @@ export default function RePhiEditChartConverter(_chart)
 
         // 一些基本信息
         judgeline.parentLine =_judgeline.father;
-        judgeline.texture = _judgeline.Texture != 'line.png' ? _judgeline.Texture : 'judgeline';
+        judgeline.texture = _judgeline.Texture != 'line.png' ? _judgeline.Texture : null;
 
         // 处理 EventLayer
         _judgeline.eventLayers.forEach((_eventLayer) =>

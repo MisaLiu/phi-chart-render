@@ -6,7 +6,7 @@ export default class Judgeline
     constructor(params)
     {
         this.id = !isNaN(params.id) ? Number(params.id) : -1;
-        this.texture = 'judgeline';
+        this.texture = null;
         this.parentLine = params.parentLine ? params.parentLine : null;
 
         this.eventLayers = [];

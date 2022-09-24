@@ -33,11 +33,14 @@ const files = {
     bg: null
 };
 
-const textures = {};
+const assets = {
+    textures: {},
+    sounds: {}
+};
 
 window.doms = doms;
 window.files = files;
-window.textures = textures;
+window.assets = assets;
 
 window.loader = new Loader();
 
@@ -99,7 +102,7 @@ doms.startBtn.addEventListener('click', () => {
 
     window._game = new Game({
         chart: files.chart,
-        texture: textures,
+        assets: assets,
         render: {
             canvas: doms.canvas,
             resizeTo: document.documentElement,
@@ -169,21 +172,25 @@ window.addEventListener('load', async () => {
         { name: 'clickRaw', url: './assets/clickRaw128.png' }
     ]).load((loader, resources) => {
         for (const name in resources) {
-            textures[name] = resources[name].texture;
-
-            if (name == 'clickRaw')
+            if (resources[name].texture)
             {
-                let _clickTextures = [];
-                
-                for (let i = 0; i < Math.floor(textures[name].height / textures[name].width); i++) {
-                    let rectangle = new Rectangle(0, i * textures[name].width, textures[name].width, textures[name].width);
-                    let texture = new Texture(textures[name].baseTexture, rectangle);
+                assets.textures[name] = resources[name].texture;
+
+                if (name == 'clickRaw')
+                {
+                    let _clickTextures = [];
                     
-                    _clickTextures.push(texture);
+                    for (let i = 0; i < Math.floor(assets.textures[name].height / assets.textures[name].width); i++) {
+                        let rectangle = new Rectangle(0, i * assets.textures[name].width, assets.textures[name].width, assets.textures[name].width);
+                        let texture = new Texture(assets.textures[name].baseTexture, rectangle);
+                        
+                        _clickTextures.push(texture);
+                    }
+                    
+                    assets.textures[name] = _clickTextures;
                 }
-                
-                textures[name] = _clickTextures;
             }
+            
         }
         
         doms.loadingStatus.innerText = 'All done!';

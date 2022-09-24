@@ -20,8 +20,8 @@ export default class Note
         this.isAbove       = !!params.isAbove;
         this.isFake        = !!params.isFake;
         this.isMulti       = !!params.isMulti;
-        this.texture       = (params.texture && params.texture != '') ? params.texture : undefined;
-        this.hitsound      = (params.hitsound && params.hitsound != '') ? params.hitsound : undefined;
+        this.texture       = (params.texture && params.texture != '') ? params.texture : null;
+        this.hitsound      = (params.hitsound && params.hitsound != '') ? params.hitsound : null;
         this.judgeline     = params.judgeline;
 
         if (!this.judgeline) throw new Error('Note must have a judgeline');

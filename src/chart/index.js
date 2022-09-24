@@ -8,9 +8,11 @@ export default class Chart
     {
         this.judgelines = [];
         this.notes      = [];
-        this.offset     = !isNaN(Number(params.offset)) ? Number(Number(params.offset).toFixed(4)) : 0;
+        this.offset     = !isNaN(Number(params.offset)) ? Number(params.offset) : 0;
+
         this.music      = params.music ? params.music : null;
         this.bg         = params.bg ? params.bg : null;
+
         this.info       = {
             name      : params.name ? params.name : 'Untitled',
             artist    : params.artist ? params.artist : 'Unknown',
@@ -19,8 +21,6 @@ export default class Chart
             difficult : params.difficult ? params.difficult : 'SP Lv.?'
         };
 
-        this._music = null;
-        this._audioOffset = 0;
         this.sprites = {};
         this.function = {
             judgeline: [],
@@ -251,16 +251,16 @@ export default class Chart
 function arrangeLineEvents(events) {
     let oldEvents = events.slice();
     let newEvents2 = [];
-    let newEvents = [{ // 以 1-1e6 开始
-        startTime : 1 - 1e6,
+    let newEvents = [{ // 以 -99 开始
+        startTime : -99,
         endTime   : 0,
         start     : oldEvents[0] ? oldEvents[0].start : 0,
         end       : oldEvents[0] ? oldEvents[0].start : 0
     }];
     
-    oldEvents.push({ // 以 1e9 结束
+    oldEvents.push({ // 以 1000 结束
         startTime : 0,
-        endTime   : 1e9,
+        endTime   : 1e3,
         start     : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0,
         end       : oldEvents[oldEvents.length - 1] ? oldEvents[oldEvents.length - 1].end : 0
     });

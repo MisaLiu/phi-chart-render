@@ -1,12 +1,41 @@
 import Judgement from './judgement';
-
 import * as PIXI from 'pixi.js-legacy';
 
-var settings = {}; // 用户渲染设置暂存区
+/**
+  * {
+  *     render: {
+  *         width?,
+  *         height?,
+  *         resolution?,
+  *         autoDensity?,
+  *         antialias?,
+  *         forceCanvas?,
+  *         view?,
+  *         resizeTo?
+  *     },
+  *     chart,
+  *     asstes,
+  *     zipFiles?,
+  *     settings: {
+  *         noteScale?,
+  *         bgDim?,
+  *         audioOffset?
+  *     }
+  * }
+ **/
 export default class Game
 {
     constructor(params)
     {
+        /* ===== 加载谱面基本信息 ===== */
+        this.chart    = params.chart;
+        this.assets   = params.assets;
+        this.zipFiles = params.zipFiles;
+
+        if (!this.chart) throw new Error('You must select a chart to play');
+        if (!this.assets) throw new Error('Render must use a texture object for creating sprites.');
+        if (!this.zipFiles) this.zipFiles = {};
+
        /* ===== 创建 render ===== */
         this.render = new PIXI.Application({
             width           : !isNaN(Number(params.render.width)) ? Number(params.render.width) : document.documentElement.clientWidth,
@@ -30,16 +59,11 @@ export default class Game
 
         /* ===== 创建判定 ===== */
         this.judgement = new Judgement({
-            chart   : params.chart,
+            chart   : this.chart,
             stage   : this.render.mainContainer,
             canvas  : this.render.view,
-            texture : params.texture.clickRaw
+            texture : this.assets.textures.clickRaw
         });
-
-        /* ===== 加载谱面基本信息 ===== */
-        this.chart    = params.chart;
-        this.texture  = params.texture;
-        this.zipFiles = params.zipFiles;
 
         /* ===== 用户设置暂存 ===== */
         this._settings = {};
@@ -51,10 +75,6 @@ export default class Game
 
         this._music = null;
         this._audioOffset = 0;
-
-        if (!this.chart) throw new Error('You must select a chart to play');
-        if (!this.texture) throw new Error('Render must use a texture object for creating sprites.');
-        if (!this.zipFiles) this.zipFiles = {};
 
         this.resize = this.resize.bind(this);
         this._calcTick = this._calcTick.bind(this);
@@ -89,7 +109,7 @@ export default class Game
             this.render.mainContainer,
             this.render.sizer,
             this._settings.bgDim,
-            this.texture,
+            this.assets.textures,
             this.zipFiles
         );
 
