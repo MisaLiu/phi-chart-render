@@ -384,6 +384,7 @@ function calcNoteJudge(currentTime, note)
     {
         case 1:
         {
+            /*
             if (timeBetweenReal <= this.judgeTimes.bad)
             {
                 note.isScored = true;
@@ -398,6 +399,7 @@ function calcNoteJudge(currentTime, note)
             {
                 note.sprite.alpha = 0;
             }
+            */
             break;
         }
         case 2:
