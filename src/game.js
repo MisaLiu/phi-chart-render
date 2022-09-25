@@ -62,7 +62,8 @@ export default class Game
             chart   : this.chart,
             stage   : this.render.mainContainer,
             canvas  : this.render.view,
-            texture : this.assets.textures.clickRaw
+            texture : this.assets.textures.clickRaw,
+            sounds  : this.assets.sounds
         });
 
         /* ===== 用户设置暂存 ===== */
@@ -126,10 +127,11 @@ export default class Game
         if (!this.chart.music) throw new Error('You must have a music to play');
 
         this.resize();
-        this.chart.addFunction('note', this.judgement.calcNote);
 
-        this.render.ticker.add(this.judgement.calcTick);
         this.render.ticker.add(this._calcTick);
+        
+        this.render.ticker.add(this.judgement.calcTick);
+        this.chart.addFunction('note', this.judgement.calcNote);
 
         setTimeout(async () =>
         {

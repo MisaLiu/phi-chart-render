@@ -1,11 +1,14 @@
 import Score from './score';
 import { Text, Container, Graphics, AnimatedSprite } from 'pixi.js-legacy';
 
-var JudgeTimes = {};
 const AllJudgeTimes = {
     bad     : 200,
     good    : 160,
-    percect : 80
+    perfect : 80,
+
+    badChallenge     : 100,
+    goodChallenge    : 75,
+    perfectChallenge : 40
 };
 
 export default class Judgement
@@ -16,7 +19,7 @@ export default class Judgement
         this.stage    = params.stage;
         this.autoPlay = params.autoPlay ? !!params.autoPlay : false;
         this.texture  = params.texture;
-        this.sounds   = {};
+        this.sounds   = params.sounds;
 
         this.inputs      = {};
         this.judgePoints = [];
@@ -24,21 +27,42 @@ export default class Judgement
         this.renderSize = {};
         this.sprites    = null;
 
-        if (!params.canvas) throw new Error('You cannot do judgement without a canvas');
         if (!params.stage) throw new Error('You cannot do judgement without a stage');
         if (!params.chart) throw new Error('You cannot do judgement without a chart');
 
-        if (false)
-        {
+        this._autoPlay      = params.autoPlay ? !!params.autoPlay : false;
+        this._challengeMode = params.challangeMode ? !!params.challangeMode : false;
 
-        }
-        else
-        {
-            JudgeTimes.percect = AllJudgeTimes.percect / 1000;
-            JudgeTimes.good = AllJudgeTimes.good / 1000;
-            JudgeTimes.bad = AllJudgeTimes.bad / 1000;
-        }
+        /* ===== 判定用时间计算 ===== */
+        this.judgeTimes = {
+            perfect : (!this._challengeMode ? AllJudgeTimes.perfect : AllJudgeTimes.perfectChallenge) / 1000,
+            good    : (!this._challengeMode ? AllJudgeTimes.good : AllJudgeTimes.goodChallenge) / 1000,
+            bad     : (!this._challengeMode ? AllJudgeTimes.bad : AllJudgeTimes.badChallenge) / 1000
+        };
 
+        /* ===== 分数计算模块 ===== */
+        this.score = {
+            scorePerNote  : !this._challengeMode ? 900000 / this.chart.totalRealNotes : 1000000 / this.chart.totalRealNotes,
+            scorePerCombo : !this._challengeMode ? 100000 / this.chart.totalRealNotes : 0,
+
+            score    : 0,
+            acc      : 0,
+            combo    : 0,
+            maxCombo : 0,
+
+            perfect  : 0,
+            good     : 0,
+            bad      : 0,
+            miss     : 0
+        };
+
+        this.calcTick = this.calcTick.bind(this);
+        this.calcNote = calcNoteJudge.bind(this);
+    }
+
+    addListenerToCanvas(canvas)
+    {
+        // 检测浏览器是否支持 preventDefault
         let passiveIfSupported = true;
         try {
             params.canvas.addEventListener('test', null, Object.defineProperty({}, 'passive', { get: function() { passiveIfSupported = { passive: false }; } }));
@@ -116,9 +140,6 @@ export default class Judgement
             this.inputs[e.button] = undefined;
 
         }, passiveIfSupported);
-
-        this.calcTick = this.calcTick.bind(this);
-        this.calcNote = this.calcNote.bind(this);
     }
 
     createSprites(showInputPoint = true)
@@ -216,33 +237,44 @@ export default class Judgement
 
         }
 
-        this.sprites.inputPoint.clear();
+        if (this.sprites.inputPoint) this.sprites.inputPoint.clear();
 
         for (const id in this.inputs)
         {
             if (this.inputs[id])
             {
                 this.inputs[id].calcTick();
-                this.sprites.inputPoint
-                    .beginFill(0xFF00FF)
-                    .drawCircle(this.inputs[id].x, this.inputs[id].y, 10)
-                    .endFill();
+
+                if (this.sprites.inputPoint)
+                {
+                    this.sprites.inputPoint
+                        .beginFill(0xFF00FF)
+                        .drawCircle(this.inputs[id].x, this.inputs[id].y, 10)
+                        .endFill();
+                }
             }
         }
     }
 
+    /*
     calcNote(currentTime, note)
     {
         if (note.isScored) return;
+        if (note.type !== 3 && note.time + this.judgeTimes.bad < currentTime)
+        {
+            note.isScored = true;
+            note.sprite.visible = false;
+            return;
+        }
 
         let timeBetween = note.time - currentTime,
             timeBetweenReal = timeBetween > 0 ? timeBetween : timeBetween * -1,
             notePosition = { x: note.sprite.judgelineX, y: note.sprite.judgelineY },
             judgeline = note.judgeline;
 
-        if (note.type !== 3 && timeBetween <= 0 && timeBetweenReal <= JudgeTimes.bad && !note.isScored)
+        if (note.type !== 3 && timeBetween <= 0 && timeBetweenReal <= this.judgeTimes.bad && !note.isScored)
         {
-            note.sprite.alpha = 1 + (timeBetween / JudgeTimes.bad);
+            note.sprite.alpha = 1 + (timeBetween / this.judgeTimes.bad);
         }
 
         switch (note.type)
@@ -256,15 +288,15 @@ export default class Judgement
                         judgePoint.isInArea(notePosition.x, notePosition.y, judgeline.cosr, judgeline.sinr, this.renderSize.noteWidth) &&
                         !note.isScored
                     ) {
-                        if  (timeBetweenReal <= JudgeTimes.percect)
+                        if  (timeBetweenReal <= this.judgeTimes.perfect)
                         {
                             note.isScored = true;
                         }
-                        else if (timeBetweenReal <= JudgeTimes.good)
+                        else if (timeBetweenReal <= this.judgeTimes.good)
                         {
                             note.isScored = true;
                         }
-                        else if (timeBetweenReal <= JudgeTimes.bad)
+                        else if (timeBetweenReal <= this.judgeTimes.bad)
                         {
                             note.isScored = true;
                         }
@@ -280,6 +312,12 @@ export default class Judgement
                 break;
             }
         }
+    }
+    */
+
+    pushScore(type = 0)
+    {
+
     }
 }
 
@@ -320,6 +358,60 @@ class JudgePoint
     isInArea(x, y, cosr, sinr, hw)
     {
         return Math.abs((this.x - x) * cosr + (this.y - y) * sinr) <= hw;
+    }
+}
+
+function calcNoteJudge(currentTime, note)
+{
+    if (note.isScored) return; // 已记分忽略
+    if (note.time - this.judgeTimes.bad > currentTime) return; // 不在记分范围内忽略
+    if (note.type !== 3 && note.time + this.judgeTimes.bad < currentTime)
+    {
+        note.isScored = true;
+        note.sprite.alpha = 0;
+        return;
+    }
+
+    let timeBetween = note.time - currentTime,
+        timeBetweenReal = timeBetween > 0 ? timeBetween : timeBetween * -1;
+    
+    if (note.type !== 3 && note.time <= currentTime)
+    {
+        note.sprite.alpha = 1 + (timeBetween / this.judgeTimes.bad);
+    }
+
+    switch (note.type)
+    {
+        case 1:
+        {
+            if (timeBetweenReal <= this.judgeTimes.bad)
+            {
+                note.isScored = true;
+                note.scoreTime = timeBetween;
+
+                if (timeBetweenReal <= this.judgeTimes.perfect) note.score = 4;
+                else if (timeBetweenReal <= this.judgeTimes.good) note.score = 3;
+                else note.score = 2;
+            }
+
+            if (note.isScored)
+            {
+                note.sprite.alpha = 0;
+            }
+            break;
+        }
+        case 2:
+        {
+            break;
+        }
+        case 3:
+        {
+            break;
+        }
+        case 4:
+        {
+            break;
+        }
     }
 }
 
