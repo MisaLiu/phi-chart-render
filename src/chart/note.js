@@ -155,63 +155,45 @@ export default class Note
         if (this.sprite)
         {
             let originX = size.widthPercent * this.positionX,
-                originY = (this.floorPosition - this.judgeline.floorPosition) * this.speed * (this.isAbove ? -1 : 1) * size.noteSpeed,
-                realX = 0,
-                realY = 0,
-                holdEndX = 0,
-                holdEndY = this.type === 3 ? this.holdLength * this.speed * size.noteSpeed / size.noteScale * (this.isAbove ? -1 : 1) : 0;
+                _originY = Math.fround((this.floorPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed),
+                originY = Math.fround(_originY * (this.isAbove ? -1 : 1)),
 
-            // Hold 的特殊位置写法
-            if (this.type === 3)
+                realX = originY * this.judgeline.sinr * -1,
+                realY = originY * this.judgeline.cosr,
+
+                _holdLength = this.type === 3 ? Math.fround((this.endPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed) : _originY,
+                holdLength = this.type === 3 ? Math.fround(_holdLength * (this.isAbove ? -1 : 1)) : originY;
+            
+            if (this.type === 3) // Hold 长度计算
             {
-                if (
-                    /* (this.floorPosition <= this.judgeline.floorPosition && this.endPosition > this.judgeline.floorPosition) && */
-                    (this.time <= currentTime && this.holdTimeLength > currentTime)
-                ) {
-                    let holdLength = Math.fround((this.endPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed / size.noteScale);
-                    originY = 0;
+                if (this.time <= currentTime && this.holdTimeLength > currentTime)
+                {
+                    realX = realY = 0;
 
                     this.sprite.children[0].visible = false;
-                    this.sprite.children[1].height = holdLength;
-                    this.sprite.children[2].position.y = holdLength * -1;
-                }
-                else if (currentTime < this.time)
-                {
-                    if (this.floorPosition >= this.judgeline.floorPosition)
-                    {
-                        this.sprite.visible = true;
-                    }
-                    else
-                    {
-                        this.sprite.visible = false;
-                    }
+                    this.sprite.children[1].height = _holdLength / size.noteScale;
+                    this.sprite.children[2].position.y = this.sprite.children[1].height * -1;
                 }
                 else
                 {
-                    this.sprite.visible = false;
+                    this.sprite.children[0].visible = true;
                 }
             }
-
+            
+            // Note 落在判定线时的绝对位置计算
             this.sprite.judgelineX = originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
             this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
 
-            realX = this.sprite.judgelineX - originY * this.judgeline.sinr;
-            realY = this.sprite.judgelineY + originY * this.judgeline.cosr;
+            // Note 的绝对位置计算
+            realX = this.sprite.judgelineX + realX;
+            realY = this.sprite.judgelineY + realY;
 
-            holdEndX = originX * this.judgeline.cosr - (holdEndY + originY) * this.judgeline.sinr + this.judgeline.sprite.position.x;
-            holdEndY = (holdEndY + originY) * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
-            
-            this.sprite.position.x = realX;
-            this.sprite.position.y = realY;
-            
-            this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
-
-            // 不渲染在屏幕外边的 Note
+            // Note 是否在舞台可视范围内
             this.sprite.outScreen = !isInArea({
                 startX : realX,
-                endX   : holdEndX,
+                endX   : originX * this.judgeline.cosr - holdLength * this.judgeline.sinr + this.judgeline.sprite.position.x,
                 startY : realY,
-                endY   : holdEndY
+                endY   : holdLength * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y
             }, {
                 startX : size.startX,
                 endX   : size.endX,
@@ -220,31 +202,25 @@ export default class Note
             });
             this.sprite.visible = !this.sprite.outScreen;
 
-            // 针对 Fake note 的渲染思路优化
-            if (
-                this.type !== 3 &&
-                this.isFake === true &&
-                (originY * (this.isAbove ? -1 : 1)) < 0
-            ) {
-                this.sprite.outScreen = true;
-                this.sprite.visible = false;
-            }
+            this.sprite.position.x = realX;
+            this.sprite.position.y = realY;
+            
+            this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
 
-            if (this.sprite.outScreen === false)
+            if (!this.sprite.outScreen)
             {
                 if (this.judgeline.alpha < 0) this.sprite.visible = false;
-                else if (this.judgeline.alpha >= 0) this.sprite.visible = true;
 
-                if (this.type !== 3 && (currentTime < this.time || this.isFake))
-                {
-                    if (this.floorPosition < this.judgeline.floorPosition) this.sprite.visible = false;
-                    else if (this.floorPosition >= this.judgeline.floorPosition) this.sprite.visible = true;
-                }
-                else if (this.type === 3)
-                {
-                    if (this.endPosition < this.judgeline.floorPosition) this.sprite.visible = false;
-                    else if (this.endPosition >= this.judgeline.floorPosition) this.sprite.visible = true;
-                }
+                // Note 特殊位置是否可视控制
+                if (this.type !== 3 && this.time > currentTime && _originY < 0) this.sprite.visible = false;
+                if (this.type !== 3 && this.isFake && this.time <= currentTime) this.sprite.visible = false;
+                if (
+                    this.type === 3 &&
+                    (
+                        (this.time > currentTime && _originY < 0) || // 时间未开始时 Hold 在判定线对面
+                        (this.holdTimeLength <= currentTime) // Hold 已经被按完
+                    )
+                ) this.sprite.visible = false;
             }
         }
     }
