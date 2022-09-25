@@ -220,20 +220,11 @@ export default class Note
             });
             this.sprite.visible = !this.sprite.outScreen;
 
-            // 针对 Hold 和 Fake note 的渲染思路优化
+            // 针对 Fake note 的渲染思路优化
             if (
                 this.type !== 3 &&
                 this.isFake === true &&
-                this.floorPosition <= this.judgeline.floorPosition &&
-                currentTime - this.time >= 0
-            ) {
-                this.sprite.outScreen = true;
-                this.sprite.visible = false;
-            }
-            else if (
-                this.type === 3 &&
-                this.endPosition <= this.judgeline.floorPosition &&
-                currentTime - this.holdTimeLength >= 0
+                (originY * (this.isAbove ? -1 : 1)) < 0
             ) {
                 this.sprite.outScreen = true;
                 this.sprite.visible = false;
