@@ -363,6 +363,7 @@ class JudgePoint
 
 function calcNoteJudge(currentTime, note)
 {
+    if (note.isFake) return; // 忽略假 Note
     if (note.isScored) return; // 已记分忽略
     if (note.time - this.judgeTimes.bad > currentTime) return; // 不在记分范围内忽略
     if (note.type !== 3 && note.time + this.judgeTimes.bad < currentTime)
