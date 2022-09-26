@@ -18,8 +18,8 @@
     "webpack-dev-server": "^4.9.2"
   },
   "dependencies": {
-    "@pixi/sound": "^4.2.0",
-    "pixi.js-legacy": "^6.4.2",
+    "@pixi/sound": "^4.3.1",
+    "pixi.js-legacy": "^6.5.4",
     "stackblur-canvas": "^2.5.0"
   }
 }
