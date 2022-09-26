@@ -71,6 +71,8 @@ export default class Game
         this._settings.noteScale = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
         this._settings.bgDim     = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
         this._settings.offset    = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
+        this._settings.multiHL   = params.settings && params.settings.multiHL ? !!params.settings.multiHL : true;
+        this._settings.debug     = params.settings && params.settings.debug ? !!params.settings.debug : false;
 
         this.sprites = {};
 
@@ -109,9 +111,11 @@ export default class Game
         this.chart.createSprites(
             this.render.mainContainer,
             this.render.sizer,
-            this._settings.bgDim,
             this.assets.textures,
-            this.zipFiles
+            this.zipFiles,
+            this._settings.bgDim,
+            this._settings.multiHL,
+            this._settings.debug
         );
 
         this.judgement.stage = this.render.mainContainer;

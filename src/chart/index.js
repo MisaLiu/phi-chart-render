@@ -91,7 +91,7 @@ export default class Chart
         this.function[type].push(func);
     }
 
-    createSprites(stage, size, bgDim = 0.5, textures, zipFiles)
+    createSprites(stage, size, textures, zipFiles = {}, bgDim = 0.5, multiHL = true, debug = false)
     {
         if (this.bg)
         {
@@ -115,7 +115,7 @@ export default class Chart
 
         this.judgelines.forEach((judgeline, index) =>
         {
-            judgeline.createSprite(textures, zipFiles);
+            judgeline.createSprite(textures, zipFiles, debug);
 
             judgeline.sprite.position.x = size.width / 2;
             judgeline.sprite.position.y = size.height / 2;
@@ -125,7 +125,7 @@ export default class Chart
         });
         this.notes.forEach((note, index) =>
         {
-            note.createSprite(textures, zipFiles);
+            note.createSprite(textures, zipFiles, multiHL, debug);
 
             note.sprite.zIndex = this.judgelines.length + (note.type === 3 ? index : index + 10) + 1;
 

@@ -33,7 +33,7 @@ export default class Note
         this.sprite = undefined;
     }
 
-    createSprite(texture, zipFiles, multiHL = true)
+    createSprite(texture, zipFiles, multiHL = true, debug = false)
     {
         if (this.sprite) return this.sprite;
 
@@ -137,16 +137,18 @@ export default class Note
         }
 
         // For debug propose
-        /*
-        let noteId = new Text(this.judgeline.id + (this.isAbove ? '+' : '-') + this.id, {
-            fontSize: 168,
-            fill: 0x0000FF
-        });
-        this.sprite.addChild(noteId);
-        noteId.anchor.set(0.5);
-        noteId.position.set(0);
-        */
-        
+        if (debug)
+        {
+            let noteId = new Text(this.judgeline.id + (this.isAbove ? '+' : '-') + this.id, {
+                fontSize: 168,
+                fill: 0x0000FF
+            });
+            this.sprite.addChild(noteId);
+            noteId.anchor.set(0.5);
+            noteId.position.set(0);
+            noteId.angle = this.isAbove ? 0 : 180;
+        }
+
         return this.sprite;
     }
 
@@ -200,6 +202,8 @@ export default class Note
                 startY : size.startY,
                 endY   : size.endY
             });
+
+            // 推送计算结果到精灵
             this.sprite.visible = !this.sprite.outScreen;
 
             this.sprite.position.x = realX;
@@ -207,6 +211,7 @@ export default class Note
             
             this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
 
+            // Note 在舞台可视范围之内时做进一步计算
             if (!this.sprite.outScreen)
             {
                 if (this.judgeline.alpha < 0) this.sprite.visible = false;

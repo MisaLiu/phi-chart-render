@@ -165,7 +165,7 @@ export default class Judgeline
         return result;
     }
 
-    createSprite(texture, zipFiles)
+    createSprite(texture, zipFiles, debug = false)
     {
         if (this.sprite) return this.sprite;
 
@@ -178,15 +178,16 @@ export default class Judgeline
         this.sprite.alpha = 1;
 
         // For debug propose
-        /*
-        let lineId = new Text(this.id, {
-            fontSize: 24,
-            fill: 0xFF0000
-        });
-        this.sprite.addChild(lineId);
-        lineId.anchor.set(0.5);
-        lineId.position.set(0);
-        */
+        if (debug)
+        {
+            let lineId = new Text(this.id, {
+                fontSize: 24,
+                fill: 0xFF0000
+            });
+            this.sprite.addChild(lineId);
+            lineId.anchor.set(0.5);
+            lineId.position.set(0);
+        }
         
         return this.sprite;
     }

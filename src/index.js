@@ -19,6 +19,7 @@ const doms = {
     },
     settings: {
         autoPlay: document.querySelector('input#settings-autoplay'),
+        debug: document.querySelector('input#settings-debug'),
         offset: document.querySelector('input#settings-offset')
     },
     startBtn : document.querySelector('button#start'),
@@ -107,6 +108,10 @@ doms.startBtn.addEventListener('click', () => {
             canvas: doms.canvas,
             resizeTo: document.documentElement,
             
+        },
+        settings: {
+            audioOffset: doms.settings.offset.value / 1000,
+            debug : doms.settings.debug.checked
         }
     });
 
