@@ -19,7 +19,9 @@ import * as PIXI from 'pixi.js-legacy';
   *     settings: {
   *         noteScale?,
   *         bgDim?,
-  *         audioOffset?
+  *         audioOffset?,
+  *         multiHL?,
+  *         debug?
   *     }
   * }
  **/
@@ -212,10 +214,10 @@ function calcResizer(width, height,  noteScale = 8000)
 
     result.widerScreen = result.width < width ? true : false;
 
-    result.startX = -result.width / 4;
-    result.endX   = result.width + result.width / 4;
-    result.startY = -result.height / 4;
-    result.endY   = result.height + result.height / 4;
+    result.startX = -result.width / 6;
+    result.endX   = result.width + result.width / 6;
+    result.startY = -result.height / 6;
+    result.endY   = result.height + result.height / 6;
 
     result.noteSpeed     = result.height * 0.6;
     result.noteScale     = result.width / noteScale;
