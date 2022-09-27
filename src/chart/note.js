@@ -158,13 +158,13 @@ export default class Note
         {
             let originX = size.widthPercent * this.positionX,
                 _originY = Math.fround((this.floorPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed),
-                originY = Math.fround(_originY * (this.isAbove ? -1 : 1)),
+                originY = _originY * (this.isAbove ? -1 : 1),
 
                 realX = originY * this.judgeline.sinr * -1,
                 realY = originY * this.judgeline.cosr,
 
                 _holdLength = this.type === 3 ? Math.fround((this.endPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed) : _originY,
-                holdLength = this.type === 3 ? Math.fround(_holdLength * (this.isAbove ? -1 : 1)) : originY;
+                holdLength = this.type === 3 ? _holdLength * (this.isAbove ? -1 : 1) : originY;
             
             if (this.type === 3) // Hold 长度计算
             {
