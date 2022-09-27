@@ -1,3 +1,4 @@
+import Input from './input';
 import Score from './score';
 import { Text, Container, Graphics, AnimatedSprite } from 'pixi.js-legacy';
 
@@ -21,7 +22,7 @@ export default class Judgement
         this.texture  = params.texture;
         this.sounds   = params.sounds;
 
-        this.inputs      = {};
+        this.input       = new Input({ canvas: params.canvas });
         this.judgePoints = [];
         
         this.renderSize = {};
@@ -58,88 +59,6 @@ export default class Judgement
 
         this.calcTick = this.calcTick.bind(this);
         this.calcNote = calcNoteJudge.bind(this);
-    }
-
-    addListenerToCanvas(canvas)
-    {
-        // 检测浏览器是否支持 preventDefault
-        let passiveIfSupported = true;
-        try {
-            params.canvas.addEventListener('test', null, Object.defineProperty({}, 'passive', { get: function() { passiveIfSupported = { passive: false }; } }));
-        } catch (err) {}
-
-        params.canvas.addEventListener('touchstart', (e) =>
-        {
-            e.preventDefault();
-            for (const touch of e.changedTouches)
-            {
-                this.inputs[touch.identifier] = new Input({
-                    x: touch.clientX - this.renderSize.widthOffset,
-                    y: touch.clientY
-                });
-            }
-
-        }, passiveIfSupported);
-        params.canvas.addEventListener('touchmove', (e) =>
-        {
-            e.preventDefault();
-            for (const touch of e.changedTouches)
-            {
-                if (this.inputs[touch.identifier])
-                {
-                    this.inputs[touch.identifier].move({
-                        x: touch.clientX - this.renderSize.widthOffset,
-                        y: touch.clientY
-                    });
-                }
-            }
-            
-        }, passiveIfSupported);
-        params.canvas.addEventListener('touchend', (e) =>
-        {
-            e.preventDefault();
-            for (const touch of e.changedTouches)
-            {
-                this.inputs[touch.identifier] = undefined;
-            }
-
-        }, passiveIfSupported);
-        params.canvas.addEventListener('touchcancel', (e) =>
-        {
-            e.preventDefault();
-            for (const touch of e.changedTouches)
-            {
-                this.inputs[touch.identifier] = undefined;
-            }
-
-        }, passiveIfSupported);
-
-        params.canvas.addEventListener('mousedown', (e) =>
-        {
-            e.preventDefault();
-            this.inputs[e.button] = new Input({
-                x: e.clientX - this.renderSize.widthOffset,
-                y: e.clientY
-            });
-
-        }, passiveIfSupported);
-        params.canvas.addEventListener('mousemove', (e) =>
-        {
-            e.preventDefault();
-            if (this.inputs[e.button])
-            {
-                this.inputs[e.button].move({
-                    x: e.clientX - this.renderSize.widthOffset,
-                    y: e.clientY
-                });
-            }
-        }, passiveIfSupported);
-        params.canvas.addEventListener('mouseup', (e) =>
-        {
-            e.preventDefault();
-            this.inputs[e.button] = undefined;
-
-        }, passiveIfSupported);
     }
 
     createSprites(showInputPoint = true)
@@ -183,14 +102,18 @@ export default class Judgement
         this.sprites.score.zIndex = 99999;
         this.stage.addChild(this.sprites.score);
 
+        /*
         this.sprites.inputPoint = new Graphics();
         this.sprites.inputPoint.zIndex = 99999;
-        this.stage.addChild(this.sprites.inputPoint);
+        */
+        this.input.createSprite();
+        this.stage.addChild(this.input.sprite);
     }
 
     resizeSprites(size)
     {
         this.renderSize = size;
+        this.input.resize(size);
 
         if (!this.sprites) return;
 
@@ -217,43 +140,7 @@ export default class Judgement
     calcTick()
     {
         this.judgePoints.length = 0;
-
-        if (!this.autoPlay)
-        {
-            for (const id in this.inputs)
-            {
-                let input = this.inputs[id];
-
-                if (input instanceof Input)
-                {
-                    if (input.time > 0) this.judgePoints.push(new JudgePoint(input.x, input.y, 2));
-                    else if (input.isMoving) this.judgePoints.push(new JudgePoint(input.x, input.y, 3));
-                    else this.judgePoints.push(new JudgePoint(input.x, input.y, 1));
-                }
-            }
-        }
-        else
-        {
-
-        }
-
-        if (this.sprites.inputPoint) this.sprites.inputPoint.clear();
-
-        for (const id in this.inputs)
-        {
-            if (this.inputs[id])
-            {
-                this.inputs[id].calcTick();
-
-                if (this.sprites.inputPoint)
-                {
-                    this.sprites.inputPoint
-                        .beginFill(0xFF00FF)
-                        .drawCircle(this.inputs[id].x, this.inputs[id].y, 10)
-                        .endFill();
-                }
-            }
-        }
+        this.input.calcTick();
     }
 
     /*
@@ -321,6 +208,7 @@ export default class Judgement
     }
 }
 
+/*
 class Input
 {
     constructor(params)
@@ -360,6 +248,7 @@ class JudgePoint
         return Math.abs((this.x - x) * cosr + (this.y - y) * sinr) <= hw;
     }
 }
+*/
 
 function calcNoteJudge(currentTime, note)
 {

@@ -11,7 +11,7 @@ function InputStart(e)
     }
     else if (e instanceof MouseEvent)
     {
-        this.addInput(e.clientX, e.clientX, e.button);
+        this.addInput(e.clientX - this.renderSize.widthOffset, e.clientY, e.button);
     }
 }
 
@@ -46,12 +46,12 @@ function InputEnd(e)
     {
         for (const touch of e.changedTouches)
         {
-            this.inputs[touch.identifier] = undefined;
+            delete this.inputs[touch.identifier];
         }
     }
     else if (e instanceof MouseEvent)
     {
-        this.inputs[e.button] = undefined;
+        delete this.inputs[e.button];
     }
 }
 

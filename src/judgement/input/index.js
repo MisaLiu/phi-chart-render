@@ -1,5 +1,6 @@
 import ListenerCallback from './callback';
 import InputPoint from './point';
+import { Graphics } from 'pixi.js-legacy';
 
 export default class Input
 {
@@ -40,6 +41,12 @@ export default class Input
         canvas.addEventListener('mouseup', this._inputEnd, passiveIfSupported);
     }
 
+    createSprite()
+    {
+        this.sprite = new Graphics();
+        this.sprite.zIndex = 99999;
+    }
+
     addInput(x, y, identify = -1)
     {
         let newInput = new InputPoint(x, y);
@@ -49,10 +56,36 @@ export default class Input
 
     calcTick()
     {
-        this.tap.length = 0;
-        for (const input in this.inputs)
+        if (this.sprite) this.sprite.clear();
+
+        for (const id in this.inputs)
         {
-            input.calcTick();
+            if (!this.inputs[id]) continue;
+            this.inputs[id].calcTick();
+            if (this.sprite)
+            {
+                this.sprite
+                    .beginFill(0xFF00FF)
+                    .drawCircle(this.inputs[id].x, this.inputs[id].y, 10)
+                    .endFill();
+            }
         }
+        for (const input of this.tap)
+        {
+            if (!input) continue;
+            if (this.sprite)
+            {
+                this.sprite
+                    .beginFill(0xFFFF00)
+                    .drawCircle(input.x, input.y, 10)
+                    .endFill();
+            }
+        }
+        this.tap.length = 0;
+    }
+
+    resize(size)
+    {
+        this.renderSize = size;
     }
 }
