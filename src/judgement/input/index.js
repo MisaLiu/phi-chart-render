@@ -41,10 +41,11 @@ export default class Input
         canvas.addEventListener('mouseup', this._inputEnd, passiveIfSupported);
     }
 
-    createSprite()
+    createSprite(stage, showInputPoint = true)
     {
         this.sprite = new Graphics();
         this.sprite.zIndex = 99999;
+        stage.addChild(this.sprite);
     }
 
     addInput(x, y, identify = -1)
@@ -84,7 +85,7 @@ export default class Input
         this.tap.length = 0;
     }
 
-    resize(size)
+    resizeSprites(size)
     {
         this.renderSize = size;
     }

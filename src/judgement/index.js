@@ -1,6 +1,6 @@
 import Input from './input';
 import Score from './score';
-import { Text, Container, Graphics, AnimatedSprite } from 'pixi.js-legacy';
+import { AnimatedSprite } from 'pixi.js-legacy';
 
 const AllJudgeTimes = {
     bad     : 200,
@@ -22,17 +22,15 @@ export default class Judgement
         this.texture  = params.texture;
         this.sounds   = params.sounds;
 
-        this.input       = new Input({ canvas: params.canvas });
-        this.judgePoints = [];
-        
-        this.renderSize = {};
-        this.sprites    = null;
-
         if (!params.stage) throw new Error('You cannot do judgement without a stage');
         if (!params.chart) throw new Error('You cannot do judgement without a chart');
 
         this._autoPlay      = params.autoPlay ? !!params.autoPlay : false;
         this._challengeMode = params.challangeMode ? !!params.challangeMode : false;
+
+        this.score       = new Score(this.chart.totalRealNotes, !!params.challangeMode, !!params.autoPlay);
+        this.input       = new Input({ canvas: params.canvas });
+        this.judgePoints = [];
 
         /* ===== 判定用时间计算 ===== */
         this.judgeTimes = {
@@ -42,6 +40,7 @@ export default class Judgement
         };
 
         /* ===== 分数计算模块 ===== */
+        /*
         this.score = {
             scorePerNote  : !this._challengeMode ? 900000 / this.chart.totalRealNotes : 1000000 / this.chart.totalRealNotes,
             scorePerCombo : !this._challengeMode ? 100000 / this.chart.totalRealNotes : 0,
@@ -56,85 +55,23 @@ export default class Judgement
             bad      : 0,
             miss     : 0
         };
-
+        */
+        
         this.calcTick = this.calcTick.bind(this);
         this.calcNote = calcNoteJudge.bind(this);
     }
 
     createSprites(showInputPoint = true)
     {
-        if (this.sprites) return;
-
-        this.sprites = {};
-        this.sprites.animate = [];
-
-        this.sprites.combo = {};
-        this.sprites.combo.container = new Container();
-        this.sprites.combo.container.zIndex = 99999;
-
-        this.sprites.combo.number = new Text('0', {
-            fontFamily: 'A-OTF Shin Go Pr6N H',
-            fill: 0xFFFFFF
-        });
-        this.sprites.combo.number.alpha = 0.81;
-        this.sprites.combo.text = new Text('COMBO', {
-            fontFamily: 'MiSans',
-            fill: 0xFFFFFF
-        });
-        this.sprites.combo.text.alpha = 0.55;
-        this.sprites.combo.container.addChild(this.sprites.combo.number, this.sprites.combo.text);
-        this.stage.addChild(this.sprites.combo.container);
-
-        this.sprites.acc = new Text('ACCURACY 0.00%', {
-            fontFamily: 'MiSans',
-            fill: 0xFFFFFF
-        });
-        this.sprites.acc.alpha = 0.63;
-        this.sprites.acc.zIndex = 99999;
-        this.stage.addChild(this.sprites.acc);
-
-        this.sprites.score = new Text('00000000', {
-            fontFamily: 'A-OTF Shin Go Pr6N H',
-            fill: 0xFFFFFF
-        });
-        this.sprites.score.alpha = 0.58;
-        this.sprites.score.anchor.set(1, 0);
-        this.sprites.score.zIndex = 99999;
-        this.stage.addChild(this.sprites.score);
-
-        /*
-        this.sprites.inputPoint = new Graphics();
-        this.sprites.inputPoint.zIndex = 99999;
-        */
-        this.input.createSprite();
-        this.stage.addChild(this.input.sprite);
+        this.score.createSprites(this.stage);
+        this.input.createSprite(this.stage);
+        // this.stage.addChild(this.input.sprite);
     }
 
     resizeSprites(size)
     {
-        this.renderSize = size;
-        this.input.resize(size);
-
-        if (!this.sprites) return;
-
-        this.sprites.combo.number.style.fontSize = size.heightPercent * 60;
-        this.sprites.combo.text.style.fontSize = size.heightPercent * 30;
-
-        this.sprites.acc.style.fontSize = size.heightPercent * 20;
-
-        this.sprites.score.style.fontSize = size.heightPercent * 50;
-
-        this.sprites.combo.container.position.x = size.heightPercent * 72;
-        this.sprites.combo.container.position.y = size.heightPercent * 41;
-        this.sprites.combo.text.position.x = this.sprites.combo.number.width + size.heightPercent * 6;
-        this.sprites.combo.text.position.y = size.heightPercent * 30;
-
-        this.sprites.acc.position.x = size.heightPercent * 72;
-        this.sprites.acc.position.y = size.heightPercent * 113;
-
-        this.sprites.score.position.x = size.width - size.heightPercent * 139;
-        this.sprites.score.position.y = size.heightPercent * 61;
-        
+        this.score.resizeSprites(size);
+        this.input.resizeSprites(size);
     }
 
     calcTick()
