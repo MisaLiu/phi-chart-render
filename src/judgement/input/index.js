@@ -1,13 +1,20 @@
+import ListenerCallback from './callback';
+import InputPoint from './point';
+
 export default class Input
 {
     constructor(params = {})
     {
         this.tap = [];
-        this.hold = {};
+        this.inputs = {};
 
         this._autoPlay = params.autoPlay ? !!params.autoPlay : false;
 
         if (!params.canvas) throw new Error('You cannot add inputs without a canvas');
+
+        this._inputStart = ListenerCallback.InputStart.bind(this);
+        this._inputMove  = ListenerCallback.InputMove.bind(this);
+        this._inputEnd   = ListenerCallback.InputEnd.bind(this);
 
         this.addListenerToCanvas(params.canvas);
     }
@@ -22,83 +29,30 @@ export default class Input
             canvas.addEventListener('test', null, Object.defineProperty({}, 'passive', { get: function() { passiveIfSupported = { passive: false }; } }));
         } catch (err) {}
 
-        canvas.addEventListener('touchstart', (e) =>
-        {
-            e.preventDefault();
-            for (const touch of e.changedTouches)
-            {
-                this.inputs[touch.identifier] = new Input({
-                    x: touch.clientX - this.renderSize.widthOffset,
-                    y: touch.clientY
-                });
-            }
-
-        }, passiveIfSupported);
-        canvas.addEventListener('touchmove', (e) =>
-        {
-            e.preventDefault();
-            for (const touch of e.changedTouches)
-            {
-                if (this.inputs[touch.identifier])
-                {
-                    this.inputs[touch.identifier].move({
-                        x: touch.clientX - this.renderSize.widthOffset,
-                        y: touch.clientY
-                    });
-                }
-            }
-            
-        }, passiveIfSupported);
-        canvas.addEventListener('touchend', (e) =>
-        {
-            e.preventDefault();
-            for (const touch of e.changedTouches)
-            {
-                this.inputs[touch.identifier] = undefined;
-            }
-
-        }, passiveIfSupported);
-        canvas.addEventListener('touchcancel', (e) =>
-        {
-            e.preventDefault();
-            for (const touch of e.changedTouches)
-            {
-                this.inputs[touch.identifier] = undefined;
-            }
-
-        }, passiveIfSupported);
+        canvas.addEventListener('touchstart', this._inputStart, passiveIfSupported);
+        canvas.addEventListener('touchmove', this._inputMove, passiveIfSupported);
+        canvas.addEventListener('touchend', this._inputEnd, passiveIfSupported);
+        canvas.addEventListener('touchcancel', this._inputEnd, passiveIfSupported);
 
         // 鼠标适配，其实并不打算做
-        canvas.addEventListener('mousedown', (e) =>
-        {
-            e.preventDefault();
-            this.inputs[e.button] = new Input({
-                x: e.clientX - this.renderSize.widthOffset,
-                y: e.clientY
-            });
-
-        }, passiveIfSupported);
-        canvas.addEventListener('mousemove', (e) =>
-        {
-            e.preventDefault();
-            if (this.inputs[e.button])
-            {
-                this.inputs[e.button].move({
-                    x: e.clientX - this.renderSize.widthOffset,
-                    y: e.clientY
-                });
-            }
-        }, passiveIfSupported);
-        canvas.addEventListener('mouseup', (e) =>
-        {
-            e.preventDefault();
-            this.inputs[e.button] = undefined;
-
-        }, passiveIfSupported);
+        canvas.addEventListener('mousedown', this._inputStart, passiveIfSupported);
+        canvas.addEventListener('mousemove', this._inputMove, passiveIfSupported);
+        canvas.addEventListener('mouseup', this._inputEnd, passiveIfSupported);
     }
 
     addInput(x, y, identify = -1)
     {
-        this.tap.push()
+        let newInput = new InputPoint(x, y);
+        this.tap.push(newInput);
+        this.inputs[identify] = newInput;
+    }
+
+    calcTick()
+    {
+        this.tap.length = 0;
+        for (const input in this.inputs)
+        {
+            input.calcTick();
+        }
     }
 }
