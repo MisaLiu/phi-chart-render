@@ -22,9 +22,4 @@ export default class InputPoint
         this.isMove = false;
         this.time++;
     }
-
-    isInArea(x, y, cosr, sinr, hw)
-    {
-        return Math.abs((this.x - x) * cosr + (this.y - y) * sinr) <= hw;
-    }
 }

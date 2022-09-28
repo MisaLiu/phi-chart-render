@@ -38,10 +38,11 @@ export default class Score
         this.combo    = 0;
         this.maxCombo = 0;
 
-        this.perfect = 0;
-        this.good    = 0;
-        this.bad     = 0;
-        this.miss    = 0;
+        this.judgedNotes = 0;
+        this.perfect     = 0;
+        this.good        = 0;
+        this.bad         = 0;
+        this.miss        = 0;
 
         this.judgeLevel  = -1;
         this.FCType      = 2;
@@ -164,7 +165,8 @@ export default class Score
             this.combo = 0;
         }
 
-        this.acc = (this.perfect + this.good * 0.65) / this._notesCount;
+        this.judgedNotes++;
+        this.acc = (this.perfect + this.good * 0.65) / this.judgedNotes;
 
         if (this.score >= 1000000) this.judgeLevel = 6;
 		else if (this.score >= 960000) this.judgeLevel = 5;
