@@ -28,7 +28,7 @@ export default class Judgement
         this._autoPlay      = params.autoPlay ? !!params.autoPlay : false;
         this._challengeMode = params.challangeMode ? !!params.challangeMode : false;
 
-        this.score       = new Score(this.chart.totalRealNotes, !!params.challangeMode, !!params.autoPlay);
+        this.score       = new Score(this.chart.totalRealNotes, !!params.showFCStatus, !!params.challangeMode, !!params.autoPlay);
         this.input       = new Input({ canvas: params.canvas });
         this.judgePoints = [];
 
@@ -64,7 +64,7 @@ export default class Judgement
     createSprites(showInputPoint = true)
     {
         this.score.createSprites(this.stage);
-        this.input.createSprite(this.stage);
+        this.input.createSprite(this.stage, showInputPoint);
         // this.stage.addChild(this.input.sprite);
     }
 
@@ -76,8 +76,10 @@ export default class Judgement
 
     calcTick()
     {
-        this.judgePoints.length = 0;
         this.input.calcTick();
+
+        this.input.tap.length = 0;
+        this.judgePoints.length = 0;
     }
 
     /*
@@ -138,11 +140,6 @@ export default class Judgement
         }
     }
     */
-
-    pushScore(type = 0)
-    {
-
-    }
 }
 
 /*
