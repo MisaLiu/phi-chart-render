@@ -192,7 +192,13 @@ function calcNoteJudge(currentTime, note)
     if (note.type !== 3 && note.time + this.judgeTimes.bad < currentTime)
     {
         note.isScored = true;
+        note.score = 1;
+        note.scoreTime = NaN;
+        
+        this.score.pushJudge(0);
+
         note.sprite.alpha = 0;
+        
         return;
     }
 
