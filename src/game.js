@@ -126,7 +126,7 @@ export default class Game
 
         if (this._settings.showFPS)
         {
-            this.render.fpsText = new PIXI.Text('FPS:0', {
+            this.render.fpsText = new PIXI.Text('FPS: 0', {
                 fontFamily: 'MiSans',
                 align: 'right',
                 fill: 0xFFFFFF
@@ -149,24 +149,24 @@ export default class Game
 
         this.resize();
 
-        this.render.ticker.add(this._calcTick);
-        
-        this.render.ticker.add(this.judgement.calcTick);
-        this.chart.addFunction('note', this.judgement.calcNote);
+        if (this.render.fpsText)
+        {
+            this.render.fpsCounter = setInterval(() =>
+            {
+                this.render.fpsText.text = 'FPS: ' + (this.render.ticker.FPS).toFixed(0);
+            }, 500);
+        }
 
         setTimeout(async () =>
         {
             this._music = await this.chart.music.play();
             this._audioOffset = this._music._source.context.baseLatency;
-        }, 100);
 
-        if (this.render.fpsText)
-        {
-            this.render.fpsCounter = setInterval(() =>
-            {
-                this.render.fpsText.text = 'FPS:' + (this.render.ticker.FPS).toFixed(0);
-            }, 500);
-        }
+            this.render.ticker.add(this._calcTick);
+        
+            this.render.ticker.add(this.judgement.calcTick);
+            this.chart.addFunction('note', this.judgement.calcNote);
+        }, 100);
     }
 
     _calcTick()
@@ -218,6 +218,7 @@ export default class Game
             this.render.mainContainerCover.visible = false;
         }
 
+        // FPS 计数器尺寸计算
         if (this.render.fpsText)
         {
             this.render.fpsText.position.x     = this.render.sizer.width;
