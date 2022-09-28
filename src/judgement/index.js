@@ -1,5 +1,6 @@
 import Input from './input';
 import Score from './score';
+import JudgePoint from './point';
 import { AnimatedSprite } from 'pixi.js-legacy';
 
 const AllJudgeTimes = {
@@ -70,16 +71,40 @@ export default class Judgement
 
     resizeSprites(size)
     {
+        this.renderSize = size;
         this.score.resizeSprites(size);
         this.input.resizeSprites(size);
     }
 
     calcTick()
     {
+        this.createJudgePoints();
         this.input.calcTick();
 
         this.input.tap.length = 0;
+    }
+
+    createJudgePoints()
+    {
         this.judgePoints.length = 0;
+
+        if (!this._autoPlay)
+        {
+            for (const tap of this.input.tap)
+            {
+                this.judgePoints.push(new JudgePoint(tap.x, tap.y, 1));
+            }
+
+            for (const id in this.input.inputs)
+            {
+                if (this.input.inputs[id].time) this.judgePoints.push(new JudgePoint(this.input.inputs[id].x, this.input.inputs[id].y, 3));
+                else if (this.input.inputs[id].isMoving) this.judgePoints.push(new JudgePoint(this.input.inputs[id].x, this.input.inputs[id].y, 2));
+            }
+        }
+        else
+        {
+
+        }
     }
 
     /*
@@ -194,7 +219,7 @@ function calcNoteJudge(currentTime, note)
         note.isScored = true;
         note.score = 1;
         note.scoreTime = NaN;
-        
+
         this.score.pushJudge(0);
 
         note.sprite.alpha = 0;
@@ -203,7 +228,9 @@ function calcNoteJudge(currentTime, note)
     }
 
     let timeBetween = note.time - currentTime,
-        timeBetweenReal = timeBetween > 0 ? timeBetween : timeBetween * -1;
+        timeBetweenReal = timeBetween > 0 ? timeBetween : timeBetween * -1,
+        judgeline = note.judgeline,
+        notePosition = note.sprite.position;
     
     if (note.type !== 3 && note.time <= currentTime)
     {
@@ -214,22 +241,33 @@ function calcNoteJudge(currentTime, note)
     {
         case 1:
         {
-            /*
-            if (timeBetweenReal <= this.judgeTimes.bad)
+            for (let i = 0; i < this.judgePoints.length; i++)
             {
-                note.isScored = true;
-                note.scoreTime = timeBetween;
+                if (
+                    this.judgePoints[i].type === 1 &&
+                    this.judgePoints[i].isInArea(notePosition.x, notePosition.y, judgeline.cosr, judgeline.sinr, this.renderSize.noteWidth)
+                ) {
+                    if (timeBetweenReal <= this.judgeTimes.bad)
+                    {
+                        note.isScored = true;
+                        note.scoreTime = timeBetween;
 
-                if (timeBetweenReal <= this.judgeTimes.perfect) note.score = 4;
-                else if (timeBetweenReal <= this.judgeTimes.good) note.score = 3;
-                else note.score = 2;
+                        if (timeBetweenReal <= this.judgeTimes.perfect) note.score = 4;
+                        else if (timeBetweenReal <= this.judgeTimes.good) note.score = 3;
+                        else note.score = 2;
+                    }
+
+                    if (note.isScored)
+                    {
+                        note.sprite.alpha = 0;
+                        this.score.pushJudge(note.score);
+
+                        this.judgePoints.splice(i, 1);
+                        break;
+                    }
+                }
             }
 
-            if (note.isScored)
-            {
-                note.sprite.alpha = 0;
-            }
-            */
             break;
         }
         case 2:
