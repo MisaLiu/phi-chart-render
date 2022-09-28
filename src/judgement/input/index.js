@@ -82,7 +82,7 @@ export default class Input
                     .endFill();
             }
         }
-        this.tap.length = 0;
+        // this.tap.length = 0;
     }
 
     resizeSprites(size)

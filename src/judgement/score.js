@@ -12,9 +12,10 @@ const JudgeTimes = {
 
 export default class Score
 {
-    constructor(notesCount = 0, isChallengeMode = false, autoMode = false)
+    constructor(notesCount = 0, showFCStatus = true, isChallengeMode = false, autoMode = false)
     {
         this._notesCount = Number(notesCount);
+        this._showFCStatus = !!showFCStatus;
 
         if (isNaN((this._notesCount)) || this._notesCount <= 0)
         {
@@ -24,7 +25,14 @@ export default class Score
 
         this.scorePerNote  = isChallengeMode ? 1000000 / notesCount : 900000 / notesCount;
         this.scorePerCombo = isChallengeMode ? 0 : 100000 / notesCount;
+
+        this.renderSize = {};
         
+        this.reset();
+    }
+
+    reset()
+    {
         this.score    = 0;
         this.acc      = 0;
         this.combo    = 0;
@@ -35,8 +43,18 @@ export default class Score
         this.bad     = 0;
         this.miss    = 0;
 
-        this.judgeLevel = -1;
+        this.judgeLevel  = -1;
+        this.FCType      = 2;
         this.levelPassed = false;
+
+        if (this.sprites)
+        {
+            this.sprites.combo.number.text = '0';
+            this.sprites.acc.text = 'ACCURACY 0.00%';
+            this.sprites.score.text = '00000000';
+
+            this.sprites.combo.text.position.x = this.sprites.combo.number.width + this.renderSize.heightPercent * 6;
+        }
     }
 
     createSprites(stage)
@@ -82,6 +100,8 @@ export default class Score
 
     resizeSprites(size)
     {
+        this.renderSize = size;
+
         if (!this.sprites) return;
 
         this.sprites.combo.number.style.fontSize = size.heightPercent * 60;
@@ -103,7 +123,7 @@ export default class Score
         this.sprites.score.position.y = size.heightPercent * 61;
     }
 
-    pushJudge(type = 0)
+    pushJudge(type = 0, judgelines = [])
     {
         if (type > 2)
         {
@@ -111,7 +131,18 @@ export default class Score
             if (this.combo > this.maxCombo) this.maxCombo = this.combo;
 
             if (type === 4) this.perfect += 1;
-            else this.good += 1;
+            else {
+                this.good += 1;
+                if (this.FCType >= 2)
+                {
+                    this.FCType = 1;
+
+                    if (this._showFCStatus)
+                    {
+
+                    }
+                }
+            }
 
             this.score += this.scorePerNote + (this.combo >= this.maxCombo ? this.scorePerCombo * (type === 4 ? 1 : 0.65) : 0); 
         }
@@ -119,10 +150,49 @@ export default class Score
         {
             if (type === 2)this.bad += 1;
             else this.miss += 1;
+
+            if (this.FCType >= 1)
+            {
+                this.FCType = 0;
+
+                if (this._showFCStatus)
+                {
+
+                }
+            }
             
             this.combo = 0;
         }
 
-        if (this.score >= 700000) this.levelPassed = true;
+        this.acc = (this.perfect + this.good * 0.65) / this._notesCount;
+
+        if (this.score >= 1000000) this.judgeLevel = 6;
+		else if (this.score >= 960000) this.judgeLevel = 5;
+		else if (this.score >= 920000) this.judgeLevel = 4;
+		else if (this.score >= 880000) this.judgeLevel = 3;
+		else if (this.score >= 820000) this.judgeLevel = 2;
+		else if (this.score >= 700000) this.judgeLevel = 1;
+        else this.judgeLevel = 0;
+
+        if (this.judgeLevel >= 1) this.levelPassed = true;
+
+        if (this.sprites)
+        {
+            this.sprites.combo.number.text = this.combo;
+            this.sprites.acc.text = 'ACCURACY ' + (this.acc * 100).toFixed(2) + '%';
+            this.sprites.score.text = fillZero((this.score).toFixed(0));
+
+            this.sprites.combo.text.position.x = this.sprites.combo.number.width + this.renderSize.heightPercent * 6;
+        }
+
+        function fillZero(num)
+        {
+            let result = num + '';
+            while (result.length < 7)
+            {
+                result = '0' + result;
+            }
+            return result;
+        }
     }
 }
