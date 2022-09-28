@@ -4,25 +4,25 @@ export default class Note
 {
     constructor(params)
     {
-        this.id            = !isNaN(Number(params.id)) ? Number(params.id) : -1;
-        this.type          = !isNaN(Number(params.type)) ? Number(params.type) : 1;
-        this.time          = !isNaN(Number(params.time)) ? Number(params.time) : -1; // Note 开始时间
-        this.holdTime      = (this.type === 3 && !isNaN(Number(params.holdTime))) ? Number(params.holdTime) : 0; // Note 按住需要经过的时间，仅 Hold
+        this.id             = !isNaN(Number(params.id)) ? Number(params.id) : -1;
+        this.type           = !isNaN(Number(params.type)) ? Number(params.type) : 1;
+        this.time           = !isNaN(Number(params.time)) ? Math.fround(Number(params.time)) : -1; // Note 开始时间
+        this.holdTime       = (this.type === 3 && !isNaN(Number(params.holdTime))) ? Math.fround(Number(params.holdTime)) : 0; // Note 按住需要经过的时间，仅 Hold
         this.holdTimeLength = this.type === 3 ? Math.fround(this.time + this.holdTime) : 0; // Note 按完的时间，自动计算，仅 Hold
-        this.speed         = !isNaN(Number(params.speed)) ? Number(params.speed) : 1;
-        this.floorPosition = !isNaN(Number(params.floorPosition)) ? Math.fround(params.floorPosition) : this.time;
-        this.holdLength    = (this.type === 3 && !isNaN(Number(params.holdLength))) ? Math.fround(params.holdLength) : 0;
-        this.endPosition   = Math.fround(this.floorPosition + this.holdLength);
-        this.positionX     = !isNaN(Number(params.positionX)) ? Number(Number(params.positionX).toFixed(6)) : 0;
-        this.basicAlpha    = (!isNaN(Number(params.basicAlpha)) && Number(params.basicAlpha) >= 0 && Number(params.basicAlpha) <= 1) ? Number(params.basicAlpha) : 1;
-        this.yOffset       = !isNaN(Number(params.yOffset)) ? Number(params.yOffset) : 0;
-        this.xScale        = !isNaN(Number(params.xScale)) ? Number(params.xScale) : 1;
-        this.isAbove       = !!params.isAbove;
-        this.isFake        = !!params.isFake;
-        this.isMulti       = !!params.isMulti;
-        this.texture       = (params.texture && params.texture != '') ? params.texture : null;
-        this.hitsound      = (params.hitsound && params.hitsound != '') ? params.hitsound : null;
-        this.judgeline     = params.judgeline;
+        this.speed          = !isNaN(Number(params.speed)) ? Number(params.speed) : 1;
+        this.floorPosition  = !isNaN(Number(params.floorPosition)) ? Math.fround(params.floorPosition) : this.time;
+        this.holdLength     = (this.type === 3 && !isNaN(Number(params.holdLength))) ? Math.fround(params.holdLength) : 0;
+        this.endPosition    = Math.fround(this.floorPosition + this.holdLength);
+        this.positionX      = !isNaN(Number(params.positionX)) ? Number(Number(params.positionX).toFixed(6)) : 0;
+        this.basicAlpha     = (!isNaN(Number(params.basicAlpha)) && Number(params.basicAlpha) >= 0 && Number(params.basicAlpha) <= 1) ? Number(params.basicAlpha) : 1;
+        this.yOffset        = !isNaN(Number(params.yOffset)) ? Number(params.yOffset) : 0;
+        this.xScale         = !isNaN(Number(params.xScale)) ? Number(params.xScale) : 1;
+        this.isAbove        = !!params.isAbove;
+        this.isFake         = !!params.isFake;
+        this.isMulti        = !!params.isMulti;
+        this.texture        = (params.texture && params.texture != '') ? params.texture : null;
+        this.hitsound       = (params.hitsound && params.hitsound != '') ? params.hitsound : null;
+        this.judgeline      = params.judgeline;
 
         if (!this.judgeline) throw new Error('Note must have a judgeline');
 

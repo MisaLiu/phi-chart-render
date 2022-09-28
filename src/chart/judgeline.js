@@ -159,7 +159,7 @@ export default class Judgeline
                 currentValue = event.value;
             }
 
-            result += currentValue;
+            result = Math.fround(result + currentValue);
         });
 
         return result;
