@@ -73,6 +73,7 @@ export default class Game
         this._settings.noteScale = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
         this._settings.bgDim     = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
         this._settings.offset    = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
+        this._settings.showFPS   = params.settings && params.settings.showFPS ? !!params.settings.showFPS : true;
         this._settings.multiHL   = params.settings && params.settings.multiHL ? !!params.settings.multiHL : true;
         this._settings.debug     = params.settings && params.settings.debug ? !!params.settings.debug : false;
 
@@ -123,6 +124,20 @@ export default class Game
         this.judgement.stage = this.render.mainContainer;
         this.judgement.createSprites();
 
+        if (this._settings.showFPS)
+        {
+            this.render.fpsText = new PIXI.Text('FPS:0', {
+                fontFamily: 'MiSans',
+                align: 'right',
+                fill: 0xFFFFFF
+            });
+            this.render.fpsText.anchor.x = 1;
+            this.render.fpsText.alpha = 0.5;
+            this.render.fpsText.zIndex = 999999;
+
+            this.render.mainContainer.addChild(this.render.fpsText);
+        }
+
         this.render.mainContainer.sortChildren();
         this.render.stage.sortChildren();
     }
@@ -144,6 +159,14 @@ export default class Game
             this._music = await this.chart.music.play();
             this._audioOffset = this._music._source.context.baseLatency;
         }, 100);
+
+        if (this.render.fpsText)
+        {
+            this.render.fpsCounter = setInterval(() =>
+            {
+                this.render.fpsText.text = 'FPS:' + (this.render.ticker.FPS).toFixed(0);
+            }, 500);
+        }
     }
 
     _calcTick()
@@ -193,6 +216,14 @@ export default class Game
         else if (this.render.mainContainerCover)
         {
             this.render.mainContainerCover.visible = false;
+        }
+
+        if (this.render.fpsText)
+        {
+            this.render.fpsText.position.x     = this.render.sizer.width;
+            this.render.fpsText.position.y     = 0;
+            this.render.fpsText.style.fontSize = this.render.sizer.heightPercent * 20;
+            this.render.fpsText.style.padding  = this.render.sizer.heightPercent * 8;
         }
         
         if (withChartSprites)
