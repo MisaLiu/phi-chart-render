@@ -26,9 +26,10 @@ export default class Note
 
         if (!this.judgeline) throw new Error('Note must have a judgeline');
 
-        this.isScored  = false;
-        this.score     = 0;
-        this.scoreTime = 0;
+        this.isScored        = false;
+        this.isScoreAnimated = false;
+        this.score           = 0;
+        this.scoreTime       = 0;
         
         this.sprite = undefined;
     }

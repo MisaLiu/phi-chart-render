@@ -212,11 +212,12 @@ class JudgePoint
 function calcNoteJudge(currentTime, note)
 {
     if (note.isFake) return; // 忽略假 Note
-    if (note.isScored) return; // 已记分忽略
+    if (note.isScored && note.isScoreAnimated) return; // 已记分忽略
     if (note.time - this.judgeTimes.bad > currentTime) return; // 不在记分范围内忽略
-    if (note.type !== 3 && note.time + this.judgeTimes.bad < currentTime)
+    if (!note.isScored && note.type !== 3 && note.time + this.judgeTimes.bad < currentTime)
     {
         note.isScored = true;
+        note.isScoreAnimated = true;
         note.score = 1;
         note.scoreTime = NaN;
 
@@ -232,7 +233,7 @@ function calcNoteJudge(currentTime, note)
         judgeline = note.judgeline,
         notePosition = note.sprite.position;
     
-    if (note.type !== 3 && note.time <= currentTime)
+    if (note.type !== 3 && !note.isScoreAnimated && note.time <= currentTime)
     {
         note.sprite.alpha = 1 + (timeBetween / this.judgeTimes.bad);
     }
@@ -260,7 +261,8 @@ function calcNoteJudge(currentTime, note)
                     if (note.isScored)
                     {
                         note.sprite.alpha = 0;
-                        this.score.pushJudge(note.score);
+                        note.isScoreAnimated = true;
+                        this.score.pushJudge(note.score, this.chart.judgelines);
 
                         this.judgePoints.splice(i, 1);
                         break;
@@ -272,6 +274,28 @@ function calcNoteJudge(currentTime, note)
         }
         case 2:
         {
+            if (note.isScored && !note.isScoreAnimated && timeBetween <= 0)
+            {
+                this.score.pushJudge(4, this.chart.judgelines);
+                note.sprite.alpha = 0;
+                note.isScoreAnimated = true;
+            }
+            else if (!note.isScored)
+            {
+                for (let i = 0; i < this.judgePoints.length; i++)
+                {
+                    if (
+                        this.judgePoints[i].isInArea(notePosition.x, notePosition.y, judgeline.cosr, judgeline.sinr, this.renderSize.noteWidth) &&
+                        timeBetweenReal <= this.judgeTimes.good
+                    ) {
+                        note.isScored = true;
+                        note.score = 4;
+                        note.scoreTime = NaN;
+                        break;
+                    }
+                }
+            }
+            
             break;
         }
         case 3:

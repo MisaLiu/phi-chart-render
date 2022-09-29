@@ -141,7 +141,8 @@ doms.startBtn.addEventListener('click', () => {
 
 
 
-window.addEventListener('load', async () => {
+window.addEventListener('load', async () =>
+{
     for (const name in fonts)
     {
         try
