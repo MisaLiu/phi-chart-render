@@ -65,12 +65,17 @@ export default class Input
             this.inputs[id].calcTick();
             if (this.sprite)
             {
+                let color = this.inputs[id].time - 1 == 0 ? (
+                    this.inputs[id].isMove ? 0x00FFFF : 0xFFFF00
+                ) : 0xFF00FF
+
                 this.sprite
-                    .beginFill(this.inputs[id].isMoving ? 0x00FFFF : 0xFF00FF)
+                    .beginFill(color)
                     .drawCircle(this.inputs[id].x, this.inputs[id].y, this.renderSize.heightPercent * 30)
                     .endFill();
             }
         }
+        /*
         for (const input of this.tap)
         {
             if (!input) continue;
@@ -82,7 +87,9 @@ export default class Input
                     .endFill();
             }
         }
-        // this.tap.length = 0;
+        */
+        
+        this.tap.length = 0;
     }
 
     resizeSprites(size)

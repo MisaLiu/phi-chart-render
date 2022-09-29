@@ -1,5 +1,6 @@
 import Input from './input';
 import Score from './score';
+import InputPoint from './input/point';
 import JudgePoint from './point';
 import { AnimatedSprite } from 'pixi.js-legacy';
 
@@ -79,9 +80,9 @@ export default class Judgement
     calcTick()
     {
         this.createJudgePoints();
-        this.input.calcTick();
 
         this.input.tap.length = 0;
+        this.input.calcTick();
     }
 
     createJudgePoints()
@@ -92,13 +93,16 @@ export default class Judgement
         {
             for (const tap of this.input.tap)
             {
-                this.judgePoints.push(new JudgePoint(tap.x, tap.y, 1));
+                if (tap instanceof InputPoint) this.judgePoints.push(new JudgePoint(tap.x, tap.y, 1));
             }
 
             for (const id in this.input.inputs)
             {
-                if (this.input.inputs[id].time) this.judgePoints.push(new JudgePoint(this.input.inputs[id].x, this.input.inputs[id].y, 3));
-                else if (this.input.inputs[id].isMoving) this.judgePoints.push(new JudgePoint(this.input.inputs[id].x, this.input.inputs[id].y, 2));
+                if (this.input.inputs[id] instanceof InputPoint)
+                {
+                    if (this.input.inputs[id].time > 0) this.judgePoints.push(new JudgePoint(this.input.inputs[id].x, this.input.inputs[id].y, 3));
+                    else if (this.input.inputs[id].isMove) this.judgePoints.push(new JudgePoint(this.input.inputs[id].x, this.input.inputs[id].y, 2));
+                }
             }
         }
         else

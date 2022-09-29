@@ -19,7 +19,6 @@ export default class InputPoint
 
     calcTick()
     {
-        this.isMove = false;
         this.time++;
     }
 }
