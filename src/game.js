@@ -173,7 +173,9 @@ export default class Game
     {
         if (!this.chart) return;
         if (!this._music) return;
-        this.chart.calcTime(this._music.progress * this.chart.music.duration - this._audioOffset - this._settings.offset);
+        let currentTime = this._music.progress * this.chart.music.duration - this._audioOffset - this._settings.offset;
+        currentTime = currentTime > 0 ? currentTime : 0;
+        this.chart.calcTime(currentTime);
     }
 
     resize(withChartSprites = true)
@@ -223,7 +225,7 @@ export default class Game
         {
             this.render.fpsText.position.x     = this.render.sizer.width;
             this.render.fpsText.position.y     = 0;
-            this.render.fpsText.style.fontSize = this.render.sizer.heightPercent * 30;
+            this.render.fpsText.style.fontSize = this.render.sizer.heightPercent * 32;
             this.render.fpsText.style.padding  = this.render.sizer.heightPercent * 8;
         }
         

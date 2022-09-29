@@ -67,7 +67,7 @@ export default class Input
             {
                 this.sprite
                     .beginFill(this.inputs[id].isMoving ? 0x00FFFF : 0xFF00FF)
-                    .drawCircle(this.inputs[id].x, this.inputs[id].y, this.renderSize.heightPercent * 20)
+                    .drawCircle(this.inputs[id].x, this.inputs[id].y, this.renderSize.heightPercent * 30)
                     .endFill();
             }
         }
@@ -78,7 +78,7 @@ export default class Input
             {
                 this.sprite
                     .beginFill(0xFFFF00)
-                    .drawCircle(input.x, input.y, this.renderSize.heightPercent * 20)
+                    .drawCircle(input.x, input.y, this.renderSize.heightPercent * 30)
                     .endFill();
             }
         }
