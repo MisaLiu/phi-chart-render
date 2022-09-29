@@ -218,19 +218,37 @@ function calcNoteJudge(currentTime, note)
     if (note.isFake) return; // 忽略假 Note
     if (note.isScored && note.isScoreAnimated) return; // 已记分忽略
     if (note.time - this.judgeTimes.bad > currentTime) return; // 不在记分范围内忽略
-    if (!note.isScored && note.type !== 3 && note.time + this.judgeTimes.bad < currentTime)
+    
+    if (!note.isScored)
     {
-        note.isScored = true;
-        note.isScoreAnimated = true;
-        note.score = 1;
-        note.scoreTime = NaN;
+        if (note.type !== 3 && note.time + this.judgeTimes.bad < currentTime)
+        {
+            note.isScored = true;
+            note.score = 1;
+            note.scoreTime = NaN;
 
-        this.score.pushJudge(0);
+            this.score.pushJudge(0, this.chart.judgelines);
 
-        note.sprite.alpha = 0;
-        
-        return;
+            note.sprite.alpha = 0;
+            note.isScoreAnimated = true;
+            
+            return;
+        }
+        else if (note.type === 3 && note.time + this.judgeTimes.good < currentTime)
+        {
+            note.isScored = true;
+            note.score = 1;
+            note.scoreTime = NaN;
+
+            this.score.pushJudge(0, this.chart.judgelines);
+
+            note.sprite.alpha = 0.5;
+            note.isScoreAnimated = true;
+
+            return;
+        }
     }
+    
 
     let timeBetween = note.time - currentTime,
         timeBetweenReal = timeBetween > 0 ? timeBetween : timeBetween * -1,
