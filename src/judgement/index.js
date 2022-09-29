@@ -308,6 +308,29 @@ function calcNoteJudge(currentTime, note)
         }
         case 4:
         {
+            if (note.isScored && !note.isScoreAnimated && timeBetween <= 0)
+            {
+                this.score.pushJudge(4, this.chart.judgelines);
+                note.sprite.alpha = 0;
+                note.isScoreAnimated = true;
+            }
+            else if (!note.isScored)
+            {
+                for (let i = 0; i < this.judgePoints.length; i++)
+                {
+                    if (
+                        this.judgePoints[i].type === 2 &&
+                        this.judgePoints[i].isInArea(notePosition.x, notePosition.y, judgeline.cosr, judgeline.sinr, this.renderSize.noteWidth) &&
+                        timeBetweenReal <= this.judgeTimes.good
+                    ) {
+                        note.isScored = true;
+                        note.score = 4;
+                        note.scoreTime = NaN;
+                        break;
+                    }
+                }
+            }
+
             break;
         }
     }
