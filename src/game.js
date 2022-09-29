@@ -223,7 +223,7 @@ export default class Game
         {
             this.render.fpsText.position.x     = this.render.sizer.width;
             this.render.fpsText.position.y     = 0;
-            this.render.fpsText.style.fontSize = this.render.sizer.heightPercent * 20;
+            this.render.fpsText.style.fontSize = this.render.sizer.heightPercent * 30;
             this.render.fpsText.style.padding  = this.render.sizer.heightPercent * 8;
         }
         
