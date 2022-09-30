@@ -75,19 +75,6 @@ export default class Input
                     .endFill();
             }
         }
-        /*
-        for (const input of this.tap)
-        {
-            if (!input) continue;
-            if (this.sprite)
-            {
-                this.sprite
-                    .beginFill(0xFFFF00)
-                    .drawCircle(input.x, input.y, this.renderSize.heightPercent * 30)
-                    .endFill();
-            }
-        }
-        */
         
         this.tap.length = 0;
     }

@@ -39,24 +39,6 @@ export default class Judgement
             good    : (!this._challengeMode ? AllJudgeTimes.good : AllJudgeTimes.goodChallenge) / 1000,
             bad     : (!this._challengeMode ? AllJudgeTimes.bad : AllJudgeTimes.badChallenge) / 1000
         };
-
-        /* ===== 分数计算模块 ===== */
-        /*
-        this.score = {
-            scorePerNote  : !this._challengeMode ? 900000 / this.chart.totalRealNotes : 1000000 / this.chart.totalRealNotes,
-            scorePerCombo : !this._challengeMode ? 100000 / this.chart.totalRealNotes : 0,
-
-            score    : 0,
-            acc      : 0,
-            combo    : 0,
-            maxCombo : 0,
-
-            perfect  : 0,
-            good     : 0,
-            bad      : 0,
-            miss     : 0
-        };
-        */
         
         this.calcTick = this.calcTick.bind(this);
         this.calcNote = calcNoteJudge.bind(this);
@@ -105,108 +87,7 @@ export default class Judgement
             }
         }
     }
-
-    /*
-    calcNote(currentTime, note)
-    {
-        if (note.isScored) return;
-        if (note.type !== 3 && note.time + this.judgeTimes.bad < currentTime)
-        {
-            note.isScored = true;
-            note.sprite.visible = false;
-            return;
-        }
-
-        let timeBetween = note.time - currentTime,
-            timeBetweenReal = timeBetween > 0 ? timeBetween : timeBetween * -1,
-            notePosition = { x: note.sprite.judgelineX, y: note.sprite.judgelineY },
-            judgeline = note.judgeline;
-
-        if (note.type !== 3 && timeBetween <= 0 && timeBetweenReal <= this.judgeTimes.bad && !note.isScored)
-        {
-            note.sprite.alpha = 1 + (timeBetween / this.judgeTimes.bad);
-        }
-
-        switch (note.type)
-        {
-            case 1:
-            {
-                this.judgePoints.forEach((judgePoint, judgePointIndex) =>
-                {
-                    if (
-                        judgePoint.type === 1 &&
-                        judgePoint.isInArea(notePosition.x, notePosition.y, judgeline.cosr, judgeline.sinr, this.renderSize.noteWidth) &&
-                        !note.isScored
-                    ) {
-                        if  (timeBetweenReal <= this.judgeTimes.perfect)
-                        {
-                            note.isScored = true;
-                        }
-                        else if (timeBetweenReal <= this.judgeTimes.good)
-                        {
-                            note.isScored = true;
-                        }
-                        else if (timeBetweenReal <= this.judgeTimes.bad)
-                        {
-                            note.isScored = true;
-                        }
-                    }
-
-                    if (note.isScored)
-                    {
-                        note.sprite.alpha = 0;
-                        createClickAnimate(this.stage, this.texture, notePosition.x, notePosition.y, this.renderSize.noteScale);
-                        this.judgePoints.splice(judgePointIndex, 1);
-                    }
-                });
-                break;
-            }
-        }
-    }
-    */
 }
-
-/*
-class Input
-{
-    constructor(params)
-    {
-        this.x = Number(params.x);
-        this.y = Number(params.y);
-        this.isMoving = false;
-        this.time = 0;
-        this.type = params.type ? params.type : 1;
-    }
-
-    move(params)
-    {
-        this.x = Number(params.x);
-        this.y = Number(params.y);
-        this.isMoving = true;
-        this.time = 0;
-    }
-
-    calcTick()
-    {
-        this.time++;
-    }
-}
-
-class JudgePoint
-{
-    constructor(x, y, type = 0)
-    {
-        this.x = Number(x);
-        this.y = Number(y);
-        this.type = Number(type);
-    }
-
-    isInArea(x, y, cosr, sinr, hw)
-    {
-        return Math.abs((this.x - x) * cosr + (this.y - y) * sinr) <= hw;
-    }
-}
-*/
 
 function calcNoteJudge(currentTime, note)
 {
