@@ -20,7 +20,7 @@ export default class Judgement
     {
         this.chart    = params.chart;
         this.stage    = params.stage;
-        this.texture  = params.texture;
+        this.textures = params.textures;
         this.sounds   = params.sounds;
         this.paused   = false;
 
@@ -87,6 +87,32 @@ export default class Judgement
                 }
             }
         }
+    }
+
+    createClickAnimate(x, y, type)
+    {
+        let sprite = new AnimatedSprite(type >= 3 ? this.textures.normal : this.textures.bad);
+
+        sprite.anchor.set(0.5);
+        sprite.position.x = x;
+        sprite.position.y = y;
+
+        sprite.scale.set((256 / sprite.texture.baseTexture.width) * this.renderSize.noteScale * 5.6);
+
+        sprite.tint = type === 4 ? 0xFFECA0 : type === 3 ? 0xB4E1FF : 0x6c4343;
+        sprite.loop = false;
+
+        sprite.onFrameChange = function () {
+            this.alpha = 1 - (this.currentFrame / this.totalFrames);
+        };
+        sprite.onComplete = function () {
+            this.destroy();
+        };
+
+        this.stage.addChild(sprite);
+        sprite.play();
+
+        return sprite;
     }
 }
 
@@ -176,6 +202,7 @@ function calcNoteJudge(currentTime, note)
                     {
                         note.sprite.alpha = 0;
                         note.isScoreAnimated = true;
+                        this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
                         this.score.pushJudge(note.score, this.chart.judgelines);
 
                         this.judgePoints.splice(i, 1);
@@ -191,6 +218,7 @@ function calcNoteJudge(currentTime, note)
             if (note.isScored && !note.isScoreAnimated && timeBetween <= 0)
             {
                 this.score.pushJudge(4, this.chart.judgelines);
+                this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
                 note.sprite.alpha = 0;
                 note.isScoreAnimated = true;
             }
@@ -216,9 +244,10 @@ function calcNoteJudge(currentTime, note)
         {
             if (note.isScored)
             {
-                if (currentTime - note.lastHoldTime >= 0.09)
+                if (currentTime - note.lastHoldTime >= 0.15)
                 {
-                    // 此处应播放打击动画
+                    note.lastHoldTime = currentTime;
+                    this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
                 }
 
                 if (note.holdTimeLength - currentTime <= this.judgeTimes.bad)
@@ -229,7 +258,7 @@ function calcNoteJudge(currentTime, note)
                 }
             }
             
-            if (currentTime - note.lastHoldTime >= 0.09) note.isHolding = false;
+            if (currentTime - note.lastHoldTime >= 0.15) note.isHolding = false;
 
             for (let i = 0; i < this.judgePoints.length; i++)
             {
@@ -244,6 +273,8 @@ function calcNoteJudge(currentTime, note)
 
                     if (timeBetweenReal <= this.judgeTimes.perfect) note.score = 4;
                     else note.score = 3;
+
+                    this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
                     
                     note.isHolding = true;
                     note.lastHoldTime = currentTime;
@@ -256,7 +287,6 @@ function calcNoteJudge(currentTime, note)
                     this.judgePoints[i].isInArea(notePosition.x, notePosition.y, judgeline.cosr, judgeline.sinr, this.renderSize.noteWidth)
                 ) {
                     note.isHolding = true;
-                    note.lastHoldTime = currentTime;
                 }
             }
 
@@ -278,6 +308,7 @@ function calcNoteJudge(currentTime, note)
             if (note.isScored && !note.isScoreAnimated && timeBetween <= 0)
             {
                 this.score.pushJudge(4, this.chart.judgelines);
+                this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
                 note.sprite.alpha = 0;
                 note.isScoreAnimated = true;
             }
@@ -301,28 +332,4 @@ function calcNoteJudge(currentTime, note)
             break;
         }
     }
-}
-
-function createClickAnimate(stage, texture, x, y, scale, type)
-{
-    let sprite = new AnimatedSprite(texture);
-
-    sprite.anchor.set(0.5);
-    sprite.position.x = x;
-    sprite.position.y = y;
-    sprite.scale.set(2);
-
-    sprite.loop = false;
-
-    sprite.onFrameChange = function () {
-        this.alpha = 1 - (this.currentFrame / this.totalFrames);
-    };
-    sprite.onComplete = function () {
-        this.destroy();
-    };
-
-    stage.addChild(sprite);
-    sprite.play();
-
-    return sprite;
 }
