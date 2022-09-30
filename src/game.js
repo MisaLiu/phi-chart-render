@@ -65,7 +65,7 @@ export default class Game
             chart    : this.chart,
             stage    : this.render.mainContainer,
             canvas   : this.render.view,
-            textures : { normal: this.assets.textures.clickRaw, bad: [] },
+            textures : { normal: this.assets.textures.clickRaw, bad: this.assets.textures.clickRaw },
             sounds   : this.assets.sounds,
             autoPlay : params.settings && params.settings.autoPlay ? !!params.settings.autoPlay : false
         });
