@@ -111,6 +111,7 @@ doms.startBtn.addEventListener('click', () => {
         },
         settings: {
             audioOffset: doms.settings.offset.value / 1000,
+            autoPlay: doms.settings.autoPlay.checked,
             debug : doms.settings.debug.checked
         }
     });

@@ -20,7 +20,6 @@ export default class Judgement
     {
         this.chart    = params.chart;
         this.stage    = params.stage;
-        this.autoPlay = params.autoPlay ? !!params.autoPlay : false;
         this.texture  = params.texture;
         this.sounds   = params.sounds;
 
@@ -77,15 +76,15 @@ export default class Judgement
         this.input.resizeSprites(size);
     }
 
-    calcTick()
+    calcTick(currentTime)
     {
-        this.createJudgePoints();
+        this.createJudgePoints(currentTime);
 
         this.input.tap.length = 0;
         this.input.calcTick();
     }
 
-    createJudgePoints()
+    createJudgePoints(currentTime)
     {
         this.judgePoints.length = 0;
 
@@ -104,10 +103,6 @@ export default class Judgement
                     else if (this.input.inputs[id].isMove) this.judgePoints.push(new JudgePoint(this.input.inputs[id].x, this.input.inputs[id].y, 2));
                 }
             }
-        }
-        else
-        {
-
         }
     }
 
@@ -258,6 +253,20 @@ function calcNoteJudge(currentTime, note)
     if (note.type !== 3 && !note.isScoreAnimated && note.time <= currentTime)
     {
         note.sprite.alpha = 1 + (timeBetween / this.judgeTimes.bad);
+    }
+
+    // 自动模式则自行添加判定点
+    if (this._autoPlay)
+    {
+        if (note.type === 1) {
+            if (timeBetween <= 0) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 1));
+        } else if (note.type === 2) {
+            if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 3));
+        } else if (note.type === 3) {
+
+        } else if (note.type === 4) {
+            if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 2));
+        }
     }
 
     switch (note.type)

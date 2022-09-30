@@ -202,10 +202,8 @@ export default class Chart
         this.sprites.info.songDiff.position.y = size.height - size.heightPercent * 43;
     }
 
-    calcTime(_currentTime)
+    calcTime(currentTime)
     {
-        let currentTime = Math.fround(_currentTime - this.offset);
-
         this.judgelines.forEach((judgeline) =>
         {
             judgeline.calcTime(currentTime, this.renderSize);

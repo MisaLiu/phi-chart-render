@@ -12,10 +12,11 @@ const JudgeTimes = {
 
 export default class Score
 {
-    constructor(notesCount = 0, showFCStatus = true, isChallengeMode = false, autoMode = false)
+    constructor(notesCount = 0, showFCStatus = true, isChallengeMode = false, autoPlay = false)
     {
         this._notesCount = Number(notesCount);
         this._showFCStatus = !!showFCStatus;
+        this._autoPlay = !!autoPlay;
 
         if (isNaN((this._notesCount)) || this._notesCount <= 0)
         {
@@ -126,44 +127,55 @@ export default class Score
 
     pushJudge(type = 0, judgelines = [])
     {
-        if (type > 2)
+        if (!this._autoPlay)
         {
-            this.combo += 1;
-            if (this.combo > this.maxCombo) this.maxCombo = this.combo;
+            if (type > 2)
+            {
+                this.combo += 1;
+                if (this.combo > this.maxCombo) this.maxCombo = this.combo;
 
-            if (type === 4) this.perfect += 1;
-            else {
-                this.good += 1;
-                if (this.FCType >= 2)
+                if (type === 4) this.perfect += 1;
+                else {
+                    this.good += 1;
+                    if (this.FCType >= 2)
+                    {
+                        this.FCType = 1;
+
+                        if (this._showFCStatus)
+                        {
+
+                        }
+                    }
+                }
+
+                this.score += this.scorePerNote + (this.combo >= this.maxCombo ? this.scorePerCombo * (type === 4 ? 1 : 0.65) : 0); 
+            }
+            else
+            {
+                if (type === 2)this.bad += 1;
+                else this.miss += 1;
+
+                if (this.FCType >= 1)
                 {
-                    this.FCType = 1;
+                    this.FCType = 0;
 
                     if (this._showFCStatus)
                     {
 
                     }
                 }
+                
+                this.combo = 0;
             }
-
-            this.score += this.scorePerNote + (this.combo >= this.maxCombo ? this.scorePerCombo * (type === 4 ? 1 : 0.65) : 0); 
         }
         else
         {
-            if (type === 2)this.bad += 1;
-            else this.miss += 1;
-
-            if (this.FCType >= 1)
-            {
-                this.FCType = 0;
-
-                if (this._showFCStatus)
-                {
-
-                }
-            }
-            
-            this.combo = 0;
+            this.perfect += 1;
+            this.combo += 1;
+            this.maxCombo = this.combo;
+            this.score += this.scorePerNote + this.scorePerCombo; 
         }
+        
 
         this.judgedNotes++;
         this.acc = (this.perfect + this.good * 0.65) / this.judgedNotes;

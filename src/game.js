@@ -21,6 +21,7 @@ import * as PIXI from 'pixi.js-legacy';
   *         bgDim?,
   *         audioOffset?,
   *         multiHL?,
+  *         autoPlay?,
   *         debug?
   *     }
   * }
@@ -61,11 +62,12 @@ export default class Game
 
         /* ===== 创建判定 ===== */
         this.judgement = new Judgement({
-            chart   : this.chart,
-            stage   : this.render.mainContainer,
-            canvas  : this.render.view,
-            texture : this.assets.textures.clickRaw,
-            sounds  : this.assets.sounds
+            chart    : this.chart,
+            stage    : this.render.mainContainer,
+            canvas   : this.render.view,
+            texture  : this.assets.textures.clickRaw,
+            sounds   : this.assets.sounds,
+            autoPlay : params.settings && params.settings.autoPlay ? !!params.settings.autoPlay : false
         });
 
         /* ===== 用户设置暂存 ===== */
@@ -162,10 +164,8 @@ export default class Game
             this._music = await this.chart.music.play();
             this._audioOffset = this._music._source.context.baseLatency;
 
-            this.render.ticker.add(this._calcTick);
-        
-            this.render.ticker.add(this.judgement.calcTick);
             this.chart.addFunction('note', this.judgement.calcNote);
+            this.render.ticker.add(this._calcTick);
         }, 100);
     }
 
@@ -173,9 +173,11 @@ export default class Game
     {
         if (!this.chart) return;
         if (!this._music) return;
-        let currentTime = this._music.progress * this.chart.music.duration - this._audioOffset - this._settings.offset;
+        let currentTime = this._music.progress * this.chart.music.duration - this._audioOffset - this.chart.offset - this._settings.offset;
         currentTime = currentTime > 0 ? currentTime : 0;
+
         this.chart.calcTime(currentTime);
+        this.judgement.calcTick(currentTime);
     }
 
     resize(withChartSprites = true)
