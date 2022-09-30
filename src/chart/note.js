@@ -28,6 +28,8 @@ export default class Note
 
         this.isScored        = false;
         this.isScoreAnimated = false;
+        this.isHolding       = false;
+        this.lastHoldTime    = NaN;
         this.score           = 0;
         this.scoreTime       = 0;
         

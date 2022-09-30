@@ -22,6 +22,7 @@ export default class Judgement
         this.stage    = params.stage;
         this.texture  = params.texture;
         this.sounds   = params.sounds;
+        this.paused   = false;
 
         if (!params.stage) throw new Error('You cannot do judgement without a stage');
         if (!params.chart) throw new Error('You cannot do judgement without a chart');
@@ -144,7 +145,8 @@ function calcNoteJudge(currentTime, note)
         } else if (note.type === 2) {
             if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 3));
         } else if (note.type === 3) {
-
+            if (!note.isScored && timeBetween <= 0) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 1));
+            else if (note.isScored && currentTime - note.lastHoldTime <= 0.09) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 3));
         } else if (note.type === 4) {
             if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 2));
         }
@@ -212,6 +214,63 @@ function calcNoteJudge(currentTime, note)
         }
         case 3:
         {
+            if (note.isScored)
+            {
+                if (currentTime - note.lastHoldTime >= 0.09)
+                {
+                    // 此处应播放打击动画
+                }
+
+                if (note.holdTimeLength - currentTime <= this.judgeTimes.bad)
+                {
+                    this.score.pushJudge(note.score, this.chart.judgelines);
+                    note.isScoreAnimated = true;
+                    break;
+                }
+            }
+            
+            if (currentTime - note.lastHoldTime >= 0.09) note.isHolding = false;
+
+            for (let i = 0; i < this.judgePoints.length; i++)
+            {
+                if (
+                    !note.isScored &&
+                    this.judgePoints[i].type === 1 &&
+                    this.judgePoints[i].isInArea(notePosition.x, notePosition.y, judgeline.cosr, judgeline.sinr, this.renderSize.noteWidth) &&
+                    timeBetweenReal <= this.judgeTimes.good
+                ) {
+                    note.isScored = true;
+                    note.scoreTime = timeBetween;
+
+                    if (timeBetweenReal <= this.judgeTimes.perfect) note.score = 4;
+                    else note.score = 3;
+                    
+                    note.isHolding = true;
+                    note.lastHoldTime = currentTime;
+
+                    this.judgePoints.splice(i, 1);
+                    break;
+                }
+                else if (
+                    note.isScored &&
+                    this.judgePoints[i].isInArea(notePosition.x, notePosition.y, judgeline.cosr, judgeline.sinr, this.renderSize.noteWidth)
+                ) {
+                    note.isHolding = true;
+                    note.lastHoldTime = currentTime;
+                }
+            }
+
+            if (!this.paused && note.isScored && !note.isHolding)
+            {
+                note.score = 1;
+                note.scoreTime = NaN;
+                
+                this.score.pushJudge(1, this.chart.judgelines);
+
+                note.sprite.alpha = 0.5;
+                note.isScoreAnimated = true;
+            }
+
             break;
         }
         case 4:
@@ -244,7 +303,7 @@ function calcNoteJudge(currentTime, note)
     }
 }
 
-function createClickAnimate(stage, texture, x, y, scale, color)
+function createClickAnimate(stage, texture, x, y, scale, type)
 {
     let sprite = new AnimatedSprite(texture);
 
