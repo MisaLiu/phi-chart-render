@@ -284,7 +284,6 @@ function calcNoteJudge(currentTime, note)
             {
                 if (currentTime - note.lastHoldTime >= 0.15)
                 {
-                    note.lastHoldTime = currentTime;
                     this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
                 }
 
@@ -296,7 +295,11 @@ function calcNoteJudge(currentTime, note)
                 }
             }
             
-            if (currentTime - note.lastHoldTime >= 0.15) note.isHolding = false;
+            if (currentTime - note.lastHoldTime >= 0.15)
+            {
+                note.lastHoldTime = currentTime;
+                note.isHolding = false;
+            }
 
             for (let i = 0; i < this.judgePoints.length; i++)
             {
