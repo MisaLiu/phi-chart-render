@@ -144,16 +144,16 @@ export default class Note
         {
             let noteInfoContainer = new Container();
             let noteId = new Text(this.judgeline.id + (this.isAbove ? '+' : '-') + this.id, {
-                fontSize: 200,
+                fontSize: 48,
                 fill: 0x00E6FF
             });
             let notePosBlock = new Graphics()
                 .beginFill(0x00E6FF)
-                .drawRect(-110, -110, 220, 220)
+                .drawRect(-22, -22, 44, 44)
                 .endFill();
             
             noteId.anchor.set(0.5);
-            noteId.position.set(0, -115 - noteId.height / 2);
+            noteId.position.set(0, -36 - noteId.height / 2);
             noteId.angle = this.isAbove ? 0 : 180;
 
             noteId.cacheAsBitmap = true;
