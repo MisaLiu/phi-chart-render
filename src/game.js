@@ -17,9 +17,12 @@ import * as PIXI from 'pixi.js-legacy';
   *     asstes,
   *     zipFiles?,
   *     settings: {
+  *         audioOffset?,
+  *         hitsound?,
+  *         hitsoundVolume?,
+  *         speed?,
   *         noteScale?,
   *         bgDim?,
-  *         audioOffset?,
   *         multiHL?,
   *         autoPlay?,
   *         debug?
@@ -63,12 +66,16 @@ export default class Game
 
         /* ===== 创建判定 ===== */
         this.judgement = new Judgement({
-            chart    : this.chart,
-            stage    : this.render.mainContainer,
-            canvas   : this.render.view,
-            textures : { normal: this.assets.textures.clickRaw, bad: this.assets.textures.clickRaw },
-            sounds   : this.assets.sounds,
-            autoPlay : params.settings && params.settings.autoPlay ? !!params.settings.autoPlay : false
+            chart          : this.chart,
+            stage          : this.render.mainContainer,
+            canvas         : this.render.view,
+            assets         : {
+                textures : { normal: this.assets.textures.clickRaw, bad: this.assets.textures.clickRaw },
+                sounds   : this.assets.sounds,
+            },
+            hitsound       : params.settings && params.settings.hitsound ? !!params.settings.hitsound : true,
+            hitsoundVolume : params.settings && !isNaN(Number(params.settings.hitsoundVolume)) ? Number(params.settings.hitsoundVolume) : 0.75,
+            autoPlay       : params.settings && params.settings.autoPlay ? !!params.settings.autoPlay : false
         });
 
         /* ===== 用户设置暂存 ===== */

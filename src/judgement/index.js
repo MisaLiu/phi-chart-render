@@ -18,11 +18,12 @@ export default class Judgement
 {
     constructor(params)
     {
-        this.chart    = params.chart;
-        this.stage    = params.stage;
-        this.textures = params.textures;
-        this.sounds   = params.sounds;
-        this.paused   = false;
+        this.chart          = params.chart;
+        this.stage          = params.stage;
+        this.textures       = params.assets.textures;
+        this.sounds         = params.assets.sounds;
+        this.hitsound       = params.hitsound;
+        this.hitsoundVolume = params.hitsoundVolume;
 
         if (!params.stage) throw new Error('You cannot do judgement without a stage');
         if (!params.chart) throw new Error('You cannot do judgement without a chart');
@@ -89,29 +90,30 @@ export default class Judgement
         }
     }
 
-    createClickAnimate(x, y, type)
+    createClickAnimate(note)
     {
         let cont = new Container();
-        let anim = new AnimatedSprite(type >= 3 ? this.textures.normal : this.textures.bad);
+        let anim = new AnimatedSprite(note.score >= 3 ? this.textures.normal : this.textures.bad);
         let blocks = [ null, null, null, null ];
 
-        cont.position.set(x, y);
+        if (note.score >= 3) cont.position.set(note.sprite.judgelineX, note.sprite.judgelineY);
+        else cont.position.set(note.sprite.position.x, note.sprite.position.y);
         cont.scale.set(this.renderSize.noteScale * 5.6);
 
         anim.anchor.set(0.5);
         anim.position.set(0, 0);
-        anim.tint = type === 4 ? 0xFFECA0 : type === 3 ? 0xB4E1FF : 0x6c4343;
+        anim.tint = note.score === 4 ? 0xFFECA0 : note.score === 3 ? 0xB4E1FF : 0x6c4343;
 
         anim.scale.set(256 / anim.texture.baseTexture.width);
-        anim.type = type;
+        anim.type = note.score;
         anim.loop = false;
 
-        if (type >= 3)
+        if (note.score >= 3)
         {
             for (let i = 0; i < blocks.length; i++)
             {
                 blocks[i] = new Graphics()
-                    .beginFill(type === 4 ? 0xFFECA0 : 0xB4E1FF)
+                    .beginFill(note.score === 4 ? 0xFFECA0 : 0xB4E1FF)
                     .drawCircle(0, 0, 15)
                     .endFill();
                 
@@ -240,7 +242,7 @@ function calcNoteJudge(currentTime, note)
                     {
                         note.sprite.alpha = 0;
                         note.isScoreAnimated = true;
-                        this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
+                        this.createClickAnimate(note);
                         this.score.pushJudge(note.score, this.chart.judgelines);
 
                         this.judgePoints.splice(i, 1);
@@ -256,7 +258,7 @@ function calcNoteJudge(currentTime, note)
             if (note.isScored && !note.isScoreAnimated && timeBetween <= 0)
             {
                 this.score.pushJudge(4, this.chart.judgelines);
-                this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
+                this.createClickAnimate(note);
                 note.sprite.alpha = 0;
                 note.isScoreAnimated = true;
             }
@@ -284,7 +286,7 @@ function calcNoteJudge(currentTime, note)
             {
                 if (currentTime - note.lastHoldTime >= 0.15)
                 {
-                    this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
+                    this.createClickAnimate(note);
                 }
 
                 if (note.holdTimeLength - currentTime <= this.judgeTimes.bad)
@@ -315,7 +317,7 @@ function calcNoteJudge(currentTime, note)
                     if (timeBetweenReal <= this.judgeTimes.perfect) note.score = 4;
                     else note.score = 3;
 
-                    this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
+                    this.createClickAnimate(note);
                     
                     note.isHolding = true;
                     note.lastHoldTime = currentTime;
@@ -347,7 +349,7 @@ function calcNoteJudge(currentTime, note)
             if (note.isScored && !note.isScoreAnimated && timeBetween <= 0)
             {
                 this.score.pushJudge(4, this.chart.judgelines);
-                this.createClickAnimate(note.sprite.judgelineX, note.sprite.judgelineY, note.score);
+                this.createClickAnimate(note);
                 note.sprite.alpha = 0;
                 note.isScoreAnimated = true;
             }
