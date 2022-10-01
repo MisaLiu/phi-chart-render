@@ -1,5 +1,5 @@
 import Judgement from './judgement';
-import * as PIXI from 'pixi.js-legacy';
+import { Application, Container, Sprite, Graphics, Text } from 'pixi.js-legacy';
 
 /**
   * {
@@ -44,7 +44,7 @@ export default class Game
         if (!this.zipFiles) this.zipFiles = {};
 
        /* ===== 创建 render ===== */
-        this.render = new PIXI.Application({
+        this.render = new Application({
             width           : !isNaN(Number(params.render.width)) ? Number(params.render.width) : document.documentElement.clientWidth,
             height          : !isNaN(Number(params.render.height)) ? Number(params.render.height) : document.documentElement.clientHeight,
             resolution      : !isNaN(Number(params.render.resolution)) ? Number(params.render.resolution) : window.devicePixelRatio,
@@ -57,12 +57,12 @@ export default class Game
         this.render.parentNode = params.render.resizeTo ? params.render.resizeTo : (params.render.canvas ? params.render.canvas.parentNode : this.render.view.parentElement);
 
         // 创建舞台主渲染区
-        this.render.mainContainer = new PIXI.Container();
+        this.render.mainContainer = new Container();
         this.render.mainContainer.zIndex = 10;
         this.render.stage.addChild(this.render.mainContainer);
 
         // 创建舞台主渲染区可见范围
-        this.render.mainContainerMask = new PIXI.Graphics();
+        this.render.mainContainerMask = new Graphics();
         this.render.mainContainerMask.cacheAsBitmap = true;
 
         /* ===== 创建判定 ===== */
@@ -80,6 +80,8 @@ export default class Game
             challengeMode  : params.settings && params.settings.challengeMode !== undefined && params.settings.challengeMode !== null ? !!params.settings.challengeMode : false,
             autoPlay       : params.settings && params.settings.autoPlay !== undefined && params.settings.autoPlay !== null ? !!params.settings.autoPlay : false
         });
+
+        this.sprites = {};
 
         /* ===== 用户设置暂存 ===== */
         this._settings = {};
@@ -109,8 +111,8 @@ export default class Game
     {
         if (this.chart.bg)
         { // 创建超宽屏舞台覆盖
-            this.render.mainContainerCover = new PIXI.Sprite(this.chart.bg);
-            let bgCover = new PIXI.Graphics();
+            this.render.mainContainerCover = new Sprite(this.chart.bg);
+            let bgCover = new Graphics();
 
             bgCover.beginFill(0x000000);
             bgCover.drawRect(0, 0, this.render.mainContainerCover.texture.width, this.render.mainContainerCover.texture.height);
@@ -151,7 +153,7 @@ export default class Game
 
         if (this._settings.showFPS)
         {
-            this.render.fpsText = new PIXI.Text('FPS: 0', {
+            this.render.fpsText = new Text('FPS: 0', {
                 fontFamily: 'MiSans',
                 align: 'right',
                 fill: 0xFFFFFF
@@ -171,6 +173,7 @@ export default class Game
     {
         if (!this.render) return;
         if (!this.chart.music) throw new Error('You must have a music to play');
+        if (this._music) throw new Error('You have already started');
 
         this.resize();
 
@@ -189,7 +192,17 @@ export default class Game
 
             this.chart.addFunction('note', this.judgement.calcNote);
             this.render.ticker.add(this._calcTick);
-        }, 100);
+        }, 200);
+    }
+
+    pause()
+    {
+
+    }
+
+    restart()
+    {
+
     }
 
     _calcTick()

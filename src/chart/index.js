@@ -149,7 +149,7 @@ export default class Chart
             fill: 0xFFFFFF
         });
         this.sprites.info.songName.anchor.set(0, 1);
-        this.sprites.info.songName.zIndex = 9999;
+        this.sprites.info.songName.zIndex = 99999;
 
         stage.addChild(this.sprites.info.songName);
 
@@ -159,7 +159,7 @@ export default class Chart
             fill: 0xFFFFFF
         });
         this.sprites.info.songDiff.anchor.set(0, 1);
-        this.sprites.info.songDiff.zIndex = 9999;
+        this.sprites.info.songDiff.zIndex = 99999;
 
         stage.addChild(this.sprites.info.songDiff);
     }
