@@ -17,8 +17,16 @@
                 left: 0;
                 max-width: 100%;
                 max-height: 100%;
+                color: #000;
+                background-color: #FFF;
                 border: 1px solid #999;
                 overflow: auto;
+            }
+
+            button#fullscreen {
+                position: absolute;
+                top: 0;
+                right: 0;
             }
 
             canvas#canvas {
@@ -82,6 +90,8 @@
             Current git hash: {{CURRENT_HASH}}<br>
             GitHub homepage: <a href="https://github.com/MisaLiu/phi-chart-render" target="_blank">https://github.com/MisaLiu/phi-chart-render</a><br>
             Report bugs <a href="https://github.com/MisaLiu/phi-chart-render/issues/new/choose" target="_blank">Here</a>
+
+            <button class="fullscreen" id="fullscreen">Fullscreen</button>
         </div>
         <div id="debug"></div>
         <script src="./script.js?hash={{CURRENT_HASH}}"></script>

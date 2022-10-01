@@ -30,7 +30,8 @@ const doms = {
     startBtn : document.querySelector('button#start'),
     loadingStatus : document.querySelector('div#loading-status'),
     canvas : document.querySelector('canvas#canvas'),
-    debug: document.querySelector('div#debug')
+    debug : document.querySelector('div#debug'),
+    fullscreenBtn : document.querySelector('button#fullscreen'),
 };
 
 const files = {
@@ -42,6 +43,87 @@ const files = {
 const assets = {
     textures: {},
     sounds: {}
+};
+
+// 全屏相关。代码来自 lchzh3473
+const fullscreen = {
+	// 切换全屏状态
+	toggle(elem, inDocument = false) {
+		// if (!this.enabled) return false;
+		if (this.element) {
+			if (!inDocument) {
+				if (document.exitFullscreen) return document.exitFullscreen();
+				if (document.cancelFullScreen) return document.cancelFullScreen();
+				if (document.webkitCancelFullScreen) return document.webkitCancelFullScreen();
+				if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
+				if (document.msExitFullscreen) return document.msExitFullscreen();
+			}
+			
+			if (this.element == elem) {
+				elem.style.position = 'relative';
+				elem.style.top = 'unset';
+				elem.style.left = 'unset';
+				elem.style.zIndex = 'unset';
+				document.body.style.overflow = 'auto';
+				
+				document.inDocumentFullscreenElement = null;
+				if (global.functions.resizeCanvas) global.functions.resizeCanvas();
+				return true;
+			}
+			
+			return false;
+			
+		} else {
+			if (!inDocument) {
+				if (!(elem instanceof HTMLElement)) elem = document.body;
+				if (elem.requestFullscreen) return elem.requestFullscreen();
+				if (elem.webkitRequestFullscreen) return elem.webkitRequestFullscreen();
+				if (elem.mozRequestFullScreen) return elem.mozRequestFullScreen();
+				if (elem.msRequestFullscreen) return elem.msRequestFullscreen();
+			}
+			
+			if (elem != document.body) {
+				elem.style.position = 'fixed';
+				elem.style.top = '0';
+				elem.style.left = '0';
+				elem.style.zIndex = '5050';
+				document.body.style.overflow = 'hidden';
+				
+				document.inDocumentFullscreenElement = elem;
+				if (global.functions.resizeCanvas) global.functions.resizeCanvas();
+				return true;
+			}
+			
+			return false;
+		}
+	},
+	
+	// 检查当前全屏的元素
+	check(elem) {
+		if (!(elem instanceof HTMLElement)) elem = document.body;
+		return this.element == elem;
+	},
+	
+	// 返回当前浏览器的全屏组件。
+	get element() {
+		return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || document.inDocumentFullscreenElement;
+	},
+	
+	// 返回当前浏览器是否支持全屏 API。
+	get enabled() {
+		return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled || document.mozFullScreenEnabled || document.msFullscreenEnabled);
+	},
+	
+	// 返回当前的全屏模式。2 == 网页内全屏，1 == API 全屏，0 == 没有开启全屏
+	get type() {
+		if (document.inDocumentFullscreenElement) {
+			return 2;
+		} else if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
 };
 
 window.doms = doms;
@@ -147,7 +229,10 @@ doms.startBtn.addEventListener('click', () => {
     doms.fileSelect.style.display = 'none';
 });
 
-
+doms.fullscreenBtn.addEventListener('click', () =>
+{
+    fullscreen.toggle(document.body, false);
+});
 
 
 
