@@ -279,6 +279,8 @@ window.addEventListener('load', async () =>
         { name: 'judgeline', url: './assets/JudgeLine.png' },
         { name: 'clickRaw', url: './assets/clickRaw128.png' },
 
+        { name: 'pauseButton', url: './assets/pauseButton.png' },
+
         { name: 'soundTap', url: './assets/sounds/Hitsound-Tap.ogg' },
         { name: 'soundDrag', url: './assets/sounds/Hitsound-Drag.ogg' },
         { name: 'soundFlick', url: './assets/sounds/Hitsound-Flick.ogg' }

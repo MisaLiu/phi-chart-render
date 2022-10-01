@@ -96,8 +96,10 @@ export default class Game
 
         this._music = null;
         this._audioOffset = 0;
+        this._isPaused = false;
 
         this.resize = this.resize.bind(this);
+        this._pauseBtnClickCallback = this._pauseBtnClickCallback.bind(this);
         this._calcTick = this._calcTick.bind(this);
 
         if (this._settings.speed < 0.25) throw new Error('Speed too slow');
@@ -151,10 +153,28 @@ export default class Game
         this.judgement.stage = this.render.mainContainer;
         this.judgement.createSprites();
 
+        // 进度条
         this.sprites.progressBar = new Graphics();
         this.sprites.progressBar.alpha = 0.75;
         this.sprites.progressBar.zIndex = 99999;
         this.render.mainContainer.addChild(this.sprites.progressBar);
+
+        // 暂停按钮
+        this.sprites.pauseButton = new Sprite(this.assets.textures.pauseButton);
+
+        this.sprites.pauseButton.interactive = true;
+        this.sprites.pauseButton.buttonMode = true;
+        this.sprites.pauseButton.on('pointerdown', this._pauseBtnClickCallback);
+
+        this.sprites.pauseButton.clickCount = 0;
+        this.sprites.pauseButton.lastClickTime = Date.now();
+        this.sprites.pauseButton.isEndRendering = false;
+        this.sprites.pauseButton.lastRenderTime = Date.now();
+
+        this.sprites.pauseButton.anchor.set(1, 0);
+        this.sprites.pauseButton.alpha = 0.5;
+        this.sprites.pauseButton.zIndex = 99999;
+        this.render.mainContainer.addChild(this.sprites.pauseButton);
 
         if (this._settings.showFPS)
         {
@@ -202,7 +222,8 @@ export default class Game
 
     pause()
     {
-
+        this._isPaused = !this._isPaused;
+        this.chart.music.paused = this._isPaused;
     }
 
     restart()
@@ -210,10 +231,61 @@ export default class Game
 
     }
 
+    _pauseBtnClickCallback()
+    {
+        let pauseButton = this.sprites.pauseButton;
+        pauseButton.clickCount++;
+        if (pauseButton.clickCount >= 2 && Date.now() - pauseButton.lastClickTime <= 2000)
+        {
+            this.pause();
+
+            pauseButton.lastRenderTime = Date.now();
+            pauseButton.isEndRendering = true;
+            pauseButton.clickCount = 0;
+        }
+        pauseButton.lastClickTime = Date.now();
+    }
+
     _calcTick()
     {
+        { // 为暂停按钮计算渐变
+            let pauseButton = this.sprites.pauseButton;
+            if (pauseButton.clickCount === 1)
+            {
+                if (pauseButton.alpha < 1)
+                { // 按钮刚被点击一次
+                    pauseButton.alpha = 0.5 + (0.5 * ((Date.now() - pauseButton.lastClickTime) / 200));
+                }
+                else if (pauseButton.alpha >= 1 && Date.now() - pauseButton.lastClickTime >= 2000)
+                { // 按钮刚被点击一次，且 2s 后没有进一步操作
+                    pauseButton.clickCount = 0;
+                    pauseButton.lastRenderTime = Date.now();
+                    pauseButton.isEndRendering = true;
+                }
+                else if (pauseButton.alpha >= 1)
+                { // 按钮被点击一次，且 200ms 后不透明度已到 1
+                    pauseButton.alpha = 1;
+                    pauseButton.lastRenderTime = Date.now();
+                }
+            }
+            else if (pauseButton.clickCount === 0 && pauseButton.isEndRendering)
+            {
+                if (pauseButton.alpha > 0.5)
+                {
+                    pauseButton.alpha = 1 - (0.5 * ((Date.now() - pauseButton.lastRenderTime) / 200));
+                }
+                else if (pauseButton.alpha <= 0.5)
+                {
+                    pauseButton.alpha = 0.5;
+                    pauseButton.lastRenderTime = Date.now();
+                    pauseButton.isEndRendering = false;
+                }
+            }
+        }
+
         if (!this.chart) return;
         if (!this._music) return;
+        if (this._isPaused) return;
         let currentTime = this._music.progress * this.chart.music.duration - this._audioOffset - this.chart.offset - this._settings.offset;
         currentTime = currentTime > 0 ? currentTime : 0;
 
@@ -224,7 +296,6 @@ export default class Game
         this.sprites.progressBar.beginFill(0xFFFFFF)
             .drawRect(0, 0, this._music.progress * this.render.sizer.width, this.render.sizer.heightPercent * 10)
             .endFill();
-        
     }
 
     resize(withChartSprites = true)
@@ -267,6 +338,16 @@ export default class Game
         else if (this.render.mainContainerCover)
         {
             this.render.mainContainerCover.visible = false;
+        }
+
+        if (this.sprites)
+        {
+            if (this.sprites.pauseButton)
+            {
+                this.sprites.pauseButton.position.x = this.render.sizer.width - this.render.sizer.heightPercent * 72;
+                this.sprites.pauseButton.position.y = this.render.sizer.heightPercent * 74.5;
+                this.sprites.pauseButton.scale.set(this.render.sizer.heightPercent * 0.94);
+            }
         }
 
         // FPS 计数器尺寸计算
