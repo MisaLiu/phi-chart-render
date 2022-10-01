@@ -200,7 +200,7 @@ export default class Game
         currentTime = currentTime > 0 ? currentTime : 0;
 
         this.chart.calcTime(currentTime);
-        this.judgement.calcTick(currentTime);
+        this.judgement.calcTick();
     }
 
     resize(withChartSprites = true)

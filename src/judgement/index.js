@@ -59,15 +59,15 @@ export default class Judgement
         this.input.resizeSprites(size);
     }
 
-    calcTick(currentTime)
+    calcTick()
     {
-        this.createJudgePoints(currentTime);
+        this.createJudgePoints();
 
         this.input.tap.length = 0;
         this.input.calcTick();
     }
 
-    createJudgePoints(currentTime)
+    createJudgePoints()
     {
         this.judgePoints.length = 0;
 

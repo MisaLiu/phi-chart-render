@@ -208,11 +208,11 @@ export default class Chart
 
         this.sprites.info.songName.style.fontSize = size.heightPercent * 27;
         this.sprites.info.songName.position.x = size.heightPercent * 57;
-        this.sprites.info.songName.position.y = size.height - size.heightPercent * 62;
+        this.sprites.info.songName.position.y = size.height - size.heightPercent * 66;
 
         this.sprites.info.songDiff.style.fontSize = size.heightPercent * 20;
         this.sprites.info.songDiff.position.x = size.heightPercent * 57;
-        this.sprites.info.songDiff.position.y = size.height - size.heightPercent * 43;
+        this.sprites.info.songDiff.position.y = size.height - size.heightPercent * 42;
     }
 
     calcTime(currentTime)
