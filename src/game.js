@@ -24,6 +24,7 @@ import * as PIXI from 'pixi.js-legacy';
   *         noteScale?,
   *         bgDim?,
   *         multiHL?,
+  *         challengeMode?,
   *         autoPlay?,
   *         debug?
   *     }
@@ -73,9 +74,10 @@ export default class Game
                 textures : { normal: this.assets.textures.clickRaw, bad: this.assets.textures.clickRaw },
                 sounds   : this.assets.sounds,
             },
-            hitsound       : params.settings && params.settings.hitsound ? !!params.settings.hitsound : true,
+            hitsound       : params.settings && params.settings.hitsound !== undefined && params.settings.hitsound !== null ? !!params.settings.hitsound : true,
             hitsoundVolume : params.settings && !isNaN(Number(params.settings.hitsoundVolume)) ? Number(params.settings.hitsoundVolume) : 0.75,
-            autoPlay       : params.settings && params.settings.autoPlay ? !!params.settings.autoPlay : false
+            challengeMode  : params.settings && params.settings.challengeMode !== undefined && params.settings.challengeMode !== null ? !!params.settings.challengeMode : false,
+            autoPlay       : params.settings && params.settings.autoPlay !== undefined && params.settings.autoPlay !== null ? !!params.settings.autoPlay : false
         });
 
         /* ===== 用户设置暂存 ===== */

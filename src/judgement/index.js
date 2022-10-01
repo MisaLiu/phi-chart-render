@@ -26,9 +26,9 @@ export default class Judgement
         if (!params.stage) throw new Error('You cannot do judgement without a stage');
         if (!params.chart) throw new Error('You cannot do judgement without a chart');
 
-        this._autoPlay       = params.autoPlay ? !!params.autoPlay : false;
-        this._challengeMode  = params.challangeMode ? !!params.challangeMode : false;
-        this._hitsound       = params.hitsound ? !!params.hitsound : true;
+        this._autoPlay       = params.autoPlay !== undefined && params.autoPlay !== null ? !!params.autoPlay : false;
+        this._challengeMode  = params.challangeMode !== undefined && params.challangeMode !== null ? !!params.challangeMode : false;
+        this._hitsound       = params.hitsound !== undefined && params.hitsound !== null ? !!params.hitsound : true;
         this._hitsoundVolume = !isNaN(Number(params.hitsoundVolume)) ? Number(params.hitsoundVolume) : 0.75;
 
         this.score       = new Score(this.chart.totalRealNotes, !!params.showFCStatus, !!params.challangeMode, !!params.autoPlay);
