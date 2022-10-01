@@ -210,7 +210,7 @@ function calcNoteJudge(currentTime, note)
             if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 3));
         } else if (note.type === 3) {
             if (!note.isScored && timeBetween <= 0) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 1));
-            else if (note.isScored && currentTime - note.lastHoldTime <= 0.09) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 3));
+            else if (note.isScored && currentTime - note.lastHoldTime >= 0.15) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 3));
         } else if (note.type === 4) {
             if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 2));
         }
@@ -293,12 +293,12 @@ function calcNoteJudge(currentTime, note)
                     note.isScoreAnimated = true;
                     break;
                 }
-            }
-            
-            if (currentTime - note.lastHoldTime >= 0.15)
-            {
-                note.lastHoldTime = currentTime;
-                note.isHolding = false;
+
+                if (currentTime - note.lastHoldTime >= 0.15)
+                {
+                    note.lastHoldTime = currentTime;
+                    note.isHolding = false;
+                }
             }
 
             for (let i = 0; i < this.judgePoints.length; i++)
@@ -323,10 +323,8 @@ function calcNoteJudge(currentTime, note)
                     this.judgePoints.splice(i, 1);
                     break;
                 }
-                else if (
-                    note.isScored &&
-                    this.judgePoints[i].isInArea(notePosition.x, notePosition.y, judgeline.cosr, judgeline.sinr, this.renderSize.noteWidth)
-                ) {
+                else if (this.judgePoints[i].isInArea(notePosition.x, notePosition.y, judgeline.cosr, judgeline.sinr, this.renderSize.noteWidth))
+                {
                     note.isHolding = true;
                 }
             }
