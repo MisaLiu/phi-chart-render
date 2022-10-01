@@ -2,7 +2,7 @@ import Input from './input';
 import Score from './score';
 import InputPoint from './input/point';
 import JudgePoint from './point';
-import { AnimatedSprite } from 'pixi.js-legacy';
+import { Container, AnimatedSprite, Graphics  } from 'pixi.js-legacy';
 
 const AllJudgeTimes = {
     bad     : 200,
@@ -91,28 +91,66 @@ export default class Judgement
 
     createClickAnimate(x, y, type)
     {
-        let sprite = new AnimatedSprite(type >= 3 ? this.textures.normal : this.textures.bad);
+        let cont = new Container();
+        let anim = new AnimatedSprite(type >= 3 ? this.textures.normal : this.textures.bad);
+        let blocks = [ null, null, null, null ];
 
-        sprite.anchor.set(0.5);
-        sprite.position.x = x;
-        sprite.position.y = y;
+        cont.position.set(x, y);
+        cont.scale.set(this.renderSize.noteScale * 5.6);
 
-        sprite.scale.set((256 / sprite.texture.baseTexture.width) * this.renderSize.noteScale * 5.6);
+        anim.anchor.set(0.5);
+        anim.position.set(0, 0);
+        anim.tint = type === 4 ? 0xFFECA0 : type === 3 ? 0xB4E1FF : 0x6c4343;
 
-        sprite.tint = type === 4 ? 0xFFECA0 : type === 3 ? 0xB4E1FF : 0x6c4343;
-        sprite.loop = false;
+        anim.scale.set(256 / anim.texture.baseTexture.width);
+        anim.type = type;
+        anim.loop = false;
 
-        sprite.onFrameChange = function () {
-            this.alpha = 1 - (this.currentFrame / this.totalFrames);
+        if (type >= 3)
+        {
+            for (let i = 0; i < blocks.length; i++)
+            {
+                blocks[i] = new Graphics()
+                    .beginFill(type === 4 ? 0xFFECA0 : 0xB4E1FF)
+                    .drawCircle(0, 0, 15)
+                    .endFill();
+                
+                blocks[i].cacheAsBitmap = true;
+                blocks[i].distance = blocks[i]._distance = Math.random() * 81 + 185;
+                blocks[i].direction = Math.floor(Math.random() * 360);
+				blocks[i].sinr = Math.sin(blocks[i].direction);
+				blocks[i].cosr = Math.cos(blocks[i].direction);
+
+                cont.addChild(blocks[i]);
+            }
+            anim.blocks = blocks;
+        }
+
+        anim.onFrameChange = function () {
+            let currentFrameProgress = (this.currentFrame / this.totalFrames);
+            this.parent.alpha = 1 - currentFrameProgress;
+
+            if (this.blocks instanceof Array)
+            {
+                for (let i = 0; i < this.blocks.length; i++)
+                {
+                    this.blocks[i].scale.set(((0.2078 * currentFrameProgress - 1.6524) * currentFrameProgress + 1.6399) * currentFrameProgress + 0.4988);
+                    this.blocks[i].distance = this.blocks[i]._distance * (9 * currentFrameProgress / (8 * currentFrameProgress + 1)) * 0.6;
+
+                    this.blocks[i].position.x = this.blocks[i].distance * this.blocks[i].cosr - this.blocks[i].distance * this.blocks[i].sinr;
+				    this.blocks[i].position.y = this.blocks[i].distance * this.blocks[i].cosr + this.blocks[i].distance * this.blocks[i].sinr;
+                }
+            }
         };
-        sprite.onComplete = function () {
-            this.destroy();
+        anim.onComplete = function () {
+            this.parent.destroy();
         };
 
-        this.stage.addChild(sprite);
-        sprite.play();
+        cont.addChild(anim);
+        this.stage.addChild(cont);
+        anim.play();
 
-        return sprite;
+        return cont;
     }
 }
 
