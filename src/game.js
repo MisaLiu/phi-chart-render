@@ -59,6 +59,7 @@ export default class Game
 
         // 创建舞台主渲染区可见范围
         this.render.mainContainerMask = new PIXI.Graphics();
+        this.render.mainContainerMask.cacheAsBitmap = true;
 
         /* ===== 创建判定 ===== */
         this.judgement = new Judgement({
