@@ -83,6 +83,7 @@ export default class Game
         this._settings.noteScale = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
         this._settings.bgDim     = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
         this._settings.offset    = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
+        this._settings.speed     = params.settings && !isNaN(Number(params.settings.speed)) ? Number(params.settings.speed) : 1;
         this._settings.showFPS   = params.settings && params.settings.showFPS ? !!params.settings.showFPS : true;
         this._settings.multiHL   = params.settings && params.settings.multiHL ? !!params.settings.multiHL : true;
         this._settings.debug     = params.settings && params.settings.debug ? !!params.settings.debug : false;
@@ -94,6 +95,9 @@ export default class Game
 
         this.resize = this.resize.bind(this);
         this._calcTick = this._calcTick.bind(this);
+
+        if (this._settings.speed < 0.25) throw new Error('Speed too slow');
+        else if (this._settings.speed > 2) throw new Error('Speed too fast');
 
         this.resize(false);
         window.addEventListener('resize', this.resize);
@@ -169,7 +173,7 @@ export default class Game
 
         setTimeout(async () =>
         {
-            this._music = await this.chart.music.play();
+            this._music = await this.chart.music.play({ speed: this._settings.speed });
             this._audioOffset = this._music._source.context.baseLatency;
 
             this.chart.addFunction('note', this.judgement.calcNote);

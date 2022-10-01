@@ -18,9 +18,14 @@ const doms = {
         bg: document.querySelector('input#file-bg')
     },
     settings: {
+        offset: document.querySelector('input#settings-audio-offset'),
+        speed: document.querySelector('input#settings-audio-speed'),
+
+        hitsound: document.querySelector('input#settings-hitsound'),
+        hitsoundVolume: document.querySelector('input#settings-hitsound-volume'),
+
         autoPlay: document.querySelector('input#settings-autoplay'),
-        debug: document.querySelector('input#settings-debug'),
-        offset: document.querySelector('input#settings-offset')
+        debug: document.querySelector('input#settings-debug')
     },
     startBtn : document.querySelector('button#start'),
     loadingStatus : document.querySelector('div#loading-status'),
@@ -111,6 +116,11 @@ doms.startBtn.addEventListener('click', () => {
         },
         settings: {
             audioOffset: doms.settings.offset.value / 1000,
+            speed: doms.settings.speed.value,
+
+            hitsound: doms.settings.hitsound.checked,
+            hitsoundVolume: doms.settings.hitsoundVolume.value,
+
             autoPlay: doms.settings.autoPlay.checked,
             debug : doms.settings.debug.checked
         }
@@ -162,6 +172,10 @@ window.addEventListener('load', async () =>
     {
         doms.loadingStatus.innerText = 'Loading asset ' + res.name + ' ...';
     });
+    loader.onComplete.add((l, res) =>
+    {
+        doms.loadingStatus.innerText = 'All done!';
+    });
 
     loader.add([
         { name: 'tap', url: './assets/Tap.png' },
@@ -176,7 +190,11 @@ window.addEventListener('load', async () =>
         { name: 'holdBodyHL', url: './assets/HoldHL.png' },
         { name: 'holdEnd', url: './assets/HoldEnd.png' },
         { name: 'judgeline', url: './assets/JudgeLine.png' },
-        { name: 'clickRaw', url: './assets/clickRaw128.png' }
+        { name: 'clickRaw', url: './assets/clickRaw128.png' },
+
+        { name: 'soundTap', url: './assets/sounds/Hitsound-Tap.ogg' },
+        { name: 'soundDrag', url: './assets/sounds/Hitsound-Drag.ogg' },
+        { name: 'soundFlick', url: './assets/sounds/Hitsound-Flick.ogg' }
     ]).load((loader, resources) => {
         for (const name in resources) {
             if (resources[name].texture)
@@ -197,52 +215,14 @@ window.addEventListener('load', async () =>
                     assets.textures[name] = _clickTextures;
                 }
             }
-            
-        }
-        
-        doms.loadingStatus.innerText = 'All done!';
-    });
-    /*
-    loader.add([
-        { name: 'tap', url: './assets/Tap.png' },
-        { name: 'tapHL', url: './assets/TapHL.png' },
-        { name: 'drag', url: './assets/Drag.png' },
-        { name: 'dragHL', url: './assets/DragHL.png' },
-        { name: 'flick', url: './assets/Flick.png' },
-        { name: 'flickHL', url: './assets/FlickHL.png' },
-        { name: 'holdHead', url: './assets/HoldHead.png' },
-        { name: 'holdHeadHL', url: './assets/HoldHeadHL.png' },
-        { name: 'holdBody', url: './assets/Hold.png' },
-        { name: 'holdBodyHL', url: './assets/HoldHL.png' },
-        { name: 'holdEnd', url: './assets/HoldEnd.png' },
-        { name: 'judgeline', url: './assets/JudgeLine.png' },
-        { name: 'clickRaw', url: './assets/clickRaw128.png' }
-    ]).load((loader, resources) => {
-        for (const name in resources) {
-            if (resources[name].texture)
+            else if (resources[name].sound)
             {
-                assets.textures[name] = resources[name].texture;
-
-                if (name == 'clickRaw')
-                {
-                    let _clickTextures = [];
-                    
-                    for (let i = 0; i < Math.floor(assets.textures[name].height / assets.textures[name].width); i++) {
-                        let rectangle = new Rectangle(0, i * assets.textures[name].width, assets.textures[name].width, assets.textures[name].width);
-                        let texture = new Texture(assets.textures[name].baseTexture, rectangle);
-                        
-                        _clickTextures.push(texture);
-                    }
-                    
-                    assets.textures[name] = _clickTextures;
-                }
+                assets.sounds[name.replace('sound', '').toLowerCase()] = resources[name].sound;
+                assets.sounds[name.replace('sound', '').toLowerCase()].loop = false;
             }
             
         }
-        
-        doms.loadingStatus.innerText = 'All done!';
     });
-    */
 });
 
 

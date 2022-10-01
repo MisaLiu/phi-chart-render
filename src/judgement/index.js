@@ -18,18 +18,18 @@ export default class Judgement
 {
     constructor(params)
     {
-        this.chart          = params.chart;
-        this.stage          = params.stage;
-        this.textures       = params.assets.textures;
-        this.sounds         = params.assets.sounds;
-        this.hitsound       = params.hitsound;
-        this.hitsoundVolume = params.hitsoundVolume;
-
+        this.chart    = params.chart;
+        this.stage    = params.stage;
+        this.textures = params.assets.textures;
+        this.sounds   = params.assets.sounds;
+        
         if (!params.stage) throw new Error('You cannot do judgement without a stage');
         if (!params.chart) throw new Error('You cannot do judgement without a chart');
 
-        this._autoPlay      = params.autoPlay ? !!params.autoPlay : false;
-        this._challengeMode = params.challangeMode ? !!params.challangeMode : false;
+        this._autoPlay       = params.autoPlay ? !!params.autoPlay : false;
+        this._challengeMode  = params.challangeMode ? !!params.challangeMode : false;
+        this._hitsound       = params.hitsound ? !!params.hitsound : true;
+        this._hitsoundVolume = !isNaN(Number(params.hitsoundVolume)) ? Number(params.hitsoundVolume) : 0.75;
 
         this.score       = new Score(this.chart.totalRealNotes, !!params.showFCStatus, !!params.challangeMode, !!params.autoPlay);
         this.input       = new Input({ canvas: params.canvas });
@@ -87,6 +87,16 @@ export default class Judgement
                     else if (this.input.inputs[id].isMove) this.judgePoints.push(new JudgePoint(this.input.inputs[id].x, this.input.inputs[id].y, 2));
                 }
             }
+        }
+    }
+
+    pushNoteJudge(note)
+    {
+        this.score.pushJudge(note.score, this.chart.judgelines);
+        if (note.score >= 2)
+        {
+            this.createClickAnimate(note);
+            if (note.score >= 3) this.playHitsound(note);
         }
     }
 
@@ -153,6 +163,34 @@ export default class Judgement
         anim.play();
 
         return cont;
+    }
+
+    playHitsound(note)
+    {
+        if (!this._hitsound) return;
+        if (note.hitsound) note.hitsound.play({ loop: false, volume: this._hitsoundVolume });
+        else
+        {
+            switch (note.type)
+            {
+                case 1:
+                case 3:
+                {
+                    this.sounds.tap.play({ loop: false, volume: this._hitsoundVolume });
+                    break;
+                }
+                case 2:
+                {
+                    this.sounds.drag.play({ loop: false, volume: this._hitsoundVolume });
+                    break;
+                }
+                case 4:
+                {
+                    this.sounds.flick.play({ loop: false, volume: this._hitsoundVolume });
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -240,10 +278,9 @@ function calcNoteJudge(currentTime, note)
 
                     if (note.isScored)
                     {
+                        this.pushNoteJudge(note);
                         note.sprite.alpha = 0;
                         note.isScoreAnimated = true;
-                        this.createClickAnimate(note);
-                        this.score.pushJudge(note.score, this.chart.judgelines);
 
                         this.judgePoints.splice(i, 1);
                         break;
@@ -257,8 +294,7 @@ function calcNoteJudge(currentTime, note)
         {
             if (note.isScored && !note.isScoreAnimated && timeBetween <= 0)
             {
-                this.score.pushJudge(4, this.chart.judgelines);
-                this.createClickAnimate(note);
+                this.pushNoteJudge(note);
                 note.sprite.alpha = 0;
                 note.isScoreAnimated = true;
             }
@@ -318,6 +354,7 @@ function calcNoteJudge(currentTime, note)
                     else note.score = 3;
 
                     this.createClickAnimate(note);
+                    this.playHitsound(note);
                     
                     note.isHolding = true;
                     note.lastHoldTime = currentTime;
@@ -348,8 +385,7 @@ function calcNoteJudge(currentTime, note)
         {
             if (note.isScored && !note.isScoreAnimated && timeBetween <= 0)
             {
-                this.score.pushJudge(4, this.chart.judgelines);
-                this.createClickAnimate(note);
+                this.pushNoteJudge(note);
                 note.sprite.alpha = 0;
                 note.isScoreAnimated = true;
             }
