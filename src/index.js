@@ -24,6 +24,7 @@ const doms = {
         hitsound: document.querySelector('input#settings-hitsound'),
         hitsoundVolume: document.querySelector('input#settings-hitsound-volume'),
 
+        showAPStatus: document.querySelector('input#settings-show-ap-status'),
         autoPlay: document.querySelector('input#settings-autoplay'),
         debug: document.querySelector('input#settings-debug')
     },
@@ -203,6 +204,7 @@ doms.startBtn.addEventListener('click', () => {
             hitsound: doms.settings.hitsound.checked,
             hitsoundVolume: doms.settings.hitsoundVolume.value,
 
+            showAPStatus: doms.settings.showAPStatus.checked,
             autoPlay: doms.settings.autoPlay.checked,
             debug : doms.settings.debug.checked
         }

@@ -12,10 +12,10 @@ const JudgeTimes = {
 
 export default class Score
 {
-    constructor(notesCount = 0, showFCStatus = true, isChallengeMode = false, autoPlay = false)
+    constructor(notesCount = 0, showAPStatus = true, isChallengeMode = false, autoPlay = false)
     {
         this._notesCount = Number(notesCount);
-        this._showFCStatus = !!showFCStatus;
+        this._showAPStatus = !!showAPStatus;
         this._autoPlay = !!autoPlay;
 
         if (isNaN((this._notesCount)) || this._notesCount <= 0)
@@ -141,9 +141,13 @@ export default class Score
                     {
                         this.FCType = 1;
 
-                        if (this._showFCStatus)
+                        if (this._showAPStatus)
                         {
-
+                            judgelines.forEach((judgeline) =>
+                            {
+                                if (!judgeline.sprite) return;
+                                judgeline.sprite.tint = 0xB4E1FF;
+                            });
                         }
                     }
                 }
@@ -159,9 +163,13 @@ export default class Score
                 {
                     this.FCType = 0;
 
-                    if (this._showFCStatus)
+                    if (this._showAPStatus)
                     {
-
+                        judgelines.forEach((judgeline) =>
+                        {
+                            if (!judgeline.sprite) return;
+                            judgeline.sprite.tint = 0xFFFFFF;
+                        });
                     }
                 }
                 

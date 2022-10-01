@@ -16,7 +16,7 @@ const AllJudgeTimes = {
 
 export default class Judgement
 {
-    constructor(params)
+    constructor(params = {})
     {
         this.chart    = params.chart;
         this.stage    = params.stage;
@@ -27,19 +27,18 @@ export default class Judgement
         if (!params.chart) throw new Error('You cannot do judgement without a chart');
 
         this._autoPlay       = params.autoPlay !== undefined && params.autoPlay !== null ? !!params.autoPlay : false;
-        this._challengeMode  = params.challangeMode !== undefined && params.challangeMode !== null ? !!params.challangeMode : false;
         this._hitsound       = params.hitsound !== undefined && params.hitsound !== null ? !!params.hitsound : true;
         this._hitsoundVolume = !isNaN(Number(params.hitsoundVolume)) ? Number(params.hitsoundVolume) : 0.75;
 
-        this.score       = new Score(this.chart.totalRealNotes, !!params.showFCStatus, !!params.challangeMode, !!params.autoPlay);
+        this.score       = new Score(this.chart.totalRealNotes, !!params.showAPStatus, !!params.challangeMode, !!params.autoPlay);
         this.input       = new Input({ canvas: params.canvas });
         this.judgePoints = [];
 
         /* ===== 判定用时间计算 ===== */
         this.judgeTimes = {
-            perfect : (!this._challengeMode ? AllJudgeTimes.perfect : AllJudgeTimes.perfectChallenge) / 1000,
-            good    : (!this._challengeMode ? AllJudgeTimes.good : AllJudgeTimes.goodChallenge) / 1000,
-            bad     : (!this._challengeMode ? AllJudgeTimes.bad : AllJudgeTimes.badChallenge) / 1000
+            perfect : (!params.challangeMode ? AllJudgeTimes.perfect : AllJudgeTimes.perfectChallenge) / 1000,
+            good    : (!params.challangeMode ? AllJudgeTimes.good : AllJudgeTimes.goodChallenge) / 1000,
+            bad     : (!params.challangeMode ? AllJudgeTimes.bad : AllJudgeTimes.badChallenge) / 1000
         };
         
         this.calcTick = this.calcTick.bind(this);

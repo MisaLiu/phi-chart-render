@@ -76,21 +76,21 @@ export default class Game
             },
             hitsound       : params.settings && params.settings.hitsound !== undefined && params.settings.hitsound !== null ? !!params.settings.hitsound : true,
             hitsoundVolume : params.settings && !isNaN(Number(params.settings.hitsoundVolume)) ? Number(params.settings.hitsoundVolume) : 0.75,
+            showAPStatus   : params.settings && params.settings.showAPStatus !== undefined && params.settings.showAPStatus !== null ? !!params.settings.showAPStatus : true,
             challengeMode  : params.settings && params.settings.challengeMode !== undefined && params.settings.challengeMode !== null ? !!params.settings.challengeMode : false,
             autoPlay       : params.settings && params.settings.autoPlay !== undefined && params.settings.autoPlay !== null ? !!params.settings.autoPlay : false
         });
 
         /* ===== 用户设置暂存 ===== */
         this._settings = {};
-        this._settings.noteScale = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
-        this._settings.bgDim     = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
-        this._settings.offset    = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
-        this._settings.speed     = params.settings && !isNaN(Number(params.settings.speed)) ? Number(params.settings.speed) : 1;
-        this._settings.showFPS   = params.settings && params.settings.showFPS ? !!params.settings.showFPS : true;
-        this._settings.multiHL   = params.settings && params.settings.multiHL ? !!params.settings.multiHL : true;
-        this._settings.debug     = params.settings && params.settings.debug ? !!params.settings.debug : false;
-
-        this.sprites = {};
+        this._settings.noteScale    = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
+        this._settings.bgDim        = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
+        this._settings.offset       = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
+        this._settings.speed        = params.settings && !isNaN(Number(params.settings.speed)) ? Number(params.settings.speed) : 1;
+        this._settings.showFPS      = params.settings && params.settings.showFPS ? !!params.settings.showFPS : true;
+        this._settings.multiHL      = params.settings && params.settings.multiHL ? !!params.settings.multiHL : true;
+        this._settings.showAPStatus = params.settings && params.settings.showAPStatus !== undefined && params.settings.showAPStatus !== null ? !!params.settings.showAPStatus : true;
+        this._settings.debug        = params.settings && params.settings.debug ? !!params.settings.debug : false;
 
         this._music = null;
         this._audioOffset = 0;
@@ -136,6 +136,15 @@ export default class Game
             this._settings.multiHL,
             this._settings.debug
         );
+        
+        if (this._settings.showAPStatus)
+        {
+            this.chart.judgelines.forEach((judgeline) =>
+            {
+                if (!judgeline.sprite) return;
+                judgeline.sprite.tint = 0xFFECA0;
+            });
+        }
 
         this.judgement.stage = this.render.mainContainer;
         this.judgement.createSprites();

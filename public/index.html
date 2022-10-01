@@ -17,10 +17,12 @@
                 left: 0;
                 max-width: 100%;
                 max-height: 100%;
+                padding: 10px;
                 color: #000;
                 background-color: #FFF;
                 border: 1px solid #999;
                 overflow: auto;
+                box-sizing: border-box;
             }
 
             button#fullscreen {
@@ -83,8 +85,10 @@
             <label><input type="checkbox" id="settings-hitsound" checked />Hitsound</label><br>
             <label>Hitsound volume: <input type="range" id="settings-hitsound-volume" min="0" max="1" step="0.01" value="0.75"></label><br>
             <hr />
+            <label><input type="checkbox" id="settings-show-ap-status" checked />Show AP Status</label><br>
             <label><input type="checkbox" id="settings-autoplay" />AutoPlay</label><br>
             <label><input type="checkbox" id="settings-debug" />Debug</label><br>
+            <hr />
             <button id="start">Start</button>
             <hr />
             Current git hash: {{CURRENT_HASH}}<br>
