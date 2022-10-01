@@ -151,6 +151,11 @@ export default class Game
         this.judgement.stage = this.render.mainContainer;
         this.judgement.createSprites();
 
+        this.sprites.progressBar = new Graphics();
+        this.sprites.progressBar.alpha = 0.75;
+        this.sprites.progressBar.zIndex = 99999;
+        this.render.mainContainer.addChild(this.sprites.progressBar);
+
         if (this._settings.showFPS)
         {
             this.render.fpsText = new Text('FPS: 0', {
@@ -214,6 +219,12 @@ export default class Game
 
         this.chart.calcTime(currentTime);
         this.judgement.calcTick();
+
+        this.sprites.progressBar.clear();
+        this.sprites.progressBar.beginFill(0xFFFFFF)
+            .drawRect(0, 0, this._music.progress * this.render.sizer.width, this.render.sizer.heightPercent * 10)
+            .endFill();
+        
     }
 
     resize(withChartSprites = true)
