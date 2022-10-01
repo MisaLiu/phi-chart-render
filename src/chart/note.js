@@ -1,4 +1,4 @@
-import { Sprite, Container, Text } from 'pixi.js-legacy';
+import { Sprite, Container, Text, Graphics } from 'pixi.js-legacy';
 
 export default class Note
 {
@@ -142,14 +142,27 @@ export default class Note
         // For debug propose
         if (debug)
         {
+            let noteInfoContainer = new Container();
             let noteId = new Text(this.judgeline.id + (this.isAbove ? '+' : '-') + this.id, {
-                fontSize: 168,
-                fill: 0x0000FF
+                fontSize: 200,
+                fill: 0x00E6FF
             });
-            this.sprite.addChild(noteId);
+            let notePosBlock = new Graphics()
+                .beginFill(0x00E6FF)
+                .drawRect(-110, -110, 220, 220)
+                .endFill();
+            
             noteId.anchor.set(0.5);
-            noteId.position.set(0);
+            noteId.position.set(0, -115 - noteId.height / 2);
             noteId.angle = this.isAbove ? 0 : 180;
+
+            noteId.cacheAsBitmap = true;
+            notePosBlock.cacheAsBitmap = true;
+
+            noteInfoContainer.addChild(noteId);
+            noteInfoContainer.addChild(notePosBlock);
+
+            this.debugSprite = noteInfoContainer;
         }
 
         return this.sprite;
@@ -213,6 +226,13 @@ export default class Note
             this.sprite.position.y = realY;
             
             this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
+
+            if (this.debugSprite)
+            {
+                this.debugSprite.visible = this.sprite.visible;
+                this.debugSprite.position = this.sprite.position;
+                this.debugSprite.angle = this.sprite.angle;
+            }
 
             // Note 在舞台可视范围之内时做进一步计算
             if (!this.sprite.outScreen)

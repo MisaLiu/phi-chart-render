@@ -1,5 +1,5 @@
 import utils from './convert/utils';
-import { Sprite, Text } from 'pixi.js-legacy';
+import { Sprite, Container, Text, Graphics } from 'pixi.js-legacy';
 
 export default class Judgeline
 {
@@ -180,13 +180,26 @@ export default class Judgeline
         // For debug propose
         if (debug)
         {
+            let lineInfoContainer = new Container();
             let lineId = new Text(this.id, {
-                fontSize: 24,
-                fill: 0xFF0000
+                fontSize: 48,
+                fill: 0xFF00A0
             });
-            this.sprite.addChild(lineId);
+            let linePosBlock = new Graphics()
+                .beginFill(0xFF00A0)
+                .drawRect(-22, -22, 44, 44)
+                .endFill();
+            
             lineId.anchor.set(0.5);
-            lineId.position.set(0);
+            lineId.position.set(0, -36 - lineId.width / 2);
+
+            lineId.cacheAsBitmap = true;
+            linePosBlock.cacheAsBitmap = true;
+
+            lineInfoContainer.addChild(lineId);
+            lineInfoContainer.addChild(linePosBlock);
+
+            this.debugSprite = lineInfoContainer;
         }
         
         return this.sprite;
@@ -233,6 +246,12 @@ export default class Judgeline
             this.sprite.position.y = (0.5 - this.y) * size.height;
             this.sprite.alpha      = this.alpha >= 0 ? this.alpha : 0;
             this.sprite.rotation   = this.deg;
+
+            if (this.debugSprite)
+            {
+                this.debugSprite.position = this.sprite.position;
+                this.debugSprite.rotation = this.sprite.rotation;
+            }
         }
     }
 }

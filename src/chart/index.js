@@ -122,6 +122,11 @@ export default class Chart
             judgeline.sprite.zIndex = index + 1;
 
             stage.addChild(judgeline.sprite);
+            if (judgeline.debugSprite)
+            {
+                judgeline.debugSprite.zIndex = index + 1;
+                stage.addChild(judgeline.debugSprite);
+            }
         });
         this.notes.forEach((note, index) =>
         {
@@ -130,6 +135,11 @@ export default class Chart
             note.sprite.zIndex = this.judgelines.length + (note.type === 3 ? index : index + 10) + 1;
 
             stage.addChild(note.sprite);
+            if (note.debugSprite)
+            {
+                note.debugSprite.zIndex = note.sprite.zIndex;
+                stage.addChild(note.debugSprite);
+            }
         });
 
         this.sprites.info = {};
@@ -176,6 +186,8 @@ export default class Chart
 
                 judgeline.sprite.height = this.renderSize.lineScale * 18.75 * 0.008;
                 judgeline.sprite.width = judgeline.sprite.height * judgeline.sprite.texture.width / judgeline.sprite.texture.height * 1.042;
+
+                if (judgeline.debugSprite) judgeline.debugSprite.scale.set(this.renderSize.heightPercent);
             });
         }
 
@@ -190,6 +202,7 @@ export default class Chart
                 }
 
                 note.sprite.scale.set(this.renderSize.noteScale * note.xScale, this.renderSize.noteScale);
+                if (note.debugSprite) note.debugSprite.scale.set(this.renderSize.noteScale * note.xScale, this.renderSize.noteScale);
             });
         }
 
