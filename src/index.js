@@ -321,6 +321,7 @@ window.addEventListener('load', async () =>
                         let rectangle = new Rectangle(0, i * assets.textures[name].width, assets.textures[name].width, assets.textures[name].width);
                         let texture = new Texture(assets.textures[name].baseTexture, rectangle);
                         
+                        texture.defaultAnchor.set(0.5);
                         _clickTextures.push(texture);
                     }
                     

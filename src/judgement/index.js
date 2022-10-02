@@ -2,7 +2,7 @@ import Input from './input';
 import Score from './score';
 import InputPoint from './input/point';
 import JudgePoint from './point';
-import { Container, AnimatedSprite, Graphics  } from 'pixi.js-legacy';
+import { ParticleContainer, Container, AnimatedSprite, Texture, Graphics, Sprite  } from 'pixi.js-legacy';
 
 const AllJudgeTimes = {
     bad     : 200,
@@ -14,6 +14,23 @@ const AllJudgeTimes = {
     perfectChallenge : 40
 };
 
+const ClickAnimatePointCache = (() =>
+{
+    const pointSize = 18;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { alpha: true });
+
+    canvas.width = canvas.height = pointSize * 2;
+    ctx.clearRect(0, 0, pointSize * 2, pointSize * 2);
+    ctx.beginPath();
+    ctx.arc(pointSize, pointSize, pointSize, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+
+    const result = Texture.from(canvas);
+    result.defaultAnchor.set(0.5);
+    return result
+})();
 export default class Judgement
 {
     constructor(params = {})
@@ -109,7 +126,6 @@ export default class Judgement
         else cont.position.set(note.sprite.position.x, note.sprite.position.y);
         cont.scale.set(this.renderSize.noteScale * 5.6);
 
-        anim.anchor.set(0.5);
         anim.position.set(0, 0);
         anim.tint = note.score === 4 ? 0xFFECA0 : note.score === 3 ? 0xB4E1FF : 0x6c4343;
 
@@ -121,12 +137,10 @@ export default class Judgement
         {
             for (let i = 0; i < blocks.length; i++)
             {
-                blocks[i] = new Graphics()
-                    .beginFill(note.score === 4 ? 0xFFECA0 : 0xB4E1FF)
-                    .drawCircle(0, 0, 15)
-                    .endFill();
-                
-                /* blocks[i].cacheAsBitmap = true; */
+                blocks[i] = new Sprite(ClickAnimatePointCache);
+
+                blocks[i].tint = note.score === 4 ? 0xFFECA0 : 0xB4E1FF;
+
                 blocks[i].distance = blocks[i]._distance = Math.random() * 81 + 185;
                 blocks[i].direction = Math.floor(Math.random() * 360);
 				blocks[i].sinr = Math.sin(blocks[i].direction);
@@ -135,6 +149,10 @@ export default class Judgement
                 cont.addChild(blocks[i]);
             }
             anim.blocks = blocks;
+        }
+        else
+        {
+            cont.angle = note.sprite.angle;
         }
 
         anim.onFrameChange = function () {
