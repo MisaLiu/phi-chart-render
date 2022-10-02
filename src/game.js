@@ -224,6 +224,7 @@ export default class Game
     {
         this._isPaused = !this._isPaused;
         this.chart.music.paused = this._isPaused;
+        this.judgement.input._isPaused = this._isPaused;
     }
 
     restart()
