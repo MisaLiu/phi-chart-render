@@ -46,7 +46,7 @@ export default class Judgement
 
         this._autoPlay       = params.autoPlay !== undefined && params.autoPlay !== null ? !!params.autoPlay : false;
         this._hitsound       = params.hitsound !== undefined && params.hitsound !== null ? !!params.hitsound : true;
-        this._hitsoundVolume = !isNaN(Number(params.hitsoundVolume)) ? Number(params.hitsoundVolume) : 0.75;
+        this._hitsoundVolume = !isNaN(Number(params.hitsoundVolume)) ? Number(params.hitsoundVolume) : 1;
 
         this.score       = new Score(this.chart.totalRealNotes, !!params.showAPStatus, !!params.challangeMode, this._autoPlay);
         this.input       = new Input({ canvas: params.canvas, autoPlay: this._autoPlay });
