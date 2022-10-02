@@ -194,6 +194,11 @@ doms.startBtn.addEventListener('click', () => {
     files.chart.music = files.music;
     files.chart.bg = files.bg;
 
+    for (const name in assets.sounds)
+    {
+        assets.sounds[name].play({ volume: 0 });
+    }
+
     window._game = new Game({
         chart: files.chart,
         assets: assets,

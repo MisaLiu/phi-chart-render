@@ -126,7 +126,7 @@ export default class Judgement
                     .drawCircle(0, 0, 15)
                     .endFill();
                 
-                blocks[i].cacheAsBitmap = true;
+                /* blocks[i].cacheAsBitmap = true; */
                 blocks[i].distance = blocks[i]._distance = Math.random() * 81 + 185;
                 blocks[i].direction = Math.floor(Math.random() * 360);
 				blocks[i].sinr = Math.sin(blocks[i].direction);

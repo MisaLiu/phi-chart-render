@@ -193,9 +193,11 @@ export default class Judgeline
             lineId.anchor.set(0.5);
             lineId.position.set(0, -36 - lineId.width / 2);
 
+            /*
             lineId.cacheAsBitmap = true;
             linePosBlock.cacheAsBitmap = true;
-
+            */
+            
             lineInfoContainer.addChild(lineId);
             lineInfoContainer.addChild(linePosBlock);
 

@@ -156,9 +156,11 @@ export default class Note
             noteId.position.set(0, -36 - noteId.height / 2);
             noteId.angle = this.isAbove ? 0 : 180;
 
+            /*
             noteId.cacheAsBitmap = true;
             notePosBlock.cacheAsBitmap = true;
-
+            */
+            
             noteInfoContainer.addChild(noteId);
             noteInfoContainer.addChild(notePosBlock);
 
