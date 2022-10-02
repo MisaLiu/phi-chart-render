@@ -309,7 +309,7 @@ export default class Game
         this.chart.calcTime(currentTime);
         this.judgement.calcTick();
 
-        this.sprites.progressBar.width =this._music.progress * this.render.sizer.width;
+        this.sprites.progressBar.width = this._music.progress * this.render.sizer.width;
     }
 
     resize(withChartSprites = true)
@@ -359,6 +359,7 @@ export default class Game
             if (this.sprites.progressBar)
             {
                 this.sprites.progressBar.scale.y = this.render.sizer.heightPercent;
+                this.sprites.progressBar.width = this._music.progress * this.render.sizer.width;
             }
 
             if (this.sprites.pauseButton)
