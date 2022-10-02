@@ -1,26 +1,26 @@
-function InputStart(e)
+function InputStart(e, type = 0)
 {
     e.preventDefault();
     if (this._isPaused) return;
 
-    if (e instanceof TouchEvent)
+    if (type === 1)
     {
         for (const touch of e.changedTouches)
         {
             this.addInput(touch.clientX - this.renderSize.widthOffset, touch.clientY, touch.identifier);
         }
     }
-    else if (e instanceof MouseEvent)
+    else
     {
         this.addInput(e.clientX - this.renderSize.widthOffset, e.clientY, e.button);
     }
 }
 
-function InputMove(e)
+function InputMove(e, type = 0)
 {
     e.preventDefault();
 
-    if (e instanceof TouchEvent)
+    if (type === 1)
     {
         for (const touch of e.changedTouches)
         {
@@ -30,7 +30,7 @@ function InputMove(e)
             }
         }
     }
-    else if (e instanceof MouseEvent)
+    else
     {
         if (this.inputs[e.button])
         {
@@ -39,18 +39,18 @@ function InputMove(e)
     }
 }
 
-function InputEnd(e)
+function InputEnd(e, type = 0)
 {
     e.preventDefault();
 
-    if (e instanceof TouchEvent)
+    if (type === 1)
     {
         for (const touch of e.changedTouches)
         {
             delete this.inputs[touch.identifier];
         }
     }
-    else if (e instanceof MouseEvent)
+    else
     {
         delete this.inputs[e.button];
     }

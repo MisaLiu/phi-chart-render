@@ -30,15 +30,15 @@ export default class Input
             canvas.addEventListener('test', null, Object.defineProperty({}, 'passive', { get: function() { passiveIfSupported = { passive: false }; } }));
         } catch (err) {}
 
-        canvas.addEventListener('touchstart', this._inputStart, passiveIfSupported);
-        canvas.addEventListener('touchmove', this._inputMove, passiveIfSupported);
-        canvas.addEventListener('touchend', this._inputEnd, passiveIfSupported);
-        canvas.addEventListener('touchcancel', this._inputEnd, passiveIfSupported);
+        canvas.addEventListener('touchstart', (e) => this._inputStart(e, 1), passiveIfSupported);
+        canvas.addEventListener('touchmove', (e) => this._inputMove(e, 1), passiveIfSupported);
+        canvas.addEventListener('touchend', (e) => this._inputEnd(e, 1), passiveIfSupported);
+        canvas.addEventListener('touchcancel', (e) => this._inputEnd(e, 1), passiveIfSupported);
 
         // 鼠标适配，其实并不打算做
-        canvas.addEventListener('mousedown', this._inputStart, passiveIfSupported);
-        canvas.addEventListener('mousemove', this._inputMove, passiveIfSupported);
-        canvas.addEventListener('mouseup', this._inputEnd, passiveIfSupported);
+        canvas.addEventListener('mousedown', (e) => this._inputStart(e, 0), passiveIfSupported);
+        canvas.addEventListener('mousemove', (e) => this._inputMove(e, 0), passiveIfSupported);
+        canvas.addEventListener('mouseup', (e) => this._inputEnd(e, 0), passiveIfSupported);
     }
 
     createSprite(stage, showInputPoint = true)
