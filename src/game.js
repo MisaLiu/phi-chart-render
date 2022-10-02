@@ -1,5 +1,20 @@
 import Judgement from './judgement';
-import { Application, Container, Sprite, Graphics, Text } from 'pixi.js-legacy';
+import { Application, Container, Texture, Sprite, Graphics, Text } from 'pixi.js-legacy';
+
+const PorgressBarCache = (() =>
+{
+    const pointSize = 18;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = 1920;
+    canvas.height = 10;
+    ctx.clearRect(0, 0, 1920, 10);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, 1920, 10);
+
+    return Texture.from(canvas);
+})();
 
 /**
   * {
@@ -154,7 +169,8 @@ export default class Game
         this.judgement.createSprites();
 
         // 进度条
-        this.sprites.progressBar = new Graphics();
+        this.sprites.progressBar = new Sprite(PorgressBarCache);
+        this.sprites.progressBar.width = 0;
         this.sprites.progressBar.alpha = 0.75;
         this.sprites.progressBar.zIndex = 99999;
         this.render.mainContainer.addChild(this.sprites.progressBar);
@@ -293,10 +309,7 @@ export default class Game
         this.chart.calcTime(currentTime);
         this.judgement.calcTick();
 
-        this.sprites.progressBar.clear();
-        this.sprites.progressBar.beginFill(0xFFFFFF)
-            .drawRect(0, 0, this._music.progress * this.render.sizer.width, this.render.sizer.heightPercent * 10)
-            .endFill();
+        this.sprites.progressBar.width =this._music.progress * this.render.sizer.width;
     }
 
     resize(withChartSprites = true)
@@ -343,6 +356,11 @@ export default class Game
 
         if (this.sprites)
         {
+            if (this.sprites.progressBar)
+            {
+                this.sprites.progressBar.scale.y = this.render.sizer.heightPercent;
+            }
+
             if (this.sprites.pauseButton)
             {
                 this.sprites.pauseButton.position.x = this.render.sizer.width - this.render.sizer.heightPercent * 72;

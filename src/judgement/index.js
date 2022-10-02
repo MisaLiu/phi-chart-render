@@ -31,6 +31,7 @@ const ClickAnimatePointCache = (() =>
     result.defaultAnchor.set(0.5);
     return result
 })();
+
 export default class Judgement
 {
     constructor(params = {})
