@@ -127,7 +127,7 @@ export default class Score
 
     pushJudge(type = 0, judgelines = [])
     {
-        if (!false)
+        if (!this._autoPlay)
         {
             if (type > 2)
             {

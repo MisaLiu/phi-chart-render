@@ -1,6 +1,7 @@
 function InputStart(e)
 {
     e.preventDefault();
+    if (this._autoPlay) return;
 
     if (e instanceof TouchEvent)
     {

@@ -9,7 +9,7 @@ export default class Input
         this.tap = [];
         this.inputs = {};
 
-        this._autoPlay = params.autoPlay ? !!params.autoPlay : false;
+        this._autoPlay = params.autoPlay !== undefined && params.autoPlay !== null ? !!params.autoPlay : false;
 
         if (!params.canvas) throw new Error('You cannot add inputs without a canvas');
 
