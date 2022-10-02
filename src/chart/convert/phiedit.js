@@ -57,7 +57,7 @@ export default function PhiEditChartConverter(_chart)
 
     if (!isNaN(Number(rawChart[0])))
     {
-        chart.offset = Number((Number(rawChart.shift()) / 1000).toFixed(4));
+        chart.offset = Number((Number(rawChart.shift()) / 1000).toFixed(4)) - 0.175;
     }
 
     rawChart.forEach((_command, commandIndex) =>

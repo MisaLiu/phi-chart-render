@@ -303,7 +303,7 @@ export default class Game
         if (!this.chart) return;
         if (!this._music) return;
         if (this._isPaused) return;
-        let currentTime = this._music.progress * this.chart.music.duration - this._audioOffset - this.chart.offset - this._settings.offset;
+        let currentTime = this._music.progress * this.chart.music.duration - this._audioOffset - this.chart.offset + this._settings.offset;
         currentTime = currentTime > 0 ? currentTime : 0;
 
         this.chart.calcTime(currentTime);
