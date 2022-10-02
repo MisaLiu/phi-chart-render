@@ -151,34 +151,33 @@ function calculateEventEase(event, Easings, easingsOffset = 1, forceLinear = fal
 function arrangeSameValueEvent(_events)
 {
     let events = _events.slice();
-    let eventIndexOffset = 0;
-    let result = [];
+    let newEvents = [ events.shift() ];
 
-    for (let eventIndex = 0, eventLength = events.length; eventIndex + eventIndexOffset < eventLength; eventIndex++)
+    for (let newEvent of events)
     {
-        let event = events[eventIndex + eventIndexOffset];
-        result.push({
-            startTime  : event.startTime,
-            endTime    : event.endTime,
-            start      : event.start,
-            end        : event.end
-        });
-
-        if (event.start != event.end) continue;
-
-        for (let nextEventIndex = eventIndex + eventIndexOffset + 1; nextEventIndex < eventLength; nextEventIndex++)
+        let lastNewEvent = newEvents[newEvents.length - 1];
+        let duration1 = lastNewEvent.endTime - lastNewEvent.startTime;
+        let duration2 = newEvent.endTime - newEvent.startTime;
+        
+        if (newEvent.startTime == newEvent.endTime)
         {
-            let nextEvent = events[nextEventIndex];
-
-            if (nextEvent.startTime < event.startTime && nextEvent.endTime < event.startTime) continue;
-            if (nextEvent.start != event.start || nextEvent.end != event.end) break;
-
-            result[result.length - 1].endTime = nextEvent.endTime;
-            eventIndexOffset++;
+            // 忽略此分支    
+        }
+        else if (
+            lastNewEvent.end == newEvent.start &&
+            (lastNewEvent.end - lastNewEvent.start) * duration2 == (newEvent.end - newEvent.start) * duration1
+        )
+        {
+            lastNewEvent.endTime = newEvent.endTime;
+            lastNewEvent.end     = newEvent.end;
+        }
+        else
+        {
+            newEvents.push(newEvent);
         }
     }
 
-    return result.slice();
+    return newEvents.slice();
 }
 
 /**

@@ -307,7 +307,7 @@ function arrangeLineEvents(events) {
             });
         }
     }
-    
+    /*
     // 合并相同变化率事件
     newEvents2 = [ newEvents.shift() ];
     for (let newEvent of newEvents)
@@ -333,6 +333,6 @@ function arrangeLineEvents(events) {
             newEvents2.push(newEvent);
         }
     }
-    
-    return newEvents2.slice();
+    */
+    return newEvents.slice();
 }
