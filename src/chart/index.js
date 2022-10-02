@@ -91,7 +91,7 @@ export default class Chart
         this.function[type].push(func);
     }
 
-    createSprites(stage, size, textures, zipFiles = {}, bgDim = 0.5, multiHL = true, debug = false)
+    createSprites(stage, size, textures, zipFiles = {}, bgDim = 0.5, multiNoteHL = true, debug = false)
     {
         if (this.bg)
         {
@@ -105,7 +105,7 @@ export default class Chart
 
             bgCover.position.x = -this.sprites.bg.width / 2;
             bgCover.position.y = -this.sprites.bg.height / 2;
-            bgCover.alpha = 1 - bgDim;
+            bgCover.alpha = bgDim;
 
             this.sprites.bg.addChild(bgCover);
             this.sprites.bg.anchor.set(0.5);
@@ -130,7 +130,7 @@ export default class Chart
         });
         this.notes.forEach((note, index) =>
         {
-            note.createSprite(textures, zipFiles, multiHL, debug);
+            note.createSprite(textures, zipFiles, multiNoteHL, debug);
 
             note.sprite.zIndex = this.judgelines.length + (note.type === 3 ? index : index + 10) + 1;
 

@@ -37,7 +37,7 @@ const PorgressBarCache = (() =>
   *         speed?,
   *         noteScale?,
   *         bgDim?,
-  *         multiHL?,
+  *         multiNoteHL?,
   *         challengeMode?,
   *         autoPlay?,
   *         debug?
@@ -103,8 +103,8 @@ export default class Game
         this._settings.bgDim        = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
         this._settings.offset       = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
         this._settings.speed        = params.settings && !isNaN(Number(params.settings.speed)) ? Number(params.settings.speed) : 1;
-        this._settings.showFPS      = params.settings && params.settings.showFPS ? !!params.settings.showFPS : true;
-        this._settings.multiHL      = params.settings && params.settings.multiHL ? !!params.settings.multiHL : true;
+        this._settings.showFPS      = params.settings && params.settings.showFPS !== undefined && params.settings.showFPS !== null ? !!params.settings.showFPS : true;
+        this._settings.multiNoteHL  = params.settings && params.settings.multiNoteHL !== undefined && params.settings.multiNoteHL !== null ? !!params.settings.multiNoteHL : true;
         this._settings.showAPStatus = params.settings && params.settings.showAPStatus !== undefined && params.settings.showAPStatus !== null ? !!params.settings.showAPStatus : true;
         this._settings.debug        = params.settings && params.settings.debug ? !!params.settings.debug : false;
 
@@ -151,7 +151,7 @@ export default class Game
             this.assets.textures,
             this.zipFiles,
             this._settings.bgDim,
-            this._settings.multiHL,
+            this._settings.multiNoteHL,
             this._settings.debug
         );
         
@@ -387,7 +387,7 @@ export default class Game
     }
 }
 
-function calcResizer(width, height,  noteScale = 8000)
+function calcResizer(width, height, noteScale = 8000)
 {
     let result = {};
 

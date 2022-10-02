@@ -18,13 +18,17 @@ const doms = {
         bg: document.querySelector('input#file-bg')
     },
     settings: {
+        multiNoteHL: document.querySelector('input#settings-multi-note-hl'),
+        showAPStatus: document.querySelector('input#settings-show-ap-status'),
+        noteScale: document.querySelector('input#settings-note-scale'),
+        bgDim: document.querySelector('input#settings-bg-dim'),
+
         offset: document.querySelector('input#settings-audio-offset'),
         speed: document.querySelector('input#settings-audio-speed'),
 
         hitsound: document.querySelector('input#settings-hitsound'),
         hitsoundVolume: document.querySelector('input#settings-hitsound-volume'),
 
-        showAPStatus: document.querySelector('input#settings-show-ap-status'),
         autoPlay: document.querySelector('input#settings-autoplay'),
         debug: document.querySelector('input#settings-debug')
     },
@@ -208,13 +212,17 @@ doms.startBtn.addEventListener('click', () => {
             
         },
         settings: {
+            multiNoteHL: doms.settings.multiNoteHL.checked,
+            showAPStatus: doms.settings.showAPStatus.checked,
+            bgDim: doms.settings.bgDim.value,
+            noteScale: 10000 - doms.settings.noteScale.value,
+
             audioOffset: doms.settings.offset.value / 1000,
             speed: doms.settings.speed.value,
 
             hitsound: doms.settings.hitsound.checked,
             hitsoundVolume: doms.settings.hitsoundVolume.value,
 
-            showAPStatus: doms.settings.showAPStatus.checked,
             autoPlay: doms.settings.autoPlay.checked,
             debug : doms.settings.debug.checked
         }
