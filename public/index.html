@@ -37,11 +37,35 @@
                 left: 0;
             }
 
-            div#debug {
+            div.error-window {
+                display: none;
                 position: absolute;
                 top: 0;
                 right: 0;
+                max-width: 100%;
+                max-height: 100%;
+                padding: 8px;
                 color: white;
+                background-color: #F33;
+                border: 1px solid #A00;
+                box-sizing: border-box;
+            }
+            div.error-window a {
+                color: #FFF;
+            }
+            div.error-window button.close {
+                float: right;
+            }
+            div.error-window pre {
+                margin-top: 8px;
+                margin-bottom: 0;
+                padding: 8px;
+                background: #D60000;
+                box-sizing: border-box;
+                overflow-x: auto;
+            }
+            div.error-window pre code.content {
+                font-family: Menlo, Monaco, 'Courier New', monospace !important;
             }
 
             div.watermark {
@@ -60,6 +84,8 @@
             
             .font-loaded div.file-select,
             .font-loaded div.file-select *,
+            .font-loaded div.error-window,
+            .font-loaded div.error-window *,
             .font-loaded div.watermark {
                 font-family: 'MiSans';
             }
@@ -97,7 +123,10 @@
 
             <button class="fullscreen" id="fullscreen">Fullscreen</button>
         </div>
-        <div id="debug"></div>
+        <div class="error-window">
+            <div>An error has just occurred, if you're sure this is not caused by you, please <a href="https://github.com/MisaLiu/phi-chart-render/issues/new/choose" target="_blank">report it on GitHub</a>.<button class="close">Close</button></div>
+            <pre><code class="content">Test Text Not A Real Error</code></pre>
+        </div>
         <script src="./script.js?hash={{CURRENT_HASH}}"></script>
     </body>
 </html>

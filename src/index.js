@@ -31,8 +31,13 @@ const doms = {
     startBtn : document.querySelector('button#start'),
     loadingStatus : document.querySelector('div#loading-status'),
     canvas : document.querySelector('canvas#canvas'),
-    debug : document.querySelector('div#debug'),
     fullscreenBtn : document.querySelector('button#fullscreen'),
+
+    errorWindow : {
+        window: document.querySelector('div.error-window'),
+        closeBtn: document.querySelector('div.error-window button.close'),
+        content: document.querySelector('div.error-window code.content')
+    }
 };
 
 const files = {
@@ -236,7 +241,20 @@ doms.fullscreenBtn.addEventListener('click', () =>
     fullscreen.toggle(document.body, false);
 });
 
-
+window.addEventListener('error', (err) =>
+{
+    doms.errorWindow.content.innerHTML = (err.error && err.error.stack ? err.error.stack : err.error.message);
+    doms.errorWindow.window.style.display = 'block';
+});
+window.addEventListener('unhandledrejection', (err) =>
+{
+    doms.errorWindow.content.innerHTML = (err.reason && err.reason.stack ? err.reason.stack : err.reason.message);
+    doms.errorWindow.window.style.display = 'block';
+});
+doms.errorWindow.closeBtn.addEventListener('click', () =>
+{
+    doms.errorWindow.window.style.display = 'none';
+});
 
 
 window.addEventListener('load', async () =>
