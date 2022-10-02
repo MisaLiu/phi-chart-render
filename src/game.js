@@ -3,7 +3,6 @@ import { Application, Container, Texture, Sprite, Graphics, Text } from 'pixi.js
 
 const PorgressBarCache = (() =>
 {
-    const pointSize = 18;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
@@ -90,7 +89,7 @@ export default class Game
                 sounds   : this.assets.sounds,
             },
             hitsound       : params.settings && params.settings.hitsound !== undefined && params.settings.hitsound !== null ? !!params.settings.hitsound : true,
-            hitsoundVolume : params.settings && !isNaN(Number(params.settings.hitsoundVolume)) ? Number(params.settings.hitsoundVolume) : 0.75,
+            hitsoundVolume : params.settings && !isNaN(Number(params.settings.hitsoundVolume)) ? Number(params.settings.hitsoundVolume) : 1,
             showAPStatus   : params.settings && params.settings.showAPStatus !== undefined && params.settings.showAPStatus !== null ? !!params.settings.showAPStatus : true,
             challengeMode  : params.settings && params.settings.challengeMode !== undefined && params.settings.challengeMode !== null ? !!params.settings.challengeMode : false,
             autoPlay       : params.settings && params.settings.autoPlay !== undefined && params.settings.autoPlay !== null ? !!params.settings.autoPlay : false
@@ -358,8 +357,9 @@ export default class Game
         {
             if (this.sprites.progressBar)
             {
+                this.sprites.progressBar.position.set(0, 0);
                 this.sprites.progressBar.scale.y = this.render.sizer.heightPercent;
-                this.sprites.progressBar.width = this._music.progress * this.render.sizer.width;
+                this.sprites.progressBar.width = this._music ? this._music.progress * this.render.sizer.width : 0;
             }
 
             if (this.sprites.pauseButton)
