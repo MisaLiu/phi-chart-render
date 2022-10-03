@@ -267,8 +267,12 @@ doms.chartPackFile.addEventListener('input', function ()
         // 处理 info.csv
         if (files.info)
         {
-            files.info = CsvReader(files.info);
-            result['info.csv'] = files.info;
+            try {
+                files.info = CsvReader(files.info);
+                result['info.csv'] = files.info;
+            } catch (e) {
+                files.info = null;
+            }
         }
 
         // 处理谱面文件

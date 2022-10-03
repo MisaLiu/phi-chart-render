@@ -213,6 +213,39 @@ export default function RePhiEditChartConverter(_chart)
             judgeline.eventLayers.push(eventLayer);
         });
 
+        // 处理 extendEvents
+        if (_judgeline.extended)
+        {
+            // 流程跟上边都是一样的，没啥好看的
+            if (_judgeline.extended.scaleXEvents)
+            {
+                utils.calculateEventsBeat(_judgeline.extended.scaleXEvents).forEach((event) =>
+                {
+                    utils.calculateEventEase(event, Easing)
+                        .forEach((newEvent) =>
+                        {
+                            judgeline.extendEvent.scaleX.push(newEvent);
+                        }
+                    );
+                });
+                judgeline.extendEvent.scaleX = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.scaleX);
+            }
+
+            if (_judgeline.extended.scaleYEvents)
+            {
+                utils.calculateEventsBeat(_judgeline.extended.scaleYEvents).forEach((event) =>
+                {
+                    utils.calculateEventEase(event, Easing)
+                        .forEach((newEvent) =>
+                        {
+                            judgeline.extendEvent.scaleY.push(newEvent);
+                        }
+                    );
+                });
+                judgeline.extendEvent.scaleY = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.scaleY);
+            }
+        }
+
         // 事件排序并计算 floorPosition
         judgeline.sortEvent();
         judgeline.calcFloorPosition();

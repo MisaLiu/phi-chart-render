@@ -46,6 +46,11 @@ export default class Judgeline
             eventLayer.sort();
         });
 
+        for (const name in this.extendEvent)
+        {
+            this.extendEvent[name].sort((a, b) => a.startTime - b.startTime);
+        }
+
         for (const name in this.eventLayers[0])
         {
             if (name == 'speed' || !(this.eventLayers[0][name] instanceof Array)) continue;
@@ -238,6 +243,9 @@ export default class Judgeline
             this.floorPosition = Math.fround((currentTime - event.startTime) * this.speed + event.floorPosition);
         };
 
+        this.scaleX = valueCalculator(this.extendEvent.scaleX, currentTime, this.scaleX);
+        this.scaleY = valueCalculator(this.extendEvent.scaleY, currentTime, this.scaleY);
+
         this.cosr = Math.cos(this.deg);
         this.sinr = Math.sin(this.deg);
 
@@ -263,4 +271,19 @@ export default class Judgeline
             }
         }
     }
+}
+
+function valueCalculator(events, currentTime, originValue = 0)
+{
+    for (const event of events)
+    {
+        if (event.endTime < currentTime) continue;
+        if (event.startTime > currentTime) break;
+
+        let timePercentEnd = (currentTime - event.startTime) / (event.endTime - event.startTime);
+        let timePercentStart = 1 - timePercentEnd;
+
+        return event.start * timePercentStart + event.end * timePercentEnd;
+    }
+    return originValue;
 }

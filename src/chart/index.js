@@ -77,6 +77,12 @@ export default class Chart
             judgeline.event.rotate = arrangeLineEvents(judgeline.event.rotate);
             judgeline.event.alpha = arrangeLineEvents(judgeline.event.alpha);
             */
+
+            for (const name in judgeline.extendEvent)
+            {
+                if (name !== 'color' && name !== 'text')
+                    judgeline.extendEvent[name] = utils.arrangeSameValueEvent(arrangeLineEvents(judgeline.extendEvent[name]));
+            }
             
             judgeline.sortEvent();
         });
