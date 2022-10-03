@@ -428,12 +428,12 @@ doms.fullscreenBtn.addEventListener('click', () =>
 
 window.addEventListener('error', (err) =>
 {
-    doms.errorWindow.content.innerHTML = (err.error && err.error.stack ? err.error.stack : err.error.message);
+    doms.errorWindow.content.innerText = (err.error && err.error.stack ? err.error.stack : err.error.message);
     doms.errorWindow.window.style.display = 'block';
 });
 window.addEventListener('unhandledrejection', (err) =>
 {
-    doms.errorWindow.content.innerHTML = (err.reason && err.reason.stack ? err.reason.stack : err.reason.message);
+    doms.errorWindow.content.innerText = (err.reason && err.reason.stack ? err.reason.stack : err.reason.message);
     doms.errorWindow.window.style.display = 'block';
 });
 doms.errorWindow.closeBtn.addEventListener('click', () =>
