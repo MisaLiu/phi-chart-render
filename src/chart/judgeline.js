@@ -253,8 +253,8 @@ export default class Judgeline
             this.sprite.alpha      = this.alpha >= 0 ? this.alpha : 0;
             this.sprite.rotation   = this.deg;
 
-            this.sprite.height = this._width * this.scaleX;
-            this.sprite.width = this._height * this.scaleY;
+            this.sprite.width = this._width * this.scaleX;
+            this.sprite.height = this._height * this.scaleY;
 
             if (this.debugSprite)
             {
