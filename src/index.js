@@ -18,9 +18,9 @@ const doms = {
     chartPackFileReadProgress: document.querySelector('div#file-read-progress'),
 
     file : {
-        chart: document.querySelector('input#file-chart'),
-        music: document.querySelector('input#file-music'),
-        bg: document.querySelector('input#file-bg')
+        chart: document.querySelector('select#file-chart'),
+        music: document.querySelector('select#file-music'),
+        bg: document.querySelector('select#file-bg')
     },
     settings: {
         multiNoteHL: document.querySelector('input#settings-multi-note-hl'),
@@ -59,7 +59,9 @@ const files = {
 };
 
 const currentFile = {
-    
+    chart: null,
+    music: null,
+    bg: null
 };
 
 const assets = {
@@ -151,6 +153,7 @@ const fullscreen = {
 window.doms = doms;
 window.files = files;
 window.assets = assets;
+window.currentFile = currentFile;
 
 window.loader = new Loader();
 
@@ -215,6 +218,7 @@ doms.chartPackFile.addEventListener('input', function ()
         }
 
         // 处理图片文件
+        doms.file.bg.innerHTML = '';
         for (const name in files.images)
         {
             doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
@@ -222,9 +226,20 @@ doms.chartPackFile.addEventListener('input', function ()
             let _result = await Texture.from(files.images[name]);
             files.images[name] = _result;
             result[name] = _result;
+
+            let selectOption = document.createElement('option');
+            selectOption.innerText = selectOption.value = name;
+            doms.file.bg.appendChild(selectOption);
+
+            if (!currentFile.bg)
+            {
+                currentFile.bg = _result;
+                doms.file.bg.value = name;
+            }
         }
 
         // 处理音频文件
+        doms.file.music.innerHTML = '';
         for (const name in files.musics)
         {
             doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
@@ -237,6 +252,16 @@ doms.chartPackFile.addEventListener('input', function ()
             });
             files.musics[name] = _result;
             result[name] = _result;
+
+            let selectOption = document.createElement('option');
+            selectOption.innerText = selectOption.value = name;
+            doms.file.music.appendChild(selectOption);
+
+            if (!currentFile.music)
+            {
+                currentFile.music = _result;
+                doms.file.music.value = name;
+            }
         }
 
         // 处理 info.csv
@@ -247,6 +272,7 @@ doms.chartPackFile.addEventListener('input', function ()
         }
 
         // 处理谱面文件
+        doms.file.chart.innerHTML = '';
         for (const name in files.charts)
         {
             doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
@@ -272,6 +298,16 @@ doms.chartPackFile.addEventListener('input', function ()
             let _result = PhiChartRender.Chart.from(files.charts[name], chartInfo);
             files.charts[name] = _result;
             result[name] = _result;
+
+            let selectOption = document.createElement('option');
+            selectOption.innerText = selectOption.value = name;
+            doms.file.chart.appendChild(selectOption);
+
+            if (!currentFile.chart)
+            {
+                currentFile.chart = _result;
+                doms.file.chart.value = name;
+            }
         }
 
         doms.chartPackFileReadProgress.innerHTML = 'All done!';
@@ -281,60 +317,36 @@ doms.chartPackFile.addEventListener('input', function ()
 });
 
 doms.file.chart.addEventListener('input', function () {
-    if (this.files.length <= 0 || !this.files[0]) return;
+    currentFile.chart = files.zip[this.value];
+    if (files.info)
+    {
+        for (const info of files.info)
+        {
+            if (info.Chart === this.value)
+            {
+                currentFile.music = files.zip[info.Music];
+                currentFile.bg = files.zip[info.Image];
 
-    let reader = new FileReader();
+                doms.file.music.value = info.Music;
+                doms.file.bg.value = info.Image;
 
-    reader.onload = function () {
-        try {
-            files.rawChart = JSON.parse(this.result);
-        } catch (e) {
-            console.log(e);
-            files.rawChart = this.result;
+                break;
+            }
         }
-
-        files.chart = Chart.from(files.rawChart);
-    };
-
-    reader.readAsText(this.files[0]);
+    }
 });
 
 doms.file.music.addEventListener('input', function () {
-    if (this.files.length <= 0 || !this.files[0]) return;
-
-    let reader = new FileReader();
-
-    reader.onload = function () {
-        files.music = Sound.from({
-            source: this.result,
-            autoPlay: false,
-            preload: true,
-            singleInstance: true
-        });
-    };
-
-    reader.readAsArrayBuffer(this.files[0]);
+    currentFile.music = files.zip[this.value];
 });
 
 doms.file.bg.addEventListener('input', function () {
-    if (this.files.length <= 0 || !this.files[0]) return;
-
-    let reader = new FileReader();
-
-    reader.onload = async function () {
-        // VS Code: 别用 await，没有效果
-        // Me: 加了 await 之后就没有 error 了
-        let bg = await Texture.from(this.result);
-        let blur = await Texture.from(blurImage(bg, 50));
-        files.bg = blur;
-    };
-
-    reader.readAsDataURL(this.files[0]);
+    currentFile.bg = files.zip[this.value];
 });
 
-doms.startBtn.addEventListener('click', () => {
-    files.chart.music = files.music;
-    files.chart.bg = files.bg;
+doms.startBtn.addEventListener('click', async () => {
+    currentFile.chart.music = currentFile.music;
+    currentFile.chart.bg = await Texture.from(blurImage(currentFile.bg, 50));;
 
     for (const name in assets.sounds)
     {
@@ -342,8 +354,9 @@ doms.startBtn.addEventListener('click', () => {
     }
 
     window._game = new Game({
-        chart: files.chart,
+        chart: currentFile.chart,
         assets: assets,
+        zipFiles: files.zip,
         render: {
             canvas: doms.canvas,
             resizeTo: document.documentElement,
