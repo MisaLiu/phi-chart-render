@@ -178,11 +178,8 @@ export default class Judgeline
     {
         if (this.sprite) return this.sprite;
 
-        this.sprite = new Sprite(
-            (this.texture && this.texture != '' && this.texture != 'judgeline') ?
-            zipFiles[this.texture] :
-            texture.judgeline
-        );
+        this.texture = zipFiles[this.texture];
+        this.sprite = new Sprite(this.texture ? this.texture : texture.judgeline);
         this.sprite.anchor.set(0.5);
         this.sprite.alpha = 1;
 
