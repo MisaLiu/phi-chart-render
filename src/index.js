@@ -313,6 +313,23 @@ doms.chartPackFile.addEventListener('input', function ()
         doms.chartPackFileReadProgress.innerHTML = 'All done!';
 
         files.zip = result;
+
+        if (files.info)
+        {
+            for (const info of files.info)
+            {
+                if (info.Chart === doms.file.chart.value)
+                {
+                    currentFile.music = files.zip[info.Music];
+                    currentFile.bg = files.zip[info.Image];
+
+                    doms.file.music.value = info.Music;
+                    doms.file.bg.value = info.Image;
+
+                    break;
+                }
+            }
+        }
     }
 });
 
