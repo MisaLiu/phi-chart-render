@@ -1,6 +1,8 @@
 import Chart from './chart';
 import Game from './game';
+import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
+import JSZip, { file } from 'jszip';
 import { Loader, Texture, Rectangle } from 'pixi.js-legacy';
 import { Sound } from '@pixi/sound';
 import * as StackBlur from 'stackblur-canvas';
@@ -12,6 +14,9 @@ const fonts = {
 
 const doms = {
     fileSelect: document.querySelector('div.file-select'),
+    chartPackFile: document.querySelector('input#file-chart-pack'),
+    chartPackFileReadProgress: document.querySelector('div#file-read-progress'),
+
     file : {
         chart: document.querySelector('input#file-chart'),
         music: document.querySelector('input#file-music'),
@@ -45,9 +50,16 @@ const doms = {
 };
 
 const files = {
-    chart: null,
-    music: null,
-    bg: null
+    charts: {},
+    musics: {},
+    images: {},
+    info: null,
+    line: null,
+    zip: null
+};
+
+const currentFile = {
+    
 };
 
 const assets = {
@@ -141,6 +153,132 @@ window.files = files;
 window.assets = assets;
 
 window.loader = new Loader();
+
+doms.chartPackFile.addEventListener('input', function ()
+{
+    if (this.files.length <= 0 || !this.files[0]) return;
+
+    let reader = new FileReader();
+    let zip = new JSZip();
+
+    reader.onload = function ()
+    {
+        zip.loadAsync(this.result, { createFolders: false })
+            .then((e) => decodeZipFile(e));
+    };
+
+    reader.readAsArrayBuffer(this.files[0]);
+
+    async function decodeZipFile(zipDecodeResult)
+    {
+        const chartFormat = ('json,pec').split(',');
+        const imageFormat = ('jpeg,jpg,gif,png,webp').split(',');
+		const audioFormat = ('aac,flac,mp3,ogg,wav,webm').split(',');
+        let zipFiles = zipDecodeResult.files;
+        let result = {};
+
+        // 文件预处理
+        for (const name in zipFiles)
+        {
+            let zipFile = zipFiles[name];
+            if (zipFile.dir) continue;
+
+            zipFile.realName = name.split('/')[name.split('/').length - 1];
+            zipFile.format   = zipFile.realName.split('.')[zipFile.realName.split('.').length - 1];
+            zipFile.isHidden = zipFile.realName.indexOf('.') === 0;
+
+            if (chartFormat.indexOf(zipFile.format.toLowerCase()) >= 0)
+            {
+                let _text = (await zipFile.async('text'));
+                try {
+                    files.charts[name] = JSON.parse(_text);
+                } catch (e) {
+                    files.charts[name] = _text;
+                }
+            }
+            else if (imageFormat.indexOf(zipFile.format.toLowerCase()) >= 0)
+            {
+                files.images[name] = 'data:image/' + zipFile.format.toLowerCase() + ';base64,' + (await zipFile.async('base64'));
+            }
+            else if (audioFormat.indexOf(zipFile.format.toLowerCase()) >= 0)
+            {
+                files.musics[name] = (await zipFile.async('arraybuffer'));
+            }
+            else if (zipFile.name.toLowerCase() === 'info.csv' || zipFile.name.toLowerCase() === 'info.txt')
+            {
+                files.info = (await zipFile.async('text'));
+            }
+            else if (zipFile.name.toLowerCase() === 'line.csv')
+            {
+                files.line = (await zipFile.async('text'));
+            }
+        }
+
+        // 处理图片文件
+        for (const name in files.images)
+        {
+            doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
+
+            let _result = await Texture.from(files.images[name]);
+            files.images[name] = _result;
+            result[name] = _result;
+        }
+
+        // 处理音频文件
+        for (const name in files.musics)
+        {
+            doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
+
+            let _result = Sound.from({
+                source: files.musics[name],
+                autoPlay: false,
+                preload: true,
+                singleInstance: true
+            });
+            files.musics[name] = _result;
+            result[name] = _result;
+        }
+
+        // 处理 info.csv
+        if (files.info)
+        {
+            files.info = CsvReader(files.info);
+            result['info.csv'] = files.info;
+        }
+
+        // 处理谱面文件
+        for (const name in files.charts)
+        {
+            doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
+
+            let chartInfo = {};
+            if (files.info)
+            {
+                for (const info of files.info)
+                {
+                    if (info.Chart === name)
+                    {
+                        chartInfo = info;
+                        break;
+                    }
+                }
+
+                chartInfo.name = chartInfo.Name;
+                chartInfo.author = chartInfo.Designer;
+                chartInfo.bgAuthor = chartInfo.Illustrator;
+                chartInfo.difficult = chartInfo.Level;
+            }
+
+            let _result = PhiChartRender.Chart.from(files.charts[name], chartInfo);
+            files.charts[name] = _result;
+            result[name] = _result;
+        }
+
+        doms.chartPackFileReadProgress.innerHTML = 'All done!';
+
+        files.zip = result;
+    }
+});
 
 doms.file.chart.addEventListener('input', function () {
     if (this.files.length <= 0 || !this.files[0]) return;
@@ -346,6 +484,29 @@ window.addEventListener('load', async () =>
     });
 });
 
+function CsvReader(_text)
+{
+    let firstRow = [];
+    let result = [];
+
+    _text.split(/\r\n|\n\r/).forEach((row, rowIndex) =>
+    {
+        row.split(',').forEach((text, columnIndex) =>
+        {
+            if (rowIndex <= 0)
+            {
+                firstRow.push(/([A-Za-z0-9]+)/.exec(text)[1]);
+            }
+            else
+            {
+                if (!result[rowIndex - 1]) result[rowIndex - 1] = {};
+                result[rowIndex - 1][firstRow[columnIndex]] = text;
+            }
+        });
+    });
+
+    return result;
+}
 
 function blurImage(_texture, radius = 10)
 {

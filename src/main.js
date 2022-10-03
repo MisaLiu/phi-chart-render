@@ -1,7 +1,7 @@
-import Render from './render';
+import Game from './game';
 import Chart from './chart';
 
 export {
-    Render,
+    Game,
     Chart
 };

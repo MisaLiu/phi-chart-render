@@ -100,6 +100,9 @@
         <canvas id="canvas"></canvas>
         <div class="watermark">github/MisaLiu/phi-chart-render {{CURRENT_HASH}}</div>
         <div class="file-select">
+            <label>Select a *.zip/*.pez file: <input type="file" id="file-chart-pack" accept=".zip,.pez"></label><br>
+            <div class="loading" id="file-read-progress">No chart pack file selected</div>
+            <hr />
             <label>Chart: <input type="file" id="file-chart" /></label><br>
             <label>Music: <input type="file" id="file-music" /></label><br>
             <label>BG: <input type="file" id="file-bg" /></label>
