@@ -406,7 +406,7 @@ function calcResizer(width, height, noteScale = 8000)
     result.noteSpeed     = result.height * 0.6;
     result.noteScale     = result.width / noteScale;
     result.noteWidth     = result.width * 0.117775;
-    result.lineScale     = result.height > result.height * 0.75 ? result.height / 18.75 : result.width / 14.0625;
+    result.lineScale     = result.width > result.height * 0.75 ? result.height / 18.75 : result.width / 14.0625;
     result.heightPercent = result.height / 1080;
 
     return result;

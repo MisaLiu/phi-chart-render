@@ -15,7 +15,8 @@ export default class Judgeline
         this.extendEvent = {
             color: [],
             scaleX: [],
-            scaleY: []
+            scaleY: [],
+            text: []
         };
         this.isText = false;
 
@@ -33,6 +34,9 @@ export default class Judgeline
         this.scaleY = 1;
 
         this.sprite = undefined;
+
+        this._width  = 5761.8432;
+        this._height = 8.64;
     }
 
     sortEvent(withEndTime = false)
@@ -248,6 +252,9 @@ export default class Judgeline
             this.sprite.position.y = (0.5 - this.y) * size.height;
             this.sprite.alpha      = this.alpha >= 0 ? this.alpha : 0;
             this.sprite.rotation   = this.deg;
+
+            this.sprite.height = this._width * this.scaleX;
+            this.sprite.width = this._height * this.scaleY;
 
             if (this.debugSprite)
             {
