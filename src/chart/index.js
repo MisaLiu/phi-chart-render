@@ -198,8 +198,8 @@ export default class Chart
                 }
                 else if (judgeline.texture)
                 {
-                    judgeline._width  = judgeline.texture.width;
-                    judgeline._height = judgeline.texture.height;
+                    judgeline._width  = judgeline.texture.width * this.renderSize.heightPercent;
+                    judgeline._height = judgeline.texture.height * this.renderSize.heightPercent;
                 }
                 else
                 {
