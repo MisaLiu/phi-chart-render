@@ -34,8 +34,7 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
     * note features
         * [x] Basic support
         * [x] Fake note support
-        * [x] Note sprite scale
-        * [ ] Custom note sprite texture *(Need test)*
+        * [x] Note scale
         * [x] Note alpha
         * [ ] yOffset
         * [ ] visible time
@@ -47,7 +46,7 @@ You must have a Node.js enviorment to helping development.
 1. Clone this repo.
 2. Run this code to install requirements:
     ```bash
-    npm insall
+    npm install
     ```
 3. Run this code to start the dev server:
     ```bash
