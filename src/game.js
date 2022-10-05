@@ -110,11 +110,15 @@ export default class Game
 
         this._music = null;
         this._audioOffset = 0;
+        this._animateStatus = NaN;
+        this._gameStartTime = NaN;
+        this._gameEndTime   = NaN;
         this._isPaused = false;
 
         this.resize = this.resize.bind(this);
         this._pauseBtnClickCallback = this._pauseBtnClickCallback.bind(this);
         this._calcTick = this._calcTick.bind(this);
+        this._gameEndCallback = this._gameEndCallback.bind(this);
 
         if (this._settings.speed < 0.25) throw new Error('Speed too slow');
         else if (this._settings.speed > 2) throw new Error('Speed too fast');
@@ -196,6 +200,13 @@ export default class Game
         this.sprites.pauseButton.zIndex = 99999;
         this.render.mainContainer.addChild(this.sprites.pauseButton);
 
+        // 假判定线，过场动画用
+        this.sprites.fakeJudgeline = new Sprite(this.assets.textures.judgeline);
+        this.sprites.fakeJudgeline.anchor.set(0.5);
+        this.sprites.fakeJudgeline.zIndex = 99999;
+        if (this._settings.showAPStatus) this.sprites.fakeJudgeline.tint = 0xFFECA0;
+        this.render.mainContainer.addChild(this.sprites.fakeJudgeline);
+
         if (this._settings.showFPS)
         {
             this.render.fpsText = new Text('FPS: 0', {
@@ -236,19 +247,28 @@ export default class Game
             }, 500);
         }
 
-        setTimeout(async () =>
-        {
-            this._music = await this.chart.music.play({ speed: this._settings.speed });
-            this._audioOffset = this._music._source.context.baseLatency;
+        this._animateStatus = 0;
+        this._gameStartTime = Date.now();
 
-            this.chart.addFunction('note', this.judgement.calcNote);
-            this.render.ticker.add(this._calcTick);
-        }, 200);
+        this.chart.addFunction('note', this.judgement.calcNote);
+        this.render.ticker.add(this._calcTick);
+
+        this.chart.calcTime(0);
+        this.chart.judgelines.forEach((judgeline) =>
+        {
+            if (judgeline.sprite) judgeline.sprite.alpha = 0;
+        });
+        this.chart.notes.forEach((note) =>
+        {
+            if (note.sprite) note.sprite.alpha = 0;
+        });
     }
 
     pause()
     {
         this._isPaused = !this._isPaused;
+
+        if (!this._music) return;
         this.chart.music.paused = this._isPaused;
         this.judgement.input._isPaused = this._isPaused;
     }
@@ -310,16 +330,109 @@ export default class Game
             }
         }
 
-        if (!this.chart) return;
-        if (!this._music) return;
-        if (this._isPaused) return;
-        let currentTime = this._music.progress * this.chart.music.duration - this._audioOffset - this.chart.offset + this._settings.offset;
-        currentTime = currentTime > 0 ? currentTime : 0;
+        switch (this._animateStatus)
+        {
+            case 0:
+            {
+                this._calcGameAnimateTick(true);
+                break;
+            }
+            case 1:
+            {
+                if (this._isPaused) return;
 
-        this.chart.calcTime(currentTime);
-        this.judgement.calcTick();
+                let currentTime = (this._music && this._music.progress ? this._music.progress * this.chart.music.duration : 0) - this._audioOffset - this.chart.offset + this._settings.offset;
+                currentTime = currentTime > 0 ? currentTime : 0;
 
-        this.sprites.progressBar.width = this._music.progress * this.render.sizer.width;
+                this.chart.calcTime(currentTime);
+                this.judgement.calcTick();
+
+                this.sprites.progressBar.width = (this._music && this._music.progress ? this._music.progress : 0) * this.render.sizer.width;
+                break;
+            }
+            case 2:
+            {
+                this._calcGameAnimateTick(false);
+                break;
+            }
+            case 3:
+            {
+                break;
+            }
+        }
+    }
+
+    _calcGameAnimateTick(isStart = true)
+    {
+        let _progress = (Date.now() - (isStart ? this._gameStartTime : this._gameEndTime)) / 1500,
+            progress = (isStart ? 1 - Math.pow(1 - _progress, 4) : -Math.pow(1 - _progress, 4));
+        let sprites = {
+            score: this.judgement.score.sprites,
+            chart: this.chart.sprites
+        };
+
+        // Combo、准度、分数、暂停按钮和进度条
+        sprites.score.combo.container.position.y = -(sprites.score.combo.container.height + sprites.score.acc.height) + ((sprites.score.combo.container.height + sprites.score.acc.height + (this.render.sizer.heightPercent * 41)) * progress);
+        sprites.score.acc.position.y = sprites.score.combo.container.position.y + (this.render.sizer.heightPercent * 72);
+        sprites.score.score.position.y = -(sprites.score.score.height) + ((sprites.score.score.height + (this.render.sizer.heightPercent * 61)) * progress);
+        if (this.sprites.pauseButton) this.sprites.pauseButton.position.y = -(this.sprites.pauseButton.height) + ((this.sprites.pauseButton.height + (this.render.sizer.heightPercent * 74.5)) * progress);
+
+        // 谱面信息
+        sprites.chart.info.songName.position.y = (this.render.sizer.height + sprites.chart.info.songName.height) - ((sprites.chart.info.songName.height + (this.render.sizer.heightPercent * 66)) * progress);
+        sprites.chart.info.songDiff.position.y = sprites.chart.info.songName.position.y + (this.render.sizer.heightPercent * 24);
+
+        // 假判定线过场动画
+        this.sprites.fakeJudgeline.width = this.render.sizer.width * progress;
+
+        if (_progress >= 1)
+        {
+            if (isStart)
+            {
+                this._animateStatus = 1;
+                this.sprites.fakeJudgeline.visible = false;
+                this.resize();
+
+                setTimeout(async () =>
+                {
+                    this._music = await this.chart.music.play({ speed: this._settings.speed, complete: this._gameEndCallback });
+                    this._audioOffset = this._music._source.context.baseLatency;
+
+                    this.chart.judgelines.forEach((judgeline) =>
+                    {
+                        if (judgeline.sprite) judgeline.sprite.alpha = 1;
+                    });
+                    this.chart.notes.forEach((note) =>
+                    {
+                        if (note.sprite) note.sprite.alpha = 1;
+                    });
+                }, 200);
+            }
+            else
+            {
+                this._animateStatus = 3;
+            }
+        }
+    }
+
+    _gameEndCallback()
+    {
+        this._animateStatus = 2;
+        this._gameEndTime = Date.now();
+        this.sprites.fakeJudgeline.visible = true;
+        if (this._settings.showAPStatus)
+        {
+            if (this.judgement.score.FCType === 1) this.sprites.fakeJudgeline.tint = 0xB4E1FF;
+            else this.sprites.fakeJudgeline.tint = 0xFFFFFF;
+        }
+        
+        this.chart.judgelines.forEach((judgeline) =>
+        {
+            if (judgeline.sprite) judgeline.sprite.alpha = 0;
+        });
+        this.chart.notes.forEach((note) =>
+        {
+            if (note.sprite) note.sprite.alpha = 0;
+        });
     }
 
     resize(withChartSprites = true)
@@ -378,6 +491,15 @@ export default class Game
                 this.sprites.pauseButton.position.x = this.render.sizer.width - this.render.sizer.heightPercent * 72;
                 this.sprites.pauseButton.position.y = this.render.sizer.heightPercent * 74.5;
                 this.sprites.pauseButton.scale.set(this.render.sizer.heightPercent * 0.94);
+            }
+
+            if (this.sprites.fakeJudgeline)
+            {
+                this.sprites.fakeJudgeline.position.x = this.render.sizer.width / 2;
+                this.sprites.fakeJudgeline.position.y = this.render.sizer.height / 2;
+
+                this.sprites.fakeJudgeline.height = this.render.sizer.lineScale * 18.75 * 0.008;
+                this.sprites.fakeJudgeline.width = 0;
             }
         }
 
