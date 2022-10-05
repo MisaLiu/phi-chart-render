@@ -7,10 +7,10 @@ const PorgressBarCache = (() =>
     const ctx = canvas.getContext('2d');
 
     canvas.width = 1920;
-    canvas.height = 10;
-    ctx.clearRect(0, 0, 1920, 10);
+    canvas.height = 14;
+    ctx.clearRect(0, 0, 1920, 14);
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, 1920, 10);
+    ctx.fillRect(0, 0, 1920, 14);
 
     return Texture.from(canvas);
 })();
@@ -365,7 +365,7 @@ export default class Game
     _calcGameAnimateTick(isStart = true)
     {
         let _progress = (Date.now() - (isStart ? this._gameStartTime : this._gameEndTime)) / 1500,
-            progress = (isStart ? 1 - Math.pow(1 - _progress, 4) : -Math.pow(1 - _progress, 4));
+            progress = (isStart ? 1 - Math.pow(1 - _progress, 4) : Math.pow(1 - _progress, 4));
         let sprites = {
             score: this.judgement.score.sprites,
             chart: this.chart.sprites
@@ -376,6 +376,7 @@ export default class Game
         sprites.score.acc.position.y = sprites.score.combo.container.position.y + (this.render.sizer.heightPercent * 72);
         sprites.score.score.position.y = -(sprites.score.score.height) + ((sprites.score.score.height + (this.render.sizer.heightPercent * 61)) * progress);
         if (this.sprites.pauseButton) this.sprites.pauseButton.position.y = -(this.sprites.pauseButton.height) + ((this.sprites.pauseButton.height + (this.render.sizer.heightPercent * 74.5)) * progress);
+        if (this.sprites.progressBar) this.sprites.progressBar.position.y = (this.render.sizer.heightPercent * 14) * progress;
 
         // 谱面信息
         sprites.chart.info.songName.position.y = (this.render.sizer.height + sprites.chart.info.songName.height) - ((sprites.chart.info.songName.height + (this.render.sizer.heightPercent * 66)) * progress);
