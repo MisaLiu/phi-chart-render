@@ -116,27 +116,7 @@ export default class Note
         if (this.hitsound)
         {
             this.hitsound = zipFiles[this.hitsound];
-        }
-        else{
-            switch (this.type)
-            {
-                case 1:
-                {
-                    break;
-                }
-                case 2:
-                {
-                    break;
-                }
-                case 3:
-                {
-                    break;
-                }
-                case 4:
-                {
-                    break;
-                }
-            }
+            this.hitsound.play({ volume: 0 });
         }
 
         // For debug propose

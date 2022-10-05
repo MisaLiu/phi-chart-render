@@ -28,7 +28,7 @@ const PorgressBarCache = (() =>
   *         resizeTo?
   *     },
   *     chart,
-  *     asstes,
+  *     assets,
   *     zipFiles?,
   *     settings: {
   *         audioOffset?,
@@ -212,6 +212,12 @@ export default class Game
 
         this.render.mainContainer.sortChildren();
         this.render.stage.sortChildren();
+
+        // 预播放 hitsound，也许能减轻打击未打击过的某类 note 时的卡顿问题？
+        for (const name in this.assets.sounds)
+        {
+            this.assets.sounds[name].play({ volume: 0 });
+        }
     }
 
     start()

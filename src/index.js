@@ -369,11 +369,6 @@ doms.startBtn.addEventListener('click', async () => {
     currentFile.chart.music = currentFile.music;
     currentFile.chart.bg = await Texture.from(blurImage(currentFile.bg, 50));;
 
-    for (const name in assets.sounds)
-    {
-        assets.sounds[name].play({ volume: 0 });
-    }
-
     window._game = new Game({
         chart: currentFile.chart,
         assets: assets,
