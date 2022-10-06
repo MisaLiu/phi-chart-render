@@ -242,11 +242,14 @@ export default function RePhiEditChartConverter(_chart)
                         }
                     );
                 });
-                judgeline.extendEvent.scaleY.forEach((event) =>
+                if (_judgeline.Texture !== 'line.png')
                 {
-                    event.start = event.start * 0.664285;
-                    event.end   = event.end * 0.664285;
-                });
+                    judgeline.extendEvent.scaleY.forEach((event) =>
+                    {
+                        event.start = event.start * 0.664285;
+                        event.end   = event.end * 0.664285;
+                    });
+                }
                 judgeline.extendEvent.scaleY = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.scaleY);
             }
         }
