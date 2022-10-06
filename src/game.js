@@ -7,10 +7,10 @@ const PorgressBarCache = (() =>
     const ctx = canvas.getContext('2d');
 
     canvas.width = 1920;
-    canvas.height = 14;
-    ctx.clearRect(0, 0, 1920, 14);
+    canvas.height = 12;
+    ctx.clearRect(0, 0, 1920, 12);
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, 1920, 14);
+    ctx.fillRect(0, 0, 1920, 12);
 
     return Texture.from(canvas);
 })();
@@ -96,6 +96,11 @@ export default class Game
         });
 
         this.sprites = {};
+        this.functions = {
+            start: [],
+            pause: [],
+            end: []
+        };
 
         /* ===== 用户设置暂存 ===== */
         this._settings = {};
@@ -271,6 +276,11 @@ export default class Game
         if (!this._music) return;
         this.chart.music.paused = this._isPaused;
         this.judgement.input._isPaused = this._isPaused;
+
+        if (this._isPaused)
+        {
+            this._runCallback('pause');
+        }
     }
 
     restart()
@@ -376,7 +386,7 @@ export default class Game
         sprites.score.acc.position.y = sprites.score.combo.container.position.y + (this.render.sizer.heightPercent * 72);
         sprites.score.score.position.y = -(sprites.score.score.height) + ((sprites.score.score.height + (this.render.sizer.heightPercent * 61)) * progress);
         if (this.sprites.pauseButton) this.sprites.pauseButton.position.y = -(this.sprites.pauseButton.height) + ((this.sprites.pauseButton.height + (this.render.sizer.heightPercent * 74.5)) * progress);
-        if (this.sprites.progressBar) this.sprites.progressBar.position.y = (this.render.sizer.heightPercent * 14) * progress;
+        if (this.sprites.progressBar) this.sprites.progressBar.position.y = -(this.render.sizer.heightPercent * 12) * (1 - progress);
 
         // 谱面信息
         sprites.chart.info.songName.position.y = (this.render.sizer.height + sprites.chart.info.songName.height) - ((sprites.chart.info.songName.height + (this.render.sizer.heightPercent * 66)) * progress);
@@ -390,7 +400,6 @@ export default class Game
             if (isStart)
             {
                 this._animateStatus = 1;
-                this.sprites.fakeJudgeline.visible = false;
                 this.resize();
 
                 setTimeout(async () =>
@@ -406,11 +415,18 @@ export default class Game
                     {
                         if (note.sprite) note.sprite.alpha = 1;
                     });
+
+                    this._isPaused = false;
+                    this.sprites.fakeJudgeline.visible = false;
+
+                    this._runCallback('start');
                 }, 200);
             }
             else
             {
                 this._animateStatus = 3;
+                this._isPaused = true;
+                this._runCallback('end');
             }
         }
     }
@@ -423,7 +439,7 @@ export default class Game
         if (this._settings.showAPStatus)
         {
             if (this.judgement.score.FCType === 1) this.sprites.fakeJudgeline.tint = 0xB4E1FF;
-            else this.sprites.fakeJudgeline.tint = 0xFFFFFF;
+            else if (this.judgement.score.FCType === 0) this.sprites.fakeJudgeline.tint = 0xFFFFFF;
         }
         
         this.chart.judgelines.forEach((judgeline) =>
@@ -434,6 +450,21 @@ export default class Game
         {
             if (note.sprite) note.sprite.alpha = 0;
         });
+
+        this.judgement.input.sprite.clear();
+    }
+
+    on(type, callback)
+    {
+        if (!this.functions[type]) return;
+        if (!(callback instanceof Function)) return;
+        this.functions[type].push(callback);
+    }
+
+    _runCallback(type)
+    {
+        if (!this.functions[type]) return;
+        this.functions[type].forEach((callback) => callback(this));
     }
 
     resize(withChartSprites = true)

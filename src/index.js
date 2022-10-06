@@ -367,7 +367,7 @@ doms.file.bg.addEventListener('input', function () {
 
 doms.startBtn.addEventListener('click', async () => {
     currentFile.chart.music = currentFile.music;
-    currentFile.chart.bg = await Texture.from(blurImage(currentFile.bg, 50));;
+    if (currentFile.bg) currentFile.chart.bg = await Texture.from(blurImage(currentFile.bg, 50));;
 
     window._game = new Game({
         chart: currentFile.chart,
@@ -394,6 +394,10 @@ doms.startBtn.addEventListener('click', async () => {
             debug : doms.settings.debug.checked
         }
     });
+
+    _game.on('start', () => console.log('Game started!'));
+    _game.on('pause', () => console.log('Game paused!'));
+    _game.on('end', () => console.log('Game ended!'));
 
     _game.createSprites();
     
