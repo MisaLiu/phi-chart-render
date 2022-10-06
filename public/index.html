@@ -10,6 +10,8 @@
                 padding: 0;
                 margin: 0;
                 overflow: hidden;
+
+                --height-percent: 1;
             }
 
             div.file-select {
@@ -36,6 +38,78 @@
                 position: absolute;
                 top: 0;
                 left: 0;
+            }
+
+            div.play-result {
+                display: none;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                padding: 12px;
+                transform: translate(-50%, -50%);
+                background-color: rgba(0, 0, 0, 0.2);
+                color: #FFF;
+                backdrop-filter: blur(20px);
+                border-radius: 14px;
+                box-shadow: 0px 0px 24px #000;
+                box-sizing: border-box;
+            }
+            div.play-result .title {
+                font-size: calc(70px * var(--height-percent));
+                text-align: center;
+            }
+
+            div.play-result .general-info,
+            div.play-result .judge-detail {
+                display: flex;
+            }
+
+            div.play-result .general-info {
+                margin: 0 calc(48px * var(--height-percent));
+                margin-top: calc(14px * var(--height-percent));
+                line-height: calc(54px * var(--height-percent));
+                justify-content: space-between;
+                flex-direction: row;
+            }
+
+            div.play-result .general-info .score .judge-level {
+                font-size: calc(60px * var(--height-percent));
+            }
+            div.play-result .general-info .score .value {
+                font-size: calc(50px * var(--height-percent));
+            }
+
+            div.play-result .general-info .accurate {
+                display: flex;
+                line-height: normal;
+                font-size: calc(36px * var(--height-percent));
+                flex-direction: column-reverse;
+            }
+
+            div.play-result .judge-detail {
+                margin-top: calc(16px * var(--height-percent));
+                font-size: calc(36px * var(--height-percent));
+                justify-content: space-between;
+                flex-direction: row;
+            }
+            div.play-result .judge-detail > * {
+                margin: 0 calc(50px * var(--height-percent));
+            }
+            div.play-result .judge-detail > * > span.value {
+                display: block;
+                font-weight: bold;
+                text-align: center;
+            }
+
+            div.play-result .action {
+                display: flex;
+                margin-top: calc(28px * var(--height-percent));
+                flex-direction: row;
+                justify-content: center;
+                align-content: center;
+            }
+            div.play-result .action * {
+                font-size: calc(38px * var(--height-percent));
             }
 
             div.error-window {
@@ -72,6 +146,8 @@
 
             .font-loaded div.file-select,
             .font-loaded div.file-select *,
+            .font-loaded div.play-result,
+            .font-loaded div.play-result *,
             .font-loaded div.error-window,
             .font-loaded div.error-window * {
                 font-family: 'MiSans';
@@ -116,6 +192,34 @@
 
             <button class="fullscreen" id="fullscreen">Fullscreen</button>
         </div>
+        
+        <div class="play-result">
+            <div class="title">Play result</div>
+
+            <div class="general-info">
+                <div class="score">
+                    <div class="judge-level">Phi</div>
+                    <div class="value">1000000</div>
+                </div>
+
+                <div class="accurate">
+                    <div class="status">All Perfect</div>
+                    <div class="value">100.00%</div>
+                </div>
+            </div>
+
+            <div class="judge-detail">
+                <div class="perfect">Perfect<span class="value">1000</span></div>
+                <div class="good">Good<span class="value">0</span></div>
+                <div class="bad">Bad<span class="value">0</span></div>
+                <div class="miss">Miss<span class="value">0</span></div>
+            </div>
+
+            <div class="action">
+                <button onclick="history.go(0)">Refresh</button>
+            </div>
+        </div>
+
         <div class="error-window">
             <div>An error has just occurred, if you're sure this is not caused by you, please <a href="https://github.com/MisaLiu/phi-chart-render/issues/new/choose" target="_blank">report it on GitHub</a>.<button class="close">Close</button></div>
             <pre><code class="content">Test Text Not A Real Error</code></pre>

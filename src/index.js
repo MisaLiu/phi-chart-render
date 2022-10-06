@@ -7,6 +7,8 @@ import { Loader, Texture, Rectangle } from 'pixi.js-legacy';
 import { Sound } from '@pixi/sound';
 import * as StackBlur from 'stackblur-canvas';
 
+const qs = (selector) => document.querySelector(selector);
+
 const fonts = {
     'MiSans'               : new FontFaceObserver('MiSans'),
     'A-OTF Shin Go Pr6N H' : new FontFaceObserver('A-OTF Shin Go Pr6N H')
@@ -150,6 +152,7 @@ const fullscreen = {
 	}
 };
 
+window.qs = qs;
 window.doms = doms;
 window.files = files;
 window.assets = assets;
@@ -398,7 +401,10 @@ doms.startBtn.addEventListener('click', async () => {
 
     _game.on('start', () => console.log('Game started!'));
     _game.on('pause', () => console.log('Game paused!'));
-    _game.on('end', () => console.log('Game ended!'));
+    _game.on('end', (game) => {
+        console.log('Game ended!');
+        showGameResultPopup(game);
+    });
 
     _game.createSprites();
     
@@ -441,7 +447,10 @@ doms.errorWindow.closeBtn.addEventListener('click', () =>
     doms.errorWindow.window.style.display = 'none';
 });
 
-
+window.addEventListener('resize', () =>
+{
+    calcHeightPercent();
+});
 window.addEventListener('load', async () =>
 {
     for (const name in fonts)
@@ -518,6 +527,8 @@ window.addEventListener('load', async () =>
             
         }
     });
+
+    calcHeightPercent();
 });
 
 function CsvReader(_text)
@@ -556,4 +567,49 @@ function blurImage(_texture, radius = 10)
 
     StackBlur.image(texture, canvas, radius);
     return canvas;
+}
+
+function calcHeightPercent()
+{
+    document.body.style.setProperty('--height-percent', document.documentElement.clientHeight / 1080);
+}
+
+function showGameResultPopup(game)
+{
+    let judge = game.judgement;
+
+    if (Number((game._settings.speed).toFixed(2)) !== 1) qs('.play-result .title').innerHTML += ' (x' + (game._settings.speed).toFixed(2) + ')';
+
+    qs('.play-result .general-info .score .value').innerText = fillZero((judge.score.score).toFixed(0));
+    if (judge.score.judgeLevel == 6) qs('.play-result .general-info .score .judge-level').innerText = 'Phi';
+    else if (judge.score.judgeLevel == 5) qs('.play-result .general-info .score .judge-level').innerText = 'V';
+    else if (judge.score.judgeLevel == 4) qs('.play-result .general-info .score .judge-level').innerText = 'S';
+    else if (judge.score.judgeLevel == 3) qs('.play-result .general-info .score .judge-level').innerText = 'A';
+    else if (judge.score.judgeLevel == 2) qs('.play-result .general-info .score .judge-level').innerText = 'B';
+    else if (judge.score.judgeLevel == 1) qs('.play-result .general-info .score .judge-level').innerText = 'C';
+    else qs('.play-result .general-info .score .judge-level').innerText = 'False';
+
+    qs('.play-result .general-info .accurate .value').innerText = (judge.score.acc * 100).toFixed(2) + '%';
+    if (judge.score.FCType == 2) qs('.play-result .general-info .accurate .status').innerText = 'All Perfect';
+    else if (judge.score.FCType == 1) qs('.play-result .general-info .accurate .status').innerText = 'Full Combo';
+    else qs('.play-result .general-info .accurate .status').innerText = '';
+
+    if (judge.score._autoPlay) qs('.play-result .general-info .accurate .status').innerText = 'Auto Play';
+
+    qs('.play-result .judge-detail .perfect .value').innerText = judge.score.perfect;
+    qs('.play-result .judge-detail .good .value').innerText = judge.score.good;
+    qs('.play-result .judge-detail .bad .value').innerText = judge.score.bad;
+    qs('.play-result .judge-detail .miss .value').innerText = judge.score.miss;
+
+    qs('.play-result').style.display = 'block';
+
+    function fillZero(num)
+    {
+        let result = num + '';
+        while (result.length < 7)
+        {
+            result = '0' + result;
+        }
+        return result;
+    }
 }
