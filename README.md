@@ -29,8 +29,14 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
     * [ ] Parent judgeline
     * [x] Easing start/end point
     * [ ] BPM factor
-    * [ ] Extend events
     * [ ] Event link group
+    * [ ] z order
+    * Extend events
+       * [x] Scale X
+       * [x] Scale Y
+       * [x] Text
+       * [ ] Alpha control
+       * ~~[ ] Incline (wont support)~~
     * note features
         * [x] Basic support
         * [x] Fake note support
