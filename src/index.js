@@ -36,6 +36,7 @@ const doms = {
         hitsound: document.querySelector('input#settings-hitsound'),
         hitsoundVolume: document.querySelector('input#settings-hitsound-volume'),
 
+        challengeMode: document.querySelector('input#settings-challenge-mode'),
         autoPlay: document.querySelector('input#settings-autoplay'),
         debug: document.querySelector('input#settings-debug')
     },
@@ -393,6 +394,7 @@ doms.startBtn.addEventListener('click', async () => {
             hitsound: doms.settings.hitsound.checked,
             hitsoundVolume: doms.settings.hitsoundVolume.value,
 
+            challengeMode: doms.settings.challengeMode.checked,
             autoPlay: doms.settings.autoPlay.checked,
             debug : doms.settings.debug.checked
         },
