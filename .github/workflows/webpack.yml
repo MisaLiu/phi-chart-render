@@ -5,6 +5,10 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Run workflow manually'
 
 permissions:
   contents: read
