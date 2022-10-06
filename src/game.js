@@ -393,6 +393,9 @@ export default class Game
         // 假判定线过场动画
         this.sprites.fakeJudgeline.width = this.render.sizer.width * progress;
 
+        // 背景图亮度
+        this.chart.sprites.bg.cover.alpha = this._settings.bgDim * progress;
+
         if (_progress >= 1)
         {
             if (isStart)

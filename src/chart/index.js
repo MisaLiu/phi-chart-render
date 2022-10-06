@@ -108,6 +108,7 @@ export default class Chart
 
             this.sprites.bg.addChild(bgCover);
             this.sprites.bg.anchor.set(0.5);
+            this.sprites.bg.cover = bgCover;
 
             stage.addChild(this.sprites.bg);
         }
