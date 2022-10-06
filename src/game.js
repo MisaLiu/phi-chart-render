@@ -255,7 +255,7 @@ export default class Game
         this._animateStatus = 0;
         this._gameStartTime = Date.now();
 
-        this.chart.addFunction('note', this.judgement.calcNote);
+        this.chart.noteJudgeCallback = this.judgement.calcNote;
         this.render.ticker.add(this._calcTick);
 
         this.chart.calcTime(0);
@@ -349,13 +349,11 @@ export default class Game
             }
             case 1:
             {
-                if (this._isPaused) return;
-
                 let currentTime = (this._music && this._music.progress ? this._music.progress * this.chart.music.duration : 0) - this._audioOffset - this.chart.offset + this._settings.offset;
                 currentTime = currentTime > 0 ? currentTime : 0;
 
                 this.chart.calcTime(currentTime);
-                this.judgement.calcTick();
+                if (!this._isPaused) this.judgement.calcTick();
 
                 this.sprites.progressBar.width = (this._music && this._music.progress ? this._music.progress : 0) * this.render.sizer.width;
                 break;

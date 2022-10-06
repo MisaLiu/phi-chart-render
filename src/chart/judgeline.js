@@ -240,9 +240,35 @@ export default class Judgeline
             this.floorPosition = Math.fround((currentTime - event.startTime) * this.speed + event.floorPosition);
         };
 
+        for (const event of this.extendEvent.scaleX)
+        {
+            if (event.endTime < currentTime) continue;
+            if (event.startTime > currentTime) break;
+
+            let timePercentEnd = (currentTime - event.startTime) / (event.endTime - event.startTime);
+            let timePercentStart = 1 - timePercentEnd;
+
+            this.scaleX = event.start * timePercentStart + event.end * timePercentEnd;
+            if (this.sprite) this.sprite.width = this._width * this.scaleX;
+        }
+
+        for (const event of this.extendEvent.scaleY)
+        {
+            if (event.endTime < currentTime) continue;
+            if (event.startTime > currentTime) break;
+
+            let timePercentEnd = (currentTime - event.startTime) / (event.endTime - event.startTime);
+            let timePercentStart = 1 - timePercentEnd;
+
+            this.scaleY = event.start * timePercentStart + event.end * timePercentEnd;
+            if (this.sprite) this.sprite.height = this._height * this.scaleY;
+        }
+
+        /*
         this.scaleX = valueCalculator(this.extendEvent.scaleX, currentTime, this.scaleX);
         this.scaleY = valueCalculator(this.extendEvent.scaleY, currentTime, this.scaleY);
-
+        */
+        
         this.cosr = Math.cos(this.deg);
         this.sinr = Math.sin(this.deg);
 
@@ -258,9 +284,11 @@ export default class Judgeline
             this.sprite.alpha      = this.alpha >= 0 ? this.alpha : 0;
             this.sprite.rotation   = this.deg;
 
+            /*
             this.sprite.width = this._width * this.scaleX;
             this.sprite.height = this._height * this.scaleY;
-
+            */
+            
             if (this.debugSprite)
             {
                 this.debugSprite.position = this.sprite.position;

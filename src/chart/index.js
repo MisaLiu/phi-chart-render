@@ -22,10 +22,7 @@ export default class Chart
         };
 
         this.sprites = {};
-        this.function = {
-            judgeline: [],
-            note: []
-        }
+        this.noteJudgeCallback = null;
     }
 
     static from(rawChart, _chartInfo = {})
@@ -91,12 +88,6 @@ export default class Chart
 
         // console.log(chart);
         return chart;
-    }
-
-    addFunction(type, func)
-    {
-        if (!this.function[type]) throw new Error('Invaild function type');
-        this.function[type].push(func);
     }
 
     createSprites(stage, size, textures, zipFiles = {}, bgDim = 0.5, multiNoteHL = true, debug = false)
@@ -207,6 +198,9 @@ export default class Chart
                     judgeline._width = judgeline._height * judgeline.sprite.texture.width / judgeline.sprite.texture.height * 1.042;
                 }
 
+                judgeline.sprite.position.x = judgeline.x * this.renderSize.width;
+                judgeline.sprite.position.y = judgeline.y * this.renderSize.height;
+
                 judgeline.sprite.width = judgeline._width * judgeline.scaleX;
                 judgeline.sprite.height = judgeline._height * judgeline.scaleY;
 
@@ -243,20 +237,11 @@ export default class Chart
         this.judgelines.forEach((judgeline) =>
         {
             judgeline.calcTime(currentTime, this.renderSize);
-            /*
-            this.function.judgeline.forEach((func) =>
-            {
-                func(currentTime, judgeline);
-            });
-            */
         });
         this.notes.forEach((note) =>
         {
             note.calcTime(currentTime, this.renderSize);
-            this.function.note.forEach((func) =>
-            {
-                func(currentTime, note);
-            });
+            if (this.noteJudgeCallback) this.noteJudgeCallback(currentTime, note);
         })
     }
 
