@@ -178,8 +178,20 @@ export default class Judgeline
     {
         if (this.sprite) return this.sprite;
 
-        this.texture = zipFiles[this.texture];
-        this.sprite = new Sprite(this.texture ? this.texture : texture.judgeline);
+        if (!this.isText)
+        {
+            this.texture = zipFiles[this.texture];
+            this.sprite = new Sprite(this.texture ? this.texture : texture.judgeline);
+        }
+        else
+        {
+            this.sprite = new Text('', {
+                fontFamily: 'MiSans',
+                align: 'center',
+                fill: 0xFFFFFF
+            });
+        }
+        
         this.sprite.anchor.set(0.5);
         this.sprite.alpha = 1;
 
@@ -249,7 +261,17 @@ export default class Judgeline
             let timePercentStart = 1 - timePercentEnd;
 
             this.scaleX = event.start * timePercentStart + event.end * timePercentEnd;
-            if (this.sprite) this.sprite.width = this._width * this.scaleX;
+            if (this.sprite)
+            {
+                if (this.isText)
+                {
+                    this.sprite.scale.x = this.scaleX;
+                }
+                else
+                {
+                    this.sprite.width = this._width * this.scaleX;
+                }
+            }
         }
 
         for (const event of this.extendEvent.scaleY)
@@ -261,9 +283,29 @@ export default class Judgeline
             let timePercentStart = 1 - timePercentEnd;
 
             this.scaleY = event.start * timePercentStart + event.end * timePercentEnd;
-            if (this.sprite) this.sprite.height = this._height * this.scaleY;
+            if (this.sprite)
+            {
+                if (this.isText)
+                {
+                    this.sprite.scale.y = this.scaleY;
+                }
+                else
+                {
+                    this.sprite.height = this._height * this.scaleY;
+                }
+            }
         }
 
+        if (this.isText && this.sprite)
+        {
+            for (const event of this.extendEvent.text)
+            {
+                if (event.endTime < currentTime) continue;
+                if (event.startTime > currentTime) break;
+
+                this.sprite.text = event.text;
+            }
+        }
         /*
         this.scaleX = valueCalculator(this.extendEvent.scaleX, currentTime, this.scaleX);
         this.scaleY = valueCalculator(this.extendEvent.scaleY, currentTime, this.scaleY);

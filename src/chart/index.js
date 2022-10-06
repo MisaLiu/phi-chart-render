@@ -186,24 +186,27 @@ export default class Chart
 
                 if (judgeline.isText)
                 {
-
-                }
-                else if (judgeline.texture)
-                {
-                    judgeline._width  = judgeline.texture.width * this.renderSize.heightPercent;
-                    judgeline._height = judgeline.texture.height * this.renderSize.heightPercent;
+                    judgeline.sprite.style.fontSize = 70 * this.renderSize.heightPercent;
                 }
                 else
                 {
-                    judgeline._height = this.renderSize.lineScale * 18.75 * 0.008;
-                    judgeline._width = judgeline._height * judgeline.sprite.texture.width / judgeline.sprite.texture.height * 1.042;
+                    if (judgeline.texture)
+                    {
+                        judgeline._width  = judgeline.texture.width * this.renderSize.heightPercent;
+                        judgeline._height = judgeline.texture.height * this.renderSize.heightPercent;
+                    }
+                    else
+                    {
+                        judgeline._height = this.renderSize.lineScale * 18.75 * 0.008;
+                        judgeline._width = judgeline._height * judgeline.sprite.texture.width / judgeline.sprite.texture.height * 1.042;
+                    }
+                    
+                    judgeline.sprite.width = judgeline._width * judgeline.scaleX;
+                    judgeline.sprite.height = judgeline._height * judgeline.scaleY;
                 }
 
                 judgeline.sprite.position.x = judgeline.x * this.renderSize.width;
                 judgeline.sprite.position.y = judgeline.y * this.renderSize.height;
-
-                judgeline.sprite.width = judgeline._width * judgeline.scaleX;
-                judgeline.sprite.height = judgeline._height * judgeline.scaleY;
 
                 if (judgeline.debugSprite) judgeline.debugSprite.scale.set(this.renderSize.heightPercent);
             });

@@ -217,7 +217,31 @@ export default function RePhiEditChartConverter(_chart)
         if (_judgeline.extended)
         {
             // 流程跟上边都是一样的，没啥好看的
-            if (_judgeline.extended.scaleXEvents)
+            if (_judgeline.extended.textEvents && _judgeline.extended.textEvents.length > 0)
+            {
+                judgeline.isText = true;
+
+                utils.calculateEventsBeat(_judgeline.extended.textEvents).forEach((event) =>
+                {
+                    calculateTextEventEase(event)
+                        .forEach((newEvent) =>
+                        {
+                            judgeline.extendEvent.text.push(newEvent);
+                        }
+                    );
+                });
+
+                judgeline.extendEvent.text.forEach((event, eventIndex) =>
+                {
+                    if (isNaN(event.endTime))
+                    {
+                        event.endTime = judgeline.extendEvent.text[eventIndex + 1] ? judgeline.extendEvent.text[eventIndex + 1].startTime : 100;
+                    }
+                });
+                judgeline.extendEvent.text =  utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.text);
+            }
+
+            if (_judgeline.extended.scaleXEvents && _judgeline.extended.scaleXEvents.length > 0)
             {
                 utils.calculateEventsBeat(_judgeline.extended.scaleXEvents).forEach((event) =>
                 {
@@ -231,25 +255,23 @@ export default function RePhiEditChartConverter(_chart)
                 judgeline.extendEvent.scaleX = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.scaleX);
             }
 
-            if (_judgeline.extended.scaleYEvents)
+            if (_judgeline.extended.scaleYEvents && _judgeline.extended.scaleYEvents.length > 0)
             {
                 utils.calculateEventsBeat(_judgeline.extended.scaleYEvents).forEach((event) =>
                 {
                     utils.calculateEventEase(event, Easing)
                         .forEach((newEvent) =>
                         {
+                            if (_judgeline.Texture !== 'line.png')
+                            {
+                                newEvent.start = newEvent.start * 0.664285;
+                                newEvent.end   = newEvent.end * 0.664285;
+                            }
+
                             judgeline.extendEvent.scaleY.push(newEvent);
                         }
                     );
                 });
-                if (_judgeline.Texture !== 'line.png')
-                {
-                    judgeline.extendEvent.scaleY.forEach((event) =>
-                    {
-                        event.start = event.start * 0.664285;
-                        event.end   = event.end * 0.664285;
-                    });
-                }
                 judgeline.extendEvent.scaleY = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.scaleY);
             }
         }
@@ -379,6 +401,56 @@ function convertChartFormat(rawChart)
     }
 
     return chart;
+}
+
+function calculateTextEventEase(event)
+{
+    let easingFunc = Easing[event.easingType - 1] ? Easing[event.easingType - 1] : Easing[0];
+    let timeBetween = event.endTime - event.startTime;
+    let result = [];
+
+    if (!event) return [];
+
+    if (event.start != event.end)
+    {
+        if (event.start == '')
+        {
+            for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
+            {
+                let currentTime = event.startTime + (timeIndex * calcBetweenTime);
+                let nextTime = (event.startTime + ((timeIndex + 1) * calcBetweenTime)) <= event.endTime ? event.startTime + ((timeIndex + 1) * calcBetweenTime) : event.endTime;
+
+                result.push({
+                    startTime : currentTime,
+                    endTime   : nextTime,
+                    text      : (result[timeIndex - 1] ? result[timeIndex - 1].text : '') + event.end[Math.floor((event.end.length - 1) * easingFunc((nextTime - event.startTime) / (event.endTime - event.startTime)))]
+                });
+            }
+        }
+        else
+        {
+            result.push({
+                startTime : event.startTime,
+                endTime   : event.endTime,
+                text      : event.start
+            });
+            result.push({
+                startTime : event.endTime,
+                endTime   : NaN,
+                text      : event.end
+            });
+        }
+    }
+    else
+    {
+        result.push({
+            startTime : event.startTime,
+            endTime   : event.endTime,
+            text      : event.start
+        });
+    }
+
+    return result;
 }
 
 function separateSpeedEvent(event)

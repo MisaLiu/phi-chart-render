@@ -106,10 +106,7 @@ function calculateEventEase(event, Easings, easingsOffset = 1, forceLinear = fal
     let result = [];
     let timeBetween = event.endTime - event.startTime;
 
-    if (!event)
-    {
-        return [];
-    }
+    if (!event) return [];
 
     if (
         event.easingType && Easings[event.easingType - easingsOffset] && (event.easingType - easingsOffset !== 0 || forceLinear) &&
