@@ -580,6 +580,7 @@ function showGameResultPopup(game)
 {
     let judge = game.judgement;
 
+    if (game._settings.challengeMode) qs('.play-result .title').innerHTML += ' (challenge)';
     if (Number((game._settings.speed).toFixed(2)) !== 1) qs('.play-result .title').innerHTML += ' (x' + (game._settings.speed).toFixed(2) + ')';
 
     qs('.play-result .general-info .score .value').innerText = fillZero((judge.score.score).toFixed(0));
@@ -602,6 +603,43 @@ function showGameResultPopup(game)
     qs('.play-result .judge-detail .good .value').innerText = judge.score.good;
     qs('.play-result .judge-detail .bad .value').innerText = judge.score.bad;
     qs('.play-result .judge-detail .miss .value').innerText = judge.score.miss;
+
+    {
+        qs('.play-result .judge-histogram').innerHTML = '';
+
+        let noteJudgeTime = (!game._settings.challengeMode ? 200 : 100) / 1000;
+        let noteTimeHigestCount = 0;
+        let accHistogramValue = {};
+
+        game.chart.notes.forEach((note) =>
+        {
+            if (note.isFake) return;
+            if (isNaN(note.scoreTime)) return;
+
+            accHistogramValue[Math.ceil((note.scoreTime / noteJudgeTime) * 50)] = accHistogramValue[Math.ceil((note.scoreTime / noteJudgeTime) * 50)] ? accHistogramValue[Math.ceil((note.scoreTime / noteJudgeTime) * 50)] + 1 : 1;
+        });
+
+        for (const acc in accHistogramValue)
+        {
+            if (accHistogramValue[acc] > noteTimeHigestCount) noteTimeHigestCount = accHistogramValue[acc];
+        }
+        for (const acc in accHistogramValue)
+        {
+            let value = document.createElement('div');
+            value.style.opacity = (accHistogramValue[acc] / noteTimeHigestCount);
+            value.style.left = (Number(acc) + 50) + '%';
+
+            if (-12.5 <= acc && acc <= 12.5) value.style.background = '#FFECA0';
+            else if (-75 <= acc && acc <= 75) value.style.background = '#B4E1FF';
+            else value.style.background = '#6c4343';
+
+            qs('.play-result .judge-histogram').appendChild(value);
+        }
+
+        let center = document.createElement('div');
+        center.className = 'center';
+        qs('.play-result .judge-histogram').appendChild(center);
+    }
 
     qs('.play-result').style.display = 'block';
 

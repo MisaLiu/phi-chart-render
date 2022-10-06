@@ -101,6 +101,26 @@
                 text-align: center;
             }
 
+            div.play-result .judge-histogram {
+                position: relative;
+                margin: 0 calc(48px * var(--height-percent));
+                margin-top: calc(22px * var(--height-percent));
+                height: calc(22px * var(--height-percent));
+                background-color: rgba(255, 255, 255, 0.4);
+            }
+            div.play-result .judge-histogram > * {
+                position: absolute;
+                width: 1%;
+                height: 100%;
+                background-color: green;
+                transform: translateX(-50%);
+            }
+            div.play-result .judge-histogram > .center {
+                left: 50%;
+                background-color: red;
+                opacity: 0.5;
+            }
+
             div.play-result .action {
                 display: flex;
                 margin-top: calc(28px * var(--height-percent));
@@ -181,7 +201,7 @@
             <label><input type="checkbox" id="settings-hitsound" checked />Hitsound</label><br>
             <label>Hitsound volume: <input type="range" id="settings-hitsound-volume" min="0" max="1" step="0.01" value="1"></label><br>
             <hr />
-            <label><input type="checkbox" id="settings-challnge-mode" />Challenge Mode</label><br>
+            <label><input type="checkbox" id="settings-challenge-mode" />Challenge Mode</label><br>
             <label><input type="checkbox" id="settings-autoplay" />AutoPlay</label><br>
             <label><input type="checkbox" id="settings-debug" />Debug</label><br>
             <hr />
@@ -214,6 +234,11 @@
                 <div class="good">Good<span class="value">0</span></div>
                 <div class="bad">Bad<span class="value">0</span></div>
                 <div class="miss">Miss<span class="value">0</span></div>
+            </div>
+
+            <div class="judge-histogram">
+                <div class="center"></div>
+                <div class="bar"></div>
             </div>
 
             <div class="action">
