@@ -192,13 +192,13 @@ export default class Chart
                 {
                     if (judgeline.texture)
                     {
-                        judgeline._width  = judgeline.texture.width * this.renderSize.heightPercent;
-                        judgeline._height = judgeline.texture.height * this.renderSize.heightPercent;
+                        judgeline._width  = judgeline.sprite.texture.baseTexture.width * this.renderSize.heightPercent;
+                        judgeline._height = judgeline.sprite.texture.baseTexture.height * this.renderSize.heightPercent;
                     }
                     else
                     {
                         judgeline._height = this.renderSize.lineScale * 18.75 * 0.008;
-                        judgeline._width = judgeline._height * judgeline.sprite.texture.width / judgeline.sprite.texture.height * 1.042;
+                        judgeline._width = judgeline._height * judgeline.sprite.texture.baseTexture.width / judgeline.sprite.texture.baseTexture.height * 1.042;
                     }
                     
                     judgeline.sprite.width = judgeline._width * judgeline.scaleX;

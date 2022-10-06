@@ -262,7 +262,7 @@ export default function RePhiEditChartConverter(_chart)
                     utils.calculateEventEase(event, Easing)
                         .forEach((newEvent) =>
                         {
-                            if (_judgeline.Texture !== 'line.png')
+                            if (_judgeline.Texture !== 'line.png' && !judgeline.isText)
                             {
                                 newEvent.start = newEvent.start * 0.664285;
                                 newEvent.end   = newEvent.end * 0.664285;
@@ -362,42 +362,39 @@ function convertChartFormat(rawChart)
 {
     let chart = JSON.parse(JSON.stringify(rawChart));
     
-    switch (chart.META.RPEVersion)
+    if (chart.META.RPEVersion <= 100)
     {
-        case 100:
+        chart.judgeLineList.forEach((judgeline) =>
         {
-            chart.judgeLineList.forEach((judgeline) =>
-            {
-                judgeline.bpmfactor = 1;
-                judgeline.father = -1;
-                judgeline.zOrder = 0;
+            judgeline.bpmfactor = 1;
+            judgeline.father = -1;
+            judgeline.zOrder = 0;
 
-                judgeline.eventLayers.forEach((eventLayer) =>
+            judgeline.eventLayers.forEach((eventLayer) =>
+            {
+                for (const name in eventLayer)
                 {
-                    for (const name in eventLayer)
+                    eventLayer[name].forEach((event) =>
                     {
-                        eventLayer[name].forEach((event) =>
-                        {
-                            event.easingLeft = 0;
-                            event.easingRight = 1;
-                        });
-                    }
-                });
+                        event.easingLeft = 0;
+                        event.easingRight = 1;
+                    });
+                }
             });
-            break;
-        }
-        case 105:
-        {
-            break;
-        }
-        case 113:
-        {
-            break;
-        }
-        default :
-        {
-            throw new Error('Unsupported chart version: ' + chart.META.RPEVersion);
-        }
+        });
+    }
+    if (chart.META.RPEVersion <= 105)
+    {
+
+    }
+    if (chart.META.RPEVersion <= 113)
+    {
+
+    }
+
+    if (chart.META.RPEVersion > 113)
+    {
+        console.warn('Unsupported chart version: ' + chart.META.RPEVersion + ', some features may not supported');
     }
 
     return chart;
