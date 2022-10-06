@@ -392,7 +392,8 @@ doms.startBtn.addEventListener('click', async () => {
 
             autoPlay: doms.settings.autoPlay.checked,
             debug : doms.settings.debug.checked
-        }
+        },
+        watermark: 'github/MisaLiu/phi-chart-render ' + GITHUB_CURRENT_GIT_HASH
     });
 
     _game.on('start', () => console.log('Game started!'));
@@ -464,6 +465,8 @@ window.addEventListener('load', async () =>
     loader.onComplete.add((l, res) =>
     {
         doms.loadingStatus.innerText = 'All done!';
+        doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
+        doms.chartPackFile.disabled = false;
     });
 
     loader.add([

@@ -4,6 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
         <link href="./fonts/index.css" rel="stylesheet" />
+        <script> const GITHUB_CURRENT_GIT_HASH = `{{CURRENT_HASH}}`;</script>
         <style>
             html, body {
                 padding: 0;
@@ -69,25 +70,10 @@
                 font-family: Menlo, Monaco, 'Courier New', monospace !important;
             }
 
-            div.watermark {
-                position: absolute;
-                right: 4px;
-                bottom: 4px;
-                color: white;
-                font-size: 1vw;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                -moz-user-select: none;
-                user-select: none;
-                pointer-events: none;
-            }
-            
             .font-loaded div.file-select,
             .font-loaded div.file-select *,
             .font-loaded div.error-window,
-            .font-loaded div.error-window *,
-            .font-loaded div.watermark {
+            .font-loaded div.error-window * {
                 font-family: 'MiSans';
             }
             .font-loaded div.file-select a {
@@ -98,10 +84,9 @@
     </head>
     <body>
         <canvas id="canvas"></canvas>
-        <div class="watermark">github/MisaLiu/phi-chart-render {{CURRENT_HASH}}</div>
         <div class="file-select">
-            <label>Select a *.zip/*.pez file: <input type="file" id="file-chart-pack" accept=".zip,.pez"></label><br>
-            <div class="loading" id="file-read-progress">No chart pack file selected</div>
+            <label>Select a *.zip/*.pez file: <input type="file" id="file-chart-pack" accept=".zip,.pez" disabled></label><br>
+            <div class="loading" id="file-read-progress">Please wait until assets loaded...</div>
             <hr />
             <label>Chart: <select id="file-chart"><option disabled selected>Select a file first...</option></select></label><br>
             <label>Music: <select id="file-music"><option disabled selected>Select a file first...</option></select></label><br>

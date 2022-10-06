@@ -30,6 +30,7 @@ const PorgressBarCache = (() =>
   *     chart,
   *     assets,
   *     zipFiles?,
+  *     watermark?,
   *     settings: {
   *         audioOffset?,
   *         hitsound?,
@@ -112,6 +113,8 @@ export default class Game
         this._settings.multiNoteHL  = params.settings && params.settings.multiNoteHL !== undefined && params.settings.multiNoteHL !== null ? !!params.settings.multiNoteHL : true;
         this._settings.showAPStatus = params.settings && params.settings.showAPStatus !== undefined && params.settings.showAPStatus !== null ? !!params.settings.showAPStatus : true;
         this._settings.debug        = params.settings && params.settings.debug ? !!params.settings.debug : false;
+
+        this._watermarkText = params.watermark && params.watermark != '' ? params.watermark : 'github/MisaLiu/phi-chart-render';
 
         this._music = null;
         this._audioOffset = 0;
@@ -225,6 +228,16 @@ export default class Game
 
             this.render.mainContainer.addChild(this.render.fpsText);
         }
+
+        this.render.watermark = new Text(this._watermarkText, {
+            fontFamily: 'MiSans',
+            align: 'right',
+            fill: 0xFFFFFF
+        });
+        this.render.watermark.anchor.set(1);
+        this.render.watermark.alpha = 0.5;
+        this.render.watermark.zIndex = 999999;
+        this.render.mainContainer.addChild(this.render.watermark);
 
         this.render.mainContainer.sortChildren();
         this.render.stage.sortChildren();
@@ -543,6 +556,13 @@ export default class Game
             this.render.fpsText.position.y     = 0;
             this.render.fpsText.style.fontSize = this.render.sizer.heightPercent * 32;
             this.render.fpsText.style.padding  = this.render.sizer.heightPercent * 8;
+        }
+
+        if (this.render.watermark)
+        {
+            this.render.watermark.position.x     = this.render.sizer.width;
+            this.render.watermark.position.y     = this.render.sizer.height;
+            this.render.watermark.style.fontSize = this.render.sizer.heightPercent * 20;
         }
         
         if (withChartSprites)
