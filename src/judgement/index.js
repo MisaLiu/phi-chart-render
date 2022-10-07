@@ -2,7 +2,7 @@ import Input from './input';
 import Score from './score';
 import InputPoint from './input/point';
 import JudgePoint from './point';
-import { ParticleContainer, Container, AnimatedSprite, Texture, Graphics, Sprite  } from 'pixi.js-legacy';
+import { Container, AnimatedSprite, Texture, Graphics, Sprite  } from 'pixi.js-legacy';
 
 const AllJudgeTimes = {
     bad     : 200,
@@ -16,7 +16,7 @@ const AllJudgeTimes = {
 
 const ClickAnimatePointCache = (() =>
 {
-    const pointSize = 18;
+    const pointSize = 20;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d', { alpha: true });
 
@@ -142,7 +142,7 @@ export default class Judgement
 
                 blocks[i].tint = note.score === 4 ? 0xFFECA0 : 0xB4E1FF;
 
-                blocks[i].distance = blocks[i]._distance = Math.random() * 81 + 185;
+                blocks[i].distance = blocks[i]._distance = Math.random() * 90 + 200;
                 blocks[i].direction = Math.floor(Math.random() * 360);
 				blocks[i].sinr = Math.sin(blocks[i].direction);
 				blocks[i].cosr = Math.cos(blocks[i].direction);
