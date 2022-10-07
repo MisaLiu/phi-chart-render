@@ -197,30 +197,6 @@ function arrangeSameValueEvent(_events)
     return result.slice();
 }
 
-(() =>
-{
-    console.log(arrangeSameValueEvent([
-        {
-            startTime: 10,
-            endTime: 20,
-            start: 5,
-            end: 5
-        },
-        {
-            startTime: 25,
-            endTime: 30,
-            start: 5,
-            end: 5
-        },
-        {
-            startTime: 40,
-            endTime: 50,
-            start: 5,
-            end: 5
-        }
-    ]));
-})();
-
 /**
  * 合并一组速度事件中值相同的事件
  * 
