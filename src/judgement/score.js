@@ -34,6 +34,7 @@ export default class Score
 
     reset()
     {
+        this._score   = 0;
         this.score    = 0;
         this.acc      = 0;
         this.combo    = 0;
@@ -152,7 +153,7 @@ export default class Score
                     }
                 }
 
-                this.score = Math.round(this.score + this.scorePerNote + (this.combo >= this.maxCombo ? this.scorePerCombo * (type === 4 ? 1 : 0.65) : 0)); 
+                this._score += this.scorePerNote + (this.combo >= this.maxCombo ? this.scorePerCombo * (type === 4 ? 1 : 0.65) : 0); 
             }
             else
             {
@@ -181,11 +182,11 @@ export default class Score
             this.perfect += 1;
             this.combo += 1;
             this.maxCombo = this.combo;
-            this.score = Math.round(this.score + this.scorePerNote + this.scorePerCombo); 
+            this._score += this.scorePerNote + this.scorePerCombo; 
         }
         
-
         this.judgedNotes++;
+        this.score = Math.round(this._score);
         this.acc = (this.perfect + this.good * 0.65) / this.judgedNotes;
 
         if (this.score >= 1000000) this.judgeLevel = 6;
