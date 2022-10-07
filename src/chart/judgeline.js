@@ -264,14 +264,8 @@ export default class Judgeline
             this.scaleX = event.start * timePercentStart + event.end * timePercentEnd;
             if (this.sprite)
             {
-                if (this.isText)
-                {
-                    this.sprite.scale.x = this.scaleX;
-                }
-                else
-                {
-                    this.sprite.width = this._width * this.scaleX;
-                }
+                if (this.isText) this.sprite.scale.x = this.scaleX;
+                else this.sprite.width = this._width * this.scaleX;
             }
         }
 
@@ -286,14 +280,8 @@ export default class Judgeline
             this.scaleY = event.start * timePercentStart + event.end * timePercentEnd;
             if (this.sprite)
             {
-                if (this.isText)
-                {
-                    this.sprite.scale.y = this.scaleY;
-                }
-                else
-                {
-                    this.sprite.height = this._height * this.scaleY;
-                }
+                if (this.isText) this.sprite.scale.y = this.scaleY;
+                else this.sprite.height = this._height * this.scaleY;
             }
         }
 
