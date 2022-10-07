@@ -437,16 +437,31 @@ function calculateTextEventEase(event)
     {
         if (event.start == '')
         {
+            let currentText = '';
+            let lastTextIndex = -1;
+
             for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
             {
                 let currentTime = event.startTime + (timeIndex * calcBetweenTime);
                 let nextTime = (event.startTime + ((timeIndex + 1) * calcBetweenTime)) <= event.endTime ? event.startTime + ((timeIndex + 1) * calcBetweenTime) : event.endTime;
+                let currentTextIndex = Math.floor(_valueCalculator(event, nextTime, 0, event.end.length - 1));
+
+                if (lastTextIndex + 1 < currentTextIndex)
+                {
+                    for (let extraTextIndex = lastTextIndex + 1; extraTextIndex < currentTextIndex; extraTextIndex++)
+                    {
+                        currentText += event.end[extraTextIndex];
+                    }
+                }
+                currentText += event.end[currentTextIndex];
 
                 result.push({
                     startTime : currentTime,
                     endTime   : nextTime,
-                    text      : (result[timeIndex - 1] ? result[timeIndex - 1].text : '') + event.end[Math.floor((event.end.length - 1) * easingFunc((nextTime - event.startTime) / (event.endTime - event.startTime)))]
+                    value     : currentText
                 });
+
+                lastTextIndex = currentTextIndex;
             }
         }
         else
@@ -454,12 +469,12 @@ function calculateTextEventEase(event)
             result.push({
                 startTime : event.startTime,
                 endTime   : event.endTime,
-                text      : event.start
+                value     : event.start
             });
             result.push({
                 startTime : event.endTime,
                 endTime   : NaN,
-                text      : event.end
+                value     : event.end
             });
         }
     }
@@ -468,7 +483,7 @@ function calculateTextEventEase(event)
         result.push({
             startTime : event.startTime,
             endTime   : event.endTime,
-            text      : event.start
+            value     : event.start
         });
     }
 
@@ -495,7 +510,7 @@ function calculateColorEventEase(event)
             result.push({
                 startTime : currentTime,
                 endTime   : nextTime,
-                color     : PIXIutils.rgb2hex([
+                value     : PIXIutils.rgb2hex([
                     Math.round(_valueCalculator(event, nextTime, event.start[0], event.end[0])) / 255,
                     Math.round(_valueCalculator(event, nextTime, event.start[1], event.end[1])) / 255,
                     Math.round(_valueCalculator(event, nextTime, event.start[2], event.end[2])) / 255
@@ -508,7 +523,7 @@ function calculateColorEventEase(event)
         result.push({
             startTime : event.startTime,
             endTime   : event.endTime,
-            color     : PIXIutils.rgb2hex(
+            value     : PIXIutils.rgb2hex(
                 event.start[0] / 255,
                 event.start[1] / 255,
                 event.start[2] / 255
@@ -541,9 +556,9 @@ function separateSpeedEvent(event)
     else
     {
         result.push({
-            startTime: event.startTime,
-            endTime: event.endTime,
-            value: Math.fround(event.start)
+            startTime : event.startTime,
+            endTime   : event.endTime,
+            value     : Math.fround(event.start)
         });
     }
 

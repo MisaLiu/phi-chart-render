@@ -304,7 +304,7 @@ export default class Judgeline
                 if (event.endTime < currentTime) continue;
                 if (event.startTime > currentTime) break;
 
-                this.sprite.text = event.text;
+                this.sprite.text = event.value;
             }
         }
 
@@ -313,7 +313,7 @@ export default class Judgeline
             if (event.endTime < currentTime) continue;
             if (event.startTime > currentTime) break;
 
-            this.sprite.tint = event.color;
+            this.sprite.tint = event.value;
         }
 
         /*
