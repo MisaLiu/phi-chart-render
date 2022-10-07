@@ -307,6 +307,15 @@ export default class Judgeline
                 this.sprite.text = event.text;
             }
         }
+
+        for (const event of this.extendEvent.color)
+        {
+            if (event.endTime < currentTime) continue;
+            if (event.startTime > currentTime) break;
+
+            this.sprite.tint = event.color;
+        }
+
         /*
         this.scaleX = valueCalculator(this.extendEvent.scaleX, currentTime, this.scaleX);
         this.scaleY = valueCalculator(this.extendEvent.scaleY, currentTime, this.scaleY);

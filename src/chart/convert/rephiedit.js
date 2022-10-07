@@ -3,6 +3,7 @@ import Judgeline from '../judgeline';
 import EventLayer from '../eventlayer';
 import Note from '../note';
 import utils from './utils';
+import { utils as PIXIutils } from 'pixi.js-legacy';
 
 const calcBetweenTime = 0.125;
 const Easing = [
@@ -222,15 +223,17 @@ export default function RePhiEditChartConverter(_chart)
             {
                 judgeline.isText = true;
 
-                utils.calculateEventsBeat(_judgeline.extended.textEvents).forEach((event) =>
-                {
-                    calculateTextEventEase(event)
-                        .forEach((newEvent) =>
-                        {
-                            judgeline.extendEvent.text.push(newEvent);
-                        }
-                    );
-                });
+                utils.calculateEventsBeat(_judgeline.extended.textEvents)
+                    .forEach((event) =>
+                    {
+                        calculateTextEventEase(event)
+                            .forEach((newEvent) =>
+                            {
+                                judgeline.extendEvent.text.push(newEvent);
+                            }
+                        );
+                    }
+                );
 
                 judgeline.extendEvent.text.forEach((event, eventIndex) =>
                 {
@@ -244,36 +247,56 @@ export default function RePhiEditChartConverter(_chart)
 
             if (_judgeline.extended.scaleXEvents && _judgeline.extended.scaleXEvents.length > 0)
             {
-                utils.calculateEventsBeat(_judgeline.extended.scaleXEvents).forEach((event) =>
-                {
-                    utils.calculateEventEase(event, Easing)
-                        .forEach((newEvent) =>
-                        {
-                            judgeline.extendEvent.scaleX.push(newEvent);
-                        }
-                    );
-                });
+                utils.calculateEventsBeat(_judgeline.extended.scaleXEvents)
+                    .forEach((event) =>
+                    {
+                        utils.calculateEventEase(event, Easing)
+                            .forEach((newEvent) =>
+                            {
+                                judgeline.extendEvent.scaleX.push(newEvent);
+                            }
+                        );
+                    }
+                );
                 judgeline.extendEvent.scaleX = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.scaleX);
             }
 
             if (_judgeline.extended.scaleYEvents && _judgeline.extended.scaleYEvents.length > 0)
             {
-                utils.calculateEventsBeat(_judgeline.extended.scaleYEvents).forEach((event) =>
-                {
-                    utils.calculateEventEase(event, Easing)
-                        .forEach((newEvent) =>
-                        {
-                            if (_judgeline.Texture !== 'line.png' && !judgeline.isText)
+                utils.calculateEventsBeat(_judgeline.extended.scaleYEvents)
+                    .forEach((event) =>
+                    {
+                        utils.calculateEventEase(event, Easing)
+                            .forEach((newEvent) =>
                             {
-                                newEvent.start = newEvent.start * 0.664285;
-                                newEvent.end   = newEvent.end * 0.664285;
-                            }
+                                if (_judgeline.Texture !== 'line.png' && !judgeline.isText)
+                                {
+                                    newEvent.start = newEvent.start * 0.664285;
+                                    newEvent.end   = newEvent.end * 0.664285;
+                                }
 
-                            judgeline.extendEvent.scaleY.push(newEvent);
-                        }
-                    );
-                });
+                                judgeline.extendEvent.scaleY.push(newEvent);
+                            }
+                        );
+                    }
+                );
                 judgeline.extendEvent.scaleY = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.scaleY);
+            }
+
+            if (_judgeline.extended.colorEvents && _judgeline.extended.colorEvents.length > 0)
+            {
+                utils.calculateEventsBeat(_judgeline.extended.colorEvents)
+                    .forEach((event) =>
+                    {
+                        calculateColorEventEase(event)
+                            .forEach((newEvent) =>
+                            {
+                                judgeline.extendEvent.color.push(newEvent);
+                            }
+                        );
+                    }
+                );
+                judgeline.extendEvent.color = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.color);
             }
         }
 
@@ -452,6 +475,50 @@ function calculateTextEventEase(event)
     return result;
 }
 
+function calculateColorEventEase(event)
+{
+    let timeBetween = event.endTime - event.startTime;
+    let result = [];
+
+    if (!event) return [];
+
+    if (
+        event.start[0] != event.end[0] ||
+        event.start[1] != event.end[1] ||
+        event.start[2] != event.end[2]
+    ) {
+        for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
+        {
+            let currentTime = event.startTime + (timeIndex * calcBetweenTime);
+            let nextTime = (event.startTime + ((timeIndex + 1) * calcBetweenTime)) <= event.endTime ? event.startTime + ((timeIndex + 1) * calcBetweenTime) : event.endTime;
+
+            result.push({
+                startTime : currentTime,
+                endTime   : nextTime,
+                color     : PIXIutils.rgb2hex([
+                    Math.round(_valueCalculator(event, nextTime, event.start[0], event.end[0])) / 255,
+                    Math.round(_valueCalculator(event, nextTime, event.start[1], event.end[1])) / 255,
+                    Math.round(_valueCalculator(event, nextTime, event.start[2], event.end[2])) / 255
+                ])
+            });
+        }
+    }
+    else
+    {
+        result.push({
+            startTime : event.startTime,
+            endTime   : event.endTime,
+            color     : PIXIutils.rgb2hex(
+                event.start[0] / 255,
+                event.start[1] / 255,
+                event.start[2] / 255
+            )
+        });
+    }
+
+    return result;
+}
+
 function separateSpeedEvent(event)
 {
     let result = [];
@@ -481,4 +548,22 @@ function separateSpeedEvent(event)
     }
 
     return result;
+}
+
+function _valueCalculator(event, currentTime, startValue = 0, endValue = 1)
+{
+    if (startValue == endValue) return startValue;
+    if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
+    if (event.endTime < currentTime) throw new Error('currentTime must smaller than endTime');
+
+    let timePercentStart = (currentTime - event.startTime) / (event.endTime - event.startTime);
+    let timePercentEnd = 1 - timePercentStart;
+    let easeFunction = Easing[event.easingType - 1] ? Easing[event.easingType - 1] : Easing[0];
+    let easePercent = easeFunction((!isNaN(event.easingLeft) ? event.easingLeft : 0) * timePercentEnd + (!isNaN(event.easingRight) ? event.easingRight : 1) * timePercentStart);
+    let easePercentStart = easeFunction(!isNaN(event.easingLeft) ? event.easingLeft : 0);
+    let easePercentEnd = easeFunction(!isNaN(event.easingRight) ? event.easingRight : 1);
+
+    easePercent = (easePercent - easePercentStart) / (easePercentEnd - easePercentStart);
+
+    return Math.fround(startValue * (1 - easePercent) + endValue * easePercent);
 }
