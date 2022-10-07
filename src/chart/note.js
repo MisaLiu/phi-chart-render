@@ -222,12 +222,12 @@ export default class Note
                 if (this.judgeline.alpha < 0) this.sprite.visible = false;
 
                 // Note 特殊位置是否可视控制
-                if (this.type !== 3 && this.time > currentTime && _originY < 0) this.sprite.visible = false;
+                if (this.type !== 3 && this.time > currentTime && _originY < 0 && this.judgeline.isCover) this.sprite.visible = false;
                 if (this.type !== 3 && this.isFake && this.time <= currentTime) this.sprite.visible = false;
                 if (
                     this.type === 3 &&
                     (
-                        (this.time > currentTime && _originY < 0) || // 时间未开始时 Hold 在判定线对面
+                        (this.time > currentTime && _originY < 0 && this.judgeline.isCover) || // 时间未开始时 Hold 在判定线对面
                         (this.holdTimeLength <= currentTime) // Hold 已经被按完
                     )
                 ) this.sprite.visible = false;

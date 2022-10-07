@@ -105,11 +105,12 @@ export default function RePhiEditChartConverter(_chart)
 
     rawChart.judgeLineList.forEach((_judgeline, judgelineIndex) =>
     {
-        let judgeline = new Judgeline({ id: judgelineIndex });
-
-        // 一些基本信息
-        judgeline.parentLine =_judgeline.father;
-        judgeline.texture = _judgeline.Texture != 'line.png' ? _judgeline.Texture : null;
+        let judgeline = new Judgeline({
+            id         : judgelineIndex,
+            texture    : _judgeline.Texture != 'line.png' ? _judgeline.Texture : null,
+            parentLine : _judgeline.father > 0 ? _judgeline.father : null,
+            isCover    : _judgeline.isCover == 1
+        });
 
         // 处理 EventLayer
         _judgeline.eventLayers.forEach((_eventLayer) =>
