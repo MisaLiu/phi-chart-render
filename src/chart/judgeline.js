@@ -338,17 +338,3 @@ export default class Judgeline
     }
 }
 
-function valueCalculator(events, currentTime, originValue = 0)
-{
-    for (const event of events)
-    {
-        if (event.endTime < currentTime) continue;
-        if (event.startTime > currentTime) break;
-
-        let timePercentEnd = (currentTime - event.startTime) / (event.endTime - event.startTime);
-        let timePercentStart = 1 - timePercentEnd;
-
-        return event.start * timePercentStart + event.end * timePercentEnd;
-    }
-    return originValue;
-}

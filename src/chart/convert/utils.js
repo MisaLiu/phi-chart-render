@@ -147,6 +147,7 @@ function calculateEventEase(event, Easings, easingsOffset = 1, forceLinear = fal
  */
 function arrangeSameValueEvent(_events)
 {
+    /*
     let events = _events.slice();
     let newEvents = [ events.shift() ];
 
@@ -173,9 +174,52 @@ function arrangeSameValueEvent(_events)
             newEvents.push(newEvent);
         }
     }
+    */
 
-    return newEvents.slice();
+    let events = _events.slice();
+    let result = [ events.shift() ];
+
+    for (const event of events)
+    {
+        if (
+            result[result.length - 1].start == result[result.length - 1].end &&
+            event.start == event.end &&
+            result[result.length - 1].start == event.start
+        ) {
+            result[result.length - 1].endTime = event.endTime;
+        }
+        else
+        {
+            result.push(event);
+        }
+    }
+    
+    return result.slice();
 }
+
+(() =>
+{
+    console.log(arrangeSameValueEvent([
+        {
+            startTime: 10,
+            endTime: 20,
+            start: 5,
+            end: 5
+        },
+        {
+            startTime: 25,
+            endTime: 30,
+            start: 5,
+            end: 5
+        },
+        {
+            startTime: 40,
+            endTime: 50,
+            start: 5,
+            end: 5
+        }
+    ]));
+})();
 
 /**
  * 合并一组速度事件中值相同的事件
