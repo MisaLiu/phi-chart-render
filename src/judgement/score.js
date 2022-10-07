@@ -152,7 +152,7 @@ export default class Score
                     }
                 }
 
-                this.score += this.scorePerNote + (this.combo >= this.maxCombo ? this.scorePerCombo * (type === 4 ? 1 : 0.65) : 0); 
+                this.score += Math.round(this.scorePerNote + (this.combo >= this.maxCombo ? this.scorePerCombo * (type === 4 ? 1 : 0.65) : 0)); 
             }
             else
             {
@@ -181,7 +181,7 @@ export default class Score
             this.perfect += 1;
             this.combo += 1;
             this.maxCombo = this.combo;
-            this.score += this.scorePerNote + this.scorePerCombo; 
+            this.score += Math.round(this.scorePerNote + this.scorePerCombo); 
         }
         
 
