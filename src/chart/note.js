@@ -156,7 +156,7 @@ export default class Note
         if (this.sprite)
         {
             let originX = size.widthPercent * this.positionX,
-                _originY = Math.fround((this.floorPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed),
+                _originY = Math.fround((this.floorPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed + size.height * this.yOffset),
                 originY = _originY * (this.isAbove ? -1 : 1),
 
                 realX = originY * this.judgeline.sinr * -1,

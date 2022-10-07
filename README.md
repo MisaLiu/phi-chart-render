@@ -42,7 +42,7 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
         * [x] Fake note support
         * [x] Note scale
         * [x] Note alpha
-        * [ ] yOffset
+        * [x] yOffset
         * [x] visible time
 
 ## Development
