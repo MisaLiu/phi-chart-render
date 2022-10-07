@@ -156,7 +156,7 @@ export default class Note
         if (this.sprite)
         {
             let originX = size.widthPercent * this.positionX,
-                _originY = Math.fround((this.floorPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed + size.height * this.yOffset),
+                _originY = Math.fround((this.floorPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed),
                 originY = _originY * (this.isAbove ? -1 : 1),
 
                 realX = originY * this.judgeline.sinr * -1,
@@ -182,8 +182,8 @@ export default class Note
             }
             
             // Note 落在判定线时的绝对位置计算
-            this.sprite.judgelineX = originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
-            this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
+            this.sprite.judgelineX = (size.height * this.yOffset) * this.judgeline.sinr + originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
+            this.sprite.judgelineY = (size.height * this.yOffset) * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
 
             // Note 的绝对位置计算
             realX = this.sprite.judgelineX + realX;
