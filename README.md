@@ -50,14 +50,8 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
 You must have a Node.js enviorment to helping development.
 
 1. Clone this repo.
-2. Run this code to install requirements:
-    ```bash
-    npm install
-    ```
-3. Run this code to start the dev server:
-    ```bash
-    npm run dev
-    ```
+2. `npm install`
+3. `npm run dev`
 
 ## Copyrights of the materials
 
