@@ -112,13 +112,15 @@
                 position: absolute;
                 width: 1%;
                 height: 100%;
+                left: calc(100% - var(--pos));
                 background-color: green;
                 transform: translateX(-50%);
             }
             div.play-result .judge-histogram > .center {
-                left: 50%;
                 background-color: red;
                 opacity: 0.5;
+
+                --pos: 50%;
             }
 
             div.play-result .action {

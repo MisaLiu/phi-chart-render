@@ -627,7 +627,7 @@ function showGameResultPopup(game)
         {
             let value = document.createElement('div');
             value.style.opacity = (accHistogramValue[acc] / noteTimeHigestCount);
-            value.style.left = (Number(acc) + 50) + '%';
+            value.style.setProperty('--pos', (Number(acc) + 50) + '%');
 
             if (-12.5 <= acc && acc <= 12.5) value.style.background = '#FFECA0';
             else if (-75 <= acc && acc <= 75) value.style.background = '#B4E1FF';
