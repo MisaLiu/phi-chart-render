@@ -41,6 +41,7 @@ const PorgressBarCache = (() =>
   *         multiNoteHL?,
   *         challengeMode?,
   *         autoPlay?,
+  *         forceCanvas?,
   *         debug?
   *     }
   * }

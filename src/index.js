@@ -3,7 +3,7 @@ import Game from './game';
 import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip, { file } from 'jszip';
-import { Loader, Texture, Rectangle } from 'pixi.js-legacy';
+import { Loader, Texture, Rectangle, utils as PIXIutils } from 'pixi.js-legacy';
 import { Sound } from '@pixi/sound';
 import * as StackBlur from 'stackblur-canvas';
 
@@ -38,6 +38,7 @@ const doms = {
 
         challengeMode: document.querySelector('input#settings-challenge-mode'),
         autoPlay: document.querySelector('input#settings-autoplay'),
+        forceCanvas: document.querySelector('input#settings-force-canvas'),
         debug: document.querySelector('input#settings-debug')
     },
     startBtn : document.querySelector('button#start'),
@@ -531,6 +532,12 @@ window.addEventListener('load', async () =>
     });
 
     calcHeightPercent();
+
+    if (!PIXIutils.isWebGLSupported())
+    {
+        doms.settings.forceCanvas.checked = true;
+        doms.settings.forceCanvas.disabled = true;
+    }
 });
 
 function CsvReader(_text)
