@@ -15,6 +15,7 @@ export default class Note
         this.endPosition    = Math.fround(this.floorPosition + this.holdLength);
         this.positionX      = !isNaN(Number(params.positionX)) ? Number(Number(params.positionX).toFixed(6)) : 0;
         this.basicAlpha     = (!isNaN(Number(params.basicAlpha)) && Number(params.basicAlpha) >= 0 && Number(params.basicAlpha) <= 1) ? Number(params.basicAlpha) : 1;
+        this.visibleTime    = (!isNaN(Number(params.visibleTime)) && params.visibleTime < 999999) ? Number(params.visibleTime) : NaN;
         this.yOffset        = !isNaN(Number(params.yOffset)) ? Number(params.yOffset) : 0;
         this.xScale         = !isNaN(Number(params.xScale)) ? Number(params.xScale) : 1;
         this.isAbove        = !!params.isAbove;
@@ -231,6 +232,8 @@ export default class Note
                         (this.holdTimeLength <= currentTime) // Hold 已经被按完
                     )
                 ) this.sprite.visible = false;
+                
+                if (!isNaN(this.visibleTime) && this.time - currentTime > this.visibleTime) this.sprite.visible = false;
             }
         }
     }
