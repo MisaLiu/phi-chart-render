@@ -28,6 +28,13 @@
                 box-sizing: border-box;
             }
 
+            div.file-select .unsupported-audio-file-type.warn {
+                color: orange;
+            }
+            div.file-select .unsupported-audio-file-type.good {
+                color: green;
+            }
+
             button#fullscreen {
                 position: absolute;
                 top: 0;
@@ -189,6 +196,7 @@
             <label>Chart: <select id="file-chart"><option disabled selected>Select a file first...</option></select></label><br>
             <label>Music: <select id="file-music"><option disabled selected>Select a file first...</option></select></label><br>
             <label>BG: <select id="file-bg"><option disabled selected>Select a file first...</option></select></label>
+            <div class="unsupported-audio-file-type">Loading...</div>
             <hr />
             <div class="loading" id="loading-status">Loading scripts...</div>
             <hr />
