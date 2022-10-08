@@ -64,9 +64,9 @@ export default class Game
             width           : !isNaN(Number(params.render.width)) ? Number(params.render.width) : document.documentElement.clientWidth,
             height          : !isNaN(Number(params.render.height)) ? Number(params.render.height) : document.documentElement.clientHeight,
             resolution      : !isNaN(Number(params.render.resolution)) ? Number(params.render.resolution) : window.devicePixelRatio,
-            autoDensity     : params.render.autoDensity ? !!params.render.autoDensity : true,
-            antialias       : params.render.antialias ? !!params.render.antialias : true,
-            forceCanvas     : params.render.forceCanvas ? !!params.render.forceCanvas : false,
+            autoDensity     : params.render.autoDensity !== undefined && params.settings.autoDensity !== null ? !!params.render.autoDensity : true,
+            antialias       : params.render.antialias !== undefined && params.render.antialias !== null ? !!params.render.antialias : true,
+            forceCanvas     : params.render.forceCanvas !== undefined && params.render.forceCanvas !== null ? !!params.render.forceCanvas : false,
             view            : params.render.canvas ? params.render.canvas : undefined,
             backgroundAlpha : 1
         });
