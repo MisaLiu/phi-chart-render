@@ -6,8 +6,6 @@ export default class Input
 {
     constructor(params = {})
     {
-        this._isPaused = false;
-
         if (!params.canvas) throw new Error('You cannot add inputs without a canvas');
 
         this._inputStart = ListenerCallback.InputStart.bind(this);
@@ -23,6 +21,8 @@ export default class Input
     {
         this.tap = [];
         this.inputs = {};
+
+        this._isPaused = false;
     }
 
     addListenerToCanvas(canvas)
