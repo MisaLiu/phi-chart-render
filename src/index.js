@@ -381,7 +381,7 @@ doms.startBtn.addEventListener('click', async () => {
         render: {
             canvas: doms.canvas,
             resizeTo: document.documentElement,
-            
+            forceCanvas: doms.settings.forceCanvas.checked,
         },
         settings: {
             multiNoteHL: doms.settings.multiNoteHL.checked,
@@ -397,7 +397,6 @@ doms.startBtn.addEventListener('click', async () => {
 
             challengeMode: doms.settings.challengeMode.checked,
             autoPlay: doms.settings.autoPlay.checked,
-            forceCanvas: doms.settings.forceCanvas.checked,
             debug : doms.settings.debug.checked
         },
         watermark: 'github/MisaLiu/phi-chart-render ' + GITHUB_CURRENT_GIT_HASH
