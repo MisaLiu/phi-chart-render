@@ -47,7 +47,7 @@ export default class Score
         this.miss        = 0;
 
         this.judgeLevel  = -1;
-        this.FCType      = 2;
+        this.APType      = 2;
         this.levelPassed = false;
 
         if (this.sprites)
@@ -138,9 +138,9 @@ export default class Score
                 if (type === 4) this.perfect += 1;
                 else {
                     this.good += 1;
-                    if (this.FCType >= 2)
+                    if (this.APType >= 2)
                     {
-                        this.FCType = 1;
+                        this.APType = 1;
 
                         if (this._showAPStatus)
                         {
@@ -160,9 +160,9 @@ export default class Score
                 if (type === 2)this.bad += 1;
                 else this.miss += 1;
 
-                if (this.FCType >= 1)
+                if (this.APType >= 1)
                 {
-                    this.FCType = 0;
+                    this.APType = 0;
 
                     if (this._showAPStatus)
                     {

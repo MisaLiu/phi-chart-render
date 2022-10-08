@@ -622,8 +622,8 @@ function showGameResultPopup(game)
     else qs('.play-result .general-info .score .judge-level').innerText = 'False';
 
     qs('.play-result .general-info .accurate .value').innerText = (judge.score.acc * 100).toFixed(2) + '%';
-    if (judge.score.FCType == 2) qs('.play-result .general-info .accurate .status').innerText = 'All Perfect';
-    else if (judge.score.FCType == 1) qs('.play-result .general-info .accurate .status').innerText = 'Full Combo';
+    if (judge.score.APType == 2) qs('.play-result .general-info .accurate .status').innerText = 'All Perfect';
+    else if (judge.score.APType == 1) qs('.play-result .general-info .accurate .status').innerText = 'Full Combo';
     else qs('.play-result .general-info .accurate .status').innerText = '';
 
     if (judge.score._autoPlay) qs('.play-result .general-info .accurate .status').innerText = 'Auto Play';

@@ -300,7 +300,35 @@ export default class Game
 
     restart()
     {
+        if (!this._music) return;
 
+        this.render.ticker.remove(this._calcTick);
+        this.chart.music.stop();
+        this._music = null;
+
+        this.chart.reset();
+        this.judgement.reset();
+
+        this.resize();
+        this.chart.calcTime(0);
+
+        this._isPaused = false;
+
+        this._animateStatus = 0;
+        this._gameStartTime = Date.now();
+        this._gameEndTime   = NaN;
+
+        this.render.ticker.add(this._calcTick);
+        this.sprites.fakeJudgeline.visible = true;
+
+        this.chart.judgelines.forEach((judgeline) =>
+        {
+            if (judgeline.sprite) judgeline.sprite.alpha = 0;
+        });
+        this.chart.notes.forEach((note) =>
+        {
+            if (note.sprite) note.sprite.alpha = 0;
+        });
     }
 
     _pauseBtnClickCallback()
@@ -454,8 +482,8 @@ export default class Game
         this.sprites.fakeJudgeline.visible = true;
         if (this._settings.showAPStatus)
         {
-            if (this.judgement.score.FCType === 1) this.sprites.fakeJudgeline.tint = 0xB4E1FF;
-            else if (this.judgement.score.FCType === 0) this.sprites.fakeJudgeline.tint = 0xFFFFFF;
+            if (this.judgement.score.APType === 1) this.sprites.fakeJudgeline.tint = 0xB4E1FF;
+            else if (this.judgement.score.APType === 0) this.sprites.fakeJudgeline.tint = 0xFFFFFF;
         }
         
         this.chart.judgelines.forEach((judgeline) =>

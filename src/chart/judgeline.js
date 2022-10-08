@@ -20,7 +20,14 @@ export default class Judgeline
             text: []
         };
         this.isText = false;
+        
+        this.sprite = undefined;
 
+        this.reset();
+    }
+
+    reset()
+    {
         this.speed = 1;
         this.x     = 0.5;
         this.y     = 0.5;
@@ -33,8 +40,6 @@ export default class Judgeline
 
         this.scaleX = 1;
         this.scaleY = 1;
-
-        this.sprite = undefined;
 
         this._width  = 5761.8432;
         this._height = 8.64;

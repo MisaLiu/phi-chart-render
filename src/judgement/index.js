@@ -48,9 +48,8 @@ export default class Judgement
         this._hitsound       = params.hitsound !== undefined && params.hitsound !== null ? !!params.hitsound : true;
         this._hitsoundVolume = !isNaN(Number(params.hitsoundVolume)) ? Number(params.hitsoundVolume) : 1;
 
-        this.score       = new Score(this.chart.totalRealNotes, !!params.showAPStatus, !!params.challangeMode, this._autoPlay);
-        this.input       = new Input({ canvas: params.canvas, autoPlay: this._autoPlay });
-        this.judgePoints = [];
+        this.score = new Score(this.chart.totalRealNotes, !!params.showAPStatus, !!params.challangeMode, this._autoPlay);
+        this.input = new Input({ canvas: params.canvas, autoPlay: this._autoPlay });
 
         /* ===== 判定用时间计算 ===== */
         this.judgeTimes = {
@@ -61,6 +60,15 @@ export default class Judgement
         
         this.calcTick = this.calcTick.bind(this);
         this.calcNote = calcNoteJudge.bind(this);
+
+        this.reset();
+    }
+
+    reset()
+    {
+        this.judgePoints = [];
+        this.score.reset();
+        this.input.reset();
     }
 
     createSprites(showInputPoint = true)

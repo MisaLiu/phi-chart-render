@@ -249,6 +249,18 @@ export default class Chart
         })
     }
 
+    reset()
+    {
+        this.judgelines.forEach((judgeline) =>
+        {
+            judgeline.reset();
+        });
+        this.notes.forEach((note) =>
+        {
+            note.reset();
+        });
+    }
+
     get totalNotes() {
         return this.notes.length;
     }

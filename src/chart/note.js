@@ -25,16 +25,21 @@ export default class Note
         this.hitsound       = (params.hitsound && params.hitsound != '') ? params.hitsound : null;
         this.judgeline      = params.judgeline;
 
+        this.sprite = undefined;
+
         if (!this.judgeline) throw new Error('Note must have a judgeline');
 
+        this.reset();
+    }
+
+    reset()
+    {
         this.isScored        = false;
         this.isScoreAnimated = false;
         this.isHolding       = false;
         this.lastHoldTime    = NaN;
         this.score           = 0;
         this.scoreTime       = 0;
-        
-        this.sprite = undefined;
     }
 
     createSprite(texture, zipFiles, multiHL = true, debug = false)
