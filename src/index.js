@@ -405,7 +405,10 @@ doms.startBtn.addEventListener('click', async () => {
     });
 
     _game.on('start', () => console.log('Game started!'));
-    _game.on('pause', () => console.log('Game paused!'));
+    _game.on('pause', () => {
+        console.log('Game paused!');
+        qs('.game-paused').style.display = 'block';
+    });
     _game.on('end', (game) => {
         console.log('Game ended!');
         showGameResultPopup(game);
@@ -622,10 +625,11 @@ function showGameResultPopup(game)
     else qs('.play-result .general-info .score .judge-level').innerText = 'False';
 
     qs('.play-result .general-info .accurate .value').innerText = (judge.score.acc * 100).toFixed(2) + '%';
+    qs('.play-result .general-info .accurate .max-combo .value').innerText = judge.score.maxCombo;
+
     if (judge.score.APType == 2) qs('.play-result .general-info .accurate .status').innerText = 'All Perfect';
     else if (judge.score.APType == 1) qs('.play-result .general-info .accurate .status').innerText = 'Full Combo';
     else qs('.play-result .general-info .accurate .status').innerText = '';
-
     if (judge.score._autoPlay) qs('.play-result .general-info .accurate .status').innerText = 'Auto Play';
 
     qs('.play-result .judge-detail .perfect .value').innerText = judge.score.perfect;

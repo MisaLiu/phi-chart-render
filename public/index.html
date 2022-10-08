@@ -47,12 +47,13 @@
                 left: 0;
             }
 
-            div.play-result {
+            div.play-result,
+            div.game-paused {
                 display: none;
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                padding: 12px;
+                padding: calc(18px * var(--height-percent));
                 transform: translate(-50%, -50%);
                 background-color: rgba(0, 0, 0, 0.2);
                 color: #FFF;
@@ -61,7 +62,8 @@
                 box-shadow: 0px 0px 24px #000;
                 box-sizing: border-box;
             }
-            div.play-result .title {
+            div.play-result .title,
+            div.game-paused .title {
                 font-size: calc(70px * var(--height-percent));
                 text-align: center;
             }
@@ -130,15 +132,21 @@
                 --pos: 50%;
             }
 
-            div.play-result .action {
+            div.play-result .action,
+            div.game-paused .action {
                 display: flex;
                 margin-top: calc(28px * var(--height-percent));
                 flex-direction: row;
                 justify-content: center;
                 align-content: center;
             }
-            div.play-result .action * {
+            div.play-result .action *,
+            div.game-paused .action * {
                 font-size: calc(38px * var(--height-percent));
+            }
+
+            div.game-paused {
+                padding: calc(30px * var(--height-percent));
             }
 
             div.error-window {
@@ -241,6 +249,7 @@
                 <div class="accurate">
                     <div class="status">All Perfect</div>
                     <div class="value">100.00%</div>
+                    <div class="max-combo">Max combo: <span class="value">1000</span></div>
                 </div>
             </div>
 
@@ -257,6 +266,15 @@
 
             <div class="action">
                 <button onclick="history.go(0)">Refresh</button>
+            </div>
+        </div>
+
+        <div class="game-paused">
+            <div class="title">Game paused</div>
+            <div class="action">
+                <button onclick="history.go(0)">Refresh</button>
+                <button onclick="_game.restart();qs('.game-paused').style.display='none';">Restart</button>
+                <button onclick="_game.pause();qs('.game-paused').style.display='none';">Continue</button>
             </div>
         </div>
 
