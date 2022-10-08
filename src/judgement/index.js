@@ -131,7 +131,7 @@ export default class Judgement
         let anim = new AnimatedSprite(note.score >= 3 ? this.textures.normal : this.textures.bad);
         let blocks = [ null, null, null, null ];
 
-        if (note.score >= 3) cont.position.set(note.sprite.judgelineX, note.sprite.judgelineY);
+        if (note.score >= 3 && note.type != 34) cont.position.set(note.sprite.judgelineX, note.sprite.judgelineY);
         else cont.position.set(note.sprite.position.x, note.sprite.position.y);
         cont.scale.set(this.renderSize.noteScale * 5.6);
 
