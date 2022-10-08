@@ -39,6 +39,7 @@ const doms = {
         challengeMode: document.querySelector('input#settings-challenge-mode'),
         autoPlay: document.querySelector('input#settings-autoplay'),
         forceCanvas: document.querySelector('input#settings-force-canvas'),
+        antiAlias: document.querySelector('input#settings-anti-alias'),
         debug: document.querySelector('input#settings-debug')
     },
     startBtn : document.querySelector('button#start'),
@@ -381,7 +382,8 @@ doms.startBtn.addEventListener('click', async () => {
         render: {
             canvas: doms.canvas,
             resizeTo: document.documentElement,
-            forceCanvas: doms.settings.forceCanvas.checked,
+            antialias: doms.settings.antiAlias.checked,
+            forceCanvas: doms.settings.forceCanvas.checked
         },
         settings: {
             multiNoteHL: doms.settings.multiNoteHL.checked,
