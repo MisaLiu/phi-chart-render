@@ -196,6 +196,8 @@ doms.chartPackFile.addEventListener('input', function ()
             zipFile.format   = zipFile.realName.split('.')[zipFile.realName.split('.').length - 1];
             zipFile.isHidden = zipFile.realName.indexOf('.') === 0;
 
+            doms.chartPackFileReadProgress.innerHTML = 'Loading ' + zipFile.name + ' ...';
+
             if (chartFormat.indexOf(zipFile.format.toLowerCase()) >= 0)
             {
                 let _text = (await zipFile.async('text'));
