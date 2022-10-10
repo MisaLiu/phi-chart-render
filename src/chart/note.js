@@ -209,6 +209,7 @@ export default class Note
 
             // 推送计算结果到精灵
             this.sprite.visible = !this.sprite.outScreen;
+            if (this.debugSprite) this.debugSprite.visible = !this.sprite.outScreen;
 
             this.sprite.position.x = realX;
             this.sprite.position.y = realY;
@@ -235,7 +236,6 @@ export default class Note
 
                 if (this.debugSprite)
                 {
-                    this.debugSprite.visible = !this.sprite.outScreen;
                     this.debugSprite.position = this.sprite.position;
                     this.debugSprite.angle = this.sprite.angle;
                     this.debugSprite.alpha = 0.2 + (this.sprite.visible ? (this.sprite.alpha * 0.8) : 0);
