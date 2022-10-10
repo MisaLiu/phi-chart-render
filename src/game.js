@@ -290,6 +290,20 @@ export default class Game
                 if (note.debugSprite) note.debugSprite.visible = false;
             }
         });
+
+        this.judgement.createClickAnimate({
+            type: 1,
+            score: 3,
+            sprite: {
+                position: {
+                    x: -200,
+                    y: -200
+                },
+                angle: 180,
+                judgelineX: -200,
+                judgelineY: -200
+            }
+        });
     }
 
     pause()
