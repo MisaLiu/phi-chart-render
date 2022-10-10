@@ -4,7 +4,6 @@ import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip, { file } from 'jszip';
 import { Loader, Texture, Rectangle, utils as PIXIutils } from 'pixi.js-legacy';
-import { Sound, utils as PIXISoundUtils } from '@pixi/sound';
 import { Howl } from 'howler';
 import * as StackBlur from 'stackblur-canvas';
 
@@ -543,26 +542,6 @@ window.addEventListener('load', async () =>
     {
         doms.settings.forceCanvas.checked = true;
         doms.settings.forceCanvas.disabled = true;
-    }
-
-    {
-        const supportedAudioFileType = PIXISoundUtils.supported;
-
-        qs('.file-select .unsupported-audio-file-type').innerHTML = '';
-        for (const type in supportedAudioFileType)
-        {
-            qs('.file-select .unsupported-audio-file-type').classList.add('warn');
-            if (!supportedAudioFileType[type])
-            {
-                qs('.file-select .unsupported-audio-file-type').innerHTML += '<div>Your device/browser doesn\'t support ' + type + ' file.</div>';
-            }
-        }
-
-        if (qs('.file-select .unsupported-audio-file-type').innerHTML == '')
-        {
-            qs('.file-select .unsupported-audio-file-type').classList.add('good');
-            qs('.file-select .unsupported-audio-file-type').innerHTML = 'You browser/device supports all types of audio file!';
-        }
     }
 });
 
