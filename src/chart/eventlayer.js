@@ -48,11 +48,12 @@ function valueCalculator(events, currentTime, originValue = 0)
     {
         if (event.endTime < currentTime) continue;
         if (event.startTime > currentTime) break;
+        if (event.start == event.end) return event.start
 
         let timePercentEnd = (currentTime - event.startTime) / (event.endTime - event.startTime);
         let timePercentStart = 1 - timePercentEnd;
 
-        return Math.fround(event.start * timePercentStart + event.end * timePercentEnd);
+        return event.start * timePercentStart + event.end * timePercentEnd;
     }
     return originValue;
 }
