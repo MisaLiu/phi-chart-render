@@ -556,7 +556,7 @@ export default class Game
             }
         });
 
-        this.judgement.input.sprite.clear();
+        if (this.judgement.input.sprite) this.judgement.input.sprite.clear();
     }
 
     on(type, callback)
