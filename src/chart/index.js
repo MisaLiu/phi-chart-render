@@ -61,7 +61,7 @@ export default class Chart
         {
             judgeline.eventLayers.forEach((eventLayer) =>
             {
-                eventLayer.speed = utils.arrangeSameValueSpeedEvent(eventLayer.speed);
+                eventLayer.speed = utils.arrangeSameSingleValueEvent(eventLayer.speed);
                 eventLayer.moveX = arrangeLineEvents(eventLayer.moveX);
                 eventLayer.moveY = arrangeLineEvents(eventLayer.moveY);
                 eventLayer.rotate = arrangeLineEvents(eventLayer.rotate);
@@ -75,13 +75,13 @@ export default class Chart
             judgeline.event.alpha = arrangeLineEvents(judgeline.event.alpha);
             */
 
-            /*
             for (const name in judgeline.extendEvent)
             {
                 if (name !== 'color' && name !== 'text')
-                    judgeline.extendEvent[name] = utils.arrangeSameValueEvent(arrangeLineEvents(judgeline.extendEvent[name]));
+                    judgeline.extendEvent[name] = utils.arrangeSameValueEvent(judgeline.extendEvent[name]);
+                else
+                    judgeline.extendEvent[name] = utils.arrangeSameSingleValueEvent(judgeline.extendEvent[name]);
             }
-            */
             
             judgeline.sortEvent();
         });

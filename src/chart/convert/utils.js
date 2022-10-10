@@ -147,34 +147,7 @@ function calculateEventEase(event, Easings, easingsOffset = 1, forceLinear = fal
  */
 function arrangeSameValueEvent(_events)
 {
-    /*
-    let events = _events.slice();
-    let newEvents = [ events.shift() ];
-
-    for (let newEvent of events)
-    {
-        let lastNewEvent = newEvents[newEvents.length - 1];
-        let duration1 = lastNewEvent.endTime - lastNewEvent.startTime;
-        let duration2 = newEvent.endTime - newEvent.startTime;
-        
-        if (newEvent.startTime == newEvent.endTime)
-        {
-            // 忽略此分支    
-        }
-        else if (
-            lastNewEvent.end == newEvent.start &&
-            (lastNewEvent.end - lastNewEvent.start) * duration2 == (newEvent.end - newEvent.start) * duration1
-        )
-        {
-            lastNewEvent.endTime = newEvent.endTime;
-            lastNewEvent.end     = newEvent.end;
-        }
-        else
-        {
-            newEvents.push(newEvent);
-        }
-    }
-    */
+    if (!_events || _events.length <= 0) return [];
 
     let events = _events.slice();
     let result = [ events.shift() ];
@@ -203,8 +176,10 @@ function arrangeSameValueEvent(_events)
  * @param {Array} events 欲合并相同值的速度事件组
  * @return {Array} 已合并相同值的速度事件组
  */
-function arrangeSameValueSpeedEvent(events)
+function arrangeSameSingleValueEvent(events)
 {
+    if (!events || events.length <= 0) return [];
+
     let newEvents = [];
     for (let i of events) {
         let lastEvent = newEvents[newEvents.length - 1];
@@ -229,5 +204,5 @@ export default {
     calculateEventEase,
 
     arrangeSameValueEvent,
-    arrangeSameValueSpeedEvent
+    arrangeSameSingleValueEvent
 }

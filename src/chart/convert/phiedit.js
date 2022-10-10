@@ -45,6 +45,7 @@ export default function PhiEditChartConverter(_chart)
     let commands = {
         bpm: [],
         note: [],
+        notePerLine: {},
 
         judgelineEvent: {
             speed: [],
@@ -145,7 +146,7 @@ export default function PhiEditChartConverter(_chart)
                 commands.judgelineEvent.speed.push({
                     lineId    : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    endTime   : null,
+                    endTime   : NaN,
                     value     : !isNaN(Number(command[3])) ? Number(command[3]) / 7 : 1
                 });
                 break;
@@ -156,7 +157,7 @@ export default function PhiEditChartConverter(_chart)
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
-                    start      : null,
+                    start      : NaN,
                     end        : !isNaN(Number(command[4])) ? Number(command[4]) / 2048 - 0.5 : 0,
                     easingType : !isNaN(Number(command[6])) && Number(command[6]) >= 1 ? Number(command[6]) : 1
                 });
@@ -164,7 +165,7 @@ export default function PhiEditChartConverter(_chart)
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
-                    start      : null,
+                    start      : NaN,
                     end        : !isNaN(Number(command[5])) ? Number(command[5]) / 1400 - 0.5 : 0,
                     easingType : !isNaN(Number(command[6])) && Number(command[6]) >= 1 ? Number(command[6]) : 1
                 });
@@ -175,7 +176,7 @@ export default function PhiEditChartConverter(_chart)
                 commands.judgelineEvent.moveX.push({
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    endTime    : null,
+                    endTime    : NaN,
                     start      : !isNaN(Number(command[3])) ? Number(command[3]) / 2048 - 0.5 : 0,
                     end        : !isNaN(Number(command[3])) ? Number(command[3]) / 2048 - 0.5 : 0,
                     easingType : 1
@@ -183,7 +184,7 @@ export default function PhiEditChartConverter(_chart)
                 commands.judgelineEvent.moveY.push({
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    endTime    : null,
+                    endTime    : NaN,
                     start      : !isNaN(Number(command[4])) ? Number(command[4]) / 1400 - 0.5 : 0,
                     end        : !isNaN(Number(command[4])) ? Number(command[4]) / 1400 - 0.5 : 0,
                     easingType : 1
@@ -196,7 +197,7 @@ export default function PhiEditChartConverter(_chart)
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
-                    start      : null,
+                    start      : NaN,
                     end        : !isNaN(Number(command[4])) ? Number(command[4]) : 0,
                     easingType : !isNaN(Number(command[5])) && Number(command[5]) >= 1 ? Number(command[5]) : 1
                 });
@@ -207,7 +208,7 @@ export default function PhiEditChartConverter(_chart)
                 commands.judgelineEvent.rotate.push({
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    endTime    : null,
+                    endTime    : NaN,
                     start      : !isNaN(Number(command[3])) ? Number(command[3]) : 0,
                     end        : !isNaN(Number(command[3])) ? Number(command[3]) : 0,
                     easingType : 1
@@ -220,8 +221,8 @@ export default function PhiEditChartConverter(_chart)
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
                     endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
-                    start      : null,
-                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 255 : 1,
+                    start      : NaN,
+                    end        : !isNaN(Number(command[4])) ? Math.fround(Number(command[4]) / 255) : 1,
                     easingType : 1
                 });
                 break;
@@ -231,9 +232,9 @@ export default function PhiEditChartConverter(_chart)
                 commands.judgelineEvent.alpha.push({
                     lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
                     startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    endTime    : null,
-                    start      : !isNaN(Number(command[3])) ? Number(command[3]) / 255 : 1,
-                    end        : !isNaN(Number(command[3])) ? Number(command[3]) / 255 : 1,
+                    endTime    : NaN,
+                    start      : !isNaN(Number(command[3])) ? Math.fround(Number(command[3]) / 255) : 1,
+                    end        : !isNaN(Number(command[3])) ? Math.fround(Number(command[3]) / 255) : 1,
                     easingType : 1
                 });
                 break;
@@ -293,7 +294,7 @@ export default function PhiEditChartConverter(_chart)
             }
             if (!judgelines[event.lineId])
             {
-                judgelines[event.lineId] = new Judgeline({ id: event.lineId });
+                judgelines[event.lineId] = new Judgeline({ id: event.lineId + 1 });
                 judgelines[event.lineId].eventLayers.push(new EventLayer());
             }
 
@@ -308,36 +309,37 @@ export default function PhiEditChartConverter(_chart)
         // 事件参数补齐
         judgeline.eventLayers[0].alpha.forEach((event, eventIndex, array) =>
         {
-            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
-            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 1;
+            if (isNaN(event.endTime)) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e5;
+            if (isNaN(event.start)) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 1;
         });
         judgeline.eventLayers[0].moveX.forEach((event, eventIndex, array) =>
         {
-            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
-            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0;
+            if (isNaN(event.endTime)) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e5;
+            if (isNaN(event.start)) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0;
         });
         judgeline.eventLayers[0].moveY.forEach((event, eventIndex, array) =>
         {
-            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
-            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0;
+            if (isNaN(event.endTime)) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e5;
+            if (isNaN(event.start)) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0;
         });
         judgeline.eventLayers[0].rotate.forEach((event, eventIndex, array) =>
         {
-            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e9;
-            if (event.start == null) event.start = eventIndex > 0 ? array[eventIndex - 1].end / (Math.PI / 180) : 0;
+            if (isNaN(event.endTime)) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e5;
+            if (isNaN(event.start)) event.start = eventIndex > 0 ? array[eventIndex - 1].end / (Math.PI / 180) : 0;
 
             event.start = event.start * (Math.PI / 180);
             event.end = event.end * (Math.PI / 180);
         });
         judgeline.eventLayers[0].speed.forEach((event, eventIndex, array) =>
         {
-            if (event.endTime == null) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e4;
+            if (isNaN(event.endTime)) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e5;
         });
 
         // 拆分缓动
         for (const name in judgeline.eventLayers[0])
         {
             if (name == 'speed' || !(judgeline.eventLayers[0][name] instanceof Array)) continue;
+            
             let newEvents = [];
             judgeline.eventLayers[0][name].forEach((event) =>
             {
@@ -352,6 +354,7 @@ export default function PhiEditChartConverter(_chart)
         }
         
         // 合并相同变化量事件
+        /*
         for (const name in judgeline.eventLayers[0])
         {
             if (name != 'speed' && (judgeline.eventLayers[0][name] instanceof Array))
@@ -359,7 +362,8 @@ export default function PhiEditChartConverter(_chart)
                 judgeline.eventLayers[0][name] = utils.arrangeSameValueEvent(judgeline.eventLayers[0][name]);
             }
         }
-        judgeline.eventLayers[0].speed = utils.arrangeSameValueSpeedEvent(judgeline.eventLayers[0].speed);
+        judgeline.eventLayers[0].speed = utils.arrangeSameSingleValueEvent(judgeline.eventLayers[0].speed);
+        */
 
         // 计算事件真实时间
         for (const name in judgeline.eventLayers[0])
@@ -401,7 +405,8 @@ export default function PhiEditChartConverter(_chart)
         }
 
         // 推送 Note
-        notes.push(new Note({
+        if (!commands.notePerLine[note.lineId]) commands.notePerLine[note.lineId] = [];
+        commands.notePerLine[note.lineId].push(new Note({
             id            : noteIndex,
             type          : note.type,
             time          : note.startTime,
@@ -416,6 +421,16 @@ export default function PhiEditChartConverter(_chart)
             judgeline     : judgeline
         }));
     });
+
+    for (const lineId in commands.notePerLine)
+    {
+        commands.notePerLine[lineId].sort((a, b) => a.time - b.time);
+        commands.notePerLine[lineId].forEach((note, noteIndex) =>
+        {
+            note.id = noteIndex + 1;
+            notes.push(note);
+        });
+    }
 
     notes.sort((a, b) => a.time - b.time);
 

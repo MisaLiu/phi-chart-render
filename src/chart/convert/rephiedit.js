@@ -107,7 +107,7 @@ export default function RePhiEditChartConverter(_chart)
     rawChart.judgeLineList.forEach((_judgeline, judgelineIndex) =>
     {
         let judgeline = new Judgeline({
-            id         : judgelineIndex,
+            id         : judgelineIndex + 1,
             texture    : _judgeline.Texture != 'line.png' ? _judgeline.Texture : null,
             parentLine : _judgeline.father > 0 ? _judgeline.father : null,
             isCover    : _judgeline.isCover == 1
@@ -307,6 +307,7 @@ export default function RePhiEditChartConverter(_chart)
         // 计算 Note 真实时间
         _judgeline.notes = utils.calculateEventsBeat(_judgeline.notes ? _judgeline.notes : []);
         _judgeline.notes = utils.calculateRealTime(rawChart.BPMList, _judgeline.notes);
+        _judgeline.notes.sort((a, b) => a.startTime - b.startTime);
 
         _judgeline.notes.forEach((_note, noteIndex) =>
         {
@@ -326,7 +327,7 @@ export default function RePhiEditChartConverter(_chart)
 
             // 推送 Note
             chart.notes.push(new Note({
-                id            : noteIndex,
+                id            : noteIndex + 1,
                 type          : (
                     _note.type == 1 ? 1 :
                     _note.type == 2 ? 3 :
@@ -339,7 +340,7 @@ export default function RePhiEditChartConverter(_chart)
                 floorPosition : _note.floorPosition,
                 holdLength    : _note.holdLength,
                 positionX     : (_note.positionX / (670 * (9 / 80))),
-                basicAlpha    : _note.alpha / 255,
+                basicAlpha    : Math.fround(_note.alpha / 255),
                 visibleTime   : _note.visibleTime < 999999 ? _note.visibleTime : NaN,
                 yOffset       : (_note.yOffset / 900),
                 xScale        : _note.size,
@@ -370,14 +371,8 @@ export default function RePhiEditChartConverter(_chart)
     
     chart.judgelines.forEach((judgeline) =>
     {
-        if (judgeline.parentLine && judgeline.parentLine >= 0)
-        {
-            judgeline.parentLine = chart.judgelines[judgeline.parentLine];
-        }
-        else
-        {
-            judgeline.parentLine = undefined;
-        }
+        if (judgeline.parentLine && judgeline.parentLine >= 0) judgeline.parentLine = chart.judgelines[judgeline.parentLine];
+        else judgeline.parentLine = undefined;
     });
     
     return chart;
@@ -427,7 +422,6 @@ function convertChartFormat(rawChart)
 
 function calculateTextEventEase(event)
 {
-    let easingFunc = Easing[event.easingType - 1] ? Easing[event.easingType - 1] : Easing[0];
     let timeBetween = event.endTime - event.startTime;
     let result = [];
 

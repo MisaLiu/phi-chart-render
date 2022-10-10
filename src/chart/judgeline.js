@@ -75,7 +75,7 @@ export default class Judgeline
 
         this.eventLayers.forEach((eventLayer) =>
         {
-            eventLayer.speed = utils.arrangeSameValueSpeedEvent(eventLayer.speed);
+            eventLayer.speed = utils.arrangeSameSingleValueEvent(eventLayer.speed);
         });
 
         let sameTimeSpeedEventAlreadyExist = {};
@@ -138,7 +138,7 @@ export default class Judgeline
         this.floorPositions = floorPositions;
     }
 
-    getFloorPosition(currentTime)
+    getFloorPosition(time)
     {
         if (this.floorPositions.length <= 0) throw new Error('No floorPosition created, please call calcFloorPosition() first');
 
@@ -146,20 +146,20 @@ export default class Judgeline
 
         for (const floorPosition of this.floorPositions)
         {
-            if (floorPosition.endTime < currentTime) continue;
-            if (floorPosition.startTime > currentTime) break;
+            if (floorPosition.endTime < time) continue;
+            if (floorPosition.startTime > time) break;
 
             result.startTime     = floorPosition.startTime;
             result.endTime       = floorPosition.endTime;
             result.floorPosition = floorPosition.floorPosition;
         }
 
-        result.value = this._calcSpeedValue(currentTime);
+        result.value = this._calcSpeedValue(time);
 
         return result;
     }
 
-    _calcSpeedValue(currentTime)
+    _calcSpeedValue(time)
     {
         let result = 0;
 
@@ -169,8 +169,8 @@ export default class Judgeline
 
             for (const event of eventLayer.speed)
             {
-                if (event.endTime < currentTime) continue;
-                if (event.startTime > currentTime) break;
+                if (event.endTime < time) continue;
+                if (event.startTime > time) break;
                 currentValue = event.value;
             }
 

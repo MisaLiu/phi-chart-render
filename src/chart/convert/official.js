@@ -12,8 +12,9 @@ export default function OfficialChartConverter(_chart)
 
     rawChart.judgeLineList.forEach((_judgeline, index) =>
     {
-        let judgeline = new Judgeline({ id: index });
+        let judgeline = new Judgeline({ id: index + 1 });
         let events = new EventLayer();
+        let notes = [];
 
         _judgeline.speedEvents.forEach((e) =>
         {
@@ -64,11 +65,18 @@ export default function OfficialChartConverter(_chart)
         _judgeline.notesAbove.forEach((rawNote, rawNoteIndex) =>
         {
             let note = pushNote(rawNote, judgeline, rawNoteIndex, _judgeline.bpm, true);
-            chart.notes.push(note);
+            notes.push(note);
         });
         _judgeline.notesBelow.forEach((rawNote, rawNoteIndex) =>
         {
             let note = pushNote(rawNote, judgeline, rawNoteIndex, _judgeline.bpm, false);
+            notes.push(note);
+        });
+
+        notes.sort((a, b) => a.time - b.time);
+        notes.forEach((note, noteIndex) =>
+        {
+            note.id = noteIndex + 1;
             chart.notes.push(note);
         });
 
