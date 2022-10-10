@@ -39,6 +39,7 @@ const PorgressBarCache = (() =>
   *         noteScale?,
   *         bgDim?,
   *         multiNoteHL?,
+  *         showInputPoint?,
   *         challengeMode?,
   *         autoPlay?,
   *         forceCanvas?,
@@ -106,15 +107,16 @@ export default class Game
 
         /* ===== 用户设置暂存 ===== */
         this._settings = {};
-        this._settings.noteScale     = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
-        this._settings.bgDim         = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
-        this._settings.offset        = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
-        this._settings.speed         = params.settings && !isNaN(Number(params.settings.speed)) ? Number(params.settings.speed) : 1;
-        this._settings.showFPS       = params.settings && params.settings.showFPS !== undefined && params.settings.showFPS !== null ? !!params.settings.showFPS : true;
-        this._settings.multiNoteHL   = params.settings && params.settings.multiNoteHL !== undefined && params.settings.multiNoteHL !== null ? !!params.settings.multiNoteHL : true;
-        this._settings.showAPStatus  = params.settings && params.settings.showAPStatus !== undefined && params.settings.showAPStatus !== null ? !!params.settings.showAPStatus : true;
-        this._settings.challengeMode = params.settings && params.settings.challengeMode !== undefined && params.settings.challengeMode !== null ? !!params.settings.challengeMode : false;
-        this._settings.debug         = params.settings && params.settings.debug ? !!params.settings.debug : false;
+        this._settings.noteScale      = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
+        this._settings.bgDim          = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
+        this._settings.offset         = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
+        this._settings.speed          = params.settings && !isNaN(Number(params.settings.speed)) ? Number(params.settings.speed) : 1;
+        this._settings.showFPS        = params.settings && params.settings.showFPS !== undefined && params.settings.showFPS !== null ? !!params.settings.showFPS : true;
+        this._settings.showInputPoint = params.settings && params.settings.showInputPoint !== undefined && params.settings.showInputPoint !== null ? !!params.settings.showInputPoint : true;
+        this._settings.multiNoteHL    = params.settings && params.settings.multiNoteHL !== undefined && params.settings.multiNoteHL !== null ? !!params.settings.multiNoteHL : true;
+        this._settings.showAPStatus   = params.settings && params.settings.showAPStatus !== undefined && params.settings.showAPStatus !== null ? !!params.settings.showAPStatus : true;
+        this._settings.challengeMode  = params.settings && params.settings.challengeMode !== undefined && params.settings.challengeMode !== null ? !!params.settings.challengeMode : false;
+        this._settings.debug          = params.settings && params.settings.debug ? !!params.settings.debug : false;
 
         this._watermarkText = params.watermark && params.watermark != '' ? params.watermark : 'github/MisaLiu/phi-chart-render';
 
@@ -187,7 +189,7 @@ export default class Game
         this.chart.music.on('end', this._gameEndCallback);
 
         this.judgement.stage = this.render.mainContainer;
-        this.judgement.createSprites();
+        this.judgement.createSprites(this._settings.showInputPoint);
 
         // 进度条
         this.sprites.progressBar = new Sprite(PorgressBarCache);

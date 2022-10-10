@@ -27,6 +27,7 @@ const doms = {
     settings: {
         multiNoteHL: document.querySelector('input#settings-multi-note-hl'),
         showAPStatus: document.querySelector('input#settings-show-ap-status'),
+        showInputPoint: document.querySelector('input#settings-show-input-point'),
         noteScale: document.querySelector('input#settings-note-scale'),
         bgDim: document.querySelector('input#settings-bg-dim'),
 
@@ -392,6 +393,7 @@ doms.startBtn.addEventListener('click', async () => {
         settings: {
             multiNoteHL: doms.settings.multiNoteHL.checked,
             showAPStatus: doms.settings.showAPStatus.checked,
+            showInputPoint: doms.settings.showInputPoint.checked,
             bgDim: doms.settings.bgDim.value,
             noteScale: 10000 - doms.settings.noteScale.value,
 

@@ -48,9 +48,12 @@ export default class Input
 
     createSprite(stage, showInputPoint = true)
     {
-        this.sprite = new Graphics();
-        this.sprite.zIndex = 99999;
-        stage.addChild(this.sprite);
+        if (showInputPoint)
+        {
+            this.sprite = new Graphics();
+            this.sprite.zIndex = 99999;
+            stage.addChild(this.sprite);
+        }
     }
 
     addInput(x, y, identify = -1)
