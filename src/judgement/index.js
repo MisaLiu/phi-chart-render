@@ -194,7 +194,7 @@ export default class Judgement
     playHitsound(note)
     {
         if (!this._hitsound) return;
-        if (note.hitsound) note.hitsound.play({ loop: false, volume: this._hitsoundVolume });
+        if (note.hitsound) note.hitsound.play();
         else
         {
             switch (note.type)
@@ -202,17 +202,17 @@ export default class Judgement
                 case 1:
                 case 3:
                 {
-                    this.sounds.tap.play({ loop: false, volume: this._hitsoundVolume });
+                    this.sounds.tap.play();
                     break;
                 }
                 case 2:
                 {
-                    this.sounds.drag.play({ loop: false, volume: this._hitsoundVolume });
+                    this.sounds.drag.play();
                     break;
                 }
                 case 4:
                 {
-                    this.sounds.flick.play({ loop: false, volume: this._hitsoundVolume });
+                    this.sounds.flick.play();
                     break;
                 }
             }

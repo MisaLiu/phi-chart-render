@@ -5,6 +5,7 @@ import FontFaceObserver from 'fontfaceobserver';
 import JSZip, { file } from 'jszip';
 import { Loader, Texture, Rectangle, utils as PIXIutils } from 'pixi.js-legacy';
 import { Sound, utils as PIXISoundUtils } from '@pixi/sound';
+import { Howl } from 'howler';
 import * as StackBlur from 'stackblur-canvas';
 
 const qs = (selector) => document.querySelector(selector);
@@ -44,7 +45,7 @@ const doms = {
     },
     startBtn : document.querySelector('button#start'),
     loadingStatus : document.querySelector('div#loading-status'),
-    canvas : document.querySelector('canvas#canvas'),
+    canvas : document.querySelector('canvas#canvas-game'),
     fullscreenBtn : document.querySelector('button#fullscreen'),
 
     errorWindow : {
@@ -211,7 +212,7 @@ doms.chartPackFile.addEventListener('input', function ()
             }
             else if (audioFormat.indexOf(zipFile.format.toLowerCase()) >= 0)
             {
-                files.musics[name] = (await zipFile.async('arraybuffer'));
+                files.musics[name] = 'data:audio/' + zipFile.format.toLowerCase() + ';base64,' + (await zipFile.async('base64'));
             }
             else if (zipFile.name.toLowerCase() === 'info.csv' || zipFile.name.toLowerCase() === 'info.txt')
             {
@@ -250,12 +251,14 @@ doms.chartPackFile.addEventListener('input', function ()
         {
             doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
 
-            let _result = Sound.from({
-                source: files.musics[name],
-                autoPlay: false,
+            let _result = new Howl({
+                src: files.musics[name],
                 preload: true,
-                singleInstance: true
+                autoPlay: false,
+                loop: false
             });
+
+            _result.load();
             files.musics[name] = _result;
             result[name] = _result;
 
@@ -483,12 +486,6 @@ window.addEventListener('load', async () =>
     {
         doms.loadingStatus.innerText = 'Loading asset ' + res.name + ' ...';
     });
-    loader.onComplete.add((l, res) =>
-    {
-        doms.loadingStatus.innerText = 'All done!';
-        doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
-        doms.chartPackFile.disabled = false;
-    });
 
     loader.add([
         { name: 'tap', url: './assets/Tap.png' },
@@ -505,39 +502,39 @@ window.addEventListener('load', async () =>
         { name: 'judgeline', url: './assets/JudgeLine.png' },
         { name: 'clickRaw', url: './assets/clickRaw128.png' },
 
-        { name: 'pauseButton', url: './assets/pauseButton.png' },
-
-        { name: 'soundTap', url: './assets/sounds/Hitsound-Tap.ogg' },
-        { name: 'soundDrag', url: './assets/sounds/Hitsound-Drag.ogg' },
-        { name: 'soundFlick', url: './assets/sounds/Hitsound-Flick.ogg' }
+        { name: 'pauseButton', url: './assets/pauseButton.png' }
     ]).load((loader, resources) => {
         for (const name in resources) {
-            if (resources[name].texture)
-            {
-                assets.textures[name] = resources[name].texture;
+            assets.textures[name] = resources[name].texture;
 
-                if (name == 'clickRaw')
-                {
-                    let _clickTextures = [];
-                    
-                    for (let i = 0; i < Math.floor(assets.textures[name].height / assets.textures[name].width); i++) {
-                        let rectangle = new Rectangle(0, i * assets.textures[name].width, assets.textures[name].width, assets.textures[name].width);
-                        let texture = new Texture(assets.textures[name].baseTexture, rectangle);
-                        
-                        texture.defaultAnchor.set(0.5);
-                        _clickTextures.push(texture);
-                    }
-                    
-                    assets.textures[name] = _clickTextures;
-                }
-            }
-            else if (resources[name].sound)
+            if (name == 'clickRaw')
             {
-                assets.sounds[name.replace('sound', '').toLowerCase()] = resources[name].sound;
-                assets.sounds[name.replace('sound', '').toLowerCase()].loop = false;
+                let _clickTextures = [];
+                
+                for (let i = 0; i < Math.floor(assets.textures[name].height / assets.textures[name].width); i++) {
+                    let rectangle = new Rectangle(0, i * assets.textures[name].width, assets.textures[name].width, assets.textures[name].width);
+                    let texture = new Texture(assets.textures[name].baseTexture, rectangle);
+                    
+                    texture.defaultAnchor.set(0.5);
+                    _clickTextures.push(texture);
+                }
+                
+                assets.textures[name] = _clickTextures;
             }
-            
         }
+    });
+
+    loader.onComplete.add((l, res) =>
+    {
+        assets.sounds = SoundLoader([
+            { name: 'tap', url: './assets/sounds/Hitsound-Tap.ogg' },
+            { name: 'drag', url: './assets/sounds/Hitsound-Drag.ogg' },
+            { name: 'flick', url: './assets/sounds/Hitsound-Flick.ogg' }
+        ]);
+
+        doms.loadingStatus.innerText = 'All done!';
+        doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
+        doms.chartPackFile.disabled = false;
     });
 
     calcHeightPercent();
@@ -589,6 +586,25 @@ function CsvReader(_text)
             }
         });
     });
+
+    return result;
+}
+
+function SoundLoader(soundList)
+{
+    let result = {};
+
+    for (const soundObj of soundList)
+    {
+        result[soundObj.name] = new Howl({
+            src: soundObj.url,
+            preload: true,
+            autoplay: false,
+            loop: false
+        });
+
+        result[soundObj.name].load();
+    }
 
     return result;
 }

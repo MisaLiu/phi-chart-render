@@ -118,7 +118,7 @@ export default class Game
 
         this._watermarkText = params.watermark && params.watermark != '' ? params.watermark : 'github/MisaLiu/phi-chart-render';
 
-        this._music = null;
+        this._musicId = null;
         this._audioOffset = 0;
         this._animateStatus = NaN;
         this._gameStartTime = NaN;
@@ -183,6 +183,9 @@ export default class Game
             });
         }
 
+        this.chart.music.rate(this._settings.speed);
+        this.chart.music.on('end', this._gameEndCallback);
+
         this.judgement.stage = this.render.mainContainer;
         this.judgement.createSprites();
 
@@ -245,9 +248,13 @@ export default class Game
         this.render.stage.sortChildren();
 
         // 预播放 hitsound，也许能减轻打击未打击过的某类 note 时的卡顿问题？
-        for (const name in this.assets.sounds)
+        for (const name in this.judgement.sounds)
         {
-            this.assets.sounds[name].play({ volume: 0 });
+            this.judgement.sounds[name].load();
+            /*
+            this.judgement.sounds[name].volume(0);
+            this.judgement.sounds[name].play();
+            */
         }
     }
 
@@ -255,7 +262,7 @@ export default class Game
     {
         if (!this.render) return;
         if (!this.chart.music) throw new Error('You must have a music to play');
-        if (this._music) throw new Error('You have already started');
+        if (this._musicId) throw new Error('You have already started');
 
         this.resize();
 
@@ -288,6 +295,7 @@ export default class Game
             {
                 note.sprite.alpha = 0;
                 if (note.debugSprite) note.debugSprite.visible = false;
+                if (note.hitsound) note.hitsound.volume(this.judgement._hitsoundVolume);
             }
         });
 
@@ -304,29 +312,37 @@ export default class Game
                 judgelineY: -200
             }
         });
+
+        for (const name in this.judgement.sounds)
+        {
+            this.judgement.sounds[name].volume(this.judgement._hitsoundVolume);
+        }
     }
 
     pause()
     {
         this._isPaused = !this._isPaused;
-
-        if (!this._music) return;
-        this.chart.music.paused = this._isPaused;
         this.judgement.input._isPaused = this._isPaused;
 
+        if (!this._musicId) return;
         if (this._isPaused)
         {
+            this.chart.music.pause();
             this._runCallback('pause');
+        }
+        else
+        {
+            this.chart.music.play(this._musicId);
         }
     }
 
     restart()
     {
-        if (!this._music) return;
+        if (!this._musicId) return;
 
         this.render.ticker.remove(this._calcTick);
         this.chart.music.stop();
-        this._music = null;
+        this._musicId = null;
 
         this.chart.reset();
         this.judgement.reset();
@@ -424,13 +440,13 @@ export default class Game
             }
             case 1:
             {
-                let currentTime = (this._music && this._music.progress ? this._music.progress * this.chart.music.duration : 0) - this._audioOffset - this.chart.offset + this._settings.offset;
+                let currentTime = (this.chart.music.seek() || 0) - this.chart.offset + this._settings.offset;
                 currentTime = currentTime > 0 ? currentTime : 0;
 
                 this.chart.calcTime(currentTime);
                 if (!this._isPaused) this.judgement.calcTick();
 
-                this.sprites.progressBar.width = (this._music && this._music.progress ? this._music.progress : 0) * this.render.sizer.width;
+                this.sprites.progressBar.width = ((this.chart.music.seek() || 0) / this.chart.music._duration) * this.render.sizer.width;
                 break;
             }
             case 2:
@@ -480,8 +496,7 @@ export default class Game
 
                 setTimeout(async () =>
                 {
-                    this._music = await this.chart.music.play({ speed: this._settings.speed, complete: this._gameEndCallback });
-                    this._audioOffset = this._music._source.context.baseLatency;
+                    this._musicId = this.chart.music.play();
 
                     this.chart.judgelines.forEach((judgeline) =>
                     {
