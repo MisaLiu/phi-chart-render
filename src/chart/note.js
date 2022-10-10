@@ -220,6 +220,7 @@ export default class Note
                 this.debugSprite.visible = this.sprite.visible;
                 this.debugSprite.position = this.sprite.position;
                 this.debugSprite.angle = this.sprite.angle;
+                this.debugSprite.alpha = 0.4 + (this.sprite.alpha * 0.6);
             }
 
             // Note 在舞台可视范围之内时做进一步计算

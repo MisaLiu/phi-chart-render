@@ -276,11 +276,19 @@ export default class Game
         this.chart.calcTime(0);
         this.chart.judgelines.forEach((judgeline) =>
         {
-            if (judgeline.sprite) judgeline.sprite.alpha = 0;
+            if (judgeline.sprite)
+            {
+                judgeline.sprite.alpha = 0;
+                if (judgeline.debugSprite) judgeline.debugSprite.visible = false;
+            }
         });
         this.chart.notes.forEach((note) =>
         {
-            if (note.sprite) note.sprite.alpha = 0;
+            if (note.sprite)
+            {
+                note.sprite.alpha = 0;
+                if (note.debugSprite) note.debugSprite.visible = false;
+            }
         });
     }
 
@@ -323,11 +331,19 @@ export default class Game
 
         this.chart.judgelines.forEach((judgeline) =>
         {
-            if (judgeline.sprite) judgeline.sprite.alpha = 0;
+            if (judgeline.sprite)
+            {
+                judgeline.sprite.alpha = 0;
+                if (judgeline.debugSprite) judgeline.debugSprite.visible = false;
+            }
         });
         this.chart.notes.forEach((note) =>
         {
-            if (note.sprite) note.sprite.alpha = 0;
+            if (note.sprite)
+            {
+                note.sprite.alpha = 0;
+                if (note.debugSprite) note.debugSprite.visible = false;
+            }
         });
     }
 
@@ -453,7 +469,11 @@ export default class Game
 
                     this.chart.judgelines.forEach((judgeline) =>
                     {
-                        if (judgeline.sprite) judgeline.sprite.alpha = 1;
+                        if (judgeline.sprite)
+                        {
+                            judgeline.sprite.alpha = 1;
+                            if (judgeline.debugSprite) judgeline.debugSprite.visible = true;
+                        }
                     });
                     this.chart.notes.forEach((note) =>
                     {
@@ -488,11 +508,19 @@ export default class Game
         
         this.chart.judgelines.forEach((judgeline) =>
         {
-            if (judgeline.sprite) judgeline.sprite.alpha = 0;
+            if (judgeline.sprite)
+            {
+                judgeline.sprite.alpha = 0;
+                if (judgeline.debugSprite) judgeline.debugSprite.visible = false;
+            }
         });
         this.chart.notes.forEach((note) =>
         {
-            if (note.sprite) note.sprite.alpha = 0;
+            if (note.sprite)
+            {
+                note.sprite.alpha = 0;
+                if (note.debugSprite) note.debugSprite.visible = false;
+            }
         });
 
         this.judgement.input.sprite.clear();
