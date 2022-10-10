@@ -215,14 +215,6 @@ export default class Note
             
             this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
 
-            if (this.debugSprite)
-            {
-                this.debugSprite.visible = this.sprite.visible;
-                this.debugSprite.position = this.sprite.position;
-                this.debugSprite.angle = this.sprite.angle;
-                this.debugSprite.alpha = 0.2 + (this.sprite.alpha * 0.8);
-            }
-
             // Note 在舞台可视范围之内时做进一步计算
             if (!this.sprite.outScreen)
             {
@@ -240,6 +232,14 @@ export default class Note
                 ) this.sprite.visible = false;
                 
                 if (!isNaN(this.visibleTime) && this.time - currentTime > this.visibleTime) this.sprite.visible = false;
+
+                if (this.debugSprite)
+                {
+                    this.debugSprite.visible = !this.sprite.outScreen;
+                    this.debugSprite.position = this.sprite.position;
+                    this.debugSprite.angle = this.sprite.angle;
+                    this.debugSprite.alpha = 0.2 + (this.sprite.visible ? (this.sprite.alpha * 0.8) : 0);
+                }
             }
         }
     }
