@@ -432,6 +432,8 @@ doms.startBtn.addEventListener('click', async () => {
     */
     _game.start();
 
+    eruda.hide();
+
     doms.fileSelect.style.display = 'none';
 });
 
@@ -444,11 +446,13 @@ window.addEventListener('error', (err) =>
 {
     doms.errorWindow.content.innerText = (err.error && err.error.stack ? err.error.stack : err.error.message);
     doms.errorWindow.window.style.display = 'block';
+    eruda.show();
 });
 window.addEventListener('unhandledrejection', (err) =>
 {
     doms.errorWindow.content.innerText = (err.reason && err.reason.stack ? err.reason.stack : err.reason.message);
     doms.errorWindow.window.style.display = 'block';
+    eruda.show();
 });
 doms.errorWindow.closeBtn.addEventListener('click', () =>
 {
