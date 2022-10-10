@@ -338,7 +338,7 @@ export default class Judgeline
             {
                 this.debugSprite.position = this.sprite.position;
                 this.debugSprite.rotation = this.sprite.rotation;
-                this.debugSprite.alpha = 0.4 + (this.sprite.alpha * 0.6);
+                this.debugSprite.alpha = 0.2 + (this.sprite.alpha * 0.8);
             }
         }
     }

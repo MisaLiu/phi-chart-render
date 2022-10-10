@@ -327,6 +327,7 @@ export default class Game
         this._gameEndTime   = NaN;
 
         this.render.ticker.add(this._calcTick);
+        if (this._settings.showAPStatus) this.sprites.fakeJudgeline.tint = 0xFFECA0;
         this.sprites.fakeJudgeline.visible = true;
 
         this.chart.judgelines.forEach((judgeline) =>
@@ -334,6 +335,7 @@ export default class Game
             if (judgeline.sprite)
             {
                 judgeline.sprite.alpha = 0;
+                if (this._settings.showAPStatus) judgeline.sprite.tint = 0xFFECA0;
                 if (judgeline.debugSprite) judgeline.debugSprite.visible = false;
             }
         });
