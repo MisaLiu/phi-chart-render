@@ -431,7 +431,7 @@ function calculateTextEventEase(event)
     {
         if (event.start == '')
         {
-            let currentText = '';
+            let currentText = [];
             let lastTextIndex = -1;
 
             for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
@@ -444,15 +444,20 @@ function calculateTextEventEase(event)
                 {
                     for (let extraTextIndex = lastTextIndex + 1; extraTextIndex < currentTextIndex; extraTextIndex++)
                     {
-                        currentText += event.end[extraTextIndex];
+                        currentText.push(event.end[extraTextIndex]);
                     }
                 }
-                currentText += event.end[currentTextIndex];
+                else if (lastTextIndex + 1 > currentTextIndex)
+                {
+                    currentText.length = currentTextIndex;
+                }
+
+                if (event.end[currentTextIndex]) currentText.push(event.end[currentTextIndex]);
 
                 result.push({
                     startTime : currentTime,
                     endTime   : nextTime,
-                    value     : currentText
+                    value     : currentText.join('')
                 });
 
                 lastTextIndex = currentTextIndex;

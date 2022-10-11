@@ -31,6 +31,7 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
     * [ ] Event link group
     * [ ] judgeline z order
     * [ ] BPM factor *(?)*
+    * [ ] Note controls *(?)*
     * Extend events
        * [x] Scale X
        * [x] Scale Y
