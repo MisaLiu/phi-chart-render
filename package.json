@@ -1,6 +1,7 @@
 {
   "name": "phi-chart-render",
   "description": "A Phigros chart render based on Pixi.js",
+  "version": "0.0.1-beta1",
   "author": "MisaLiu",
   "files": [
     "./src"
@@ -10,7 +11,16 @@
     "dev": "npx webpack-dev-server --progress --color",
     "build": "npx webpack --mode=production"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MisaLiu/phi-chart-render.git"
+  },
   "license": "MIT License",
+  "bugs": {
+    "url": "https://github.com/MisaLiu/phi-chart-render/issues"
+  },
+  "homepage": "https://github.com/MisaLiu/phi-chart-render",
+
   "devDependencies": {
     "fontfaceobserver": "^2.3.0",
     "jszip": "^3.10.1",
