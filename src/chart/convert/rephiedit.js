@@ -522,11 +522,11 @@ function calculateColorEventEase(event)
         result.push({
             startTime : event.startTime,
             endTime   : event.endTime,
-            value     : PIXIutils.rgb2hex(
+            value     : PIXIutils.rgb2hex([
                 event.start[0] / 255,
                 event.start[1] / 255,
                 event.start[2] / 255
-            )
+            ])
         });
     }
 
