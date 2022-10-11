@@ -109,7 +109,7 @@ export default function RePhiEditChartConverter(_chart)
         let judgeline = new Judgeline({
             id         : judgelineIndex + 1,
             texture    : _judgeline.Texture != 'line.png' ? _judgeline.Texture : null,
-            parentLine : _judgeline.father > 0 ? _judgeline.father : null,
+            parentLine : _judgeline.father >= 0 ? _judgeline.father + 1 : null,
             isCover    : _judgeline.isCover == 1
         });
 
@@ -371,7 +371,7 @@ export default function RePhiEditChartConverter(_chart)
     
     chart.judgelines.forEach((judgeline) =>
     {
-        if (judgeline.parentLine && judgeline.parentLine >= 0) judgeline.parentLine = chart.judgelines[judgeline.parentLine];
+        if (judgeline.parentLine && judgeline.parentLine > 0) judgeline.parentLine = chart.judgelines[judgeline.parentLine - 1];
         else judgeline.parentLine = undefined;
     });
     

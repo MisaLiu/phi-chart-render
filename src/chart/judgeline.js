@@ -319,7 +319,11 @@ export default class Judgeline
 
         if (this.parentLine)
         {
-
+            let oldPosX = this.x,
+                oldPosY = this.y;
+            
+            this.x = oldPosX * this.parentLine.cosr + oldPosY * this.parentLine.sinr + this.parentLine.x;
+            this.y = oldPosX * this.parentLine.sinr + oldPosY * this.parentLine.cosr + this.parentLine.y;
         }
 
         if (this.sprite)

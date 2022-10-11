@@ -26,11 +26,11 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
     * [x] Event Layers support  *(Need test)*
     * [x] Custom judgeline texture *(Need test)*
     * [x] Judgeline cover type
-    * [ ] Parent judgeline
+    * [x] Parent judgeline
     * [x] Easing start/end point
-    * [ ] BPM factor
     * [ ] Event link group
-    * [ ] z order
+    * [ ] judgeline z order
+    * [ ] BPM factor *(?)*
     * Extend events
        * [x] Scale X
        * [x] Scale Y
