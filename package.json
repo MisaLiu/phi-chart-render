@@ -9,7 +9,7 @@
   "main": "./src/main.js",
   "scripts": {
     "dev": "npx webpack-dev-server --progress --color",
-    "build": "npx webpack --mode=production"
+    "build": "npx webpack --mode=production --filename=phi-chart-render.min.js"
   },
   "repository": {
     "type": "git",
