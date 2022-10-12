@@ -4,9 +4,9 @@
   "version": "0.0.1-beta4",
   "author": "MisaLiu",
   "files": [
-    "./src"
+    "src"
   ],
-  "main": "./src/main.js",
+  "main": "src/main.js",
   "scripts": {
     "dev": "npx webpack-dev-server --progress --color",
     "build": "npx webpack --mode=production --entry=./src/main.js"
