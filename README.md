@@ -37,6 +37,7 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
        * [x] Scale Y
        * [x] Text
        * [x] Color
+       * [ ] Draw
        * [ ] ~~Incline (wont support)~~
     * note features
         * [x] Basic support
