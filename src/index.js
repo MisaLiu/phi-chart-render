@@ -615,6 +615,7 @@ function showGameResultPopup(game)
 {
     let judge = game.judgement;
 
+    qs('.play-result .title').innerHTML = 'Play result';
     if (game._settings.challengeMode) qs('.play-result .title').innerHTML += ' (challenge)';
     if (Number((game._settings.speed).toFixed(2)) !== 1) qs('.play-result .title').innerHTML += ' (x' + (game._settings.speed).toFixed(2) + ')';
 
@@ -665,9 +666,19 @@ function showGameResultPopup(game)
             value.style.opacity = (accHistogramValue[acc] / noteTimeHigestCount);
             value.style.setProperty('--pos', (Number(acc) + 50) + '%');
 
-            if (-12.5 <= acc && acc <= 12.5) value.style.background = '#FFECA0';
-            else if (-75 <= acc && acc <= 75) value.style.background = '#B4E1FF';
-            else value.style.background = '#6c4343';
+            if (!game._settings.challengeMode)
+            {
+                if (-20 <= acc && acc <= 20) value.style.background = '#FFECA0';
+                else if (-40 <= acc && acc <= 40) value.style.background = '#B4E1FF';
+                else value.style.background = '#6c4343';
+            }
+            else
+            {
+                if (-20 <= acc && acc <= 20) value.style.background = '#FFECA0';
+                else if (-37.5 <= acc && acc <= 37.5) value.style.background = '#B4E1FF';
+                else value.style.background = '#6c4343';
+            }
+            
 
             qs('.play-result .judge-histogram').appendChild(value);
         }
