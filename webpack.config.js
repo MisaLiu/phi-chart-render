@@ -2,7 +2,7 @@
  * @Author: git config user.name && git config user.email
  * @Date: 2022-07-17 20:27:06
  * @LastEditors: git config user.name && git config user.email
- * @LastEditTime: 2022-10-12 20:18:45
+ * @LastEditTime: 2022-10-12 20:53:35
  * @FilePath: \phi-chart-render\webpack.config.js
  * @Description: 
  * 
@@ -12,7 +12,7 @@ const path = require('path');
 
 module.exports = {
     mode: 'development',
-    entry: './src/index.js',
+    entry: '/src/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'script.js'

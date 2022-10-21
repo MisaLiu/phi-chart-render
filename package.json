@@ -9,7 +9,7 @@
   "main": "src/main.js",
   "scripts": {
     "dev": "npx webpack-dev-server --progress --color",
-    "build": "npx webpack --mode=production --entry=./src/main.js"
+    "build": "npx webpack --mode=production"
   },
   "repository": {
     "type": "git",
