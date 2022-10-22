@@ -12,7 +12,7 @@ export default function OfficialChartConverter(_chart)
 
     rawChart.judgeLineList.forEach((_judgeline, index) =>
     {
-        let judgeline = new Judgeline({ id: index + 1 });
+        let judgeline = new Judgeline({ id: index });
         let events = new EventLayer();
         let notes = [];
 
@@ -76,7 +76,7 @@ export default function OfficialChartConverter(_chart)
         notes.sort((a, b) => a.time - b.time);
         notes.forEach((note, noteIndex) =>
         {
-            note.id = noteIndex + 1;
+            note.id = noteIndex;
             chart.notes.push(note);
         });
 

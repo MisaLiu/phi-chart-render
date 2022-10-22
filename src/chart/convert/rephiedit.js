@@ -107,7 +107,7 @@ export default function RePhiEditChartConverter(_chart)
     rawChart.judgeLineList.forEach((_judgeline, judgelineIndex) =>
     {
         let judgeline = new Judgeline({
-            id         : judgelineIndex + 1,
+            id         : judgelineIndex,
             texture    : _judgeline.Texture != 'line.png' ? _judgeline.Texture : null,
             parentLine : _judgeline.father >= 0 ? _judgeline.father + 1 : null,
             isCover    : _judgeline.isCover == 1
@@ -327,7 +327,7 @@ export default function RePhiEditChartConverter(_chart)
 
             // 推送 Note
             chart.notes.push(new Note({
-                id            : noteIndex + 1,
+                id            : noteIndex,
                 type          : (
                     _note.type == 1 ? 1 :
                     _note.type == 2 ? 3 :

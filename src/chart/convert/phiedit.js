@@ -294,7 +294,7 @@ export default function PhiEditChartConverter(_chart)
             }
             if (!judgelines[event.lineId])
             {
-                judgelines[event.lineId] = new Judgeline({ id: event.lineId + 1 });
+                judgelines[event.lineId] = new Judgeline({ id: event.lineId });
                 judgelines[event.lineId].eventLayers.push(new EventLayer());
             }
 
@@ -427,7 +427,7 @@ export default function PhiEditChartConverter(_chart)
         commands.notePerLine[lineId].sort((a, b) => a.time - b.time);
         commands.notePerLine[lineId].forEach((note, noteIndex) =>
         {
-            note.id = noteIndex + 1;
+            note.id = noteIndex;
             notes.push(note);
         });
     }
