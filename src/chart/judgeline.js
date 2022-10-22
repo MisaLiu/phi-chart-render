@@ -104,7 +104,7 @@ export default class Judgeline
                 sameTimeSpeedEventAlreadyExist[eventTime] = true;
             });
 
-            if (eventLayerIndex === 0)
+            if (eventLayerIndex === 0 && eventLayer.speed[0].startTime > 0)
             {
                 eventLayer.speed.unshift({
                     startTime : 1 - 100,
