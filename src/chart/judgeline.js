@@ -117,9 +117,9 @@ export default class Judgeline
         floorPositions.sort((a, b) => a.startTime - b.startTime);
 
         floorPositions.unshift({
-            startTime     : 1 - 100,
+            startTime     : 1 - 1000,
             endTime       : floorPositions[0] ? floorPositions[0].startTime : 1e4,
-            floorPosition : 1 - 100
+            floorPosition : 1 - 1000
         });
         currentFloorPosition += Math.fround(floorPositions[0].endTime);
         
