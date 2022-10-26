@@ -270,15 +270,17 @@ function calcNoteJudge(currentTime, note)
     // 自动模式则自行添加判定点
     if (this._autoPlay)
     {
+        let input = { x: notePosition.x, y: notePosition.y, isFlicked: false };
+
         if (note.type === 1) {
-            if (timeBetween <= 0) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 1));
+            if (timeBetween <= 0) this.judgePoints.push(new JudgePoint(input, 1));
         } else if (note.type === 2) {
-            if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 3));
+            if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(input, 3));
         } else if (note.type === 3) {
-            if (!note.isScored && timeBetween <= 0) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 1));
-            else if (note.isScored && currentTime - note.lastHoldTime >= 0.15) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 3));
+            if (!note.isScored && timeBetween <= 0) this.judgePoints.push(new JudgePoint(input, 1));
+            else if (note.isScored && currentTime - note.lastHoldTime >= 0.15) this.judgePoints.push(new JudgePoint(input, 3));
         } else if (note.type === 4) {
-            if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(notePosition.x, notePosition.y, 2));
+            if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(input, 2));
         }
     }
 
