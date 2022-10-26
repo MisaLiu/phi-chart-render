@@ -101,15 +101,15 @@ export default class Judgement
         {
             for (const tap of this.input.tap)
             {
-                if (tap instanceof InputPoint) this.judgePoints.push(new JudgePoint(tap.x, tap.y, 1));
+                if (tap instanceof InputPoint) this.judgePoints.push(new JudgePoint(tap, 1));
             }
 
             for (const id in this.input.inputs)
             {
                 if (this.input.inputs[id] instanceof InputPoint)
                 {
-                    if (this.input.inputs[id].time > 0) this.judgePoints.push(new JudgePoint(this.input.inputs[id].x, this.input.inputs[id].y, 3));
-                    else if (this.input.inputs[id].isMove) this.judgePoints.push(new JudgePoint(this.input.inputs[id].x, this.input.inputs[id].y, 2));
+                    if (this.input.inputs[id].isFlickable && !this.input.inputs[id].isFlicked) this.judgePoints.push(new JudgePoint(this.input.inputs[id], 2));
+                    else this.judgePoints.push(new JudgePoint(this.input.inputs[id], 3));
                 }
             }
         }
@@ -427,6 +427,10 @@ function calcNoteJudge(currentTime, note)
                         note.isScored = true;
                         note.score = 4;
                         note.scoreTime = NaN;
+
+                        this.judgePoints[i].input.isFlicked = true;
+                        this.judgePoints.splice(i, 1);
+
                         break;
                     }
                 }

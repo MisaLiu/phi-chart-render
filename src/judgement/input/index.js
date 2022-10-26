@@ -73,8 +73,8 @@ export default class Input
             this.inputs[id].calcTick();
             if (this.sprite)
             {
-                let color = this.inputs[id].time - 1 == 0 ? (
-                    this.inputs[id].isMove ? 0x00FFFF : 0xFFFF00
+                let color = this.inputs[id].tick - 1 == 0 ? (
+                    this.inputs[id].isMoving ? 0x00FFFF : 0xFFFF00
                 ) : 0xFF00FF
 
                 this.sprite

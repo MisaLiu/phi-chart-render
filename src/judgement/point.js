@@ -1,10 +1,11 @@
 export default class JudgePoint
 {
-    constructor(x, y, type = 1)
+    constructor(input, type = 1)
     {
-        this.x = x;
-        this.y = y;
-        this.type = type; // 1: tap, 2: flick, 3: hold
+        this.x = input.x;
+        this.y = input.y;
+        this.input = input;
+        this.type  = type; // 1: tap, 2: flick, 3: hold
     }
 
     isInArea(x, y, cosr, sinr, hw)
