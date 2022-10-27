@@ -381,6 +381,23 @@ export default class Game
         });
     }
 
+    destroy()
+    {
+        const canvas = this.render.view;
+
+        this.render.ticker.remove(this._calcTick);
+        this.chart.music.stop();
+
+        if (this.render.fpsText) clearInterval(this.render.fpsCounter);
+
+        this.chart.reset();
+        this.render.destroy();
+
+        this.judgement.input.removeListenerFromCanvas(canvas);
+
+        canvas.width = canvas.height = 0;
+    }
+
     _pauseBtnClickCallback()
     {
         let pauseButton = this.sprites.pauseButton;

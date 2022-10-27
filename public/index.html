@@ -281,22 +281,22 @@
             </div>
 
             <div class="action">
-                <button onclick="history.go(0)">Refresh</button>
-                <button onclick="_game.restart();qs('.play-result').style.display='none';">Restart</button>
+                <button onclick="exitGame()">Exit</button>
+                <button onclick="restartGame()">Restart</button>
             </div>
         </div>
 
         <div class="game-paused">
             <div class="title">Game paused</div>
             <div class="action">
-                <button onclick="history.go(0)">Refresh</button>
-                <button onclick="_game.restart();qs('.game-paused').style.display='none';">Restart</button>
-                <button onclick="_game.pause();qs('.game-paused').style.display='none';">Continue</button>
+                <button onclick="exitGame()">Exit</button>
+                <button onclick="restartGame()">Restart</button>
+                <button onclick="pauseGame()">Continue</button>
             </div>
         </div>
 
         <div class="error-window">
-            <div>An error has just occurred, if you're sure this is not caused by you, please <a href="https://github.com/MisaLiu/phi-chart-render/issues/new/choose" target="_blank">report it on GitHub</a>.<button class="close">Close</button></div>
+            <div>An error has just occurred, if you're sure this is not caused by you, please <a href="https://github.com/MisaLiu/phi-chart-render/issues/new/choose" target="_blank">report it on GitHub</a>. <a href="#" onclick="eruda.show();return false;">Show Eruda</a><button class="close">Close</button></div>
             <pre><code class="content">Test Text Not A Real Error</code></pre>
         </div>
         <script src="./script.js?hash={{CURRENT_HASH}}"></script>

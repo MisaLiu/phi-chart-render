@@ -452,13 +452,11 @@ window.addEventListener('error', (err) =>
 {
     doms.errorWindow.content.innerText = (err.error && err.error.stack ? err.error.stack : err.error.message);
     doms.errorWindow.window.style.display = 'block';
-    eruda.show();
 });
 window.addEventListener('unhandledrejection', (err) =>
 {
     doms.errorWindow.content.innerText = (err.reason && err.reason.stack ? err.reason.stack : err.reason.message);
     doms.errorWindow.window.style.display = 'block';
-    eruda.show();
 });
 doms.errorWindow.closeBtn.addEventListener('click', () =>
 {
@@ -610,6 +608,52 @@ function calcHeightPercent()
 {
     document.body.style.setProperty('--height-percent', document.documentElement.clientHeight / 1080);
 }
+
+function pauseGame()
+{
+    if (!_game) return;
+
+    _game.pause();
+
+    if (_game._isPaused)
+    {
+        qs('.game-paused').style.display = 'block';
+    }
+    else
+    {
+        console.log('Game unpaused!');
+        qs('.game-paused').style.display = 'none';
+    }
+}
+
+function restartGame()
+{
+    if (!_game) return;
+
+    _game.restart();
+
+    qs('.game-paused').style.display = 'none';
+    qs('.play-result').style.display = 'none';
+}
+
+function exitGame()
+{
+    if (!_game) return;
+
+    _game.destroy();
+    _game = undefined;
+
+    qs('.game-paused').style.display = 'none';
+    qs('.play-result').style.display = 'none';
+
+    doms.fileSelect.style.display = 'block';
+}
+
+
+window.pauseGame = pauseGame;
+window.restartGame  = restartGame;
+window.exitGame = exitGame;
+
 
 function showGameResultPopup(game)
 {
