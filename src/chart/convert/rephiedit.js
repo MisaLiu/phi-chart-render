@@ -372,7 +372,7 @@ export default function RePhiEditChartConverter(_chart)
     chart.judgelines.forEach((judgeline) =>
     {
         if (judgeline.parentLine && judgeline.parentLine > 0) judgeline.parentLine = chart.judgelines[judgeline.parentLine - 1];
-        else judgeline.parentLine = undefined;
+        else judgeline.parentLine = null;
     });
     
     return chart;
