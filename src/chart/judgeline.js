@@ -186,8 +186,7 @@ export default class Judgeline
 
         if (!this.isText)
         {
-            this.texture = zipFiles[this.texture];
-            this.sprite = new Sprite(this.texture ? this.texture : texture.judgeline);
+            this.sprite = new Sprite(zipFiles[this.texture] ? zipFiles[this.texture] : texture.judgeline);
         }
         else
         {
