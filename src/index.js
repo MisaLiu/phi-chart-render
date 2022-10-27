@@ -162,6 +162,7 @@ window.doms = doms;
 window.files = files;
 window.assets = assets;
 window.currentFile = currentFile;
+window.fullscreen = fullscreen;
 
 window.loader = new Loader();
 
@@ -453,11 +454,6 @@ doms.startBtn.addEventListener('click', async () => {
     eruda.hide();
 
     doms.fileSelect.style.display = 'none';
-});
-
-doms.fullscreenBtn.addEventListener('click', () =>
-{
-    fullscreen.toggle(document.body, false);
 });
 
 window.addEventListener('error', (err) =>
