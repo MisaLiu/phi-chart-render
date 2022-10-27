@@ -141,11 +141,6 @@ export default class Game
 
     createSprites()
     {
-        if (Math.round(this._settings.speed * 100) !== 100) 
-        {
-            this.chart.info.name += ' (x' + this._settings.speed.toFixed(2) + ')';
-        }
-
         if (this.chart.bg)
         { // 创建超宽屏舞台覆盖
             this.render.mainContainerCover = new Sprite(this.chart.bg);
@@ -171,6 +166,7 @@ export default class Game
             this.render.sizer,
             this.assets.textures,
             this.zipFiles,
+            this._settings.speed,
             this._settings.bgDim,
             this._settings.multiNoteHL,
             this._settings.debug

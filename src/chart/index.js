@@ -90,7 +90,7 @@ export default class Chart
         return chart;
     }
 
-    createSprites(stage, size, textures, zipFiles = {}, bgDim = 0.5, multiNoteHL = true, debug = false)
+    createSprites(stage, size, textures, zipFiles = {}, speed = 1, bgDim = 0.5, multiNoteHL = true, debug = false)
     {
         if (this.bg)
         {
@@ -144,7 +144,7 @@ export default class Chart
 
         this.sprites.info = {};
 
-        this.sprites.info.songName = new Text(this.info.name, {
+        this.sprites.info.songName = new Text(this.info.name + ((Math.round(speed * 100) !== 100) ? ' (x' + speed.toFixed(2) + ')' : ''), {
             fontFamily: 'A-OTF Shin Go Pr6N H',
             fill: 0xFFFFFF
         });
