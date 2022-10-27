@@ -261,6 +261,36 @@ export default class Chart
         });
     }
 
+    destroySprites()
+    {
+        this.judgelines.forEach((judgeline) =>
+        {
+            if (!judgeline.sprite) return;
+            judgeline.sprite.destroy();
+            judgeline.sprite = undefined;
+        });
+        this.notes.forEach((note) =>
+        {
+            if (!note.sprite) return;
+            note.sprite.destroy();
+            note.sprite = undefined;
+        });
+
+        if (this.sprites.bg)
+        {
+            this.sprites.bg.destroy();
+            this.sprites.bg = undefined;
+        }
+
+        this.sprites.info.songName.destroy();
+        this.sprites.info.songName = undefined;
+
+        this.sprites.info.songDiff.destroy();
+        this.sprites.info.songDiff = undefined;
+
+        this.sprites.info = undefined;
+    }
+
     get totalNotes() {
         return this.notes.length;
     }

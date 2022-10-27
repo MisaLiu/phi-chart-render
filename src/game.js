@@ -387,6 +387,7 @@ export default class Game
         if (this.render.fpsText) clearInterval(this.render.fpsCounter);
 
         this.chart.reset();
+        this.chart.destroySprites();
         this.render.destroy();
 
         this.judgement.input.removeListenerFromCanvas(canvas);
