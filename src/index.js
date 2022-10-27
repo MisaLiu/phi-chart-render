@@ -30,6 +30,7 @@ const doms = {
         showInputPoint: document.querySelector('input#settings-show-input-point'),
         noteScale: document.querySelector('input#settings-note-scale'),
         bgDim: document.querySelector('input#settings-bg-dim'),
+        bgBlur: document.querySelector('input#settings-bg-blur'),
 
         offset: document.querySelector('input#settings-audio-offset'),
         speed: document.querySelector('input#settings-audio-speed'),
@@ -389,7 +390,7 @@ doms.file.bg.addEventListener('input', function () {
 
 doms.startBtn.addEventListener('click', async () => {
     currentFile.chart.music = currentFile.music;
-    if (currentFile.bg) currentFile.chart.bg = await Texture.from(blurImage(currentFile.bg, 50));;
+    if (currentFile.bg) currentFile.chart.bg = await Texture.from(blurImage(currentFile.bg, doms.settings.bgBlur.value));;
 
     window._game = new Game({
         chart: currentFile.chart,
