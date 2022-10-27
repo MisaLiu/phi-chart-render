@@ -390,6 +390,7 @@ export default class Game
         this.render.destroy();
 
         this.judgement.input.removeListenerFromCanvas(canvas);
+        window.removeEventListener('resize', this.resize);
 
         canvas.width = canvas.height = 0;
     }
