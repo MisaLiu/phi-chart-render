@@ -168,6 +168,17 @@ doms.chartPackFile.addEventListener('input', function ()
 {
     if (this.files.length <= 0 || !this.files[0]) return;
 
+    files.charts = {};
+    files.musics = {};
+    files.images = {};
+    files.info = null;
+    files.line = null;
+    files.zip = null;
+    
+    currentFile.chart = null;
+    currentFile.music = null;
+    currentFile.bg = null;
+
     let reader = new FileReader();
     let zip = new JSZip();
 
