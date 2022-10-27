@@ -20,6 +20,7 @@ export default class Input
         this._mouseInputMove = (e) => { this._inputMove(e, 0) };
         this._mouseInputEnd = (e) => { this._inputEnd(e, 0) };
 
+        this._noCanvasMenu = (e) => { e.preventDefault();return false; };
 
         this.addListenerToCanvas(params.canvas);
 
@@ -53,6 +54,8 @@ export default class Input
         canvas.addEventListener('mousedown', this._mouseInputStart, passiveIfSupported);
         canvas.addEventListener('mousemove', this._mouseInputMove, passiveIfSupported);
         canvas.addEventListener('mouseup', this._mouseInputEnd, passiveIfSupported);
+
+        canvas.addEventListener('contextmenu', this._noCanvasMenu, passiveIfSupported);
     }
 
     removeListenerFromCanvas(canvas)
@@ -68,6 +71,8 @@ export default class Input
         canvas.removeEventListener('mousedown', this._mouseInputStart);
         canvas.removeEventListener('mousemove', this._mouseInputMove);
         canvas.removeEventListener('mouseup', this._mouseInputEnd);
+
+        canvas.removeEventListener('contextmenu', this._noCanvasMenu);
     }
 
     createSprite(stage, showInputPoint = true)
