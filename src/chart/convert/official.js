@@ -2,6 +2,7 @@ import Chart from '../index';
 import Judgeline from '../judgeline';
 import EventLayer from '../eventlayer';
 import Note from '../note';
+import utils from './utils';
 
 export default function OfficialChartConverter(_chart)
 {
@@ -60,6 +61,12 @@ export default function OfficialChartConverter(_chart)
 
         judgeline.eventLayers.push(events);
         judgeline.sortEvent();
+
+        judgeline.eventLayers[0].moveX = utils.arrangeSameValueEvent(judgeline.eventLayers[0].moveX);
+        judgeline.eventLayers[0].moveY = utils.arrangeSameValueEvent(judgeline.eventLayers[0].moveY);
+        judgeline.eventLayers[0].rotate = utils.arrangeSameValueEvent(judgeline.eventLayers[0].rotate);
+        judgeline.eventLayers[0].alpha = utils.arrangeSameValueEvent(judgeline.eventLayers[0].alpha);
+
         judgeline.calcFloorPosition();
 
         _judgeline.notesAbove.forEach((rawNote, rawNoteIndex) =>

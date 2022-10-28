@@ -10,12 +10,12 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
 
 * Official charts
     * [x] Basic support
-    * [ ] Custom judgeline texture
+    * [x] Custom judgeline texture *(Need test)*
 
 * PhiEdit charts
     * [x] Basic support
     * [x] BPM List *(Need test)*
-    * [ ] Custom judgeline texture
+    * [x] Custom judgeline texture *(Need test)*
     * note features
         * [x] Basic support
         * [x] Fake note support
@@ -28,7 +28,7 @@ Huge thanks to [@lchzh3473](https://github.com/lchzh3473) and his awesome [sim-p
     * [x] Judgeline cover type
     * [x] Parent judgeline
     * [x] Easing start/end point
-    * [ ] Event link group
+    * [ ] Event link group *(?)*
     * [ ] judgeline z order
     * [ ] BPM factor *(?)*
     * [ ] Note controls *(?)*

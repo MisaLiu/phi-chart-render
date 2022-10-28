@@ -5,10 +5,11 @@ export default class Judgeline
 {
     constructor(params)
     {
-        this.id         = !isNaN(params.id) ? Number(params.id) : -1;
-        this.texture    = params.texture ? params.texture : null;
-        this.parentLine = params.parentLine ? params.parentLine : null;
-        this.isCover    = params.isCover !== undefined && params.isCover !== null ? !!params.isCover : true;
+        this.id               = !isNaN(params.id) ? Number(params.id) : -1;
+        this.texture          = params.texture ? params.texture : null;
+        this.parentLine       = params.parentLine ? params.parentLine : null;
+        this.isCover          = params.isCover !== undefined && params.isCover !== null ? !!params.isCover : true;
+        this.useOfficialScale = false;
 
         this.eventLayers = [];
         this.floorPositions = [];

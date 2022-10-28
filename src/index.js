@@ -229,7 +229,7 @@ doms.chartPackFile.addEventListener('input', function ()
             {
                 files.musics[name] = 'data:audio/' + zipFile.format.toLowerCase() + ';base64,' + (await zipFile.async('base64'));
             }
-            else if (zipFile.name.toLowerCase() === 'info.csv' || zipFile.name.toLowerCase() === 'info.txt')
+            else if (zipFile.name.toLowerCase() === 'info.csv')
             {
                 files.info = (await zipFile.async('text'));
             }
@@ -299,6 +299,17 @@ doms.chartPackFile.addEventListener('input', function ()
             }
         }
 
+        // 处理 line.csv
+        if (files.line)
+        {
+            try {
+                files.line = CsvReader(files.line);
+                result['line.csv'] = files.line;
+            } catch (e) {
+                files.line = null;
+            }
+        }
+
         // 处理谱面文件
         doms.file.chart.innerHTML = '';
         for (const name in files.charts)
@@ -306,6 +317,8 @@ doms.chartPackFile.addEventListener('input', function ()
             doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
 
             let chartInfo = {};
+            let chartLineTextures = [];
+
             if (files.info)
             {
                 for (const info of files.info)
@@ -323,7 +336,16 @@ doms.chartPackFile.addEventListener('input', function ()
                 chartInfo.difficult = chartInfo.Level;
             }
 
-            let _result = PhiChartRender.Chart.from(files.charts[name], chartInfo);
+            if (files.line)
+            {
+                files.line.forEach((line) =>
+                {
+                    if (line.Chart !== name) return;
+                    chartLineTextures.push(line);
+                });
+            }
+
+            let _result = PhiChartRender.Chart.from(files.charts[name], chartInfo, chartLineTextures);
             files.charts[name] = _result;
             result[name] = _result;
 

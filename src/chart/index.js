@@ -25,7 +25,7 @@ export default class Chart
         this.noteJudgeCallback = null;
     }
 
-    static from(rawChart, _chartInfo = {})
+    static from(rawChart, _chartInfo = {}, _chartLineTexture = [])
     {
         let chart;
         let chartInfo = _chartInfo;
@@ -61,19 +61,12 @@ export default class Chart
         {
             judgeline.eventLayers.forEach((eventLayer) =>
             {
-                eventLayer.speed = utils.arrangeSameSingleValueEvent(eventLayer.speed);
+                /* eventLayer.speed = utils.arrangeSameSingleValueEvent(eventLayer.speed); */
                 eventLayer.moveX = arrangeLineEvents(eventLayer.moveX);
                 eventLayer.moveY = arrangeLineEvents(eventLayer.moveY);
                 eventLayer.rotate = arrangeLineEvents(eventLayer.rotate);
                 eventLayer.alpha = arrangeLineEvents(eventLayer.alpha);
             });
-            /*
-            judgeline.event.speed = arrangeSpeedEvents(judgeline.event.speed);
-            judgeline.event.moveX = arrangeLineEvents(judgeline.event.moveX);
-            judgeline.event.moveY = arrangeLineEvents(judgeline.event.moveY);
-            judgeline.event.rotate = arrangeLineEvents(judgeline.event.rotate);
-            judgeline.event.alpha = arrangeLineEvents(judgeline.event.alpha);
-            */
 
             for (const name in judgeline.extendEvent)
             {
@@ -84,6 +77,30 @@ export default class Chart
             }
             
             judgeline.sortEvent();
+        });
+
+        _chartLineTexture.forEach((lineInfo) =>
+        {
+            if (!chart.judgelines[lineInfo.LineId]) return;
+
+            chart.judgelines[lineInfo.LineId].texture = lineInfo.Image;
+            chart.judgelines[lineInfo.LineId].useOfficialScale = true;
+            chart.judgelines[lineInfo.LineId].scaleX = !isNaN(lineInfo.Horz) ? Number(lineInfo.Horz) : 1;
+            chart.judgelines[lineInfo.LineId].scaleY = !isNaN(lineInfo.Vert) ? Number(lineInfo.Vert) : 1;
+
+            chart.judgelines[lineInfo.LineId].extendEvent.scaleX.push({
+                startTime: 1 - 1000,
+                endTime: 1000,
+                start: chart.judgelines[lineInfo.LineId].scaleX,
+                end: chart.judgelines[lineInfo.LineId].scaleX
+            });
+
+            chart.judgelines[lineInfo.LineId].extendEvent.scaleY.push({
+                startTime: 1 - 1000,
+                endTime: 1000,
+                start: chart.judgelines[lineInfo.LineId].scaleY,
+                end: chart.judgelines[lineInfo.LineId].scaleY
+            });
         });
 
         // console.log(chart);
@@ -126,6 +143,18 @@ export default class Chart
             {
                 judgeline.debugSprite.zIndex = index + 1;
                 stage.addChild(judgeline.debugSprite);
+            }
+
+            if (judgeline.texture && judgeline.useOfficialScale)
+            {
+                if (judgeline.extendEvent.scaleY[0].start < 0)
+                {
+                    let oldScaleY = judgeline.extendEvent.scaleY[0].start;
+
+                    judgeline.extendEvent.scaleY[0].start = judgeline.extendEvent.scaleY[0].end = (1080 / judgeline.sprite.texture.baseTexture.height) * (oldScaleY * -1);
+                }
+
+                judgeline.extendEvent.scaleX[0].start = judgeline.extendEvent.scaleX[0].end = judgeline.extendEvent.scaleY[0].start * judgeline.extendEvent.scaleX[0].start;
             }
         });
         this.notes.forEach((note, index) =>
@@ -377,10 +406,9 @@ function arrangeLineEvents(events) {
         else if (
             lastNewEvent2.end == newEvent.start &&
             (lastNewEvent2.end - lastNewEvent2.start) * duration2 == (newEvent.end - newEvent.start) * duration1
-        )
-        {
-            lastNewEvent2.endTime = newEvent.endTime;
-            lastNewEvent2.end     = newEvent.end;
+        ) {
+            newEvents2[newEvents2.length - 1].endTime = newEvent.endTime;
+            newEvents2[newEvents2.length - 1].end     = newEvent.end;
         }
         else
         {
