@@ -120,4 +120,13 @@ export default class Input
     {
         this.renderSize = size;
     }
+
+    destroySprites()
+    {
+        if (this.sprite)
+        {
+            this.sprite.destroy();
+            this.sprite = undefined;
+        }
+    }
 }

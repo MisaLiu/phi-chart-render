@@ -218,6 +218,14 @@ export default class Judgement
             }
         }
     }
+
+    destroySprites()
+    {
+        this.reset();
+
+        this.input.destroySprites();
+        this.score.destroySprites();
+    }
 }
 
 function calcNoteJudge(currentTime, note)

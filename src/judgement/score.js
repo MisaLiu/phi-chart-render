@@ -218,4 +218,22 @@ export default class Score
             return result;
         }
     }
+
+    destroySprites()
+    {
+        if (!this.sprites) return;
+        
+        this.sprites.combo.number.destroy();
+        this.sprites.combo.text.destroy();
+        this.sprites.combo.container.destroy();
+        this.sprites.combo = undefined;
+
+        this.sprites.acc.destroy();
+        this.sprites.acc = undefined;
+
+        this.sprites.score.destroy();
+        this.sprites.score = undefined;
+
+        this.sprites = undefined;
+    }
 }
