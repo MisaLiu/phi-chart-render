@@ -204,12 +204,7 @@ export default class Note
                 endX   : originX * this.judgeline.cosr - holdLength * this.judgeline.sinr + this.judgeline.sprite.position.x,
                 startY : realY,
                 endY   : holdLength * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y
-            }, {
-                startX : size.startX,
-                endX   : size.endX,
-                startY : size.startY,
-                endY   : size.endY
-            });
+            }, sizer);
 
             // 推送计算结果到精灵
             this.sprite.visible = !this.sprite.outScreen;
@@ -290,18 +285,5 @@ function isInArea(sprite, area)
     else
     {
         return false;
-    }
-    
-
-    function isInValueArea(value, start, end)
-    {
-        if (value >= start && value <= end)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
     }
 }
