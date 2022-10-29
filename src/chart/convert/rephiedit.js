@@ -269,11 +269,13 @@ export default function RePhiEditChartConverter(_chart)
                         utils.calculateEventEase(event, Easing)
                             .forEach((newEvent) =>
                             {
+                                /*
                                 if (!judgeline.texture && !judgeline.isText)
                                 {
                                     newEvent.start = newEvent.start * 0.664285;
                                     newEvent.end   = newEvent.end * 0.664285;
                                 }
+                                */
 
                                 judgeline.extendEvent.scaleY.push(newEvent);
                             }
