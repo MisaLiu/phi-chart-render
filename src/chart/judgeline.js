@@ -79,6 +79,7 @@ export default class Judgeline
         {
             eventLayer.speed = utils.arrangeSameSingleValueEvent(eventLayer.speed);
             if (eventLayer.speed.length < 1) noSpeedEvents = true;
+            else noSpeedEvents = false;
         });
 
         if (noSpeedEvents)
