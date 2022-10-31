@@ -42,13 +42,12 @@ jobs:
       - name: Replace current git hash to HTML
         run: sed -i 's/{{CURRENT_HASH}}/${{ github.sha }}/g' ./public/index.html
       
-      - name: Build webpack
+      - name: Build webpack 
         run: |
           npm install
           npx webpack --output-path=./public/
       
-      - name: Create Sentry release
-      - uses: actions/checkout@v2
+      - name: Upload sourcemap to Sentry
         uses: getsentry/action-release@v1
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
