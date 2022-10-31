@@ -9,6 +9,7 @@
             crossorigin="anonymous"
             data-lazy="no"
         ></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9YT2TVFV"></script>
         <!--script src="./eruda.min.js"></script>
         <script>eruda.init();</script-->
         <script>
@@ -22,6 +23,12 @@
                 debug: (GITHUB_CURRENT_GIT_HASH == '{{' + 'CURRENT_HASH' + '}}'),
                 release: (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}')
             });
+
+            // Init google analytics
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-PW9YT2TVFV');
         </script>
         <style>
             html, body {
