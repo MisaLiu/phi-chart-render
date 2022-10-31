@@ -4,9 +4,25 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
         <link href="./fonts/index.css" rel="stylesheet" />
+        <script
+            src="https://js.sentry-cdn.com/c0f2c5052bd740c3b734b74c7dd6d350.min.js"
+            crossorigin="anonymous"
+            data-lazy="no"
+        ></script>
         <!--script src="./eruda.min.js"></script>
         <script>eruda.init();</script-->
-        <script> const GITHUB_CURRENT_GIT_HASH = `{{CURRENT_HASH}}`;</script>
+        <script>
+            const GITHUB_CURRENT_GIT_HASH = `{{CURRENT_HASH}}`;
+
+            // Init sentry
+            Sentry.init({
+                dsn: "https://c0f2c5052bd740c3b734b74c7dd6d350@o4504077358792704.ingest.sentry.io/4504077363183616",
+                tracesSampleRate: 1.0,
+                maxBreadcrumbs: 50,
+                debug: (GITHUB_CURRENT_GIT_HASH == '{{' + 'CURRENT_HASH' + '}}'),
+                release: (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}')
+            });
+        </script>
         <style>
             html, body {
                 padding: 0;
