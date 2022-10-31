@@ -11,15 +11,18 @@ import { BrowserTracing } from '@sentry/tracing';
 
 (() =>
 {
-    // Init sentry
-    Sentry.init({
-        dsn: "https://c0f2c5052bd740c3b734b74c7dd6d350@o4504077358792704.ingest.sentry.io/4504077363183616",
-        integrations: [ new BrowserTracing() ],
-        tracesSampleRate: 1.0,
-        maxBreadcrumbs: 50,
-        debug: (GITHUB_CURRENT_GIT_HASH == '{{' + 'CURRENT_HASH' + '}}'),
-        release: (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}')
-    });
+    if (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}')
+    {
+        // Init sentry
+        Sentry.init({
+            dsn: "https://c0f2c5052bd740c3b734b74c7dd6d350@o4504077358792704.ingest.sentry.io/4504077363183616",
+            integrations: [ new BrowserTracing() ],
+            tracesSampleRate: 1.0,
+            maxBreadcrumbs: 50,
+            debug: false,
+            release: true
+        });
+    }
 })();
 
 

@@ -74,10 +74,23 @@ export default class Judgeline
     {
         if (this.eventLayers.length <= 0) throw new Error('No event layer in this judgeline');
 
+        let noSpeedEvents = false;
         this.eventLayers.forEach((eventLayer) =>
         {
             eventLayer.speed = utils.arrangeSameSingleValueEvent(eventLayer.speed);
+            if (eventLayer.speed.length < 1) noSpeedEvents = true;
         });
+
+        if (noSpeedEvents)
+        {
+            console.warn('Line ' + this.id + ' don\'t have any speed event, use default speed.');
+            this.eventLayers[0].speed.push({
+                startTime: 0,
+                endTime: 1e4,
+                start: 1,
+                end: 1
+            });
+        }
 
         let sameTimeSpeedEventAlreadyExist = {};
         let currentFloorPosition = 0;
