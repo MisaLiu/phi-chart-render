@@ -58,7 +58,7 @@ jobs:
           environment: production
           version: ${{ github.sha }}
           sourcemaps: './public'
-          set_commits: auto
+          set_commits: skip
           ignore_missing: true
       
       - name: Upload artifact
