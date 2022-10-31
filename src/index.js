@@ -42,6 +42,7 @@ const doms = {
         autoPlay: document.querySelector('input#settings-autoplay'),
         forceCanvas: document.querySelector('input#settings-force-canvas'),
         antiAlias: document.querySelector('input#settings-anti-alias'),
+        lowResolution: document.querySelector('input#settings-low-resolution'),
         debug: document.querySelector('input#settings-debug')
     },
     startBtn : document.querySelector('button#start'),
@@ -422,6 +423,7 @@ doms.startBtn.addEventListener('click', async () => {
         render: {
             canvas: doms.canvas,
             resizeTo: document.documentElement,
+            resolution: doms.settings.lowResolution.checked ? 1 : window.devicePixelRatio,
             antialias: doms.settings.antiAlias.checked,
             forceCanvas: doms.settings.forceCanvas.checked
         },
