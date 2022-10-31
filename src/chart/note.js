@@ -172,7 +172,9 @@ export default class Note
                 realY = originY * this.judgeline.cosr,
 
                 _holdLength = this.type === 3 ? Math.fround((this.endPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed) : _originY,
-                holdLength = this.type === 3 ? _holdLength * (this.isAbove ? -1 : 1) : originY;
+                holdLength = this.type === 3 ? _holdLength * (this.isAbove ? -1 : 1) : originY,
+
+                realYOffset = size.height * this.yOffset;
             
             if (this.type === 3) // Hold 长度计算
             {
@@ -191,8 +193,8 @@ export default class Note
             }
             
             // Note 落在判定线时的绝对位置计算
-            this.sprite.judgelineX = (size.height * this.yOffset) * this.judgeline.sinr + originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
-            this.sprite.judgelineY = (size.height * this.yOffset) * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
+            this.sprite.judgelineX = realYOffset * this.judgeline.sinr + originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
+            this.sprite.judgelineY = realYOffset * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
 
             // Note 的绝对位置计算
             realX = this.sprite.judgelineX + realX;
@@ -221,12 +223,12 @@ export default class Note
                 if (this.judgeline.alpha < 0) this.sprite.visible = false;
 
                 // Note 特殊位置是否可视控制
-                if (this.type !== 3 && this.time > currentTime && (_originY + (size.height * this.yOffset)) < 0 && this.judgeline.isCover) this.sprite.visible = false;
+                if (this.type !== 3 && this.time > currentTime && (_originY + realYOffset) < 0 && this.judgeline.isCover) this.sprite.visible = false;
                 if (this.type !== 3 && this.isFake && this.time <= currentTime) this.sprite.visible = false;
                 if (
                     this.type === 3 &&
                     (
-                        (this.time > currentTime && (_originY + (size.height * this.yOffset)) < 0 && this.judgeline.isCover) || // 时间未开始时 Hold 在判定线对面
+                        (this.time > currentTime && (_originY + realYOffset) < 0 && this.judgeline.isCover) || // 时间未开始时 Hold 在判定线对面
                         (this.holdTimeLength <= currentTime) // Hold 已经被按完
                     )
                 ) this.sprite.visible = false;
