@@ -59,6 +59,7 @@ jobs:
           version: ${{ github.sha }}
           sourcemaps: './public'
           set_commits: auto
+          ignore_missing: true
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
