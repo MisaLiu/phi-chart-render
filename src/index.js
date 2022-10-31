@@ -475,7 +475,7 @@ doms.startBtn.addEventListener('click', async () => {
     */
     _game.start();
 
-    eruda.hide();
+    // eruda.hide();
 
     doms.fileSelect.style.display = 'none';
 });
