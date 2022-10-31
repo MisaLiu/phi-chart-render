@@ -6,6 +6,22 @@ import JSZip, { file } from 'jszip';
 import { Loader, Texture, Rectangle, utils as PIXIutils } from 'pixi.js-legacy';
 import { Howl } from 'howler';
 import * as StackBlur from 'stackblur-canvas';
+import * as Sentry from '@sentry/browser';
+import { BrowserTracing } from '@sentry/tracing';
+
+(() =>
+{
+    // Init sentry
+    Sentry.init({
+        dsn: "https://c0f2c5052bd740c3b734b74c7dd6d350@o4504077358792704.ingest.sentry.io/4504077363183616",
+        integrations: [ new BrowserTracing() ],
+        tracesSampleRate: 1.0,
+        maxBreadcrumbs: 50,
+        debug: (GITHUB_CURRENT_GIT_HASH == '{{' + 'CURRENT_HASH' + '}}'),
+        release: (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}')
+    });
+})();
+
 
 const qs = (selector) => document.querySelector(selector);
 
