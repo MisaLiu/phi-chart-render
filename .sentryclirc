@@ -1,0 +1,6 @@
+[auth]
+token=09e716fc2902422683c8e3b931baaf610d7788d3d8484527a8360abf40cc213b
+
+[defaults]
+org=phifans
+project=phi-chart-render

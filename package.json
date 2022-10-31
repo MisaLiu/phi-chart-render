@@ -23,6 +23,7 @@
   "devDependencies": {
     "@sentry/browser": "^7.17.2",
     "@sentry/tracing": "^7.17.2",
+    "@sentry/webpack-plugin": "^1.19.1",
     "fontfaceobserver": "^2.3.0",
     "jszip": "^3.10.1",
     "stackblur-canvas": "^2.5.0",
