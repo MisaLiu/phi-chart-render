@@ -57,6 +57,7 @@ jobs:
           environment: production
           version: ${{ github.sha }}
           sourcemaps: './public'
+          set_commits: auto
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
