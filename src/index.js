@@ -11,7 +11,7 @@ import { BrowserTracing } from '@sentry/tracing';
 
 (() =>
 {
-    if (GITHUB_CURRENT_GIT_HASH == '{{' + 'CURRENT_HASH' + '}}')
+    if (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}')
     {
         // Init sentry
         Sentry.init({
