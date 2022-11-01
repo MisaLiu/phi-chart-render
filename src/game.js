@@ -504,7 +504,7 @@ export default class Game
         this.sprites.fakeJudgeline.width = this.render.sizer.width * progress;
 
         // 背景图亮度
-        this.chart.sprites.bg.cover.alpha = this._settings.bgDim * progress;
+        if (this.chart.sprites.bg && this.chart.sprites.bg.cover) this.chart.sprites.bg.cover.alpha = this._settings.bgDim * progress;
 
         if (_progress >= 1)
         {
