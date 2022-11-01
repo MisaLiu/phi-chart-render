@@ -198,17 +198,6 @@ doms.chartPackFile.addEventListener('input', function ()
 {
     if (this.files.length <= 0 || !this.files[0]) return;
 
-    files.charts = {};
-    files.musics = {};
-    files.images = {};
-    files.info = null;
-    files.line = null;
-    files.zip = null;
-    
-    currentFile.chart = null;
-    currentFile.music = null;
-    currentFile.bg = null;
-
     let reader = new FileReader();
     let zip = new JSZip();
 
@@ -222,6 +211,19 @@ doms.chartPackFile.addEventListener('input', function ()
 
     async function decodeZipFile(zipDecodeResult)
     {
+        doms.startBtn.disabled = true;
+
+        files.charts = {};
+        files.musics = {};
+        files.images = {};
+        files.info = null;
+        files.line = null;
+        files.zip = null;
+        
+        currentFile.chart = null;
+        currentFile.music = null;
+        currentFile.bg = null;
+
         const chartFormat = ('json,pec').split(',');
         const imageFormat = ('jpeg,jpg,gif,png,webp').split(',');
 		const audioFormat = ('aac,flac,mp3,ogg,wav,webm').split(',');
@@ -408,6 +410,8 @@ doms.chartPackFile.addEventListener('input', function ()
                 }
             }
         }
+
+        doms.startBtn.disabled = false;
     }
 });
 
@@ -440,6 +444,17 @@ doms.file.bg.addEventListener('input', function () {
 });
 
 doms.startBtn.addEventListener('click', async () => {
+    if (!currentFile.chart)
+    {
+        alert('No chart selected.');
+        return;
+    }
+    if (!currentFile.music)
+    {
+        alert('No music selected.');
+        return;
+    }
+
     currentFile.chart.music = currentFile.music;
     if (currentFile.bg) currentFile.chart.bg = await Texture.from(blurImage(currentFile.bg, doms.settings.bgBlur.value));;
 
