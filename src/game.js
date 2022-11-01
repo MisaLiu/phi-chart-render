@@ -389,12 +389,13 @@ export default class Game
         this.chart.reset();
         this.chart.destroySprites();
         this.judgement.destroySprites();
-        this.render.destroy(removeCanvas, { children: true, texture: false, baseTexture: false });
 
         this.judgement.input.removeListenerFromCanvas(canvas);
         window.removeEventListener('resize', this.resize);
 
         canvas.width = canvas.height = 0;
+
+        this.render.destroy(removeCanvas, { children: true, texture: false, baseTexture: false });
     }
 
     _pauseBtnClickCallback()

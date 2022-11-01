@@ -448,7 +448,6 @@ doms.startBtn.addEventListener('click', async () => {
         assets: assets,
         zipFiles: files.zip,
         render: {
-            canvas: doms.canvas,
             resizeTo: document.documentElement,
             resolution: doms.settings.lowResolution.checked ? 1 : window.devicePixelRatio,
             antialias: doms.settings.antiAlias.checked,
@@ -473,6 +472,9 @@ doms.startBtn.addEventListener('click', async () => {
         },
         watermark: 'github/MisaLiu/phi-chart-render ' + GITHUB_CURRENT_GIT_HASH
     });
+
+    document.body.appendChild(_game.render.view);
+    _game.render.view.classList.add('canvas-game');
 
     _game.on('start', () => console.log('Game started!'));
     _game.on('pause', () => {
@@ -689,7 +691,7 @@ function exitGame()
 {
     if (!_game) return;
 
-    _game.destroy();
+    _game.destroy(true);
     _game = undefined;
 
     qs('.game-paused').style.display = 'none';

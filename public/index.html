@@ -37,6 +37,7 @@
                 border: 1px solid #999;
                 overflow: auto;
                 box-sizing: border-box;
+                z-index: 10;
             }
 
             div.file-select .unsupported-audio-file-type.warn {
@@ -52,10 +53,11 @@
                 right: 0;
             }
 
-            canvas#canvas {
+            .canvas-game {
                 position: absolute;
                 top: 0;
                 left: 0;
+                z-index: 1;
             }
 
             div.play-result,
@@ -72,6 +74,7 @@
                 border-radius: 14px;
                 box-shadow: 0px 0px 24px #000;
                 box-sizing: border-box;
+                z-index: 10;
             }
             div.play-result .title,
             div.game-paused .title {
@@ -172,6 +175,7 @@
                 background-color: #F33;
                 border: 1px solid #A00;
                 box-sizing: border-box;
+                z-index: 20;
             }
             div.error-window a {
                 color: #FFF;
