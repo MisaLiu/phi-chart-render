@@ -177,11 +177,12 @@
                 color: #FFF;
             }
             div.error-window button.close {
+                margin-left: 6px;
                 float: right;
             }
             div.error-window pre {
                 margin-top: 8px;
-                margin-bottom: 0;
+                margin-bottom: 8px;
                 padding: 8px;
                 background: #D60000;
                 box-sizing: border-box;
@@ -313,6 +314,7 @@
         <div class="error-window">
             <div>An error has just occurred, if you're sure this is not caused by you, please <a href="https://github.com/MisaLiu/phi-chart-render/issues/new/choose" target="_blank">report it on GitHub</a>. <!--a href="#" onclick="eruda.show();return false;">Show Eruda</a--><button class="close">Close</button></div>
             <pre><code class="content">Test Text Not A Real Error</code></pre>
+            <div>The infomation about this error will upload to <a href="https://sentry.io" target="_blank">Sentry.io</a> for analyze and debug.</div>
         </div>
         <script src="./script.js?hash={{CURRENT_HASH}}"></script>
     </body>

@@ -11,7 +11,7 @@ import { BrowserTracing } from '@sentry/tracing';
 
 (() =>
 {
-    if (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}')
+    if (GITHUB_CURRENT_GIT_HASH == '{{' + 'CURRENT_HASH' + '}}')
     {
         // Init sentry
         Sentry.init({
@@ -19,8 +19,16 @@ import { BrowserTracing } from '@sentry/tracing';
             integrations: [ new BrowserTracing() ],
             tracesSampleRate: 1.0,
             maxBreadcrumbs: 50,
-            debug: false,
-            release: true
+            debug: (GITHUB_CURRENT_GIT_HASH == '{{' + 'CURRENT_HASH' + '}}'),
+            release: (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}'),
+            beforeSend: (event, hint) => {
+                let err = hint.originalException;
+
+                doms.errorWindow.content.innerText = err.stack ? err.stack : err.message ? err.message : err;
+                doms.errorWindow.window.style.display = 'block';
+
+                return event;
+            }
         });
     }
 })();
@@ -499,16 +507,6 @@ doms.startBtn.addEventListener('click', async () => {
     doms.fileSelect.style.display = 'none';
 });
 
-window.addEventListener('error', (err) =>
-{
-    doms.errorWindow.content.innerText = (err.error && err.error.stack ? err.error.stack : err.error.message);
-    doms.errorWindow.window.style.display = 'block';
-});
-window.addEventListener('unhandledrejection', (err) =>
-{
-    doms.errorWindow.content.innerText = (err.reason && err.reason.stack ? err.reason.stack : err.reason.message);
-    doms.errorWindow.window.style.display = 'block';
-});
 doms.errorWindow.closeBtn.addEventListener('click', () =>
 {
     doms.errorWindow.window.style.display = 'none';
