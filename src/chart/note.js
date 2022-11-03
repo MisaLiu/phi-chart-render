@@ -242,6 +242,19 @@ export default class Note
                     this.debugSprite.position = this.sprite.position;
                     this.debugSprite.angle = this.sprite.angle;
                     this.debugSprite.alpha = 0.2 + (this.sprite.visible ? (this.sprite.alpha * 0.8) : 0);
+
+                    if (this.time > currentTime)
+                    {
+                        if (!this.sprite.visible)
+                        {
+                            this.sprite.visible = true;
+                            this.sprite.alpha = 0.2;
+                        }
+                        else if (this.sprite.visible)
+                        {
+                            this.sprite.alpha = this.basicAlpha;
+                        }
+                    }
                 }
             }
         }
