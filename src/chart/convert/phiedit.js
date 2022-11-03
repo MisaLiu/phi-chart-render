@@ -311,6 +311,9 @@ export default function PhiEditChartConverter(_chart)
         {
             if (isNaN(event.endTime)) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e5;
             if (isNaN(event.start)) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 1;
+
+            if (event.start < 0) event.start = 0;
+            if (event.end < 0) event.end = 0;
         });
         judgeline.eventLayers[0].moveX.forEach((event, eventIndex, array) =>
         {
