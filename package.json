@@ -1,7 +1,7 @@
 {
   "name": "phi-chart-render",
   "description": "A Phigros chart render based on Pixi.js",
-  "version": "0.0.1-beta11",
+  "version": "0.0.1-beta12",
   "author": "MisaLiu",
   "files": [
     "src"
