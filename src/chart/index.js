@@ -297,12 +297,24 @@ export default class Chart
             if (!judgeline.sprite) return;
             judgeline.sprite.destroy();
             judgeline.sprite = undefined;
+
+            if (judgeline.debugSprite)
+            {
+                judgeline.debugSprite.destroy(true);
+                judgeline.debugSprite = undefined;
+            }
         });
         this.notes.forEach((note) =>
         {
             if (!note.sprite) return;
             note.sprite.destroy();
             note.sprite = undefined;
+
+            if (note.debugSprite)
+            {
+                note.debugSprite.destroy(true);
+                note.debugSprite = undefined;
+            }
         });
 
         if (this.sprites.bg)
