@@ -36,7 +36,7 @@ export default class Chart
             {
                 chart = Convert.Official(rawChart);
             }
-            else if (!isNaN(Number(rawChart.META.RPEVersion)))
+            else if (rawChart.META && !isNaN(Number(rawChart.META.RPEVersion)))
             {
                 chart = Convert.RePhiEdit(rawChart);
                 chartInfo = chart.info;
