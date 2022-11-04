@@ -242,7 +242,7 @@ export default function RePhiEditChartConverter(_chart)
                         event.endTime = judgeline.extendEvent.text[eventIndex + 1] ? judgeline.extendEvent.text[eventIndex + 1].startTime : 100;
                     }
                 });
-                judgeline.extendEvent.text =  utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.text);
+                judgeline.extendEvent.text = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.text);
             }
 
             if (_judgeline.extended.scaleXEvents && _judgeline.extended.scaleXEvents.length > 0)

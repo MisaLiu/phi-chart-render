@@ -43,6 +43,7 @@ export default function PhiEditChartConverter(_chart)
     let chartSimple = {
         bpm: [],
         judgelines: [],
+        _judgelines: {},
         notes: [],
         notesPerLine: {},
 
@@ -53,19 +54,21 @@ export default function PhiEditChartConverter(_chart)
                 console.warn('Invalid line id: ' + lineId + ', ignored');
                 return;
             }
-            if (!this.judgelines[lineId]) this.judgelines[lineId] = new Judgeline({ id: lineId });
-            if (this.judgelines[lineId].eventLayers.length < 1) this.judgelines[lineId].eventLayers.push(new EventLayer());
-            if (!this.judgelines[lineId].eventLayers[0][eventName]) throw new Error('No such event type: ' + eventName);
+            if (!this._judgelines[lineId]) this._judgelines[lineId] = new Judgeline({ id: lineId });
+            if (this._judgelines[lineId].eventLayers.length < 1) this._judgelines[lineId].eventLayers.push(new EventLayer());
+            if (!this._judgelines[lineId].eventLayers[0][eventName]) throw new Error('No such event type: ' + eventName);
 
-            let events = this.judgelines[lineId].eventLayers[0][eventName];
+            let events = this._judgelines[lineId].eventLayers[0][eventName];
             let lastEvent = events[events.length - 1];
 
             if (
                 lastEvent &&
                 lastEvent.startTime == event.startTime &&
                 (
-                    isNaN(lastEvent.endTime) ||
-                    isNaN(event.endTime) ||
+                    (
+                        isNaN(lastEvent.endTime) &&
+                        isNaN(event.endTime)
+                    ) ||
                     (
                         !isNaN(lastEvent.endTime) &&
                         !isNaN(event.endTime) &&
@@ -257,7 +260,7 @@ export default function PhiEditChartConverter(_chart)
                     startTime  : command[2] || 0,
                     endTime    : command[3] || (command[2] || 0),
                     start      : NaN,
-                    end        : !isNaN(command[4]) ? command[4] / 255 : 1,
+                    end        : command[4] / 255 || 0,
                     easingType : 1
                 });
                 break;
@@ -267,8 +270,8 @@ export default function PhiEditChartConverter(_chart)
                 chartSimple.pushEventToLine(command[1], 'alpha', {
                     startTime  : command[2] || 0,
                     endTime    : NaN,
-                    start      : !isNaN(command[3]) ? command[3] / 255 : 1,
-                    end        : !isNaN(command[3]) ? command[3] / 255 : 1,
+                    start      : command[3] / 255 || 0,
+                    end        : command[3] / 255 || 0,
                     easingType : 1
                 });
                 break;
@@ -316,15 +319,17 @@ export default function PhiEditChartConverter(_chart)
 
     // 将事件推送给对应的判定线
     chart.judgelines = chartSimple.judgelines;
-    chart.judgelines.forEach((judgeline) =>
+    for (const lineId in chartSimple._judgelines)
     {
+        let judgeline = chartSimple._judgelines[lineId];
+
         judgeline.sortEvent();
 
         // 事件参数补齐
         judgeline.eventLayers[0].alpha.forEach((event, eventIndex, array) =>
         {
             if (isNaN(event.endTime)) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e5;
-            if (isNaN(event.start)) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 1;
+            if (isNaN(event.start)) event.start = eventIndex > 0 ? array[eventIndex - 1].end : event.end;
 
             if (event.start < 0) event.start = 0;
             if (event.end < 0) event.end = 0;
@@ -391,13 +396,13 @@ export default function PhiEditChartConverter(_chart)
 
         judgeline.sortEvent();
         judgeline.calcFloorPosition();
-    });
+    };
 
     // 计算 note 的真实时间
     chartSimple.notes = utils.calculateRealTime(chartSimple.bpm, chartSimple.notes);
     chartSimple.notes.forEach((note, noteIndex) =>
     {
-        let judgeline = chart.judgelines[note.lineId];
+        let judgeline = chartSimple._judgelines[note.lineId];
 
         if (!judgeline)
         {
@@ -438,6 +443,12 @@ export default function PhiEditChartConverter(_chart)
         }));
     });
 
+    for (const lineId in chartSimple._judgelines)
+    {
+        chartSimple.judgelines.push(chartSimple._judgelines[lineId]);
+    }
+    chartSimple.judgelines.sort((a, b) => a.id - b.id);
+    
     for (const lineId in chartSimple.notesPerLine)
     {
         chartSimple.notesPerLine[lineId].sort((a, b) => a.time - b.time);

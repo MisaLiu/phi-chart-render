@@ -157,13 +157,8 @@ export default class Chart
 
             if (judgeline.texture && judgeline.useOfficialScale)
             {
-                if (judgeline.extendEvent.scaleY[0].start < 0)
-                {
-                    let oldScaleY = judgeline.extendEvent.scaleY[0].start;
-
-                    judgeline.extendEvent.scaleY[0].start = judgeline.extendEvent.scaleY[0].end = (1080 / judgeline.sprite.texture.baseTexture.height) * (oldScaleY * -1);
-                }
-
+                let oldScaleY = judgeline.extendEvent.scaleY[0].start;
+                judgeline.extendEvent.scaleY[0].start = judgeline.extendEvent.scaleY[0].end = (1080 / judgeline.sprite.texture.baseTexture.height) * (oldScaleY * (judgeline.extendEvent.scaleY[0].start < 0 ? -1 : 1));
                 judgeline.extendEvent.scaleX[0].start = judgeline.extendEvent.scaleX[0].end = judgeline.extendEvent.scaleY[0].start * judgeline.extendEvent.scaleX[0].start;
             }
         });
