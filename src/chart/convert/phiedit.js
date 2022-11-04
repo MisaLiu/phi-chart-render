@@ -317,8 +317,6 @@ export default function PhiEditChartConverter(_chart)
     chartSimple.bpm.sort((a, b) => b.startBeat - a.startBeat);
     chartSimple.notes.sort((a, b) => a.startTime - b.startTime);
 
-    // 将事件推送给对应的判定线
-    chart.judgelines = chartSimple.judgelines;
     for (const lineId in chartSimple._judgelines)
     {
         let judgeline = chartSimple._judgelines[lineId];
@@ -445,10 +443,10 @@ export default function PhiEditChartConverter(_chart)
 
     for (const lineId in chartSimple._judgelines)
     {
-        chartSimple.judgelines.push(chartSimple._judgelines[lineId]);
+        chart.judgelines.push(chartSimple._judgelines[lineId]);
     }
-    chartSimple.judgelines.sort((a, b) => a.id - b.id);
-    
+    chart.judgelines.sort((a, b) => a.id - b.id);
+
     for (const lineId in chartSimple.notesPerLine)
     {
         chartSimple.notesPerLine[lineId].sort((a, b) => a.time - b.time);
