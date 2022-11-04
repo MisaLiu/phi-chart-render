@@ -40,21 +40,59 @@ export default function PhiEditChartConverter(_chart)
 {
     let rawChart = _chart.split(/\r\n|\n\r/);
     let chart = new Chart();
-    let judgelines = [];
-    let notes = [];
-    let commands = {
+    let chartSimple = {
         bpm: [],
-        note: [],
-        notePerLine: {},
+        judgelines: [],
+        notes: [],
+        notesPerLine: {},
 
-        judgelineEvent: {
-            speed: [],
-            moveX: [],
-            moveY: [],
-            rotate: [],
-            alpha: []
+        pushEventToLine: function (lineId, eventName, event)
+        {
+            if (isNaN(lineId) || lineId < 0)
+            {
+                console.warn('Invalid line id: ' + lineId + ', ignored');
+                return;
+            }
+            if (!this.judgelines[lineId]) this.judgelines[lineId] = new Judgeline({ id: lineId });
+            if (this.judgelines[lineId].eventLayers.length < 1) this.judgelines[lineId].eventLayers.push(new EventLayer());
+            if (!this.judgelines[lineId].eventLayers[0][eventName]) throw new Error('No such event type: ' + eventName);
+
+            let events = this.judgelines[lineId].eventLayers[0][eventName];
+            let lastEvent = events[events.length - 1];
+
+            if (
+                lastEvent &&
+                lastEvent.startTime == event.startTime &&
+                (
+                    isNaN(lastEvent.endTime) ||
+                    isNaN(event.endTime) ||
+                    (
+                        !isNaN(lastEvent.endTime) &&
+                        !isNaN(event.endTime) &&
+                        lastEvent.endTime == event.endTime
+                    )
+                )
+            ) {
+                lastEvent.endTime = event.endTime;
+                
+                if (isNaN(parseFloat(event.value)))
+                {
+                    lastEvent.start = event.start;
+                    lastEvent.end = event.end;
+                }
+                else
+                {
+                    lastEvent.value = event.value;
+                }
+            }
+            else
+            {
+                events.push(event);
+            }
         }
-    }
+    };
+
+    chartSimple.pushEventToLine = chartSimple.pushEventToLine.bind(chartSimple);
 
     if (!isNaN(parseFloat(rawChart[0])))
     {
@@ -69,24 +107,29 @@ export default function PhiEditChartConverter(_chart)
 
         let command = _command.split(' ');
 
+        for (let commandIndex = 1; commandIndex < command.length; commandIndex++)
+        {
+            command[commandIndex] = parseFloat(command[commandIndex]);
+        }
+
         switch (command[0])
         {
             // bpm 列表
             case 'bp': {
-                commands.bpm.push({
-                    startBeat : !isNaN(parseFloat(command[1])) ? parseFloat(command[1]) : 0,
-                    bpm       : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 1 ? parseFloat(command[2]) : 120
+                chartSimple.bpm.push({
+                    startBeat : command[1] || 0,
+                    bpm       : command[2] || 120
                 });
                 break;
             }
             // note
             case 'n1':
             { // tap
-                commands.note.push({
+                chartSimple.notes.push({
                     type      : 1,
-                    lineId    : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
-                    positionX : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) : 0,
+                    lineId    : !isNaN(command[1]) ? command[1] : -1,
+                    startTime : command[2] || 0,
+                    positionX : command[3] || 0,
                     isAbove   : command[4] == 1 ? true : false,
                     isFake    : command[5] == 1 ? true : false
                 });
@@ -94,12 +137,12 @@ export default function PhiEditChartConverter(_chart)
             }
             case 'n2':
             { // hold
-                commands.note.push({
+                chartSimple.notes.push({
                     type      : 3,
-                    lineId    : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
-                    endTime   : !isNaN(parseFloat(command[3])) && parseFloat(command[3]) >= parseFloat(command[2]) ? parseFloat(command[3]) : parseFloat(command[2]),
-                    positionX : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) : 0,
+                    lineId    : !isNaN(command[1]) ? command[1] : -1,
+                    startTime : command[2] || 0,
+                    endTime   : command[3] || (command[2] || 0),
+                    positionX : command[4] || 0,
                     isAbove   : command[5] == 1 ? true : false,
                     isFake    : command[6] == 1 ? true : false
                 });
@@ -107,11 +150,11 @@ export default function PhiEditChartConverter(_chart)
             }
             case 'n3':
             { // flick
-                commands.note.push({
+                chartSimple.notes.push({
                     type      : 4,
-                    lineId    : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
-                    positionX : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) : 0,
+                    lineId    : !isNaN(command[1]) ? command[1] : -1,
+                    startTime : command[2] || 0,
+                    positionX : command[3] || 0,
                     isAbove   : command[4] == 1 ? true : false,
                     isFake    : command[5] == 1 ? true : false
                 });
@@ -119,11 +162,11 @@ export default function PhiEditChartConverter(_chart)
             }
             case 'n4':
             { // drag
-                commands.note.push({
+                chartSimple.notes.push({
                     type      : 2,
-                    lineId    : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
-                    positionX : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) : 0,
+                    lineId    : !isNaN(command[1]) ? command[1] : -1,
+                    startTime : command[2] || 0,
+                    positionX : command[3] || 0,
                     isAbove   : command[4] == 1 ? true : false,
                     isFake    : command[5] == 1 ? true : false
                 });
@@ -132,109 +175,100 @@ export default function PhiEditChartConverter(_chart)
             // note 附加信息
             case '#':
             { // 速度
-                commands.note[commands.note.length - 1].speed = !isNaN(parseFloat(command[1])) ? parseFloat(command[1]) : 1;
+                chartSimple.notes[chartSimple.notes.length - 1].speed = !isNaN(command[1]) ? command[1] : 1;
                 break;
             }
             case '&':
             { // 缩放
-                commands.note[commands.note.length - 1].xScale = !isNaN(parseFloat(command[1])) ? parseFloat(command[1]) : 1;
+                chartSimple.notes[chartSimple.notes.length - 1].xScale = !isNaN(command[1]) ? command[1] : 1;
                 break;
             }
             // 判定线事件相关
             case 'cv':
             { // speed
-                commands.judgelineEvent.speed.push({
-                    lineId    : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                chartSimple.pushEventToLine(command[1], 'speed', {
+                    startTime : command[2] || 0,
                     endTime   : NaN,
-                    value     : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) / 7 : 1
+                    value     : !isNaN(command[3]) ? command[3] / 7 : 1
                 });
                 break;
             }
             case 'cm':
             { // moveX & moveY
-                commands.judgelineEvent.moveX.push({
-                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
-                    endTime    : !isNaN(parseFloat(command[3])) && parseFloat(command[3]) >= parseFloat(command[2]) ? parseFloat(command[3]) : parseFloat(command[2]),
+                chartSimple.pushEventToLine(command[1], 'moveX', {
+                    startTime  : command[2] || 0,
+                    endTime    : command[3] || (command[2] || 0),
                     start      : NaN,
-                    end        : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) / 2048 - 0.5 : 0,
-                    easingType : !isNaN(parseFloat(command[6])) && parseFloat(command[6]) >= 1 ? parseFloat(command[6]) : 1
+                    end        : command[4] / 2048 - 0.5 || 0,
+                    easingType : command[6] || 1
                 });
-                commands.judgelineEvent.moveY.push({
-                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
-                    endTime    : !isNaN(parseFloat(command[3])) && parseFloat(command[3]) >= parseFloat(command[2]) ? parseFloat(command[3]) : parseFloat(command[2]),
+                chartSimple.pushEventToLine(command[1], 'moveY', {
+                    startTime  : command[2] || 0,
+                    endTime    : command[3] || (command[2] || 0),
                     start      : NaN,
-                    end        : !isNaN(parseFloat(command[5])) ? parseFloat(command[5]) / 1400 - 0.5 : 0,
-                    easingType : !isNaN(parseFloat(command[6])) && parseFloat(command[6]) >= 1 ? parseFloat(command[6]) : 1
+                    end        : command[5] / 1400 - 0.5 || 0,
+                    easingType : command[6] || 1
                 });
                 break;
             }
             case 'cp':
             { // moveX & moveY（瞬时）
-                commands.judgelineEvent.moveX.push({
-                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                chartSimple.pushEventToLine(command[1], 'moveX', {
+                    startTime  : command[2] || 0,
                     endTime    : NaN,
-                    start      : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) / 2048 - 0.5 : 0,
-                    end        : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) / 2048 - 0.5 : 0,
+                    start      : command[3] / 2048 - 0.5 || 0,
+                    end        : command[3] / 2048 - 0.5 || 0,
                     easingType : 1
                 });
-                commands.judgelineEvent.moveY.push({
-                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                chartSimple.pushEventToLine(command[1], 'moveY', {
+                    startTime  : command[2] || 0,
                     endTime    : NaN,
-                    start      : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) / 1400 - 0.5 : 0,
-                    end        : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) / 1400 - 0.5 : 0,
+                    start      : command[4] / 1400 - 0.5 || 0,
+                    end        : command[4] / 1400 - 0.5 || 0,
                     easingType : 1
                 });
                 break;
             }
             case 'cr':
             { // rotate
-                commands.judgelineEvent.rotate.push({
-                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
-                    endTime    : !isNaN(parseFloat(command[3])) && parseFloat(command[3]) >= parseFloat(command[2]) ? parseFloat(command[3]) : parseFloat(command[2]),
+                chartSimple.pushEventToLine(command[1], 'rotate', {
+                    startTime  : command[2] || 0,
+                    endTime    : command[3] || (command[2] || 0),
                     start      : NaN,
-                    end        : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) : 0,
-                    easingType : !isNaN(parseFloat(command[5])) && parseFloat(command[5]) >= 1 ? parseFloat(command[5]) : 1
+                    end        : command[4] || 0,
+                    easingType : command[5] || 1
                 });
                 break;
             }
             case 'cd':
             { // rotate（瞬时）
-                commands.judgelineEvent.rotate.push({
-                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                chartSimple.pushEventToLine(command[1], 'rotate', {
+                    startTime  : command[2] || 0,
                     endTime    : NaN,
-                    start      : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) : 0,
-                    end        : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) : 0,
+                    start      : command[3] || 0,
+                    end        : command[3] || 0,
                     easingType : 1
                 });
                 break;
             }
             case 'cf':
             { // alpha
-                commands.judgelineEvent.alpha.push({
-                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
-                    endTime    : !isNaN(parseFloat(command[3])) && parseFloat(command[3]) >= parseFloat(command[2]) ? parseFloat(command[3]) : parseFloat(command[2]),
+                chartSimple.pushEventToLine(command[1], 'alpha', {
+                    startTime  : command[2] || 0,
+                    endTime    : command[3] || (command[2] || 0),
                     start      : NaN,
-                    end        : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) / 255 : 1,
+                    end        : !isNaN(command[4]) ? command[4] / 255 : 1,
                     easingType : 1
                 });
                 break;
             }
             case 'ca':
             { // alpha（瞬时）
-                commands.judgelineEvent.alpha.push({
-                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
-                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                chartSimple.pushEventToLine(command[1], 'alpha', {
+                    startTime  : command[2] || 0,
                     endTime    : NaN,
-                    start      : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) / 255 : 1,
-                    end        : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) / 255 : 1,
+                    start      : !isNaN(command[3]) ? command[3] / 255 : 1,
+                    end        : !isNaN(command[3]) ? command[3] / 255 : 1,
                     easingType : 1
                 });
                 break;
@@ -246,9 +280,9 @@ export default function PhiEditChartConverter(_chart)
         }
     });
 
-    if (commands.bpm.length <= 0)
+    if (chartSimple.bpm.length <= 0)
     {
-        commands.bpm.push({
+        chartSimple.bpm.push({
             startBeat : 0,
             endBeat   : 1e4,
             bpm       : 120
@@ -260,10 +294,10 @@ export default function PhiEditChartConverter(_chart)
         let bpmChangedBeat = 0; // 当前 BPM 是在什么时候被更改的（Beat）
         let bpmChangedTime = 0; // 当前 BPM 是在什么时候被更改的（秒）
 
-        commands.bpm.forEach((bpm, index) =>
+        chartSimple.bpm.forEach((bpm, index) =>
         {   
 
-            bpm.endBeat = commands.bpm[index + 1] ? commands.bpm[index + 1].startBeat : 1e4;
+            bpm.endBeat = chartSimple.bpm[index + 1] ? chartSimple.bpm[index + 1].startBeat : 1e4;
 
             bpmChangedTime += currentBeatRealTime * (bpm.startBeat - bpmChangedBeat);
             bpm.startTime = bpmChangedTime;
@@ -277,32 +311,12 @@ export default function PhiEditChartConverter(_chart)
     }
 
     // note 和 bpm 按时间排序
-    commands.bpm.sort((a, b) => b.startBeat - a.startBeat);
-    commands.note.sort((a, b) => a.startTime - b.startTime);
+    chartSimple.bpm.sort((a, b) => b.startBeat - a.startBeat);
+    chartSimple.notes.sort((a, b) => a.startTime - b.startTime);
 
     // 将事件推送给对应的判定线
-    for (const eventName in commands.judgelineEvent)
-    {
-        let events = commands.judgelineEvent[eventName];
-        
-        events.forEach((event) =>
-        {
-            if (event.lineId < 0)
-            {
-                console.warn('Invaild line ID: ' + event.lineId + ', ignoring');
-                return;
-            }
-            if (!judgelines[event.lineId])
-            {
-                judgelines[event.lineId] = new Judgeline({ id: event.lineId });
-                judgelines[event.lineId].eventLayers.push(new EventLayer());
-            }
-
-            judgelines[event.lineId].eventLayers[0][eventName].push(event);
-        });
-    }
-
-    judgelines.forEach((judgeline) =>
+    chart.judgelines = chartSimple.judgelines;
+    chart.judgelines.forEach((judgeline) =>
     {
         judgeline.sortEvent();
 
@@ -372,7 +386,7 @@ export default function PhiEditChartConverter(_chart)
         for (const name in judgeline.eventLayers[0])
         {
             if (!(judgeline.eventLayers[0][name] instanceof Array)) continue;
-            judgeline.eventLayers[0][name] = utils.calculateRealTime(commands.bpm, judgeline.eventLayers[0][name]);
+            judgeline.eventLayers[0][name] = utils.calculateRealTime(chartSimple.bpm, judgeline.eventLayers[0][name]);
         }
 
         judgeline.sortEvent();
@@ -380,11 +394,10 @@ export default function PhiEditChartConverter(_chart)
     });
 
     // 计算 note 的真实时间
-    commands.note = utils.calculateRealTime(commands.bpm, commands.note);
-
-    commands.note.forEach((note, noteIndex) =>
+    chartSimple.notes = utils.calculateRealTime(chartSimple.bpm, chartSimple.notes);
+    chartSimple.notes.forEach((note, noteIndex) =>
     {
-        let judgeline = judgelines[note.lineId];
+        let judgeline = chart.judgelines[note.lineId];
 
         if (!judgeline)
         {
@@ -408,8 +421,8 @@ export default function PhiEditChartConverter(_chart)
         }
 
         // 推送 Note
-        if (!commands.notePerLine[note.lineId]) commands.notePerLine[note.lineId] = [];
-        commands.notePerLine[note.lineId].push(new Note({
+        if (!chartSimple.notesPerLine[note.lineId]) chartSimple.notesPerLine[note.lineId] = [];
+        chartSimple.notesPerLine[note.lineId].push(new Note({
             id            : noteIndex,
             type          : note.type,
             time          : note.startTime,
@@ -425,20 +438,16 @@ export default function PhiEditChartConverter(_chart)
         }));
     });
 
-    for (const lineId in commands.notePerLine)
+    for (const lineId in chartSimple.notesPerLine)
     {
-        commands.notePerLine[lineId].sort((a, b) => a.time - b.time);
-        commands.notePerLine[lineId].forEach((note, noteIndex) =>
+        chartSimple.notesPerLine[lineId].sort((a, b) => a.time - b.time);
+        chartSimple.notesPerLine[lineId].forEach((note, noteIndex) =>
         {
             note.id = noteIndex;
-            notes.push(note);
+            chart.notes.push(note);
         });
     }
-
-    notes.sort((a, b) => a.time - b.time);
-
-    chart.judgelines = judgelines;
-    chart.notes = notes;
+    chart.notes.sort((a, b) => a.time - b.time);
 
     return chart;
 }

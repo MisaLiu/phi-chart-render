@@ -151,7 +151,7 @@ export default class Chart
             stage.addChild(judgeline.sprite);
             if (judgeline.debugSprite)
             {
-                judgeline.debugSprite.zIndex = index + 1;
+                judgeline.debugSprite.zIndex = 999 + judgeline.sprite.zIndex;
                 stage.addChild(judgeline.debugSprite);
             }
 
@@ -176,7 +176,7 @@ export default class Chart
             stage.addChild(note.sprite);
             if (note.debugSprite)
             {
-                note.debugSprite.zIndex = note.sprite.zIndex;
+                note.debugSprite.zIndex = 999 + note.sprite.zIndex;
                 stage.addChild(note.debugSprite);
             }
         });
