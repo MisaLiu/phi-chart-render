@@ -188,7 +188,7 @@ export default function RePhiEditChartConverter(_chart)
             // 计算事件规范值
             eventLayer.speed.forEach((event) =>
             {
-                event.value = Math.fround(event.value / (0.6 / (120 / 900)));
+                event.value = event.value / (0.6 / (120 / 900));
             });
             eventLayer.moveX.forEach((event) =>
             {
@@ -315,12 +315,12 @@ export default function RePhiEditChartConverter(_chart)
         {
             // 计算 Note 的 floorPosition
             let noteStartSpeedEvent = judgeline.getFloorPosition(_note.startTime);
-            _note.floorPosition = noteStartSpeedEvent ? Math.fround(noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (_note.startTime - noteStartSpeedEvent.startTime)) : 0;
+            _note.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (_note.startTime - noteStartSpeedEvent.startTime) : 0;
 
             if (_note.type == 2)
             {
                 let noteEndSpeedEvent = judgeline.getFloorPosition(_note.endTime);
-                _note.holdLength = Math.fround((noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (_note.endTime - noteEndSpeedEvent.startTime) : 0) - _note.floorPosition);
+                _note.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (_note.endTime - noteEndSpeedEvent.startTime) : 0) - _note.floorPosition;
             }
             else
             {
@@ -337,12 +337,12 @@ export default function RePhiEditChartConverter(_chart)
                     _note.type == 4 ? 2 : 1
                 ),
                 time          : _note.startTime,
-                holdTime      : Math.fround(_note.endTime - _note.startTime),
+                holdTime      : _note.endTime - _note.startTime,
                 speed         : _note.speed,
                 floorPosition : _note.floorPosition,
                 holdLength    : _note.holdLength,
                 positionX     : (_note.positionX / (670 * (9 / 80))),
-                basicAlpha    : Math.fround(_note.alpha / 255),
+                basicAlpha    : _note.alpha / 255,
                 visibleTime   : _note.visibleTime < 999999 ? _note.visibleTime : NaN,
                 yOffset       : (_note.yOffset / 900),
                 xScale        : _note.size,
@@ -547,7 +547,7 @@ function separateSpeedEvent(event)
         result.push({
             startTime : event.startTime,
             endTime   : event.endTime,
-            value     : Math.fround(event.start)
+            value     : event.start
         });
     }
 
@@ -569,5 +569,5 @@ function _valueCalculator(event, currentTime, startValue = 0, endValue = 1)
 
     easePercent = (easePercent - easePercentStart) / (easePercentEnd - easePercentStart);
 
-    return Math.fround(startValue * (1 - easePercent) + endValue * easePercent);
+    return startValue * (1 - easePercent) + endValue * easePercent;
 }

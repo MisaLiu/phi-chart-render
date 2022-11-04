@@ -108,12 +108,12 @@ export default function OfficialChartConverter(_chart)
 
         {  // 考虑到 js 精度，此处重新计算 Note 的 floorPosition 值
             let noteStartSpeedEvent = judgeline.getFloorPosition(rawNote.time);
-            rawNote.floorPosition = noteStartSpeedEvent ? Math.fround(noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (rawNote.time - noteStartSpeedEvent.startTime)) : 0;
+            rawNote.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (rawNote.time - noteStartSpeedEvent.startTime) : 0;
 
             if (rawNote.type == 3)
             {
                 let noteEndSpeedEvent = judgeline.getFloorPosition(rawNote.holdEndTime);
-                rawNote.holdLength = Math.fround((noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (rawNote.holdEndTime - noteEndSpeedEvent.startTime) : 0) - rawNote.floorPosition);
+                rawNote.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (rawNote.holdEndTime - noteEndSpeedEvent.startTime) : 0) - rawNote.floorPosition;
             }
             else
             {
@@ -190,5 +190,5 @@ function convertOfficialVersion(chart)
 }
 
 function calcRealTime(time, bpm) {
-    return Math.fround(time / bpm * 1.875);
+    return time / bpm * 1.875;
 }

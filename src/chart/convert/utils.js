@@ -8,8 +8,8 @@ const calcBetweenTime = 0.125; // 1/32
  */
 function calculateEventBeat(event)
 {
-    event.startTime = Math.fround(event.startTime[0] + (event.startTime[1] / event.startTime[2]));
-    event.endTime = Math.fround(event.endTime[0] + (event.endTime[1] / event.endTime[2]))
+    event.startTime = event.startTime[0] + (event.startTime[1] / event.startTime[2]);
+    event.endTime = event.endTime[0] + (event.endTime[1] / event.endTime[2]);
     return event;
 }
 
@@ -52,7 +52,7 @@ function valueCalculator(event, Easings, currentTime, easingsOffset = 1)
 
     easePercent = (easePercent - easePercentStart) / (easePercentEnd - easePercentStart);
 
-    return Math.fround(event.start * (1 - easePercent) + event.end * easePercent);
+    return event.start * (1 - easePercent) + event.end * easePercent;
 }
 
 /**
@@ -74,14 +74,14 @@ function calculateRealTime(_bpmList, _events)
             let bpm = bpmList[bpmIndex];
 
             if (bpm.startBeat > event.endTime) continue;
-            event.endTime = Math.fround(bpm.startTime + ((event.endTime - bpm.startBeat) * bpm.beatTime));
+            event.endTime = bpm.startTime + ((event.endTime - bpm.startBeat) * bpm.beatTime);
 
             for (let nextBpmIndex = bpmIndex; nextBpmIndex < bpmLength; nextBpmIndex++)
             {
                 let nextBpm = bpmList[nextBpmIndex];
 
                 if (nextBpm.startBeat > event.startTime) continue;
-                event.startTime = Math.fround(nextBpm.startTime + ((event.startTime - nextBpm.startBeat) * nextBpm.beatTime));
+                event.startTime = nextBpm.startTime + ((event.startTime - nextBpm.startBeat) * nextBpm.beatTime);
                 break;
             }
 

@@ -135,7 +135,7 @@ export default class Judgeline
             endTime       : floorPositions[0] ? floorPositions[0].startTime : 1e4,
             floorPosition : 1 - 1000
         });
-        currentFloorPosition += Math.fround(floorPositions[0].endTime);
+        currentFloorPosition += floorPositions[0].endTime;
         
         for (let floorPositionIndex = 1; floorPositionIndex < floorPositions.length; floorPositionIndex++)
         {
@@ -143,10 +143,10 @@ export default class Judgeline
             let nextEvent = floorPositionIndex < floorPositions.length - 1 ? floorPositions[floorPositionIndex + 1] : { startTime: 1e4 };
             let currentTime = currentEvent.startTime;
 
-            floorPositions[floorPositionIndex].floorPosition = Math.fround(currentFloorPosition);
+            floorPositions[floorPositionIndex].floorPosition = currentFloorPosition;
             floorPositions[floorPositionIndex].endTime = nextEvent.startTime;
 
-            currentFloorPosition += Math.fround((nextEvent.startTime - currentEvent.startTime) * this._calcSpeedValue(currentTime));
+            currentFloorPosition += (nextEvent.startTime - currentEvent.startTime) * this._calcSpeedValue(currentTime);
         }
 
         this.floorPositions = floorPositions;
@@ -188,7 +188,7 @@ export default class Judgeline
                 currentValue = event.value;
             }
 
-            result = Math.fround(result + currentValue);
+            result += currentValue;
         });
 
         return result;
@@ -268,7 +268,7 @@ export default class Judgeline
             if (event.endTime < currentTime) continue;
             if (event.startTime > currentTime) break;
 
-            this.floorPosition = Math.fround((currentTime - event.startTime) * this.speed + event.floorPosition);
+            this.floorPosition = (currentTime - event.startTime) * this.speed + event.floorPosition;
         };
 
         for (const event of this.extendEvent.scaleX)

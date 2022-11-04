@@ -8,7 +8,7 @@ export default class Chart
     {
         this.judgelines = [];
         this.notes      = [];
-        this.offset     = !isNaN(Number(params.offset)) ? Number(params.offset) : 0;
+        this.offset     = !isNaN(parseFloat(params.offset)) ? parseFloat(params.offset) : 0;
 
         this.music      = params.music ? params.music : null;
         this.bg         = params.bg ? params.bg : null;
@@ -85,8 +85,8 @@ export default class Chart
 
             chart.judgelines[lineInfo.LineId].texture = lineInfo.Image;
             chart.judgelines[lineInfo.LineId].useOfficialScale = true;
-            chart.judgelines[lineInfo.LineId].scaleX = !isNaN(lineInfo.Horz) ? Number(lineInfo.Horz) : 1;
-            chart.judgelines[lineInfo.LineId].scaleY = !isNaN(lineInfo.Vert) ? Number(lineInfo.Vert) : 1;
+            chart.judgelines[lineInfo.LineId].scaleX = !isNaN(lineInfo.Horz) ? parseFloat(lineInfo.Horz) : 1;
+            chart.judgelines[lineInfo.LineId].scaleY = !isNaN(lineInfo.Vert) ? parseFloat(lineInfo.Vert) : 1;
 
             chart.judgelines[lineInfo.LineId].extendEvent.scaleX.push({
                 startTime: 1 - 1000,
@@ -106,7 +106,7 @@ export default class Chart
         chart.notes.forEach((note, index) =>
         {
             if (!chart.notes[index + 1]) return;
-            if (floorNum(note.time, 3) == floorNum(chart.notes[index + 1].time, 3))
+            if (roundNum(note.time, 2) == roundNum(chart.notes[index + 1].time, 2)) /* JavaScript 我操你妈 */
             {
                 chart.notes[index].isMulti = true;
                 chart.notes[index + 1].isMulti = true;
@@ -444,4 +444,9 @@ function arrangeLineEvents(events) {
 function floorNum(num, n)
 {
     return Math.floor(num * (10 ** n)) / (10 ** n);
+}
+
+function roundNum(num, n)
+{
+    return Math.round(num * (10 ** n)) / (10 ** n);
 }

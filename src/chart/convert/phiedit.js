@@ -56,9 +56,9 @@ export default function PhiEditChartConverter(_chart)
         }
     }
 
-    if (!isNaN(Number(rawChart[0])))
+    if (!isNaN(parseFloat(rawChart[0])))
     {
-        chart.offset = Number((Number(rawChart.shift()) / 1000).toFixed(4)) - 0.175;
+        chart.offset = parseFloat((parseFloat(rawChart.shift()) / 1000).toFixed(4)) - 0.175;
     }
 
     rawChart.forEach((_command, commandIndex) =>
@@ -74,8 +74,8 @@ export default function PhiEditChartConverter(_chart)
             // bpm 列表
             case 'bp': {
                 commands.bpm.push({
-                    startBeat : !isNaN(Number(command[1])) ? Number(command[1]) : 0,
-                    bpm       : !isNaN(Number(command[2])) && Number(command[2]) >= 1 ? Number(command[2]) : 120
+                    startBeat : !isNaN(parseFloat(command[1])) ? parseFloat(command[1]) : 0,
+                    bpm       : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 1 ? parseFloat(command[2]) : 120
                 });
                 break;
             }
@@ -84,9 +84,9 @@ export default function PhiEditChartConverter(_chart)
             { // tap
                 commands.note.push({
                     type      : 1,
-                    lineId    : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    positionX : !isNaN(Number(command[3])) ? Number(command[3]) : 0,
+                    lineId    : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                    positionX : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) : 0,
                     isAbove   : command[4] == 1 ? true : false,
                     isFake    : command[5] == 1 ? true : false
                 });
@@ -96,10 +96,10 @@ export default function PhiEditChartConverter(_chart)
             { // hold
                 commands.note.push({
                     type      : 3,
-                    lineId    : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    endTime   : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
-                    positionX : !isNaN(Number(command[4])) ? Number(command[4]) : 0,
+                    lineId    : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                    endTime   : !isNaN(parseFloat(command[3])) && parseFloat(command[3]) >= parseFloat(command[2]) ? parseFloat(command[3]) : parseFloat(command[2]),
+                    positionX : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) : 0,
                     isAbove   : command[5] == 1 ? true : false,
                     isFake    : command[6] == 1 ? true : false
                 });
@@ -109,9 +109,9 @@ export default function PhiEditChartConverter(_chart)
             { // flick
                 commands.note.push({
                     type      : 4,
-                    lineId    : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    positionX : !isNaN(Number(command[3])) ? Number(command[3]) : 0,
+                    lineId    : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                    positionX : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) : 0,
                     isAbove   : command[4] == 1 ? true : false,
                     isFake    : command[5] == 1 ? true : false
                 });
@@ -121,9 +121,9 @@ export default function PhiEditChartConverter(_chart)
             { // drag
                 commands.note.push({
                     type      : 2,
-                    lineId    : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    positionX : !isNaN(Number(command[3])) ? Number(command[3]) : 0,
+                    lineId    : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                    positionX : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) : 0,
                     isAbove   : command[4] == 1 ? true : false,
                     isFake    : command[5] == 1 ? true : false
                 });
@@ -132,61 +132,61 @@ export default function PhiEditChartConverter(_chart)
             // note 附加信息
             case '#':
             { // 速度
-                commands.note[commands.note.length - 1].speed = !isNaN(Number(command[1])) ? Number(command[1]) : 1;
+                commands.note[commands.note.length - 1].speed = !isNaN(parseFloat(command[1])) ? parseFloat(command[1]) : 1;
                 break;
             }
             case '&':
             { // 缩放
-                commands.note[commands.note.length - 1].xScale = !isNaN(Number(command[1])) ? Number(command[1]) : 1;
+                commands.note[commands.note.length - 1].xScale = !isNaN(parseFloat(command[1])) ? parseFloat(command[1]) : 1;
                 break;
             }
             // 判定线事件相关
             case 'cv':
             { // speed
                 commands.judgelineEvent.speed.push({
-                    lineId    : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
+                    lineId    : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
                     endTime   : NaN,
-                    value     : !isNaN(Number(command[3])) ? Number(command[3]) / 7 : 1
+                    value     : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) / 7 : 1
                 });
                 break;
             }
             case 'cm':
             { // moveX & moveY
                 commands.judgelineEvent.moveX.push({
-                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
+                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                    endTime    : !isNaN(parseFloat(command[3])) && parseFloat(command[3]) >= parseFloat(command[2]) ? parseFloat(command[3]) : parseFloat(command[2]),
                     start      : NaN,
-                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 2048 - 0.5 : 0,
-                    easingType : !isNaN(Number(command[6])) && Number(command[6]) >= 1 ? Number(command[6]) : 1
+                    end        : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) / 2048 - 0.5 : 0,
+                    easingType : !isNaN(parseFloat(command[6])) && parseFloat(command[6]) >= 1 ? parseFloat(command[6]) : 1
                 });
                 commands.judgelineEvent.moveY.push({
-                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
+                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                    endTime    : !isNaN(parseFloat(command[3])) && parseFloat(command[3]) >= parseFloat(command[2]) ? parseFloat(command[3]) : parseFloat(command[2]),
                     start      : NaN,
-                    end        : !isNaN(Number(command[5])) ? Number(command[5]) / 1400 - 0.5 : 0,
-                    easingType : !isNaN(Number(command[6])) && Number(command[6]) >= 1 ? Number(command[6]) : 1
+                    end        : !isNaN(parseFloat(command[5])) ? parseFloat(command[5]) / 1400 - 0.5 : 0,
+                    easingType : !isNaN(parseFloat(command[6])) && parseFloat(command[6]) >= 1 ? parseFloat(command[6]) : 1
                 });
                 break;
             }
             case 'cp':
             { // moveX & moveY（瞬时）
                 commands.judgelineEvent.moveX.push({
-                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
+                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
                     endTime    : NaN,
-                    start      : !isNaN(Number(command[3])) ? Number(command[3]) / 2048 - 0.5 : 0,
-                    end        : !isNaN(Number(command[3])) ? Number(command[3]) / 2048 - 0.5 : 0,
+                    start      : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) / 2048 - 0.5 : 0,
+                    end        : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) / 2048 - 0.5 : 0,
                     easingType : 1
                 });
                 commands.judgelineEvent.moveY.push({
-                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
+                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
                     endTime    : NaN,
-                    start      : !isNaN(Number(command[4])) ? Number(command[4]) / 1400 - 0.5 : 0,
-                    end        : !isNaN(Number(command[4])) ? Number(command[4]) / 1400 - 0.5 : 0,
+                    start      : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) / 1400 - 0.5 : 0,
+                    end        : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) / 1400 - 0.5 : 0,
                     easingType : 1
                 });
                 break;
@@ -194,23 +194,23 @@ export default function PhiEditChartConverter(_chart)
             case 'cr':
             { // rotate
                 commands.judgelineEvent.rotate.push({
-                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
+                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                    endTime    : !isNaN(parseFloat(command[3])) && parseFloat(command[3]) >= parseFloat(command[2]) ? parseFloat(command[3]) : parseFloat(command[2]),
                     start      : NaN,
-                    end        : !isNaN(Number(command[4])) ? Number(command[4]) : 0,
-                    easingType : !isNaN(Number(command[5])) && Number(command[5]) >= 1 ? Number(command[5]) : 1
+                    end        : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) : 0,
+                    easingType : !isNaN(parseFloat(command[5])) && parseFloat(command[5]) >= 1 ? parseFloat(command[5]) : 1
                 });
                 break;
             }
             case 'cd':
             { // rotate（瞬时）
                 commands.judgelineEvent.rotate.push({
-                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
+                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
                     endTime    : NaN,
-                    start      : !isNaN(Number(command[3])) ? Number(command[3]) : 0,
-                    end        : !isNaN(Number(command[3])) ? Number(command[3]) : 0,
+                    start      : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) : 0,
+                    end        : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) : 0,
                     easingType : 1
                 });
                 break;
@@ -218,11 +218,11 @@ export default function PhiEditChartConverter(_chart)
             case 'cf':
             { // alpha
                 commands.judgelineEvent.alpha.push({
-                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
-                    endTime    : !isNaN(Number(command[3])) && Number(command[3]) >= Number(command[2]) ? Number(command[3]) : Number(command[2]),
+                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
+                    endTime    : !isNaN(parseFloat(command[3])) && parseFloat(command[3]) >= parseFloat(command[2]) ? parseFloat(command[3]) : parseFloat(command[2]),
                     start      : NaN,
-                    end        : !isNaN(Number(command[4])) ? Math.fround(Number(command[4]) / 255) : 1,
+                    end        : !isNaN(parseFloat(command[4])) ? parseFloat(command[4]) / 255 : 1,
                     easingType : 1
                 });
                 break;
@@ -230,11 +230,11 @@ export default function PhiEditChartConverter(_chart)
             case 'ca':
             { // alpha（瞬时）
                 commands.judgelineEvent.alpha.push({
-                    lineId     : !isNaN(Number(command[1])) && Number(command[1]) >= 0 ? Number(command[1]) : -1,
-                    startTime  : !isNaN(Number(command[2])) && Number(command[2]) >= 0 ? Number(command[2]) : 0,
+                    lineId     : !isNaN(parseFloat(command[1])) && parseFloat(command[1]) >= 0 ? parseFloat(command[1]) : -1,
+                    startTime  : !isNaN(parseFloat(command[2])) && parseFloat(command[2]) >= 0 ? parseFloat(command[2]) : 0,
                     endTime    : NaN,
-                    start      : !isNaN(Number(command[3])) ? Math.fround(Number(command[3]) / 255) : 1,
-                    end        : !isNaN(Number(command[3])) ? Math.fround(Number(command[3]) / 255) : 1,
+                    start      : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) / 255 : 1,
+                    end        : !isNaN(parseFloat(command[3])) ? parseFloat(command[3]) / 255 : 1,
                     easingType : 1
                 });
                 break;
@@ -394,12 +394,12 @@ export default function PhiEditChartConverter(_chart)
 
         {  // 计算 Note 的 floorPosition
             let noteStartSpeedEvent = judgeline.getFloorPosition(note.startTime);
-            note.floorPosition = noteStartSpeedEvent ? Math.fround(noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (note.startTime - noteStartSpeedEvent.startTime)) : 0;
+            note.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (note.startTime - noteStartSpeedEvent.startTime) : 0;
 
             if (note.type == 3)
             {
                 let noteEndSpeedEvent = judgeline.getFloorPosition(note.endTime);
-                note.holdLength = Math.fround((noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (note.endTime - noteEndSpeedEvent.startTime) : 0) - note.floorPosition);
+                note.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (note.endTime - noteEndSpeedEvent.startTime) : 0) - note.floorPosition;
             }
             else
             {
@@ -413,7 +413,7 @@ export default function PhiEditChartConverter(_chart)
             id            : noteIndex,
             type          : note.type,
             time          : note.startTime,
-            holdTime      : Math.fround(note.endTime - note.startTime),
+            holdTime      : note.endTime - note.startTime,
             speed         : note.speed,
             isAbove       : note.isAbove,
             isFake        : note.isFake,
