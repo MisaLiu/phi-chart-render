@@ -440,17 +440,5 @@ export default function PhiEditChartConverter(_chart)
     chart.judgelines = judgelines;
     chart.notes = notes;
 
-    chart.notes.forEach((note, index) =>
-    {
-        let nextNote = chart.notes[index + 1];
-        if (!nextNote) return;
-
-        if (note.time == nextNote.time)
-        {
-            note.isMulti = true;
-            nextNote.isMulti = true;
-        }
-    })
-
     return chart;
 }

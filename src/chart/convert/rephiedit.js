@@ -359,18 +359,6 @@ export default function RePhiEditChartConverter(_chart)
     chart.judgelines.sort((a, b) => a.id - b.id);
     chart.notes.sort((a, b) => a.time - b.time);
 
-    chart.notes.forEach((note, index) =>
-    {
-        let nextNote = chart.notes[index + 1];
-        if (!nextNote) return;
-
-        if (note.time.toFixed(3) == nextNote.time.toFixed(3))
-        {
-            note.isMulti = true;
-            chart.notes[index + 1].isMulti = true;
-        }
-    });
-    
     chart.judgelines.forEach((judgeline) =>
     {
         if (judgeline.parentLine && judgeline.parentLine > 0) judgeline.parentLine = chart.judgelines[judgeline.parentLine - 1];

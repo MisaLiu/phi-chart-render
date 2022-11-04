@@ -103,6 +103,16 @@ export default class Chart
             });
         });
 
+        chart.notes.forEach((note, index) =>
+        {
+            if (!chart.notes[index + 1]) return;
+            if (floorNum(note.time, 3) == floorNum(chart.notes[index + 1].time, 3))
+            {
+                chart.notes[index].isMulti = true;
+                chart.notes[index + 1].isMulti = true;
+            }
+        });
+
         // console.log(chart);
         return chart;
     }
@@ -429,4 +439,9 @@ function arrangeLineEvents(events) {
     }
     
     return newEvents.slice();
+}
+
+function floorNum(num, n)
+{
+    return Math.floor(num * (10 ** n)) / (10 ** n);
 }
