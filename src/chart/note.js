@@ -197,11 +197,11 @@ export default class Note
             this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
 
             // Note 的绝对位置计算
-            realX = this.sprite.judgelineX + realX;
-            realY = this.sprite.judgelineY + realY;
+            realX += this.sprite.judgelineX;
+            realY += this.sprite.judgelineY;
 
             // Note 落在判定线时的绝对位置计算（补 y 轴偏移）
-            this.sprite.judgelineX += yOffset * this.judgeline.sinr;
+            this.sprite.judgelineX += yOffset * this.judgeline.sinr * -1;
             this.sprite.judgelineY += yOffset * this.judgeline.cosr;
 
             // Note 是否在舞台可视范围内
