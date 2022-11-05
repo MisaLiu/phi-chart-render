@@ -50,7 +50,7 @@ export default function PhiEditChartConverter(_chart)
 
         pushNote: function (note)
         {
-            this.sameTimeNoteCount[note.startTime] = !this.sameTimeNoteCount[note.startTime] ? 1 : this.sameTimeNoteCount[note.startTime] + 1;
+            this.sameTimeNoteCount[floorNum(note.startTime)] = !this.sameTimeNoteCount[floorNum(note.startTime)] ? 1 : this.sameTimeNoteCount[floorNum(note.startTime)] + 1;
             this.notes.push(note);
         },
 
@@ -407,8 +407,10 @@ export default function PhiEditChartConverter(_chart)
     // 计算 Note 高亮
     chartSimple.notes.forEach((note) =>
     {
-        if (chartSimple.sameTimeNoteCount[note.startTime] > 1) note.isMulti = true;
+        if (chartSimple.sameTimeNoteCount[floorNum(note.startTime)] > 1) note.isMulti = true;
     });
+
+    console.log(chartSimple.sameTimeNoteCount);
 
     // 计算 note 的真实时间
     chartSimple.notes = utils.calculateRealTime(chartSimple.bpm, chartSimple.notes);
@@ -474,4 +476,11 @@ export default function PhiEditChartConverter(_chart)
     chart.notes.sort((a, b) => a.time - b.time);
 
     return chart;
+}
+
+
+function floorNum(num)
+{
+    return Math.floor(num * 8);
+    // return Math.floor(num * (10 ** n)) / (10 ** n);
 }
