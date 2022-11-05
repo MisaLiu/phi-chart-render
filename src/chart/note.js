@@ -201,8 +201,8 @@ export default class Note
             realY = this.sprite.judgelineY + realY;
 
             // Note 落在判定线时的绝对位置计算（补 y 轴偏移）
-            this.sprite.judgelineX += yOffset * this.judgeline.sinr;
-            this.sprite.judgelineY += yOffset * this.judgeline.cosr;
+            this.sprite.judgelineX -= yOffset * this.judgeline.sinr;
+            this.sprite.judgelineY -= yOffset * this.judgeline.cosr;
 
             // Note 是否在舞台可视范围内
             this.sprite.outScreen = !isInArea({
