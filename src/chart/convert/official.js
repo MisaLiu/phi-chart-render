@@ -8,6 +8,8 @@ export default function OfficialChartConverter(_chart)
 {
     let chart = new Chart();
     let rawChart = convertOfficialVersion(_chart);
+    let notes = [];
+    let sameTimeNoteCount = {};
 
     chart.offset = rawChart.offset;
 
@@ -15,7 +17,7 @@ export default function OfficialChartConverter(_chart)
     {
         let judgeline = new Judgeline({ id: index });
         let events = new EventLayer();
-        let notes = [];
+        let judgelineNotes = [];
 
         _judgeline.speedEvents.forEach((e) =>
         {
@@ -71,34 +73,50 @@ export default function OfficialChartConverter(_chart)
 
         _judgeline.notesAbove.forEach((rawNote, rawNoteIndex) =>
         {
-            let note = pushNote(rawNote, judgeline, rawNoteIndex, _judgeline.bpm, true);
-            notes.push(note);
+            rawNote.judgeline = judgeline;
+            rawNote.id = rawNoteIndex;
+            rawNote.bpm = _judgeline.bpm;
+            rawNote.isAbove = true;
+            // let note = pushNote(rawNote, judgeline, rawNoteIndex, _judgeline.bpm, true);
+            judgelineNotes.push(rawNote);
         });
         _judgeline.notesBelow.forEach((rawNote, rawNoteIndex) =>
         {
-            let note = pushNote(rawNote, judgeline, rawNoteIndex, _judgeline.bpm, false);
-            notes.push(note);
+            rawNote.judgeline = judgeline;
+            rawNote.id = rawNoteIndex;
+            rawNote.bpm = _judgeline.bpm;
+            rawNote.isAbove = false;
+            // let note = pushNote(rawNote, judgeline, rawNoteIndex, _judgeline.bpm, false);
+            judgelineNotes.push(rawNote);
         });
 
-        notes.sort((a, b) => a.time - b.time);
-        notes.forEach((note, noteIndex) =>
+        judgelineNotes.sort((a, b) => a.time - b.time);
+        judgelineNotes.forEach((note, noteIndex) =>
         {
+            sameTimeNoteCount[note.time] = !sameTimeNoteCount[note.time] ? 1 : sameTimeNoteCount[note.time] + 1;
             note.id = noteIndex;
-            chart.notes.push(note);
         });
+
+        notes.push(...judgelineNotes);
 
         chart.judgelines.push(judgeline);
+    });
+
+    notes.sort((a, b) => a.time - b.time);
+    notes.forEach((note) =>
+    {
+        if (sameTimeNoteCount[note.time] > 1) note.isMulti = true;
+        chart.notes.push(pushNote(note));
     });
 
     chart.notes.sort((a, b) => a.time - b.time);
 
     return chart;
 
-    function pushNote(rawNote, judgeline, id = -1, bpm = 120, isAbove = true)
+    function pushNote(rawNote)
     {
-        rawNote.isAbove = isAbove;
-        rawNote.time = calcRealTime(rawNote.time, bpm);
-        rawNote.holdTime = calcRealTime(rawNote.holdTime, bpm);
+        rawNote.time = calcRealTime(rawNote.time, rawNote.bpm);
+        rawNote.holdTime = calcRealTime(rawNote.holdTime, rawNote.bpm);
         rawNote.holdEndTime = rawNote.time + rawNote.holdTime;
 
         if (rawNote.type == 3)
@@ -107,12 +125,12 @@ export default function OfficialChartConverter(_chart)
         }
 
         {  // 考虑到 js 精度，此处重新计算 Note 的 floorPosition 值
-            let noteStartSpeedEvent = judgeline.getFloorPosition(rawNote.time);
+            let noteStartSpeedEvent = rawNote.judgeline.getFloorPosition(rawNote.time);
             rawNote.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (rawNote.time - noteStartSpeedEvent.startTime) : 0;
 
             if (rawNote.type == 3)
             {
-                let noteEndSpeedEvent = judgeline.getFloorPosition(rawNote.holdEndTime);
+                let noteEndSpeedEvent = rawNote.judgeline.getFloorPosition(rawNote.holdEndTime);
                 rawNote.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (rawNote.holdEndTime - noteEndSpeedEvent.startTime) : 0) - rawNote.floorPosition;
             }
             else
@@ -122,7 +140,7 @@ export default function OfficialChartConverter(_chart)
         }
 
         return new Note({
-            id            : id,
+            id            : rawNote.id,
             lineId        : rawNote.lineId,
             type          : rawNote.type,
             time          : rawNote.time,
@@ -132,7 +150,8 @@ export default function OfficialChartConverter(_chart)
             floorPosition : rawNote.floorPosition,
             speed         : rawNote.speed,
             isAbove       : rawNote.isAbove,
-            judgeline     : judgeline
+            isMulti       : rawNote.isMulti,
+            judgeline     : rawNote.judgeline
         });
     }
 };

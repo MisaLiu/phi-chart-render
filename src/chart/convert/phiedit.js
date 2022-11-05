@@ -46,6 +46,13 @@ export default function PhiEditChartConverter(_chart)
         _judgelines: {},
         notes: [],
         notesPerLine: {},
+        sameTimeNoteCount: {},
+
+        pushNote: function (note)
+        {
+            this.sameTimeNoteCount[note.startTime] = !this.sameTimeNoteCount[note.startTime] ? 1 : this.sameTimeNoteCount[note.startTime] + 1;
+            this.notes.push(note);
+        },
 
         pushEventToLine: function (lineId, eventName, event)
         {
@@ -95,6 +102,7 @@ export default function PhiEditChartConverter(_chart)
         }
     };
 
+    chartSimple.pushNote = chartSimple.pushNote.bind(chartSimple);
     chartSimple.pushEventToLine = chartSimple.pushEventToLine.bind(chartSimple);
 
     if (!isNaN(parseFloat(rawChart[0])))
@@ -128,7 +136,7 @@ export default function PhiEditChartConverter(_chart)
             // note
             case 'n1':
             { // tap
-                chartSimple.notes.push({
+                chartSimple.pushNote({
                     type      : 1,
                     lineId    : !isNaN(command[1]) ? command[1] : -1,
                     startTime : command[2] || 0,
@@ -140,7 +148,7 @@ export default function PhiEditChartConverter(_chart)
             }
             case 'n2':
             { // hold
-                chartSimple.notes.push({
+                chartSimple.pushNote({
                     type      : 3,
                     lineId    : !isNaN(command[1]) ? command[1] : -1,
                     startTime : command[2] || 0,
@@ -153,7 +161,7 @@ export default function PhiEditChartConverter(_chart)
             }
             case 'n3':
             { // flick
-                chartSimple.notes.push({
+                chartSimple.pushNote({
                     type      : 4,
                     lineId    : !isNaN(command[1]) ? command[1] : -1,
                     startTime : command[2] || 0,
@@ -165,7 +173,7 @@ export default function PhiEditChartConverter(_chart)
             }
             case 'n4':
             { // drag
-                chartSimple.notes.push({
+                chartSimple.pushNote({
                     type      : 2,
                     lineId    : !isNaN(command[1]) ? command[1] : -1,
                     startTime : command[2] || 0,
@@ -396,6 +404,12 @@ export default function PhiEditChartConverter(_chart)
         judgeline.calcFloorPosition();
     };
 
+    // 计算 Note 高亮
+    chartSimple.notes.forEach((note) =>
+    {
+        if (chartSimple.sameTimeNoteCount[note.startTime] > 1) note.isMulti = true;
+    });
+
     // 计算 note 的真实时间
     chartSimple.notes = utils.calculateRealTime(chartSimple.bpm, chartSimple.notes);
     chartSimple.notes.forEach((note, noteIndex) =>
@@ -432,6 +446,7 @@ export default function PhiEditChartConverter(_chart)
             holdTime      : note.endTime - note.startTime,
             speed         : note.speed,
             isAbove       : note.isAbove,
+            isMulti       : note.isMulti,
             isFake        : note.isFake,
             positionX     : note.positionX * 9 / 1024,
             floorPosition : note.floorPosition,

@@ -70,6 +70,7 @@ const Easing = [
 export default function RePhiEditChartConverter(_chart)
 {
     let notes = [];
+    let sameTimeNoteCount = {};
     let rawChart = convertChartFormat(_chart);
     let chart = new Chart({
         name      : rawChart.META.name,
@@ -314,52 +315,75 @@ export default function RePhiEditChartConverter(_chart)
 
         // 计算 Note 真实时间
         _judgeline.notes = utils.calculateEventsBeat(_judgeline.notes ? _judgeline.notes : []);
-        _judgeline.notes = utils.calculateRealTime(rawChart.BPMList, _judgeline.notes);
         _judgeline.notes.sort((a, b) => a.startTime - b.startTime);
+        _judgeline.notes.forEach((note, noteIndex) =>
+        {
+            sameTimeNoteCount[note.startTime] = !sameTimeNoteCount[note.startTime] ? 1 : sameTimeNoteCount[note.startTime] + 1;
 
+            note.id = noteIndex;
+            note.judgeline = judgeline;
+
+            notes.push(note);
+        });;
+        // _judgeline.notes = utils.calculateRealTime(rawChart.BPMList, _judgeline.notes);
+        
+        /*
         _judgeline.notes.forEach((_note, noteIndex) =>
         {
-            // 计算 Note 的 floorPosition
-            let noteStartSpeedEvent = judgeline.getFloorPosition(_note.startTime);
-            _note.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (_note.startTime - noteStartSpeedEvent.startTime) : 0;
-
-            if (_note.type == 2)
-            {
-                let noteEndSpeedEvent = judgeline.getFloorPosition(_note.endTime);
-                _note.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (_note.endTime - noteEndSpeedEvent.startTime) : 0) - _note.floorPosition;
-            }
-            else
-            {
-                _note.holdLength = 0;
-            }
-
-            // 推送 Note
-            chart.notes.push(new Note({
-                id            : noteIndex,
-                type          : (
-                    _note.type == 1 ? 1 :
-                    _note.type == 2 ? 3 :
-                    _note.type == 3 ? 4 :
-                    _note.type == 4 ? 2 : 1
-                ),
-                time          : _note.startTime,
-                holdTime      : _note.endTime - _note.startTime,
-                speed         : _note.speed,
-                floorPosition : _note.floorPosition,
-                holdLength    : _note.holdLength,
-                positionX     : (_note.positionX / (670 * (9 / 80))),
-                basicAlpha    : _note.alpha / 255,
-                visibleTime   : _note.visibleTime < 999999 ? _note.visibleTime : NaN,
-                yOffset       : (_note.yOffset / 900),
-                xScale        : _note.size,
-                isAbove       : _note.above == 1 ? true : false,
-                isMulti       : false,
-                isFake        : _note.isFake == 1 ? true : false,
-                judgeline     : judgeline
-            }));
+            
         });
+        */
 
         chart.judgelines.push(judgeline);
+    });
+
+    // 计算 Note 高亮
+    notes.forEach((note) =>
+    {
+        if (sameTimeNoteCount[note.startTime] > 1) note.isMulti = true;
+    });
+
+    notes = utils.calculateRealTime(rawChart.BPMList, notes);
+    notes.forEach((note) =>
+    {
+        // 计算 Note 的 floorPosition
+        let noteStartSpeedEvent = note.judgeline.getFloorPosition(note.startTime);
+        note.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (note.startTime - noteStartSpeedEvent.startTime) : 0;
+
+        if (note.type == 2)
+        {
+            let noteEndSpeedEvent = note.judgeline.getFloorPosition(note.endTime);
+            note.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (note.endTime - noteEndSpeedEvent.startTime) : 0) - note.floorPosition;
+        }
+        else
+        {
+            note.holdLength = 0;
+        }
+
+        // 推送 Note
+        chart.notes.push(new Note({
+            id            : note.id,
+            type          : (
+                note.type == 1 ? 1 :
+                note.type == 2 ? 3 :
+                note.type == 3 ? 4 :
+                note.type == 4 ? 2 : 1
+            ),
+            time          : note.startTime,
+            holdTime      : note.endTime - note.startTime,
+            speed         : note.speed,
+            floorPosition : note.floorPosition,
+            holdLength    : note.holdLength,
+            positionX     : (note.positionX / (670 * (9 / 80))),
+            basicAlpha    : note.alpha / 255,
+            visibleTime   : note.visibleTime < 999999 ? note.visibleTime : NaN,
+            yOffset       : (note.yOffset / 900),
+            xScale        : note.size,
+            isAbove       : note.above == 1 ? true : false,
+            isMulti       : note.isMulti,
+            isFake        : note.isFake == 1 ? true : false,
+            judgeline     : note.judgeline
+        }));
     });
 
     chart.judgelines.sort((a, b) => a.id - b.id);
