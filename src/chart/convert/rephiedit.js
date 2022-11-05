@@ -365,9 +365,22 @@ export default function RePhiEditChartConverter(_chart)
     chart.judgelines.sort((a, b) => a.id - b.id);
     chart.notes.sort((a, b) => a.time - b.time);
 
-    chart.judgelines.forEach((judgeline) =>
+    chart.judgelines.forEach((judgeline, judgelineIndex, judgelines) =>
     {
-        if (judgeline.parentLine && judgeline.parentLine > 0 && chart.judgelines[judgeline.parentLine - 1]) judgeline.parentLine = chart.judgelines[judgeline.parentLine - 1];
+        if (judgeline.parentLine && judgeline.parentLine > 0)
+        {
+            let parentLineId = judgeline.parentLine - 1;
+            judgeline.parentLine = null;
+
+            for (const parentLine of judgelines)
+            {
+                if (parentLine.id == parentLineId)
+                {
+                    judgeline.parentLine = parentLine;
+                    break;
+                }
+            }
+        }
         else judgeline.parentLine = null;
     });
     
