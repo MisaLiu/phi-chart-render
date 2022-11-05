@@ -410,8 +410,6 @@ export default function PhiEditChartConverter(_chart)
         if (chartSimple.sameTimeNoteCount[floorNum(note.startTime)] > 1) note.isMulti = true;
     });
 
-    console.log(chartSimple.sameTimeNoteCount);
-
     // 计算 note 的真实时间
     chartSimple.notes = utils.calculateRealTime(chartSimple.bpm, chartSimple.notes);
     chartSimple.notes.forEach((note, noteIndex) =>
