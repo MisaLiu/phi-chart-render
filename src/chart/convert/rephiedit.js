@@ -113,6 +113,12 @@ export default function RePhiEditChartConverter(_chart)
             isCover    : _judgeline.isCover == 1
         });
 
+        if (_judgeline.attachUI && _judgeline.attachUI != '')
+        {
+            console.warn('Line ' + judgelineIndex + ' is using \'attachUI\' feature, ignored this line.\nPlease note that all notes on this line will also be ignored.');
+            return;
+        }
+
         // 处理 EventLayer
         _judgeline.eventLayers.forEach((_eventLayer) =>
         {
@@ -361,7 +367,7 @@ export default function RePhiEditChartConverter(_chart)
 
     chart.judgelines.forEach((judgeline) =>
     {
-        if (judgeline.parentLine && judgeline.parentLine > 0) judgeline.parentLine = chart.judgelines[judgeline.parentLine - 1];
+        if (judgeline.parentLine && judgeline.parentLine > 0 && chart.judgelines[judgeline.parentLine - 1]) judgeline.parentLine = chart.judgelines[judgeline.parentLine - 1];
         else judgeline.parentLine = null;
     });
     
