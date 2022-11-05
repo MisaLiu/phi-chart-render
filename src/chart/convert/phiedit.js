@@ -300,6 +300,8 @@ export default function PhiEditChartConverter(_chart)
         });
     }
 
+    chartSimple.bpm.sort((a, b) => a.startBeat - b.startBeat);
+
     { // 将 Beat 计算为对应的时间（秒）
         let currentBeatRealTime = 0.5; // 当前每个 Beat 的实际时长（秒）
         let bpmChangedBeat = 0; // 当前 BPM 是在什么时候被更改的（Beat）
@@ -335,7 +337,7 @@ export default function PhiEditChartConverter(_chart)
         judgeline.eventLayers[0].alpha.forEach((event, eventIndex, array) =>
         {
             if (isNaN(event.endTime)) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e5;
-            if (isNaN(event.start)) event.start = eventIndex > 0 ? array[eventIndex - 1].end : event.end;
+            if (isNaN(event.start)) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0;
 
             if (event.start < 0) event.start = 0;
             if (event.end < 0) event.end = 0;
