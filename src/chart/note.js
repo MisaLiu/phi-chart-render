@@ -167,7 +167,7 @@ export default class Note
             let _yOffset = size.height * this.yOffset,
                 yOffset = _yOffset * (this.isAbove ? -1 : 1),
                 originX = size.widthPercent * this.positionX,
-                _originY = (this.floorPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed,
+                _originY = (this.floorPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed + _yOffset,
                 originY = _originY * (this.isAbove ? -1 : 1),
 
                 realX = originY * this.judgeline.sinr * -1,
@@ -193,12 +193,16 @@ export default class Note
             }
             
             // Note 落在判定线时的绝对位置计算
-            this.sprite.judgelineX = yOffset * this.judgeline.sinr + originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
-            this.sprite.judgelineY = yOffset * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
+            this.sprite.judgelineX = originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
+            this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
 
             // Note 的绝对位置计算
             realX = this.sprite.judgelineX + realX;
             realY = this.sprite.judgelineY + realY;
+
+            // Note 落在判定线时的绝对位置计算（补 y 轴偏移）
+            this.sprite.judgelineX += yOffset * this.judgeline.sinr;
+            this.sprite.judgelineY += yOffset * this.judgeline.cosr;
 
             // Note 是否在舞台可视范围内
             this.sprite.outScreen = !isInArea({
@@ -223,8 +227,6 @@ export default class Note
                 if (this.judgeline.alpha < 0) this.sprite.visible = false;
 
                 // Note 特殊位置是否可视控制
-                _originY = _originY + _yOffset;
-
                 if (this.type !== 3 && this.time > currentTime && _originY < 0 && this.judgeline.isCover) this.sprite.visible = false;
                 if (this.type !== 3 && this.isFake && this.time <= currentTime) this.sprite.visible = false;
                 if (
