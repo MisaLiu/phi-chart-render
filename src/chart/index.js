@@ -369,7 +369,43 @@ function arrangeLineEvents(events) {
     // 保证时间连续性
     for (let oldEvent of oldEvents) {
         let lastNewEvent = newEvents[newEvents.length - 1];
+
+        if (oldEvent.endTime < oldEvent.startTime)
+        {
+            let newStartTime = oldEvent.endTime,
+                newEndTime = oldEvent.startTime;
+            
+                oldEvent.startTime = newStartTime;
+                oldEvent.endTime = newEndTime;
+        }
+
+        if (lastNewEvent.endTime < oldEvent.startTime)
+        {
+            newEvents.push({
+                startTime : lastNewEvent.endTime,
+                endTime   : oldEvent.startTime,
+                start     : lastNewEvent.end,
+                end       : lastNewEvent.end
+            }, oldEvent);
+        }
+        else if (lastNewEvent.endTime == oldEvent.startTime)
+        {
+            newEvents.push(oldEvent);
+        }
+        else if (lastNewEvent.endTime > oldEvent.startTime)
+        {
+            if (lastNewEvent.endTime < oldEvent.endTime)
+            {
+                newEvents.push({
+                    startTime : lastNewEvent.endTime,
+                    endTime   : oldEvent.endTime,
+                    start     : oldEvent.start + (oldEvent.end - oldEvent.start) * ((lastNewEvent.endTime - oldEvent.startTime) / (oldEvent.endTime - oldEvent.startTime)) + (lastNewEvent.end - oldEvent.start),
+                    end       : oldEvent.end
+                });
+            }
+        }
         
+        /*
         if (lastNewEvent.endTime > oldEvent.endTime)
         {
             // 忽略此分支
@@ -396,6 +432,7 @@ function arrangeLineEvents(events) {
                 end       : lastNewEvent.end
             });
         }
+        */
     }
     
     // 合并相同变化率事件
