@@ -363,8 +363,10 @@ export default function PhiEditChartConverter(_chart)
         });
 
         // Alpha 事件单独进行计算
-        judgeline.eventLayers[0].alpha.forEach((event, eventIndex, array) =>
+        judgeline.eventLayers[0].alpha.forEach((event) =>
         {
+            let noNoteSetsVisibleTime = true;
+
             if (event.start == -1) event.start = -255;
             else if (event.start == -2) event.start = -510;
             else if (event.start < -100 && event.start >= -1000)
@@ -381,18 +383,19 @@ export default function PhiEditChartConverter(_chart)
                     {
                         if (note.lineId != lineId) continue;
                         if (note.startTime < currentTime) continue;
-                        if (note.endTime > currentTime) break;
+                        if (note.startTime > currentTime) break;
 
                         note.visibleBeat = visibleBeat;
+                        noNoteSetsVisibleTime = false;
                     }
                 }
 
-                event.start = 0;
+                event.start = noNoteSetsVisibleTime ? -255 : 0;
             }
 
             if (event.end == -1) event.end = -255;
             else if (event.end == -2) event.end = -510;
-            else if (event.end < -100) event.end = 0;
+            else if (event.end < -100) event.end = noNoteSetsVisibleTime ? -255 : 0;
 
             event.start = event.start / 255;
             event.end = event.end / 255;
@@ -488,7 +491,7 @@ export default function PhiEditChartConverter(_chart)
             floorPosition : note.floorPosition,
             holdLength    : note.holdLength,
             xScale        : note.xScale,
-            visibleTime   : note.visibleTime,
+            visibleTime   : note.visibleTime ? note.visibleTime : NaN,
             judgeline     : judgeline
         }));
     });
@@ -527,14 +530,15 @@ function calculateRealVisibleTime(_bpmList, _notes)
 
     notes.forEach((note) =>
     {
-        if (isNaN(note.visibleBeat)) return;
+        if (!note.visibleBeat) return;
 
         for (let bpmIndex = 0, bpmLength = bpmList.length; bpmIndex < bpmLength; bpmIndex++)
         {
             let bpm = bpmList[bpmIndex];
 
             if (bpm.startBeat > note.visibleBeat) continue;
-            note.visibleTime = bpm.startTime + ((note.visibleBeat - bpm.startBeat) * bpm.beatTime);
+            note.visibleTime = note.visibleBeat * bpm.beatTime;
+
             break;
         }
     });
