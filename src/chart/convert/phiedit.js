@@ -268,7 +268,7 @@ export default function PhiEditChartConverter(_chart)
                     startTime  : command[2] || 0,
                     endTime    : command[3] || (command[2] || 0),
                     start      : NaN,
-                    end        : command[4] / 255 || 0,
+                    end        : command[4] || 0,
                     easingType : 1
                 });
                 break;
@@ -278,8 +278,8 @@ export default function PhiEditChartConverter(_chart)
                 chartSimple.pushEventToLine(command[1], 'alpha', {
                     startTime  : command[2] || 0,
                     endTime    : NaN,
-                    start      : command[3] / 255 || 0,
-                    end        : command[3] / 255 || 0,
+                    start      : command[3] || 0,
+                    end        : command[3] || 0,
                     easingType : 1
                 });
                 break;
@@ -338,9 +338,6 @@ export default function PhiEditChartConverter(_chart)
         {
             if (isNaN(event.endTime)) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e5;
             if (isNaN(event.start)) event.start = eventIndex > 0 ? array[eventIndex - 1].end : 0;
-
-            if (event.start < 0) event.start = 0;
-            if (event.end < 0) event.end = 0;
         });
         judgeline.eventLayers[0].moveX.forEach((event, eventIndex, array) =>
         {
@@ -363,6 +360,42 @@ export default function PhiEditChartConverter(_chart)
         judgeline.eventLayers[0].speed.forEach((event, eventIndex, array) =>
         {
             if (isNaN(event.endTime)) event.endTime = eventIndex < array.length - 1 ? array[eventIndex + 1].startTime : 1e5;
+        });
+
+        // Alpha 事件单独进行计算
+        judgeline.eventLayers[0].alpha.forEach((event, eventIndex, array) =>
+        {
+            if (event.start == -1) event.start = -255;
+            else if (event.start == -2) event.start = -510;
+            else if (event.start < -100 && event.start >= -1000)
+            {
+                for (let eventCountIndex = 0, eventCountLength = Math.ceil((event.endTime - event.startTime) / utils.CalcBetweenTime); eventCountIndex < eventCountLength; eventCountIndex++)
+                {
+                    let currentTime = (event.startTime + (eventCountIndex * utils.CalcBetweenTime)) >= event.endTime ? event.endTime : (event.startTime + (eventCountIndex * utils.CalcBetweenTime));
+                    let currentEventValue = utils.valueCalculator(event, Easing, currentTime);
+                    let visibleBeat = ((currentEventValue + 100) * -1) / 10;
+
+                    if (currentEventValue >= -100) break;
+
+                    for (const note of chartSimple.notes)
+                    {
+                        if (note.lineId != lineId) continue;
+                        if (note.startTime < currentTime) continue;
+                        if (note.endTime > currentTime) break;
+
+                        note.visibleBeat = visibleBeat;
+                    }
+                }
+
+                event.start = 0;
+            }
+
+            if (event.end == -1) event.end = -255;
+            else if (event.end == -2) event.end = -510;
+            else if (event.end < -100) event.end = 0;
+
+            event.start = event.start / 255;
+            event.end = event.end / 255;
         });
 
         // 拆分缓动
@@ -413,6 +446,7 @@ export default function PhiEditChartConverter(_chart)
     });
 
     // 计算 note 的真实时间
+    chartSimple.notes = calculateRealVisibleTime(chartSimple.bpm, chartSimple.notes);
     chartSimple.notes = utils.calculateRealTime(chartSimple.bpm, chartSimple.notes);
     chartSimple.notes.forEach((note, noteIndex) =>
     {
@@ -454,6 +488,7 @@ export default function PhiEditChartConverter(_chart)
             floorPosition : note.floorPosition,
             holdLength    : note.holdLength,
             xScale        : note.xScale,
+            visibleTime   : note.visibleTime,
             judgeline     : judgeline
         }));
     });
@@ -483,4 +518,26 @@ function floorNum(num)
 {
     return Math.floor(num * 8);
     // return Math.floor(num * (10 ** n)) / (10 ** n);
+}
+
+function calculateRealVisibleTime(_bpmList, _notes)
+{
+    let bpmList = _bpmList.slice();
+    let notes = _notes.slice();
+
+    notes.forEach((note) =>
+    {
+        if (isNaN(note.visibleBeat)) return;
+
+        for (let bpmIndex = 0, bpmLength = bpmList.length; bpmIndex < bpmLength; bpmIndex++)
+        {
+            let bpm = bpmList[bpmIndex];
+
+            if (bpm.startBeat > note.visibleBeat) continue;
+            note.visibleTime = bpm.startTime + ((note.visibleBeat - bpm.startBeat) * bpm.beatTime);
+            break;
+        }
+    });
+
+    return notes;
 }

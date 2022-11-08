@@ -209,8 +209,14 @@ export default function RePhiEditChartConverter(_chart)
             });
             eventLayer.alpha.forEach((event) =>
             {
-                event.start = event.start > 255 ? 1 : event.start / 255;
-                event.end = event.end > 255 ? 1 : event.end / 255;
+                event.start = event.start / 255;
+                event.end = event.end / 255;
+
+                event.start = event.start > 1 ? 1 : event.start;
+                event.end = event.end > 1 ? 1 : event.end;
+
+                event.start = event.start < -1 ? -1 : event.start;
+                event.end = event.end < -1 ? -1 : event.end;
             });
             eventLayer.rotate.forEach((event) =>
             {

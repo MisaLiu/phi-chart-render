@@ -195,6 +195,8 @@ function arrangeSameSingleValueEvent(events)
 }
 
 export default {
+    CalcBetweenTime: calcBetweenTime,
+
     calculateEventBeat,
     calculateEventsBeat,
     
