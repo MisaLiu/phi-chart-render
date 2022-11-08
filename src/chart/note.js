@@ -237,8 +237,11 @@ export default class Note
                 
                 if (!isNaN(this.visibleTime) && this.time - currentTime > this.visibleTime) this.sprite.visible = false;
 
-                if (this.judgeline.alpha < 0 && this.judgeline.alpha >= -1) this.sprite.visible = false;
-                else if (this.judgeline.alpha < -1 && this.judgeline.alpha >= -2 && this.originY < 0) this.sprite.visible = false;
+                if (this.judgeline.alpha < 0)
+                {
+                    if (this.judgeline.alpha >= -1) this.sprite.visible = false;
+                    else if (this.judgeline.alpha >= -2 && this.originY < 0) this.sprite.visible = false;
+                }
 
                 if (this.debugSprite)
                 {
