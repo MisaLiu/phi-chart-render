@@ -8,8 +8,8 @@ const calcBetweenTime = 0.125; // 1/32
  */
 function calculateEventBeat(event)
 {
-    event.startTime = event.startTime[0] + (event.startTime[1] / event.startTime[2]);
-    event.endTime = event.endTime[0] + (event.endTime[1] / event.endTime[2]);
+    event.startTime = parseFloat((event.startTime[0] + (event.startTime[1] / event.startTime[2])).toFixed(3));
+    event.endTime = parseFloat((event.endTime[0] + (event.endTime[1] / event.endTime[2])).toFixed(3));
     return event;
 }
 
