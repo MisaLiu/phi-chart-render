@@ -5,11 +5,11 @@ import JudgePoint from './point';
 import { Container, AnimatedSprite, Texture, Graphics, Sprite  } from 'pixi.js-legacy';
 
 const AllJudgeTimes = {
-    bad     : 200,
+    bad     : 180,
     good    : 160,
     perfect : 80,
 
-    badChallenge     : 100,
+    badChallenge     : 90,
     goodChallenge    : 75,
     perfectChallenge : 40
 };
@@ -29,7 +29,7 @@ const ClickAnimatePointCache = (() =>
 
     const result = Texture.from(canvas);
     result.defaultAnchor.set(0.5);
-    return result
+    return result;
 })();
 
 export default class Judgement

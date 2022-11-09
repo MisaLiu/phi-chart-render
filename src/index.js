@@ -754,7 +754,7 @@ function showGameResultPopup(game)
     {
         qs('.play-result .judge-histogram').innerHTML = '';
 
-        let noteJudgeTime = (!game._settings.challengeMode ? 200 : 100) / 1000;
+        let noteJudgeTime = (!game._settings.challengeMode ? 180 : 90) / 1000;
         let noteTimeHigestCount = 0;
         let accHistogramValue = {};
 
@@ -778,14 +778,14 @@ function showGameResultPopup(game)
 
             if (!game._settings.challengeMode)
             {
-                if (-20 <= acc && acc <= 20) value.style.background = '#FFECA0';
-                else if (-40 <= acc && acc <= 40) value.style.background = '#B4E1FF';
+                if (-(80 / 360 * 100) <= acc && acc <= (80 / 360 * 100)) value.style.background = '#FFECA0';
+                else if (-(160 / 360 * 100) <= acc && acc <= (160 / 360 * 100)) value.style.background = '#B4E1FF';
                 else value.style.background = '#6c4343';
             }
             else
             {
-                if (-20 <= acc && acc <= 20) value.style.background = '#FFECA0';
-                else if (-37.5 <= acc && acc <= 37.5) value.style.background = '#B4E1FF';
+                if (-(40 / 180 * 100) <= acc && acc <= (40 / 180 * 100)) value.style.background = '#FFECA0';
+                else if (-(75 / 180 * 100) <= acc && acc <= (75 / 180 * 100)) value.style.background = '#B4E1FF';
                 else value.style.background = '#6c4343';
             }
             
