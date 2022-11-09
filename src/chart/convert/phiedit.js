@@ -51,6 +51,8 @@ export default function PhiEditChartConverter(_chart)
         pushNote: function (note)
         {
             this.sameTimeNoteCount[floorNum(note.startTime)] = !this.sameTimeNoteCount[floorNum(note.startTime)] ? 1 : this.sameTimeNoteCount[floorNum(note.startTime)] + 1;
+            if (!this.notesPerLine[note.lineId]) this.notesPerLine[note.lineId] = [];
+            this.notesPerLine[note.lineId].push(note);
             this.notes.push(note);
         },
 
@@ -102,9 +104,11 @@ export default function PhiEditChartConverter(_chart)
         }
     };
 
+    /*
     chartSimple.pushNote = chartSimple.pushNote.bind(chartSimple);
     chartSimple.pushEventToLine = chartSimple.pushEventToLine.bind(chartSimple);
-
+    */
+    
     if (!isNaN(parseFloat(rawChart[0])))
     {
         chart.offset = parseFloat((parseFloat(rawChart.shift()) / 1000).toFixed(4)) - 0.175;
@@ -325,7 +329,10 @@ export default function PhiEditChartConverter(_chart)
 
     // note 和 bpm 按时间排序
     chartSimple.bpm.sort((a, b) => b.startBeat - a.startBeat);
-    chartSimple.notes.sort((a, b) => a.startTime - b.startTime);
+    for (const lineId in chartSimple.notesPerLine)
+    {
+        chartSimple.notesPerLine[lineId].sort((a, b) => a.startTime - b.startTime);
+    }
 
     for (const lineId in chartSimple._judgelines)
     {
@@ -379,9 +386,8 @@ export default function PhiEditChartConverter(_chart)
 
                     if (currentEventValue >= -100) break;
 
-                    for (const note of chartSimple.notes)
+                    for (const note of chartSimple.notesPerLine[lineId])
                     {
-                        if (note.lineId != lineId) continue;
                         if (note.startTime < currentTime) continue;
                         if (note.startTime > currentTime) break;
 
@@ -442,75 +448,71 @@ export default function PhiEditChartConverter(_chart)
         judgeline.calcFloorPosition();
     };
 
-    // 计算 Note 高亮
-    chartSimple.notes.forEach((note) =>
+    for (const lineId in chartSimple.notesPerLine)
     {
-        if (chartSimple.sameTimeNoteCount[floorNum(note.startTime)] > 1) note.isMulti = true;
-    });
+        let notes = chartSimple.notesPerLine[lineId];
 
-    // 计算 note 的真实时间
-    chartSimple.notes = calculateRealVisibleTime(chartSimple.bpm, chartSimple.notes);
-    chartSimple.notes = utils.calculateRealTime(chartSimple.bpm, chartSimple.notes);
-    chartSimple.notes.forEach((note, noteIndex) =>
-    {
-        let judgeline = chartSimple._judgelines[note.lineId];
-
-        if (!judgeline)
+        // 计算 Note 高亮
+        notes.forEach((note) =>
         {
-            console.warn('Judgeline ' + note.lineId + ' doesn\'t exist, ignoring.');
-            return;
-        }
+            if (chartSimple.sameTimeNoteCount[floorNum(note.startTime)] > 1) note.isMulti = true;
+        });
 
-        {  // 计算 Note 的 floorPosition
-            let noteStartSpeedEvent = judgeline.getFloorPosition(note.startTime);
-            note.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (note.startTime - noteStartSpeedEvent.startTime) : 0;
+        notes = calculateRealVisibleTime(chartSimple.bpm, notes);
+        notes = utils.calculateRealTime(chartSimple.bpm, notes);
+        notes.sort((a, b) => a.startTime - b.startTime);
 
-            if (note.type == 3)
+        notes.forEach((note, noteIndex) =>
+        {
+            let judgeline = chartSimple._judgelines[note.lineId];
+
+            if (!judgeline)
             {
-                let noteEndSpeedEvent = judgeline.getFloorPosition(note.endTime);
-                note.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (note.endTime - noteEndSpeedEvent.startTime) : 0) - note.floorPosition;
+                console.warn('Judgeline ' + note.lineId + ' doesn\'t exist, ignoring.');
+                return;
             }
-            else
-            {
-                note.holdLength = 0;
-            }
-        }
 
-        // 推送 Note
-        if (!chartSimple.notesPerLine[note.lineId]) chartSimple.notesPerLine[note.lineId] = [];
-        chartSimple.notesPerLine[note.lineId].push(new Note({
-            id            : noteIndex,
-            type          : note.type,
-            time          : note.startTime,
-            holdTime      : note.endTime - note.startTime,
-            speed         : note.speed,
-            isAbove       : note.isAbove,
-            isMulti       : note.isMulti,
-            isFake        : note.isFake,
-            positionX     : note.positionX * 9 / 1024,
-            floorPosition : note.floorPosition,
-            holdLength    : note.holdLength,
-            xScale        : note.xScale,
-            visibleTime   : note.visibleTime ? note.visibleTime : NaN,
-            judgeline     : judgeline
-        }));
-    });
+            {  // 计算 Note 的 floorPosition
+                let noteStartSpeedEvent = judgeline.getFloorPosition(note.startTime);
+                note.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (note.startTime - noteStartSpeedEvent.startTime) : 0;
+
+                if (note.type == 3)
+                {
+                    let noteEndSpeedEvent = judgeline.getFloorPosition(note.endTime);
+                    note.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (note.endTime - noteEndSpeedEvent.startTime) : 0) - note.floorPosition;
+                }
+                else
+                {
+                    note.holdLength = 0;
+                }
+            }
+
+            // 推送 Note
+            chart.notes.push(new Note({
+                id            : noteIndex,
+                type          : note.type,
+                time          : note.startTime,
+                holdTime      : note.endTime - note.startTime,
+                speed         : note.speed,
+                isAbove       : note.isAbove,
+                isMulti       : note.isMulti,
+                isFake        : note.isFake,
+                positionX     : note.positionX * 9 / 1024,
+                floorPosition : note.floorPosition,
+                holdLength    : note.holdLength,
+                xScale        : note.xScale,
+                visibleTime   : note.visibleTime,
+                judgeline     : judgeline
+            }));
+        });
+    }
 
     for (const lineId in chartSimple._judgelines)
     {
         chart.judgelines.push(chartSimple._judgelines[lineId]);
     }
-    chart.judgelines.sort((a, b) => a.id - b.id);
 
-    for (const lineId in chartSimple.notesPerLine)
-    {
-        chartSimple.notesPerLine[lineId].sort((a, b) => a.time - b.time);
-        chartSimple.notesPerLine[lineId].forEach((note, noteIndex) =>
-        {
-            note.id = noteIndex;
-            chart.notes.push(note);
-        });
-    }
+    chart.judgelines.sort((a, b) => a.id - b.id);
     chart.notes.sort((a, b) => a.time - b.time);
 
     return chart;
