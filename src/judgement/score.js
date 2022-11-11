@@ -77,7 +77,7 @@ export default class Score
             fill: 0xFFFFFF
         });
         this.sprites.combo.number.alpha = 0.81;
-        this.sprites.combo.text = new Text('COMBO', {
+        this.sprites.combo.text = new Text((this._autoPlay ? 'AUT' + 'OPL' + 'AY' : 'COMBO'), {
             fontFamily: 'MiSans',
             fill: 0xFFFFFF
         });

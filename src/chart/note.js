@@ -240,7 +240,11 @@ export default class Note
                 if (this.judgeline.alpha < 0)
                 {
                     if (this.judgeline.alpha >= -1) this.sprite.visible = false;
-                    else if (this.judgeline.alpha >= -2 && this.originY < 0) this.sprite.visible = false;
+                    else if (this.judgeline.alpha >= -2)
+                    {
+                        if (this.originY > 0) this.sprite.visible = false;
+                        else if (this.originY < 0) this.sprite.visible = true;
+                    }
                 }
 
                 if (this.debugSprite)
