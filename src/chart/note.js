@@ -256,7 +256,7 @@ export default class Note
                             this.sprite.visible = true;
                             this.sprite.alpha = 0.2;
                         }
-                        else if (this.sprite.visible)
+                        else
                         {
                             this.sprite.alpha = this.basicAlpha;
                         }

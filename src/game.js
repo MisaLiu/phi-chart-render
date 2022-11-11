@@ -527,7 +527,7 @@ export default class Game
                     });
                     this.chart.notes.forEach((note) =>
                     {
-                        if (note.sprite) note.sprite.alpha = 1;
+                        if (note.sprite) note.sprite.alpha = note.basicAlpha;
                     });
 
                     this._isPaused = false;
