@@ -256,7 +256,7 @@ export default class Judgeline
         this.alpha = 0;
         this.deg   = 0;
 
-        this.eventLayers.forEach((eventLayer) =>
+        for (const eventLayer of this.eventLayers)
         {
             eventLayer.calcTime(currentTime);
 
@@ -265,7 +265,7 @@ export default class Judgeline
             this.y      += eventLayer._posY;
             this.alpha  += eventLayer._alpha;
             this.deg    += eventLayer._rotate;
-        });
+        }
 
         for (const event of this.floorPositions)
         {
