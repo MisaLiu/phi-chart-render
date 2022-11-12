@@ -316,24 +316,25 @@ export default function RePhiEditChartConverter(_chart)
 
             if (_judgeline.extended.inclineEvents && _judgeline.extended.inclineEvents.length > 0)
             {
-                let inclineEvents = _judgeline.extended.inclineEvents;
+                let inclineEvents = utils.calculateEventsBeat(_judgeline.extended.inclineEvents);
 
-                if (inclineEvents.length > 1 || (inclineEvents[0].start != 0 && inclineEvents.end != 0))
-                {
-                    utils.calculateEventsBeat(inclineEvents)
-                        .forEach((event) =>
-                        {
-                            utils.calculateEventEase(event, Easing)
-                                .forEach((newEvent) =>
-                                {
-                                    newEvent.start = (Math.PI / 180) * newEvent.start;
-                                    newEvent.end = (Math.PI / 180) * newEvent.end;
+                if (inclineEvents.length == 1 &&
+                    (inclineEvents[0].startTime == 0 && inclineEvents[0].endTime == 1) &&
+                    (inclineEvents[0].start == 0 && inclineEvents[0].end == 0)
+                ) { /* Do nothing */ }
+                else {
+                    inclineEvents.forEach((event) =>
+                    {
+                        utils.calculateEventEase(event, Easing)
+                            .forEach((newEvent) =>
+                            {
+                                newEvent.start = (Math.PI / 180) * newEvent.start;
+                                newEvent.end = (Math.PI / 180) * newEvent.end;
 
-                                    judgeline.extendEvent.incline.push(newEvent);
-                                }
-                            );
-                        }
-                    );
+                                judgeline.extendEvent.incline.push(newEvent);
+                            }
+                        );
+                    });
                     judgeline.extendEvent.incline = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.incline);
                 }
             }
