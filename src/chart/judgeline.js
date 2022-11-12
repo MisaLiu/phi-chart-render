@@ -43,9 +43,7 @@ export default class Judgeline
         this.scaleX = 1;
         this.scaleY = 1;
 
-        this.inclineDeg = NaN;
         this.inclineSinr = NaN;
-        this.inclineCosr = NaN;
 
         this._width  = 5761.8432;
         this._height = 8.64;
@@ -339,11 +337,6 @@ export default class Judgeline
             this.inclineSinr = Math.sin(event.start * timePercentStart + event.end * timePercentEnd);
         }
 
-        /*
-        this.scaleX = valueCalculator(this.extendEvent.scaleX, currentTime, this.scaleX);
-        this.scaleY = valueCalculator(this.extendEvent.scaleY, currentTime, this.scaleY);
-        */
-        
         this.cosr = Math.cos(this.deg);
         this.sinr = Math.sin(this.deg);
 
