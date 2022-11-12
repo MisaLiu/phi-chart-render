@@ -246,6 +246,7 @@ export default class Chart
                     note.sprite.children[2].position.y = -(note.holdLength * note.speed * this.renderSize.noteSpeed / this.renderSize.noteScale);
                 }
 
+                note.sprite.baseScale = this.renderSize.noteScale;
                 note.sprite.scale.set(this.renderSize.noteScale * note.xScale, this.renderSize.noteScale);
                 if (note.debugSprite) note.debugSprite.scale.set(this.renderSize.heightPercent);
             });

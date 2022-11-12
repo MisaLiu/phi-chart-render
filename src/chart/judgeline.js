@@ -18,7 +18,8 @@ export default class Judgeline
             color: [],
             scaleX: [],
             scaleY: [],
-            text: []
+            text: [],
+            incline: []
         };
         this.isText = false;
         
@@ -41,6 +42,10 @@ export default class Judgeline
 
         this.scaleX = 1;
         this.scaleY = 1;
+
+        this.inclineDeg = NaN;
+        this.inclineSinr = NaN;
+        this.inclineCosr = NaN;
 
         this._width  = 5761.8432;
         this._height = 8.64;
@@ -321,6 +326,17 @@ export default class Judgeline
             if (event.startTime > currentTime) break;
 
             this.sprite.tint = event.value;
+        }
+
+        for (const event of this.extendEvent.incline)
+        {
+            if (event.endTime < currentTime) continue;
+            if (event.startTime > currentTime) break;
+
+            let timePercentEnd = (currentTime - event.startTime) / (event.endTime - event.startTime);
+            let timePercentStart = 1 - timePercentEnd;
+
+            this.inclineSinr = Math.sin(event.start * timePercentStart + event.end * timePercentEnd);
         }
 
         /*

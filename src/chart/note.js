@@ -176,6 +176,13 @@ export default class Note
                 _holdLength = this.type === 3 ? (this.endPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed : _originY,
                 holdLength = this.type === 3 ? _holdLength * (this.isAbove ? -1 : 1) : originY;
             
+            if (!isNaN(this.judgeline.inclineSinr) && this.type !== 3)
+            {
+                let inclineValue = 1 - ((this.judgeline.inclineSinr * _originY) / 360);
+                this.sprite.scale.set(inclineValue * this.sprite.baseScale * this.xScale, inclineValue * this.sprite.baseScale);
+                originX *= inclineValue;
+            }
+            
             if (this.type === 3) // Hold 长度计算
             {
                 if (this.time <= currentTime && this.holdTimeLength > currentTime)

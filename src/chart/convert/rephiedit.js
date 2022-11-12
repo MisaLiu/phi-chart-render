@@ -313,6 +313,30 @@ export default function RePhiEditChartConverter(_chart)
                 );
                 judgeline.extendEvent.color = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.color);
             }
+
+            if (_judgeline.extended.inclineEvents && _judgeline.extended.inclineEvents.length > 0)
+            {
+                let inclineEvents = _judgeline.extended.inclineEvents;
+
+                if (inclineEvents.length > 1 || (inclineEvents[0].start != 0 || inclineEvents.end != 0))
+                {
+                    utils.calculateEventsBeat(inclineEvents)
+                        .forEach((event) =>
+                        {
+                            utils.calculateEventEase(event, Easing)
+                                .forEach((newEvent) =>
+                                {
+                                    newEvent.start = (Math.PI / 180) * newEvent.start;
+                                    newEvent.end = (Math.PI / 180) * newEvent.end;
+
+                                    judgeline.extendEvent.incline.push(newEvent);
+                                }
+                            );
+                        }
+                    );
+                    judgeline.extendEvent.incline = utils.calculateRealTime(rawChart.BPMList, judgeline.extendEvent.incline);
+                }
+            }
         }
 
         // 事件排序并计算 floorPosition
