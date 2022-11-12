@@ -318,7 +318,7 @@ export default function RePhiEditChartConverter(_chart)
             {
                 let inclineEvents = _judgeline.extended.inclineEvents;
 
-                if (inclineEvents.length > 1 || (inclineEvents[0].start != 0 || inclineEvents.end != 0))
+                if (inclineEvents.length > 1 || (inclineEvents[0].start != 0 && inclineEvents.end != 0))
                 {
                     utils.calculateEventsBeat(inclineEvents)
                         .forEach((event) =>
