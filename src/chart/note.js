@@ -4,26 +4,27 @@ export default class Note
 {
     constructor(params)
     {
-        this.id             = !isNaN(Number(params.id)) ? Number(params.id) : -1;
-        this.type           = !isNaN(Number(params.type)) ? Number(params.type) : 1;
-        this.time           = !isNaN(parseFloat(params.time)) ? parseFloat(params.time) : -1; // Note 开始时间
-        this.holdTime       = (this.type === 3 && !isNaN(parseFloat(params.holdTime))) ? parseFloat(params.holdTime) : 0; // Note 按住需要经过的时间，仅 Hold
-        this.holdTimeLength = this.type === 3 ? parseFloat(this.time + this.holdTime) : 0; // Note 按完的时间，自动计算，仅 Hold
-        this.speed          = !isNaN(parseFloat(params.speed)) ? parseFloat(params.speed) : 1;
-        this.floorPosition  = !isNaN(parseFloat(params.floorPosition)) ? parseFloat(params.floorPosition) : this.time;
-        this.holdLength     = (this.type === 3 && !isNaN(parseFloat(params.holdLength))) ? parseFloat(params.holdLength) : 0;
-        this.endPosition    = parseFloat(this.floorPosition + this.holdLength);
-        this.positionX      = !isNaN(parseFloat(params.positionX)) ? parseFloat(params.positionX) : 0;
-        this.basicAlpha     = (!isNaN(parseFloat(params.basicAlpha)) && parseFloat(params.basicAlpha) >= 0 && parseFloat(params.basicAlpha) <= 1) ? parseFloat(params.basicAlpha) : 1;
-        this.visibleTime    = (!isNaN(parseFloat(params.visibleTime)) && params.visibleTime < 999999) ? parseFloat(params.visibleTime) : NaN;
-        this.yOffset        = !isNaN(parseFloat(params.yOffset)) ? parseFloat(params.yOffset) : 0;
-        this.xScale         = !isNaN(parseFloat(params.xScale)) ? parseFloat(params.xScale) : 1;
-        this.isAbove        = !!params.isAbove;
-        this.isFake         = !!params.isFake;
-        this.isMulti        = !!params.isMulti;
-        this.texture        = (params.texture && params.texture != '') ? params.texture : null;
-        this.hitsound       = (params.hitsound && params.hitsound != '') ? params.hitsound : null;
-        this.judgeline      = params.judgeline;
+        this.id               = !isNaN(Number(params.id)) ? Number(params.id) : -1;
+        this.type             = !isNaN(Number(params.type)) ? Number(params.type) : 1;
+        this.time             = !isNaN(parseFloat(params.time)) ? parseFloat(params.time) : -1; // Note 开始时间
+        this.holdTime         = (this.type === 3 && !isNaN(parseFloat(params.holdTime))) ? parseFloat(params.holdTime) : 0; // Note 按住需要经过的时间，仅 Hold
+        this.holdTimeLength   = this.type === 3 ? parseFloat(this.time + this.holdTime) : 0; // Note 按完的时间，自动计算，仅 Hold
+        this.speed            = !isNaN(parseFloat(params.speed)) ? parseFloat(params.speed) : 1;
+        this.floorPosition    = !isNaN(parseFloat(params.floorPosition)) ? parseFloat(params.floorPosition) : this.time;
+        this.holdLength       = (this.type === 3 && !isNaN(parseFloat(params.holdLength))) ? parseFloat(params.holdLength) : 0;
+        this.endPosition      = parseFloat(this.floorPosition + this.holdLength);
+        this.positionX        = !isNaN(parseFloat(params.positionX)) ? parseFloat(params.positionX) : 0;
+        this.basicAlpha       = (!isNaN(parseFloat(params.basicAlpha)) && parseFloat(params.basicAlpha) >= 0 && parseFloat(params.basicAlpha) <= 1) ? parseFloat(params.basicAlpha) : 1;
+        this.visibleTime      = (!isNaN(parseFloat(params.visibleTime)) && params.visibleTime < 999999) ? parseFloat(params.visibleTime) : NaN;
+        this.yOffset          = !isNaN(parseFloat(params.yOffset)) ? parseFloat(params.yOffset) : 0;
+        this.xScale           = !isNaN(parseFloat(params.xScale)) ? parseFloat(params.xScale) : 1;
+        this.isAbove          = !!params.isAbove;
+        this.isFake           = !!params.isFake;
+        this.isMulti          = !!params.isMulti;
+        this.useOfficialSpeed = !!params.useOfficialSpeed;
+        this.texture          = (params.texture && params.texture != '') ? params.texture : null;
+        this.hitsound         = (params.hitsound && params.hitsound != '') ? params.hitsound : null;
+        this.judgeline        = params.judgeline;
 
         this.sprite = undefined;
 
@@ -167,13 +168,13 @@ export default class Note
             let _yOffset = size.height * this.yOffset,
                 yOffset = _yOffset * (this.isAbove ? -1 : 1),
                 originX = size.widthPercent * this.positionX,
-                _originY = (this.floorPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed + _yOffset,
+                _originY = (this.floorPosition - this.judgeline.floorPosition) * (this.type === 3 && this.useOfficialSpeed ? 1 : this.speed) * size.noteSpeed + _yOffset,
                 originY = _originY * (this.isAbove ? -1 : 1),
 
                 realX = originY * this.judgeline.sinr * -1,
                 realY = originY * this.judgeline.cosr,
 
-                _holdLength = this.type === 3 ? (this.endPosition - this.judgeline.floorPosition) * this.speed * size.noteSpeed : _originY,
+                _holdLength = this.type === 3 ? (this.useOfficialSpeed ? (this.holdTimeLength - currentTime) : (this.endPosition - this.judgeline.floorPosition)) * this.speed * size.noteSpeed : _originY,
                 holdLength = this.type === 3 ? _holdLength * (this.isAbove ? -1 : 1) : originY;
             
             if (!isNaN(this.judgeline.inclineSinr) && this.type !== 3)

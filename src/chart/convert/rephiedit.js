@@ -110,7 +110,7 @@ export default function RePhiEditChartConverter(_chart)
         let judgeline = new Judgeline({
             id         : judgelineIndex,
             texture    : _judgeline.Texture != 'line.png' ? _judgeline.Texture : null,
-            parentLine : _judgeline.father >= 0 ? _judgeline.father + 1 : null,
+            parentLine : _judgeline.father >= 0 ? _judgeline.father : null,
             isCover    : _judgeline.isCover == 1
         });
 
@@ -424,7 +424,7 @@ export default function RePhiEditChartConverter(_chart)
     {
         if (judgeline.parentLine && judgeline.parentLine > 0)
         {
-            let parentLineId = judgeline.parentLine - 1;
+            let parentLineId = judgeline.parentLine;
             judgeline.parentLine = null;
 
             for (const parentLine of judgelines)

@@ -242,8 +242,9 @@ export default class Chart
             {
                 if (note.type === 3)
                 {
-                    note.sprite.children[1].height = note.holdLength * note.speed * this.renderSize.noteSpeed / this.renderSize.noteScale;
-                    note.sprite.children[2].position.y = -(note.holdLength * note.speed * this.renderSize.noteSpeed / this.renderSize.noteScale);
+                    let holdLength = note.holdLength * (note.useOfficialSpeed ? 1 : note.speed) * this.renderSize.noteSpeed / this.renderSize.noteScale
+                    note.sprite.children[1].height = holdLength;
+                    note.sprite.children[2].position.y = -holdLength;
                 }
 
                 note.sprite.baseScale = this.renderSize.noteScale;

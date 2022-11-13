@@ -119,11 +119,6 @@ export default function OfficialChartConverter(_chart)
         rawNote.holdTime = calcRealTime(rawNote.holdTime, rawNote.bpm);
         rawNote.holdEndTime = rawNote.time + rawNote.holdTime;
 
-        if (rawNote.type == 3)
-        {
-            rawNote.speed = 1;
-        }
-
         {  // 考虑到 js 精度，此处重新计算 Note 的 floorPosition 值
             let noteStartSpeedEvent = rawNote.judgeline.getFloorPosition(rawNote.time);
             rawNote.floorPosition = noteStartSpeedEvent ? noteStartSpeedEvent.floorPosition + noteStartSpeedEvent.value * (rawNote.time - noteStartSpeedEvent.startTime) : 0;
@@ -131,7 +126,7 @@ export default function OfficialChartConverter(_chart)
             if (rawNote.type == 3)
             {
                 let noteEndSpeedEvent = rawNote.judgeline.getFloorPosition(rawNote.holdEndTime);
-                rawNote.holdLength = (noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (rawNote.holdEndTime - noteEndSpeedEvent.startTime) : 0) - rawNote.floorPosition;
+                rawNote.holdLength = rawNote.holdTime * rawNote.speed /*(noteEndSpeedEvent ? noteEndSpeedEvent.floorPosition + noteEndSpeedEvent.value * (rawNote.holdEndTime - noteEndSpeedEvent.startTime) : 0) - rawNote.floorPosition */;
             }
             else
             {
@@ -140,18 +135,19 @@ export default function OfficialChartConverter(_chart)
         }
 
         return new Note({
-            id            : rawNote.id,
-            lineId        : rawNote.lineId,
-            type          : rawNote.type,
-            time          : rawNote.time,
-            holdTime      : rawNote.holdTime,
-            holdLength    : rawNote.holdLength,
-            positionX     : rawNote.positionX,
-            floorPosition : rawNote.floorPosition,
-            speed         : rawNote.speed,
-            isAbove       : rawNote.isAbove,
-            isMulti       : rawNote.isMulti,
-            judgeline     : rawNote.judgeline
+            id               : rawNote.id,
+            lineId           : rawNote.lineId,
+            type             : rawNote.type,
+            time             : rawNote.time,
+            holdTime         : rawNote.holdTime,
+            holdLength       : rawNote.holdLength,
+            positionX        : rawNote.positionX,
+            floorPosition    : rawNote.floorPosition,
+            speed            : rawNote.speed,
+            isAbove          : rawNote.isAbove,
+            isMulti          : rawNote.isMulti,
+            useOfficialSpeed : true,
+            judgeline        : rawNote.judgeline
         });
     }
 };
