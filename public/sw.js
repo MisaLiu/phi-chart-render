@@ -2,7 +2,7 @@
  * @Author: git config user.name && git config user.email
  * @Date: 2022-11-13 15:24:32
  * @LastEditors: git config user.name && git config user.email
- * @LastEditTime: 2022-11-13 18:36:06
+ * @LastEditTime: 2022-11-13 18:42:59
  * @FilePath: \phi-chart-render\public\sw.js
  * @Description: 
  * 
@@ -42,7 +42,7 @@ self.addEventListener('activate', (e) =>
 self.addEventListener('fetch', (e) =>
 {
     if (e.request.method != 'GET') return;
-    if (!(/index\.html|.+\.css|script\.js|assets|fonts/.test(e.request.url))) return;
+    if (!(/phi-chart-render\/$|index\.html|.+\.css|script\.js|assets|fonts/.test(e.request.url))) return;
 
     let req = e.request;
     let resVersion = ASSETS_VERSION;
