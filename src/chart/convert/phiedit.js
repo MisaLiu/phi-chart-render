@@ -109,10 +109,8 @@ export default function PhiEditChartConverter(_chart)
     chartSimple.pushEventToLine = chartSimple.pushEventToLine.bind(chartSimple);
     */
     
-    if (!isNaN(parseFloat(rawChart[0])))
-    {
-        chart.offset = parseFloat((parseFloat(rawChart.shift()) / 1000).toFixed(4)) - 0.175;
-    }
+    if (!isNaN(rawChart[0])) chart.offset = parseFloat((parseFloat(rawChart.shift()) / 1000).toFixed(4)) - 0.175;
+    else return null;
 
     rawChart.forEach((_command, commandIndex) =>
     {
