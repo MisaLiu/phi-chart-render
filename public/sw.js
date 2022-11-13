@@ -2,7 +2,7 @@
  * @Author: git config user.name && git config user.email
  * @Date: 2022-11-13 15:24:32
  * @LastEditors: git config user.name && git config user.email
- * @LastEditTime: 2022-11-13 16:00:37
+ * @LastEditTime: 2022-11-13 17:54:37
  * @FilePath: \phi-chart-render\public\sw.js
  * @Description: 
  * 
@@ -32,7 +32,7 @@ self.addEventListener('fetch', (e) =>
         }
         else
         {
-            const urlReg = /assets|fonts/;
+            const urlReg = /index\.html|assets|fonts/;
             const res = await fetch(req);
 
             if (res.ok && urlReg.test(req.url)) e.waitUntil(cache.put(req, res.clone()));
