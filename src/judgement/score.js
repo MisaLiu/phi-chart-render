@@ -133,8 +133,11 @@ export default class Score
                 )
             );
 
-            if (this.sprites.acc.currentValue >= (this.sprites.acc.oldValue + this.sprites.acc.addedValue))
-            {
+            if (
+                this.sprites.acc.currentValue === (this.sprites.acc.oldValue + this.sprites.acc.addedValue) ||
+                (this.sprites.acc.addedValue > 0 && this.sprites.acc.currentValue > (this.sprites.acc.oldValue + this.sprites.acc.addedValue)) ||
+                (this.sprites.acc.addedValue < 0 && this.sprites.acc.currentValue < (this.sprites.acc.oldValue + this.sprites.acc.addedValue))
+            ) {
                 this.sprites.acc.currentValue = this.sprites.acc.oldValue + this.sprites.acc.addedValue;
                 this.sprites.acc.valueChangedTime = NaN;
             }
