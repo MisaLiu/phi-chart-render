@@ -1,5 +1,5 @@
 {
-    "background_color": "purple",
+    "background_color": "black",
     "description": "A Phigros chart render based on Pixi.js",
     "display": "fullscreen",
     "orientation": "landscape",
@@ -12,5 +12,5 @@
     ],
     "name": "phi-chart-render",
     "short_name": "phi-chart-render",
-    "start_url": "/phi-chart-render"
+    "start_url": "."
 }
