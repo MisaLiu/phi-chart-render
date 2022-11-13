@@ -2,7 +2,7 @@
  * @Author: git config user.name && git config user.email
  * @Date: 2022-11-13 15:24:32
  * @LastEditors: git config user.name && git config user.email
- * @LastEditTime: 2022-11-13 18:07:16
+ * @LastEditTime: 2022-11-13 18:36:06
  * @FilePath: \phi-chart-render\public\sw.js
  * @Description: 
  * 
@@ -15,39 +15,71 @@ self.addEventListener('install', () =>
     console.log('[Service Worker] Hello world!');
 });
 
+self.addEventListener('activate', (e) =>
+{
+    e.waitUntil(
+        Promise.all([
+            self.clients.claim(),
+
+            caches.keys()
+                .then((cacheList) =>
+                {
+                    return Promise.all(
+                        cacheList.map((cacheName) =>
+                        {
+                            if (cacheName !== ASSETS_VERSION)
+                            {
+                                return caches.delete(cacheName);
+                            }
+                        }
+                    ));
+                }
+            )
+        ])
+    );
+});
+
 self.addEventListener('fetch', (e) =>
 {
     if (e.request.method != 'GET') return;
+    if (!(/index\.html|.+\.css|script\.js|assets|fonts/.test(e.request.url))) return;
 
-    const req = e.request;
-    e.respondWith((async () =>
-    {
-        const cache = await caches.open(ASSETS_VERSION);
-        const cacheRes = await cache.match(req);
+    let req = e.request;
+    let resVersion = ASSETS_VERSION;
 
-        if (cacheRes)
-        {
-            console.log('[Service Worker] Fetching cache: ' + req.url);
-            e.waitUntil(cache.add(req));
-            return cacheRes;
-        }
-        else
-        {
-            const urlReg = /index\.html|.+\.css|script\.js|assets|fonts/;
-            let res;
-
-            try {
-                res = await fetch(req);
-            }
-            catch (e)
+    e.respondWith(
+        caches.match(e.request)
+            .then((res) =>
             {
-                console.warn(e);
-                res = null;
-            }
+                if (res)
+                {
+                    console.log('[Service Worker] Fetching cache: ' + req.url);
+                    return res;
+                }
 
-            console.log('[Service Worker] Getting resource: ' + req.url);
-            if (res && res.ok && urlReg.test(req.url)) e.waitUntil(cache.put(req, res.clone()));
-            return res;
-        }
-    })());
+                const httpReq = e.request.clone();
+                return (
+                    fetch(httpReq)
+                        .then((httpRes) =>
+                        {
+                            console.log('[Service Worker] Getting resource: ' + req.url);
+                            
+                            if (!httpRes || httpRes.status !== 200)
+                            {
+                                return httpRes;
+                            }
+
+                            var resClone = httpRes.clone();
+                            caches.open(resVersion).then((cache) =>
+                            {
+                                cache.put(req, resClone);
+                            });
+
+                            return httpRes;
+                        }
+                    )
+                );
+            }
+        )
+    );
 });
