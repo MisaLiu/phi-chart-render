@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>phi-chart-render</title>
+        <meta name="description" content="A Phigros chart render based on Pixi.js" />
+        <meta name="author" content="MisaLiu" />
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
+        <link rel="shortcut icon" href="./icons/favicon.ico" />
+        <link rel="manifest" href="./manifest.webmanifest" />
         <link href="./fonts/index.css" rel="stylesheet" />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9YT2TVFV"></script>
         <!--script src="./eruda.min.js"></script>
         <script>eruda.init();</script-->
         <script>
+            const ASSETS_VERSION = '0.1';
             const GITHUB_CURRENT_GIT_HASH = `{{CURRENT_HASH}}`;
 
             // Init google analytics
@@ -15,6 +21,12 @@
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-PW9YT2TVFV');
+            
+            // Init service worker
+            if ('serviceWorker' in navigator)
+            {
+                navigator.serviceWorker.register('./sw.js');
+            }
         </script>
         <style>
             html, body {
