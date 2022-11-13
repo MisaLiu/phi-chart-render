@@ -74,7 +74,6 @@ const doms = {
     },
     startBtn : document.querySelector('button#start'),
     loadingStatus : document.querySelector('div#loading-status'),
-    canvas : document.querySelector('canvas#canvas-game'),
     fullscreenBtn : document.querySelector('button#fullscreen'),
 
     errorWindow : {
