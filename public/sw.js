@@ -2,7 +2,7 @@
  * @Author: git config user.name && git config user.email
  * @Date: 2022-11-13 15:24:32
  * @LastEditors: git config user.name && git config user.email
- * @LastEditTime: 2022-11-13 17:54:37
+ * @LastEditTime: 2022-11-13 18:01:52
  * @FilePath: \phi-chart-render\public\sw.js
  * @Description: 
  * 
@@ -27,14 +27,16 @@ self.addEventListener('fetch', (e) =>
 
         if (cacheRes)
         {
+            console.log('[Service Worker] Fetching cache: ' + req.url);
             e.waitUntil(cache.add(req));
             return cacheRes;
         }
         else
         {
-            const urlReg = /index\.html|assets|fonts/;
+            const urlReg = /index\.html|style\.css|script\.js|assets|fonts/;
             const res = await fetch(req);
 
+            console.log('[Service Worker] Getting resource: ' + req.url);
             if (res.ok && urlReg.test(req.url)) e.waitUntil(cache.put(req, res.clone()));
             return res;
         }
