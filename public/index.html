@@ -22,7 +22,7 @@
             gtag('config', 'G-PW9YT2TVFV');
             
             // Init service worker
-            if ('serviceWorker' in navigator)
+            if (GITHUB_CURRENT_GIT_HASH == '{{' + 'CURRENT_HASH' + '}}' && 'serviceWorker' in navigator)
             {
                 navigator.serviceWorker.register('./sw.js?v=0.0.2');
             }
