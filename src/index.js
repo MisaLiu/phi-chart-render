@@ -11,12 +11,6 @@ import { BrowserTracing } from '@sentry/tracing';
 
 (() =>
 {
-    // Init service worker
-    if ('serviceWorker' in navigator)
-    {
-        navigator.serviceWorker.register('./sw.js');
-    }
-    
     if (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}')
     {
         // Init sentry

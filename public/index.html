@@ -13,7 +13,6 @@
         <!--script src="./eruda.min.js"></script>
         <script>eruda.init();</script-->
         <script>
-            const ASSETS_VERSION = '0.1';
             const GITHUB_CURRENT_GIT_HASH = `{{CURRENT_HASH}}`;
 
             // Init google analytics
@@ -21,6 +20,12 @@
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-PW9YT2TVFV');
+            
+            // Init service worker
+            if ('serviceWorker' in navigator)
+            {
+                navigator.serviceWorker.register('./sw.js');
+            }
         </script>
         <style>
             html, body {

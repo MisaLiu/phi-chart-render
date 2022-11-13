@@ -8,6 +8,8 @@
  * 
  * Copyright (c) 2022 by ${git_name_email}, All Rights Reserved. 
  */
+const ASSETS_VERSION = '0.1';
+
 self.addEventListener('install', () =>
 {
     console.log('[Service Worker] Hello world!');
