@@ -2,13 +2,14 @@
  * @Author: git config user.name && git config user.email
  * @Date: 2022-11-13 15:24:32
  * @LastEditors: git config user.name && git config user.email
- * @LastEditTime: 2022-11-13 18:42:59
+ * @LastEditTime: 2022-11-16 00:03:31
  * @FilePath: \phi-chart-render\public\sw.js
  * @Description: 
  * 
  * Copyright (c) 2022 by ${git_name_email}, All Rights Reserved. 
  */
-const ASSETS_VERSION = '0.1';
+const ASSETS_VERSION = '0.2';
+const GITHUB_CURRENT_GIT_HASH = `{{CURRENT_HASH}}`;
 
 self.addEventListener('install', () =>
 {
@@ -27,7 +28,7 @@ self.addEventListener('activate', (e) =>
                     return Promise.all(
                         cacheList.map((cacheName) =>
                         {
-                            if (cacheName !== ASSETS_VERSION)
+                            if (cacheName !== ASSETS_VERSION && cacheName !== GITHUB_CURRENT_GIT_HASH)
                             {
                                 return caches.delete(cacheName);
                             }
@@ -42,10 +43,10 @@ self.addEventListener('activate', (e) =>
 self.addEventListener('fetch', (e) =>
 {
     if (e.request.method != 'GET') return;
-    if (!(/phi-chart-render\/$|index\.html|.+\.css|script\.js|assets|fonts/.test(e.request.url))) return;
+    if (!(/phi-chart-render\/?$|index\.html|.+\.css|script\.js\?hash=|assets|fonts/.test(e.request.url))) return;
 
     let req = e.request;
-    let resVersion = ASSETS_VERSION;
+    let resVersion = (/phi-chart-render\/?$|index\.html$|script\.js\?hash=|/.test(e.request.url)) ? GITHUB_CURRENT_GIT_HASH : ASSETS_VERSION;
 
     e.respondWith(
         caches.match(e.request)

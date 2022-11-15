@@ -40,12 +40,14 @@ jobs:
         uses: actions/configure-pages@v2
       
       - name: Replace current git hash to HTML
-        run: sed -i 's/{{CURRENT_HASH}}/${{ github.sha }}/g' ./public/index.html
+        run:
+          - sed -i 's/{{CURRENT_HASH}}/${{ github.sha }}/g' ./public/index.html
+          - sed -i 's/{{CURRENT_HASH}}/${{ github.sha }}/g' ./public/sw.js
       
       - name: Build webpack 
         run: |
           npm install
-          npx webpack --output-path=./public/
+          npm run build
       
       - name: Upload sourcemap to Sentry
         uses: getsentry/action-release@v1
@@ -56,10 +58,13 @@ jobs:
         with:
           environment: production
           version: ${{ github.sha }}
-          sourcemaps: './public'
+          sourcemaps: './dist'
           set_commits: skip
           ignore_missing: true
       
+      - name: Copy JavaScript to /public
+        run: cp ./dist/script.js ./public/script.js
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
