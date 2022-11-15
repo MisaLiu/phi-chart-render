@@ -60,6 +60,7 @@ const doms = {
         bgBlur: document.querySelector('input#settings-bg-blur'),
 
         offset: document.querySelector('input#settings-audio-offset'),
+        testInputDelay: document.querySelector('button#settings-test-input-delay'),
         speed: document.querySelector('input#settings-audio-speed'),
 
         hitsound: document.querySelector('input#settings-hitsound'),
@@ -610,6 +611,18 @@ window.addEventListener('load', async () =>
         doms.settings.forceCanvas.checked = true;
         doms.settings.forceCanvas.disabled = true;
     }
+
+    doms.settings.testInputDelay.addEventListener('click', (e) =>
+    {
+        doms.settings.testInputDelay.innerText = 'Tap on this button to test input delay...plz dont click me with a mouse';
+    });
+
+    doms.settings.testInputDelay.addEventListener('touchstart', (e) =>
+    {
+        e.preventDefault();
+        let getTime = () => performance ? performance.now() : Date.now();
+        doms.settings.testInputDelay.innerText = 'Tap on this button to test input delay...' + (Math.round((getTime() - e.timeStamp) * 1000) / 1000) + 'ms';
+    });
 });
 
 function CsvReader(_text)
