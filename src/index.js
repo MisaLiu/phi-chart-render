@@ -612,14 +612,9 @@ window.addEventListener('load', async () =>
         doms.settings.forceCanvas.disabled = true;
     }
 
-    doms.settings.testInputDelay.addEventListener('click', (e) =>
+    doms.settings.testInputDelay.addEventListener('pointerdown', (e) =>
     {
-        doms.settings.testInputDelay.innerText = 'Tap on this button to test input delay...plz dont click me with a mouse';
-    });
-
-    doms.settings.testInputDelay.addEventListener('touchstart', (e) =>
-    {
-        e.preventDefault();
+        console.log(e.getCoalescedEvents());
         let getTime = () => performance ? performance.now() : Date.now();
         doms.settings.testInputDelay.innerText = 'Tap on this button to test input delay...' + (Math.round((getTime() - e.timeStamp) * 1000) / 1000) + 'ms';
     });
