@@ -11,8 +11,9 @@
 const ASSETS_VERSION = '0.2';
 const GITHUB_CURRENT_GIT_HASH = `{{CURRENT_HASH}}`;
 
-self.addEventListener('install', () =>
+self.addEventListener('install', (e) =>
 {
+    self.skipWaiting();
     console.log('[Service Worker] Hello world!');
 });
 
@@ -83,7 +84,7 @@ self.addEventListener('fetch', (e) =>
                             console.error(e);
                             return res;
                         }
-                    );
+                    )
                 );
             }
         )
