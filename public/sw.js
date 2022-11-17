@@ -52,7 +52,7 @@ self.addEventListener('fetch', (e) =>
         caches.match(e.request)
             .then((res) =>
             {
-                if (res)
+                if (res && !(/phi-chart-render\/?$|index\.html|script\.js\?hash=/.test(e.request.url)))
                 {
                     console.log('[Service Worker] Fetching cache: ' + req.url);
                     return res;
@@ -67,7 +67,7 @@ self.addEventListener('fetch', (e) =>
                             
                             if (!httpRes || httpRes.status !== 200)
                             {
-                                return httpRes;
+                                return (res ? res : httpRes);
                             }
 
                             var resClone = httpRes.clone();
@@ -77,8 +77,13 @@ self.addEventListener('fetch', (e) =>
                             });
 
                             return httpRes;
+                        })
+                        .catch((e) =>
+                        {
+                            console.error(e);
+                            return res;
                         }
-                    )
+                    );
                 );
             }
         )
