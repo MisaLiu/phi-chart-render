@@ -126,6 +126,7 @@ export default class Game
         this._gameStartTime = NaN;
         this._gameEndTime   = NaN;
         this._isPaused = false;
+        this._isEnded = false;
 
         this.resize = this.resize.bind(this);
         this._pauseBtnClickCallback = this._pauseBtnClickCallback.bind(this);
@@ -349,6 +350,7 @@ export default class Game
         this.chart.calcTime(0);
 
         this._isPaused = false;
+        this._isEnded = false;
 
         this._animateStatus = 0;
         this._gameStartTime = Date.now();
@@ -531,6 +533,7 @@ export default class Game
                     });
 
                     this._isPaused = false;
+                    this._isEnded = false;
                     this.sprites.fakeJudgeline.visible = false;
 
                     this._runCallback('start');
@@ -540,6 +543,7 @@ export default class Game
             {
                 this._animateStatus = 3;
                 this._isPaused = true;
+                this._isEnded = true;
                 this._runCallback('end');
             }
         }
@@ -631,7 +635,7 @@ export default class Game
             this.render.mainContainerCover.visible = false;
         }
 
-        if (this.sprites)
+        if (!this._isEnded && this.sprites)
         {
             if (this.sprites.progressBar)
             {
@@ -653,7 +657,7 @@ export default class Game
                 this.sprites.fakeJudgeline.position.y = this.render.sizer.height / 2;
 
                 this.sprites.fakeJudgeline.height = this.render.sizer.lineScale * 18.75 * 0.008;
-                if (shouldResetFakeJudgeLine)
+                if (shouldResetFakeJudgeLine || this._isEnded)
                 {
                     this.sprites.fakeJudgeline.width = 0;
                 }
@@ -678,8 +682,8 @@ export default class Game
         
         if (withChartSprites)
         {
-            this.judgement.resizeSprites(this.render.sizer);
-            this.chart.resizeSprites(this.render.sizer);
+            this.judgement.resizeSprites(this.render.sizer, this._isEnded);
+            this.chart.resizeSprites(this.render.sizer, this._isEnded);
         }
     }
 }

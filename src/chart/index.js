@@ -188,7 +188,7 @@ export default class Chart
         stage.addChild(this.sprites.info.songDiff);
     }
 
-    resizeSprites(size)
+    resizeSprites(size, isEnded)
     {
         this.renderSize = size;
 
@@ -232,6 +232,7 @@ export default class Chart
                 judgeline.sprite.position.x = judgeline.x * this.renderSize.width;
                 judgeline.sprite.position.y = judgeline.y * this.renderSize.height;
 
+                if (isEnded) judgeline.sprite.alpha = 0;
                 if (judgeline.debugSprite) judgeline.debugSprite.scale.set(this.renderSize.heightPercent);
             });
         }
@@ -249,6 +250,7 @@ export default class Chart
 
                 note.sprite.baseScale = this.renderSize.noteScale;
                 note.sprite.scale.set(this.renderSize.noteScale * note.xScale, this.renderSize.noteScale);
+                if (isEnded) note.sprite.alpha = 0;
                 if (note.debugSprite) note.debugSprite.scale.set(this.renderSize.heightPercent);
             });
         }

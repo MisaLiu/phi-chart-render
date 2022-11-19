@@ -146,7 +146,7 @@ export default class Score
         }
     }
 
-    resizeSprites(size)
+    resizeSprites(size, isEnded)
     {
         this.renderSize = size;
 
@@ -159,16 +159,26 @@ export default class Score
 
         this.sprites.score.style.fontSize = size.heightPercent * 50;
 
-        this.sprites.combo.container.position.x = size.heightPercent * 72;
-        this.sprites.combo.container.position.y = size.heightPercent * 41;
-        this.sprites.combo.text.position.x = this.sprites.combo.number.width + size.heightPercent * 6;
-        this.sprites.combo.text.position.y = size.heightPercent * 30;
+        if (!isEnded)
+        {
+            this.sprites.combo.container.position.x = size.heightPercent * 72;
+            this.sprites.combo.container.position.y = size.heightPercent * 41;
+            this.sprites.combo.text.position.x = this.sprites.combo.number.width + size.heightPercent * 6;
+            this.sprites.combo.text.position.y = size.heightPercent * 30;
 
-        this.sprites.acc.position.x = size.heightPercent * 72;
-        this.sprites.acc.position.y = size.heightPercent * 113;
+            this.sprites.acc.position.x = size.heightPercent * 72;
+            this.sprites.acc.position.y = size.heightPercent * 113;
 
-        this.sprites.score.position.x = size.width - size.heightPercent * 139;
-        this.sprites.score.position.y = size.heightPercent * 61;
+            this.sprites.score.position.x = size.width - size.heightPercent * 139;
+            this.sprites.score.position.y = size.heightPercent * 61;
+        }
+        else
+        {
+            this.sprites.combo.container.position.y = size.height;
+            this.sprites.combo.text.position.y = size.height;
+            this.sprites.acc.position.y = size.height;
+            this.sprites.score.position.y = size.height;
+        }
     }
 
     pushJudge(type = 0, judgelines = [])

@@ -78,11 +78,11 @@ export default class Judgement
         // this.stage.addChild(this.input.sprite);
     }
 
-    resizeSprites(size)
+    resizeSprites(size, isEnded)
     {
         this.renderSize = size;
-        this.score.resizeSprites(size);
-        this.input.resizeSprites(size);
+        this.score.resizeSprites(size, isEnded);
+        this.input.resizeSprites(size, isEnded);
     }
 
     calcTick()
