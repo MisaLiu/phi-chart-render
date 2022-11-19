@@ -511,7 +511,7 @@ export default class Game
             if (isStart)
             {
                 this._animateStatus = 1;
-                this.resize();
+                this.resize(true, false);
 
                 setTimeout(async () =>
                 {
@@ -589,7 +589,7 @@ export default class Game
         this.functions[type].forEach((callback) => callback(this));
     }
 
-    resize(withChartSprites = true)
+    resize(withChartSprites = true, shouldResetFakeJudgeLine = true)
     {
         if (!this.render) return;
 
@@ -653,7 +653,9 @@ export default class Game
                 this.sprites.fakeJudgeline.position.y = this.render.sizer.height / 2;
 
                 this.sprites.fakeJudgeline.height = this.render.sizer.lineScale * 18.75 * 0.008;
-                this.sprites.fakeJudgeline.width = 0;
+                if(shouldResetFakeJudgeLine){
+                    this.sprites.fakeJudgeline.width = 0;
+                }
             }
         }
 
