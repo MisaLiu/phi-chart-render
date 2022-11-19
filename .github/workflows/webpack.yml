@@ -47,7 +47,7 @@ jobs:
       - name: Build webpack 
         run: |
           npm install
-          npx webpack --mode=development --output-path=./dist/
+          npm run build
       
       - name: Upload sourcemap to Sentry
         uses: getsentry/action-release@v1
@@ -63,7 +63,9 @@ jobs:
           ignore_missing: true
       
       - name: Copy JavaScript to /public
-        run: cp ./dist/script.js ./public/script.js
+        run: |
+          cp ./dist/script.js ./public/script.js
+          cp ./dist/script.js.map ./public/script.js.map
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
