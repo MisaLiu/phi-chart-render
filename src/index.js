@@ -77,6 +77,12 @@ const doms = {
     loadingStatus : document.querySelector('div#loading-status'),
     fullscreenBtn : document.querySelector('button#fullscreen'),
 
+    playResult: {
+        container: document.querySelector('div.play-result'),
+        scoreBar: document.querySelector('div.play-result .info-bar.score'),
+        accBar: document.querySelector('div.play-result .info-bar.acc-bar'),
+    },
+
     errorWindow : {
         window: document.querySelector('div.error-window'),
         closeBtn: document.querySelector('div.error-window button.close'),
@@ -622,6 +628,8 @@ window.addEventListener('load', async () =>
         doms.settings.testInputDelay.testDelays += (getTime() - e.timeStamp);
         doms.settings.testInputDelay.innerText = 'Tap on this button to test input delay...' + (Math.round((doms.settings.testInputDelay.testDelays / doms.settings.testInputDelay.testTimes) * 1000) / 1000) + 'ms';
     });
+
+    doms.playResult.scoreBar.addEventListener('click', () => doms.playResult.accBar.classList.toggle('show'));
 });
 
 function CsvReader(_text)
@@ -683,7 +691,10 @@ function blurImage(_texture, radius = 10)
 
 function calcHeightPercent()
 {
+    let realWidth = document.documentElement.clientHeight / 9 * 16 < document.documentElement.clientWidth ? document.documentElement.clientHeight / 9 * 16 : document.documentElement.clientWidth;
+
     document.body.style.setProperty('--height-percent', document.documentElement.clientHeight / 1080);
+    document.body.style.setProperty('--width-offset', (document.documentElement.clientWidth - realWidth) / 2 + 'px');
 }
 
 function pauseGame()
@@ -710,7 +721,8 @@ function restartGame()
     _game.restart();
 
     qs('.game-paused').style.display = 'none';
-    qs('.play-result').style.display = 'none';
+    qs('.play-result').classList.remove('show');
+    doms.playResult.accBar.classList.remove('show');
 }
 
 function exitGame()
@@ -721,7 +733,8 @@ function exitGame()
     _game = undefined;
 
     qs('.game-paused').style.display = 'none';
-    qs('.play-result').style.display = 'none';
+    qs('.play-result').classList.remove('show');
+    doms.playResult.accBar.classList.remove('show');
 
     doms.fileSelect.style.display = 'block';
 }
@@ -734,36 +747,39 @@ window.exitGame = exitGame;
 
 function showGameResultPopup(game)
 {
+    let chart = game.chart;
     let judge = game.judgement;
 
-    qs('.play-result .title').innerHTML = 'Play result';
-    if (game._settings.challengeMode) qs('.play-result .title').innerHTML += ' (challenge)';
-    if (Number((game._settings.speed).toFixed(2)) !== 1) qs('.play-result .title').innerHTML += ' (x' + (game._settings.speed).toFixed(2) + ')';
+    qs('.play-result .song-info .title').innerHTML = chart.info.name;
+    qs('.play-result .song-info .subtitle.artist').innerHTML = chart.info.artist;
+    qs('.play-result .song-info .subtitle.diff').innerHTML = chart.info.difficult;
+    if (game._settings.challengeMode) qs('.play-result .song-info .title').innerHTML += ' (challenge)';
+    if (Number((game._settings.speed).toFixed(2)) !== 1) qs('.play-result .song-info .title').innerHTML += ' (x' + (game._settings.speed).toFixed(2) + ')';
 
-    qs('.play-result .general-info .score .value').innerText = fillZero((judge.score.score).toFixed(0));
-    if (judge.score.judgeLevel == 6) qs('.play-result .general-info .score .judge-level').innerText = 'Phi';
-    else if (judge.score.judgeLevel == 5) qs('.play-result .general-info .score .judge-level').innerText = 'V';
-    else if (judge.score.judgeLevel == 4) qs('.play-result .general-info .score .judge-level').innerText = 'S';
-    else if (judge.score.judgeLevel == 3) qs('.play-result .general-info .score .judge-level').innerText = 'A';
-    else if (judge.score.judgeLevel == 2) qs('.play-result .general-info .score .judge-level').innerText = 'B';
-    else if (judge.score.judgeLevel == 1) qs('.play-result .general-info .score .judge-level').innerText = 'C';
-    else qs('.play-result .general-info .score .judge-level').innerText = 'False';
+    if (judge.score.judgeLevel == 6) qs('.play-result .judge-icon').innerText = 'Phi';
+    else if (judge.score.judgeLevel == 5) qs('.play-result .judge-icon').innerText = 'V';
+    else if (judge.score.judgeLevel == 4) qs('.play-result .judge-icon').innerText = 'S';
+    else if (judge.score.judgeLevel == 3) qs('.play-result .judge-icon').innerText = 'A';
+    else if (judge.score.judgeLevel == 2) qs('.play-result .judge-icon').innerText = 'B';
+    else if (judge.score.judgeLevel == 1) qs('.play-result .judge-icon').innerText = 'C';
+    else qs('.play-result .judge-icon').innerText = 'False';
 
-    qs('.play-result .general-info .accurate .value').innerText = (judge.score.acc * 100).toFixed(2) + '%';
-    qs('.play-result .general-info .accurate .max-combo .value').innerText = judge.score.maxCombo;
+    if (judge.score.APType == 2) qs('.play-result .extra-info').innerText = 'All Perfect';
+    else if (judge.score.APType == 1) qs('.play-result .extra-info').innerText = 'Full Combo';
+    else qs('.play-result .extra-info').innerText = '';
+    if (judge.score._autoPlay) qs('.play-result .extra-info').innerText = 'Auto Play';
 
-    if (judge.score.APType == 2) qs('.play-result .general-info .accurate .status').innerText = 'All Perfect';
-    else if (judge.score.APType == 1) qs('.play-result .general-info .accurate .status').innerText = 'Full Combo';
-    else qs('.play-result .general-info .accurate .status').innerText = '';
-    if (judge.score._autoPlay) qs('.play-result .general-info .accurate .status').innerText = 'Auto Play';
+    qs('.play-result .info-bar.score .score').innerText = fillZero((judge.score.score).toFixed(0));
+    qs('.play-result .info-bar.score .acc').innerText = 'Accuracy ' + (judge.score.acc * 100).toFixed(2) + '%';
 
-    qs('.play-result .judge-detail .perfect .value').innerText = judge.score.perfect;
-    qs('.play-result .judge-detail .good .value').innerText = judge.score.good;
-    qs('.play-result .judge-detail .bad .value').innerText = judge.score.bad;
-    qs('.play-result .judge-detail .miss .value').innerText = judge.score.miss;
+    qs('.play-result .info-bar.detail .detail-single .value.perfect').innerText = judge.score.perfect;
+    qs('.play-result .info-bar.detail .detail-single .value.good').innerText = judge.score.good;
+    qs('.play-result .info-bar.detail .detail-single .value.bad').innerText = judge.score.bad;
+    qs('.play-result .info-bar.detail .detail-single .value.miss').innerText = judge.score.miss;
+    qs('.play-result .info-bar.detail .max-combo').innerText = 'Max Combo ' + judge.score.maxCombo;
 
     {
-        qs('.play-result .judge-histogram').innerHTML = '';
+        qs('.play-result .info-bar.acc-bar .judge-histogram').innerHTML = '';
 
         let noteJudgeTime = (!game._settings.challengeMode ? 180 : 90) / 1000;
         let noteTimeHigestCount = 0;
@@ -801,15 +817,15 @@ function showGameResultPopup(game)
             }
             
 
-            qs('.play-result .judge-histogram').appendChild(value);
+            qs('.play-result .info-bar.acc-bar .judge-histogram').appendChild(value);
         }
 
         let center = document.createElement('div');
         center.className = 'center';
-        qs('.play-result .judge-histogram').appendChild(center);
+        qs('.play-result .info-bar.acc-bar .judge-histogram').appendChild(center);
     }
 
-    qs('.play-result').style.display = 'block';
+    qs('.play-result').classList.add('show');
 
     function fillZero(num)
     {

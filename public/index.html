@@ -8,7 +8,7 @@
         <meta name="viewport" content="width=device-width" />
         <link rel="shortcut icon" href="./icons/favicon.ico" />
         <link rel="manifest" href="./manifest.webmanifest" />
-        <link href="./fonts/index.css" rel="stylesheet" />
+        <link href="./style.css" rel="stylesheet" />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9YT2TVFV"></script>
         <!--script src="./eruda.min.js"></script>
         <script>eruda.init();</script-->
@@ -44,239 +44,24 @@
             // Init service worker
             if (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}' && 'serviceWorker' in navigator)
             {
-                if (getCookie('is_old_sw_deleted') != 'true')
+                (async () =>
                 {
-                    const serviceWorker = navigator.serviceWorker;
-
-                    if (serviceWorker.getRegistrations)
+                    if (navigator.serviceWorker.getRegistrations)
                     {
-                        serviceWorker.getRegistrations()
-                            .then((sws) =>
+                        let sws = await navigator.serviceWorker.getRegistrations();
+                        if (sws.length > 1)
+                        {
+                            for (const sw of sws)
                             {
-                                sws.forEach((sw) =>
-                                {
-                                    sw.unregister();
-                                });
+                                sw.unregister();
                             }
-                        );
-                    }
-                    else if (serviceWorker.getRegistration)
-                    {
-                        serviceWorker.getRegistration()
-                            .then((sw) =>
-                            {
-                                sw && sw.unregister();
-                            }
-                        );
+                        }
                     }
 
-                    setCookie('is_old_sw_deleted', 'true', 30);
-                }
-
-                navigator.serviceWorker.register('./sw.js');
+                    navigator.serviceWorker.register('./sw.js');
+                })();
             }
         </script>
-        <style>
-            html, body {
-                padding: 0;
-                margin: 0;
-                overflow: hidden;
-
-                --height-percent: 1;
-            }
-
-            div.file-select {
-                position: absolute;
-                top: 0;
-                left: 0;
-                max-width: 100%;
-                max-height: 100%;
-                padding: 10px;
-                color: #000;
-                background-color: #FFF;
-                border: 1px solid #999;
-                overflow: auto;
-                box-sizing: border-box;
-                z-index: 10;
-            }
-
-            div.file-select .unsupported-audio-file-type.warn {
-                color: orange;
-            }
-            div.file-select .unsupported-audio-file-type.good {
-                color: green;
-            }
-
-            button#fullscreen {
-                position: absolute;
-                top: 0;
-                right: 0;
-            }
-
-            canvas.canvas-game {
-                position: absolute;
-                top: 0;
-                left: 0;
-                z-index: 1;
-            }
-
-            div.play-result,
-            div.game-paused {
-                display: none;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                padding: calc(18px * var(--height-percent));
-                transform: translate(-50%, -50%);
-                background-color: rgba(0, 0, 0, 0.2);
-                color: #FFF;
-                backdrop-filter: blur(20px);
-                border-radius: 14px;
-                box-shadow: 0px 0px 24px #000;
-                box-sizing: border-box;
-                z-index: 10;
-            }
-            div.play-result .title,
-            div.game-paused .title {
-                font-size: calc(70px * var(--height-percent));
-                text-align: center;
-            }
-
-            div.play-result .general-info,
-            div.play-result .judge-detail {
-                display: flex;
-            }
-
-            div.play-result .general-info {
-                margin: 0 calc(48px * var(--height-percent));
-                margin-top: calc(14px * var(--height-percent));
-                line-height: calc(54px * var(--height-percent));
-                justify-content: space-between;
-                flex-direction: row;
-            }
-
-            div.play-result .general-info .score .judge-level {
-                font-size: calc(60px * var(--height-percent));
-            }
-            div.play-result .general-info .score .value {
-                font-size: calc(50px * var(--height-percent));
-            }
-
-            div.play-result .general-info .accurate {
-                display: flex;
-                line-height: normal;
-                font-size: calc(36px * var(--height-percent));
-                flex-direction: column-reverse;
-            }
-
-            div.play-result .judge-detail {
-                margin-top: calc(16px * var(--height-percent));
-                font-size: calc(36px * var(--height-percent));
-                justify-content: space-between;
-                flex-direction: row;
-            }
-            div.play-result .judge-detail > * {
-                margin: 0 calc(50px * var(--height-percent));
-            }
-            div.play-result .judge-detail > * > span.value {
-                display: block;
-                font-weight: bold;
-                text-align: center;
-            }
-
-            div.play-result .judge-histogram {
-                position: relative;
-                margin: 0 calc(48px * var(--height-percent));
-                margin-top: calc(22px * var(--height-percent));
-                height: calc(22px * var(--height-percent));
-                background-color: rgba(0, 0, .0, 0.6);
-            }
-            div.play-result .judge-histogram > * {
-                position: absolute;
-                width: 1%;
-                height: 100%;
-                left: calc(100% - var(--pos));
-                background-color: green;
-                transform: translateX(50%);
-            }
-            div.play-result .judge-histogram > .center {
-                background-color: red;
-                opacity: 0.4;
-
-                --pos: 50%;
-            }
-
-            div.play-result .action,
-            div.game-paused .action {
-                display: flex;
-                margin-top: calc(28px * var(--height-percent));
-                flex-direction: row;
-                justify-content: center;
-                align-content: center;
-            }
-            div.play-result .action *,
-            div.game-paused .action * {
-                font-size: calc(38px * var(--height-percent));
-            }
-
-            div.game-paused {
-                padding: calc(30px * var(--height-percent));
-            }
-
-            div.error-window {
-                display: none;
-                position: absolute;
-                top: 0;
-                right: 0;
-                max-width: 100%;
-                max-height: 100%;
-                padding: 8px;
-                color: white;
-                background-color: #F33;
-                border: 1px solid #A00;
-                box-sizing: border-box;
-                z-index: 20;
-            }
-            div.error-window a {
-                color: #FFF;
-            }
-            div.error-window button.close {
-                margin-left: 6px;
-                float: right;
-            }
-            div.error-window pre {
-                margin-top: 8px;
-                margin-bottom: 8px;
-                padding: 8px;
-                background: #D60000;
-                box-sizing: border-box;
-                overflow-x: auto;
-            }
-            div.error-window pre,
-            div.error-window pre * {
-                font-family: Menlo, Monaco, 'Courier New', monospace !important;
-            }
-
-            .font-loaded div.file-select,
-            .font-loaded div.file-select *,
-            .font-loaded div.play-result,
-            .font-loaded div.play-result *,
-            .font-loaded div.error-window,
-            .font-loaded div.error-window * {
-                font-family: 'MiSans';
-            }
-            .font-loaded div.file-select a {
-                font-family: 'A-OTF Shin Go Pr6N H';
-                line-height: 20px;
-            }
-
-            div.debug-value {
-                position: absolute;
-                top: 0;
-                right: 0;
-                color: white;
-            }
-        </style>
     </head>
     <body>
         <div class="file-select">
@@ -337,36 +122,52 @@
         <div class="debug-value"></div>
         
         <div class="play-result">
-            <div class="title">Play result</div>
+            <div class="song-info">
+                <div class="title">Song name</div>
+                <div class="subtitle artist">Artist</div>
+                <div class="subtitle diff">SP Lv.?</div>
+            </div>
 
-            <div class="general-info">
-                <div class="score">
-                    <div class="judge-level">Phi</div>
-                    <div class="value">1000000</div>
+            <div class="judge-icon">S</div>
+            <div class="extra-info">FULL COMBO</div>
+            
+            <div class="info-bar score">
+                <div class="score">1000000</div>
+                <div class="acc">Accuracy 100.00%</div>
+            </div>
+
+            <div class="info-bar acc-bar">
+                <div class="judge-histogram">
+                    <div class="center"></div>
                 </div>
+            </div>
 
-                <div class="accurate">
-                    <div class="status">All Perfect</div>
-                    <div class="value">100.00%</div>
-                    <div class="max-combo">Max combo: <span class="value">1000</span></div>
+            <div class="info-bar detail">
+                <div class="detail">
+                    <div class="detail-single">
+                        <div class="type">Perfect</div>
+                        <div class="value perfect">100</div>
+                    </div>
+                    <div class="detail-single">
+                        <div class="type">Good</div>
+                        <div class="value good">0</div>
+                    </div>
+                    <div class="detail-single">
+                        <div class="type">Bad</div>
+                        <div class="value bad">0</div>
+                    </div>
+                    <div class="detail-single">
+                        <div class="type">Miss</div>
+                        <div class="value miss">0</div>
+                    </div>
                 </div>
+                <div class="max-combo">Max Combo 100</div>
             </div>
 
-            <div class="judge-detail">
-                <div class="perfect">Perfect<span class="value">1000</span></div>
-                <div class="good">Good<span class="value">0</span></div>
-                <div class="bad">Bad<span class="value">0</span></div>
-                <div class="miss">Miss<span class="value">0</span></div>
-            </div>
-
-            <div class="judge-histogram">
-                <div class="center"></div>
-            </div>
-
-            <div class="action">
-                <button onclick="exitGame()">Exit</button>
+            <div class="actions">
                 <button onclick="history.go(0)">Refresh</button>
-                <button onclick="restartGame()">Restart</button>
+                <button class="big highlight" onclick="restartGame()">Restart</button>
+                <button class="big highlight" onclick="exitGame()">Exit</button>
             </div>
         </div>
 

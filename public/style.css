@@ -1,0 +1,398 @@
+@import url('./fonts/index.css');
+
+html, body {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+
+    --height-percent: 1;
+    --width-offset: 0px;
+}
+
+div.file-select {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: 100%;
+    max-height: 100%;
+    padding: 10px;
+    color: #000;
+    background-color: #FFF;
+    border: 1px solid #999;
+    overflow: auto;
+    box-sizing: border-box;
+    z-index: 10;
+}
+
+button#fullscreen {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+canvas.canvas-game {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+div.game-paused {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    padding: calc(18px * var(--height-percent));
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #FFF;
+    backdrop-filter: blur(20px);
+    border-radius: 14px;
+    box-shadow: 0px 0px 24px #000;
+    box-sizing: border-box;
+    z-index: 10;
+}
+div.game-paused .title {
+    font-size: calc(70px * var(--height-percent));
+    text-align: center;
+}
+
+div.game-paused .action {
+    display: flex;
+    margin-top: calc(28px * var(--height-percent));
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+}
+div.game-paused .action * {
+    font-size: calc(38px * var(--height-percent));
+}
+
+div.game-paused {
+    padding: calc(30px * var(--height-percent));
+}
+
+div.error-window {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    max-width: 100%;
+    max-height: 100%;
+    padding: 8px;
+    color: white;
+    background-color: #F33;
+    border: 1px solid #A00;
+    box-sizing: border-box;
+    z-index: 20;
+}
+div.error-window a {
+    color: #FFF;
+}
+div.error-window button.close {
+    margin-left: 6px;
+    float: right;
+}
+div.error-window pre {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding: 8px;
+    background: #D60000;
+    box-sizing: border-box;
+    overflow-x: auto;
+}
+div.error-window pre,
+div.error-window pre * {
+    font-family: Menlo, Monaco, 'Courier New', monospace !important;
+}
+
+.play-result {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    color: #FFF;
+    z-index: 10;
+    pointer-events: none;
+    touch-action: none;
+}
+
+.play-result .song-info {
+    position: absolute;
+    top: calc(106px * var(--height-percent));
+    left: 100%;
+    padding-left: calc(16px * var(--height-percent));
+    box-sizing: border-box;
+}
+.play-result .song-info::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: calc(8px * var(--height-percent));
+    background: #FFF;
+    border-radius: calc(6px * var(--height-percent));
+}
+
+.play-result .song-info .title {
+    font-family: 'A-OTF Shin Go Pr6N H';
+    font-size: calc(60px * var(--height-percent));
+    font-weight: bolder;
+    line-height: calc(68px * var(--height-percent));
+}
+.play-result .song-info .subtitle {
+    font-size: calc(25px * var(--height-percent));
+    font-weight: bold;
+    line-height: calc(26px * var(--height-percent));
+}
+.play-result .song-info .subtitle.diff {
+    font-size: calc(20px * var(--height-percent));
+    font-weight: normal;
+}
+
+.play-result .judge-icon {
+    position: absolute;
+    top: calc(304px * var(--height-percent));
+    left: 100%;
+    font-size: calc(204px * var(--height-percent));
+
+    /* 以下内容皆为测试专用 */
+    color: #EBCF0E;
+    font-weight: bold;
+    text-shadow: 0px 0px 20px #EBCF0E;
+}
+.play-result .extra-info {
+    position: absolute;
+    top: calc(540px * var(--height-percent));
+    left: 100%;
+    font-family: 'A-OTF Shin Go Pr6N H' !important;
+    font-size: calc(26px * var(--height-percent));
+    line-height: calc(50px * var(--height-percent));
+    text-transform: uppercase;
+}
+
+.play-result .info-bar {
+    position: absolute;
+    left: 100%;
+    width: calc(520px * var(--height-percent));
+    height: calc(130px * var(--height-percent));
+    padding: calc(24px * var(--height-percent)) calc(54px * var(--height-percent));
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: calc(16px * var(--height-percent));
+    box-sizing: border-box;
+    -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(30px);
+}
+.play-result .info-bar::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: calc(30px * var(--height-percent));
+    left: calc(26px * var(--height-percent));
+    width: calc(4px * var(--height-percent));
+    height: calc(100% - (60px * var(--height-percent)));
+    background: #FFF;
+    border-radius: calc(6px * var(--height-percent));
+}
+
+.play-result .info-bar.score {
+    bottom: calc(333px * var(--height-percent));
+}
+.play-result .info-bar.score .score {
+    font-family: 'A-OTF Shin Go Pr6N H';
+    font-size: calc(50px * var(--height-percent));
+    line-height: calc(56px * var(--height-percent));
+}
+.play-result .info-bar.score .acc {
+    font-family: 'A-OTF Shin Go Pr6N H';
+    font-size: calc(20px * var(--height-percent));
+    line-height: calc(18px * var(--height-percent));
+}
+
+.play-result .info-bar.acc-bar {
+    height: calc(38px * var(--height-percent));
+    left: calc(646px * var(--height-percent) + var(--width-offset));
+    bottom: calc(333px * var(--height-percent));
+    padding: calc(8px * var(--height-percent));
+    opacity: 0;
+    pointer-events: none;
+    touch-action: none;
+    -webkit-transition: opacity 0.15s linear;
+    -moz-transition: opacity 0.15s linear;
+    -ms-transition: opacity 0.15s linear;
+    transition: opacity 0.15s linear;
+}
+.play-result .info-bar.acc-bar.show {
+    opacity: 1;
+}
+.play-result .info-bar.acc-bar::after {
+    display: none;
+}
+
+.play-result .info-bar.acc-bar .judge-histogram {
+    position: relative;
+    width: 100%;
+    height: calc(22px * var(--height-percent));
+    background-color: rgba(0, 0, .0, 0.6);
+}
+.play-result .info-bar.acc-bar .judge-histogram > * {
+    position: absolute;
+    width: 1%;
+    height: 100%;
+    left: calc(100% - var(--pos));
+    background-color: green;
+    transform: translateX(50%);
+}
+.play-result .info-bar.acc-bar .judge-histogram > .center {
+    background-color: red;
+    opacity: 0.4;
+
+    --pos: 50%;
+}
+
+.play-result .info-bar.detail {
+    bottom: calc(184px * var(--height-percent));
+}
+.play-result .info-bar.detail .detail {
+    display: flex;
+    margin-top: calc(6px * var(--height-percent));
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    align-items: center;
+}
+.play-result .info-bar.detail .detail .detail-single {
+    flex: 1;
+}
+.play-result .info-bar.detail .detail .detail-single .type {
+    font-family: 'A-OTF Shin Go Pr6N H';
+    font-size: calc(25px * var(--height-percent));
+    line-height: calc(22px * var(--height-percent));
+    letter-spacing: calc(-2px * var(--height-percent));
+}
+.play-result .info-bar.detail .detail .detail-single .value {
+    font-size: calc(16px * var(--height-percent));
+}
+
+.play-result .actions {
+    display: flex;
+    position: absolute;
+    bottom: calc(72px * var(--height-percent));
+    right: 100%;
+    flex-direction: row;
+    align-content: flex-end;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: calc(24px * var(--height-percent));
+}
+
+.play-result .actions button {
+    min-width: calc(128px * var(--height-percent));
+    height: calc(62px * var(--height-percent));
+    padding: 0 calc(26px * var(--height-percent));
+    background: rgba(0, 0, 0, 0.4);
+    color: #FFF;
+    font-size: calc(24px * var(--height-percent));
+    border: none;
+    outline: none;
+    border-radius: calc(36px * var(--height-percent));
+    -webkit-transition: background 0.15s linear , color 0.15s linear;
+    -moz-transition: background 0.15s linear , color 0.15s linear;
+    -ms-transition: background 0.15s linear , color 0.15s linear;
+    transition: background 0.15s linear , color 0.15s linear;
+}   
+.play-result .actions button.big {
+    min-width: calc(216px * var(--height-percent));
+    height: calc(90px * var(--height-percent));
+    padding: 0 calc(50px * var(--height-percent));
+    font-size: calc(36px * var(--height-percent));
+    border-radius: calc(52px * var(--height-percent));
+}
+.play-result .actions button:hover {
+    background: #FFF;
+    color: #000;
+}
+.play-result .actions button:active {
+    background: #bbb;
+}
+.play-result .actions button.highlight {
+    background: #FFF;
+    color: #4e4e4e;
+}
+.play-result .actions button.highlight:hover {
+    color: #000;
+}
+.play-result .actions button.highlight:active {
+    background: #bbb;
+}
+
+.play-result.show {
+    pointer-events: all;
+    touch-action: auto;
+}
+.play-result.show .song-info {
+    left: calc(106px * var(--height-percent) + var(--width-offset));
+    -webkit-transition: left 0.5s cubic-bezier(0, 0, 0, 1);
+    -moz-transition: left 0.5s cubic-bezier(0, 0, 0, 1);
+    -ms-transition: left 0.5s cubic-bezier(0, 0, 0, 1);
+    transition: left 0.5s cubic-bezier(0, 0, 0, 1);
+}
+.play-result.show .judge-icon {
+    left: calc(110px * var(--height-percent) + var(--width-offset));
+    -webkit-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.2s;
+    -moz-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.2s;
+    -ms-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.2s;
+    transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.2s;
+}
+.play-result.show .extra-info {
+    left: calc(112px * var(--height-percent) + var(--width-offset));
+    -webkit-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.2s;
+    -moz-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.2s;
+    -ms-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.2s;
+    transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.2s;
+}
+.play-result.show .info-bar.score {
+    left: calc(106px * var(--height-percent) + var(--width-offset));
+    -webkit-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.4s;
+    -moz-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.4s;
+    -ms-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.4s;
+    transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.4s;
+}
+.play-result.show .info-bar.detail {
+    left: calc(106px * var(--height-percent) + var(--width-offset));
+    -webkit-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.6s;
+    -moz-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.6s;
+    -ms-transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.6s;
+    transition: left 0.5s cubic-bezier(0, 0, 0, 1) 0.6s;
+}
+.play-result.show .actions {
+    right: calc(68px * var(--height-percent) + var(--width-offset));
+    -webkit-transition: right 0.5s cubic-bezier(0, 0, 0, 1) 0.8s;
+    -moz-transition: right 0.5s cubic-bezier(0, 0, 0, 1) 0.8s;
+    -ms-transition: right 0.5s cubic-bezier(0, 0, 0, 1) 0.8s;
+    transition: right 0.5s cubic-bezier(0, 0, 0, 1) 0.8s;
+}
+
+.font-loaded div.file-select,
+.font-loaded div.file-select *,
+.font-loaded div.play-result,
+.font-loaded div.play-result *,
+.font-loaded div.error-window,
+.font-loaded div.error-window * {
+    font-family: 'MiSans';
+}
+.font-loaded div.file-select a {
+    font-family: 'A-OTF Shin Go Pr6N H';
+    line-height: 20px;
+}
+
+div.debug-value {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: white;
+}
