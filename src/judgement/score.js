@@ -175,7 +175,6 @@ export default class Score
         else
         {
             this.sprites.combo.container.position.y = size.height;
-            this.sprites.combo.text.position.y = size.height;
             this.sprites.acc.position.y = size.height;
             this.sprites.score.position.y = size.height;
         }
