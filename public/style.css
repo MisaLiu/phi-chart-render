@@ -135,7 +135,7 @@ div.error-window pre * {
 .play-result .song-info {
     position: absolute;
     top: calc(106px * var(--height-percent));
-    left: 100%;
+    left: 110%;
     padding-left: calc(16px * var(--height-percent));
     box-sizing: border-box;
 }
@@ -170,7 +170,7 @@ div.error-window pre * {
 .play-result .judge-icon {
     position: absolute;
     top: calc(304px * var(--height-percent));
-    left: 100%;
+    left: 110%;
     font-size: calc(204px * var(--height-percent));
 
     /* 以下内容皆为测试专用 */
@@ -181,7 +181,7 @@ div.error-window pre * {
 .play-result .extra-info {
     position: absolute;
     top: calc(540px * var(--height-percent));
-    left: 100%;
+    left: 110%;
     font-family: 'A-OTF Shin Go Pr6N H' !important;
     font-size: calc(26px * var(--height-percent));
     line-height: calc(50px * var(--height-percent));
@@ -190,7 +190,7 @@ div.error-window pre * {
 
 .play-result .info-bar {
     position: absolute;
-    left: 100%;
+    left: 110%;
     width: calc(520px * var(--height-percent));
     height: calc(130px * var(--height-percent));
     padding: calc(24px * var(--height-percent)) calc(54px * var(--height-percent));
@@ -299,7 +299,7 @@ div.error-window pre * {
     display: flex;
     position: absolute;
     bottom: calc(72px * var(--height-percent));
-    right: 100%;
+    right: 110%;
     flex-direction: row;
     align-content: flex-end;
     justify-content: flex-start;
