@@ -653,7 +653,8 @@ export default class Game
                 this.sprites.fakeJudgeline.position.y = this.render.sizer.height / 2;
 
                 this.sprites.fakeJudgeline.height = this.render.sizer.lineScale * 18.75 * 0.008;
-                if(shouldResetFakeJudgeLine){
+                if (shouldResetFakeJudgeLine)
+                {
                     this.sprites.fakeJudgeline.width = 0;
                 }
             }
