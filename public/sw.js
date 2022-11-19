@@ -2,7 +2,7 @@
  * @Author: git config user.name && git config user.email
  * @Date: 2022-11-13 15:24:32
  * @LastEditors: git config user.name && git config user.email
- * @LastEditTime: 2022-11-19 00:11:43
+ * @LastEditTime: 2022-11-19 19:39:34
  * @FilePath: \phi-chart-render\public\sw.js
  * @Description: 
  * 
@@ -44,16 +44,16 @@ self.addEventListener('activate', (e) =>
 self.addEventListener('fetch', (e) =>
 {
     if (e.request.method != 'GET') return;
-    if (!(/phi-chart-render\/?$|index\.html|.+\.css|script\.js\?hash=|assets|fonts/.test(e.request.url))) return;
+    if (!(/phi-chart-render\/?$|index\.html|\.css|script\.js\?hash=|assets|fonts/.test(e.request.url))) return;
 
     let req = e.request;
-    let resVersion = (/phi-chart-render\/?$|index\.html|.+\.css|script\.js\?hash=/.test(e.request.url)) ? GITHUB_CURRENT_GIT_HASH : ASSETS_VERSION;
+    let resVersion = (/phi-chart-render\/?$|index\.html|\.css|script\.js\?hash=/.test(e.request.url)) ? GITHUB_CURRENT_GIT_HASH : ASSETS_VERSION;
 
     e.respondWith(
         caches.match(e.request)
             .then((res) =>
             {
-                if (res && !(/phi-chart-render\/?$|index\.html|.+\.css|script\.js\?hash=/.test(e.request.url)))
+                if (res && !(/phi-chart-render\/?$|index\.html|\.css|script\.js\?hash=/.test(e.request.url)))
                 {
                     console.log('[Service Worker] Fetching cache: ' + req.url);
                     return res;
