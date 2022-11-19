@@ -1,7 +1,7 @@
 import Judgement from './judgement';
 import { Application, Container, Texture, Sprite, Graphics, Text } from 'pixi.js-legacy';
 
-const PorgressBarCache = (() =>
+const ProgressBarCache = (() =>
 {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -189,7 +189,7 @@ export default class Game
         this.judgement.createSprites(this._settings.showInputPoint);
 
         // 进度条
-        this.sprites.progressBar = new Sprite(PorgressBarCache);
+        this.sprites.progressBar = new Sprite(ProgressBarCache);
         this.sprites.progressBar.width = 0;
         this.sprites.progressBar.alpha = 0.75;
         this.sprites.progressBar.zIndex = 99999;
