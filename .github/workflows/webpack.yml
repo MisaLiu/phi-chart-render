@@ -47,7 +47,7 @@ jobs:
       - name: Build webpack 
         run: |
           npm install
-          npm run build
+          npx webpack --mode=development --output-path=./dist/
       
       - name: Upload sourcemap to Sentry
         uses: getsentry/action-release@v1
