@@ -601,8 +601,7 @@ window.addEventListener('load', async () =>
                 { name: 'ez', url: './assets/sounds/result/ez.ogg' },
                 { name: 'hd', url: './assets/sounds/result/hd.ogg' },
                 { name: 'in', url: './assets/sounds/result/in.ogg' },
-                { name: 'at', url: './assets/sounds/result/at.ogg' },
-                { name: 'sp', url: './assets/sounds/result/sp.ogg' }
+                { name: 'at', url: './assets/sounds/result/at.ogg' }
             ], { loop: true }).then((result) =>
             {
                 assets.sounds.result = result;
@@ -819,7 +818,7 @@ function showGameResultPopup(game)
     if (game._settings.challengeMode) qs('.play-result .song-info .subtitle.diff').innerHTML += ' (challenge)';
     if (Number((game._settings.speed).toFixed(2)) !== 1) qs('.play-result .song-info .subtitle.diff').innerHTML += ' (x' + (game._settings.speed).toFixed(2) + ')';
 
-    if (judge.score.judgeLevel == 6) qs('.play-result .judge-icon').innerText = 'Phi';
+    if (judge.score.judgeLevel == 6) qs('.play-result .judge-icon').innerText = 'φ';
     else if (judge.score.judgeLevel == 5) qs('.play-result .judge-icon').innerText = 'V';
     else if (judge.score.judgeLevel == 4) qs('.play-result .judge-icon').innerText = 'S';
     else if (judge.score.judgeLevel == 3) qs('.play-result .judge-icon').innerText = 'A';
@@ -910,12 +909,6 @@ function showGameResultPopup(game)
             {
                 assets.sounds.result.at.stop();
                 assets.sounds.result.at.play();
-                break;
-            }
-            case 'sp':
-            {
-                assets.sounds.result.sp.stop();
-                assets.sounds.result.sp.play();
                 break;
             }
             case 'in' :
