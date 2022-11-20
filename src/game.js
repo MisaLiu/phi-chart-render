@@ -89,7 +89,11 @@ export default class Game
             canvas         : this.render.view,
             assets         : {
                 textures : { normal: this.assets.textures.clickRaw, bad: this.assets.textures.clickRaw },
-                sounds   : this.assets.sounds,
+                sounds   : {
+                    tap   : this.assets.sounds.tap,
+                    drag  : this.assets.sounds.drag,
+                    flick : this.assets.sounds.flick
+                },
             },
             hitsound       : params.settings && params.settings.hitsound !== undefined && params.settings.hitsound !== null ? !!params.settings.hitsound : true,
             hitsoundVolume : params.settings && !isNaN(Number(params.settings.hitsoundVolume)) ? Number(params.settings.hitsoundVolume) : 1,

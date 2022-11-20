@@ -508,21 +508,6 @@ doms.startBtn.addEventListener('click', async () => {
     });
 
     _game.createSprites();
-    
-    /*
-    _game.chart.addFunction('note', (currentTime, note) =>
-    {
-        if (note.isFake) return;
-        if (currentTime < note.time) return;
-        if (currentTime - 0.2 > note.time) return;
-        if (note.type !== 3 && note.sprite.alpha != 0)
-        {
-            note.sprite.alpha = 0;
-            // console.log(note);
-        }
-        // note.sprite.alpha = 1 - (currentTime - note.time) / 0.2;
-    });
-    */
     _game.start();
 
     // eruda.hide();
@@ -599,15 +584,34 @@ window.addEventListener('load', async () =>
 
     loader.onComplete.add((l, res) =>
     {
-        assets.sounds = SoundLoader([
+        doms.loadingStatus.innerText = 'Loading hitsounds...';
+
+        SoundLoader([
             { name: 'tap', url: './assets/sounds/Hitsound-Tap.ogg' },
             { name: 'drag', url: './assets/sounds/Hitsound-Drag.ogg' },
             { name: 'flick', url: './assets/sounds/Hitsound-Flick.ogg' }
-        ]);
+        ]).then((result) =>
+        {
+            assets.sounds = result;
 
-        doms.loadingStatus.innerText = 'All done!';
-        doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
-        doms.chartPackFile.disabled = false;
+            doms.loadingStatus.innerText = 'Loading result musics...';
+            assets.sounds.result = {};
+
+            SoundLoader([
+                { name: 'ez', url: './assets/sounds/result/ez.ogg' },
+                { name: 'hd', url: './assets/sounds/result/hd.ogg' },
+                { name: 'in', url: './assets/sounds/result/in.ogg' },
+                { name: 'at', url: './assets/sounds/result/at.ogg' },
+                { name: 'sp', url: './assets/sounds/result/sp.ogg' }
+            ], { loop: true }).then((result) =>
+            {
+                assets.sounds.result = result;
+
+                doms.loadingStatus.innerText = 'All done!';
+                doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
+                doms.chartPackFile.disabled = false;
+            });
+        });
     });
 
     calcHeightPercent();
@@ -656,23 +660,70 @@ function CsvReader(_text)
     return result;
 }
 
-function SoundLoader(soundList)
+function SoundLoader(soundList, options = {})
 {
-    let result = {};
-
-    for (const soundObj of soundList)
+    return new Promise(async (res) =>
     {
-        result[soundObj.name] = new Howl({
-            src: soundObj.url,
-            preload: true,
-            autoplay: false,
-            loop: false
-        });
+        let result = {};
 
-        result[soundObj.name].load();
-    }
+        for (const soundObj of soundList)
+        {
+            try
+            {
+                result[soundObj.name] = await (new Promise((_res, _rej) =>
+                {
+                    let xhr = new XMLHttpRequest();
+                    let reader = new FileReader();
 
-    return result;
+                    xhr.responseType = 'blob';
+
+                    xhr.onreadystatechange = function ()
+                    {
+                        if (this.readyState === 4 && this.status == 200)
+                        {
+                            reader.readAsDataURL(this.response);
+                        }
+                    };
+
+                    xhr.onerror = (e) => _rej(e);
+
+                    reader.onloadend = function ()
+                    {
+                        let sound = new Howl({
+                            src: this.result,
+                            preload: true,
+                            autoplay: false,
+                            loop: false,
+                            ...options,
+
+                            onload: () =>
+                            {
+                                _res(sound);
+                            },
+                            onloaderror: (id, code) =>
+                            {
+                                _rej(id, code);
+                            }
+                        });
+
+                        sound.load();
+                    }
+
+                    reader.onerror = (e) => _rej(e);
+
+                    xhr.open('GET', soundObj.url);
+                    xhr.send();
+                }));
+            }
+            catch (e)
+            {
+                console.error(e);
+                result[soundObj.name] = null;
+            }
+        }
+
+        res(result);
+    });
 }
 
 function blurImage(_texture, radius = 10)
@@ -720,6 +771,12 @@ function restartGame()
 
     _game.restart();
 
+    for (const name in assets.sounds.result)
+    {
+        let sound = assets.sounds.result[name];
+        sound.stop();
+    }
+
     qs('.game-paused').style.display = 'none';
     qs('.play-result').classList.remove('show');
     doms.playResult.accBar.classList.remove('show');
@@ -731,6 +788,12 @@ function exitGame()
 
     _game.destroy(true);
     _game = undefined;
+
+    for (const name in assets.sounds.result)
+    {
+        let sound = assets.sounds.result[name];
+        sound.stop();
+    }
 
     qs('.game-paused').style.display = 'none';
     qs('.play-result').classList.remove('show');
@@ -753,8 +816,8 @@ function showGameResultPopup(game)
     qs('.play-result .song-info .title').innerHTML = chart.info.name;
     qs('.play-result .song-info .subtitle.artist').innerHTML = chart.info.artist;
     qs('.play-result .song-info .subtitle.diff').innerHTML = chart.info.difficult;
-    if (game._settings.challengeMode) qs('.play-result .song-info .title').innerHTML += ' (challenge)';
-    if (Number((game._settings.speed).toFixed(2)) !== 1) qs('.play-result .song-info .title').innerHTML += ' (x' + (game._settings.speed).toFixed(2) + ')';
+    if (game._settings.challengeMode) qs('.play-result .song-info .subtitle.diff').innerHTML += ' (challenge)';
+    if (Number((game._settings.speed).toFixed(2)) !== 1) qs('.play-result .song-info .subtitle.diff').innerHTML += ' (x' + (game._settings.speed).toFixed(2) + ')';
 
     if (judge.score.judgeLevel == 6) qs('.play-result .judge-icon').innerText = 'Phi';
     else if (judge.score.judgeLevel == 5) qs('.play-result .judge-icon').innerText = 'V';
@@ -823,6 +886,46 @@ function showGameResultPopup(game)
         let center = document.createElement('div');
         center.className = 'center';
         qs('.play-result .info-bar.acc-bar .judge-histogram').appendChild(center);
+    }
+
+    {
+        let diffType = /([a-zA-Z]+)\s[lL][vV]\.?(.+)/.exec(chart.info.difficult);
+        diffType = (diffType && diffType.length >= 1 ? diffType[1] : 'IN');
+
+        switch ((diffType ? diffType.toLowerCase() : 'in'))
+        {
+            case 'ez':
+            {
+                assets.sounds.result.ez.stop();
+                assets.sounds.result.ez.play();
+                break;
+            }
+            case 'hd':
+            {
+                assets.sounds.result.hd.stop();
+                assets.sounds.result.hd.play();
+                break;
+            }
+            case 'at':
+            {
+                assets.sounds.result.at.stop();
+                assets.sounds.result.at.play();
+                break;
+            }
+            case 'sp':
+            {
+                assets.sounds.result.sp.stop();
+                assets.sounds.result.sp.play();
+                break;
+            }
+            case 'in' :
+            default :
+            {
+                assets.sounds.result.in.stop();
+                assets.sounds.result.in.play();
+                break;
+            }
+        }
     }
 
     qs('.play-result').classList.add('show');
