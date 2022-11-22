@@ -49,6 +49,13 @@ export default class Judgeline
         else this.scaleY = 1;
 
         this.inclineSinr = NaN;
+
+        if (this.sprite)
+        {
+            this.sprite.alpha = 1;
+            this.sprite.angle = 0;
+            this.sprite.scale.set(1);
+        }
     }
 
     sortEvent(withEndTime = false)

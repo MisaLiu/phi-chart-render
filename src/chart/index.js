@@ -148,8 +148,11 @@ export default class Chart
             if (judgeline.texture && judgeline.useOfficialScale)
             {
                 let oldScaleY = judgeline.extendEvent.scaleY[0].start;
+                
                 judgeline.extendEvent.scaleY[0].start = judgeline.extendEvent.scaleY[0].end = (1080 / judgeline.sprite.texture.height) * (oldScaleY * (oldScaleY < 0 ? -1 : 1));
                 judgeline.extendEvent.scaleX[0].start = judgeline.extendEvent.scaleX[0].end = judgeline.extendEvent.scaleY[0].start * judgeline.extendEvent.scaleX[0].start;
+
+                judgeline.useOfficialScale = false;
             }
         });
         this.notes.forEach((note, index) =>
@@ -290,6 +293,7 @@ export default class Chart
         this.judgelines.forEach((judgeline) =>
         {
             if (!judgeline.sprite) return;
+            judgeline.reset();
             judgeline.sprite.destroy();
             judgeline.sprite = undefined;
 
@@ -302,6 +306,7 @@ export default class Chart
         this.notes.forEach((note) =>
         {
             if (!note.sprite) return;
+            note.reset();
             note.sprite.destroy();
             note.sprite = undefined;
 
