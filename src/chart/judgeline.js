@@ -40,13 +40,15 @@ export default class Judgeline
 
         this.floorPosition = 0;
 
-        this.scaleX = 1;
-        this.scaleY = 1;
+        this.baseScaleX = 3;
+        this.baseScaleY = 2.88;
+        
+        if (this.extendEvent.scaleX.length > 0 && this.extendEvent.scaleX[0].startTime <= 0) this.scaleX = this.extendEvent.scaleX[0].start;
+        else this.scaleX = 1;
+        if (this.extendEvent.scaleY.length > 0 && this.extendEvent.scaleY[0].startTime <= 0) this.scaleY = this.extendEvent.scaleY[0].start;
+        else this.scaleY = 1;
 
         this.inclineSinr = NaN;
-
-        this._width  = 5761.8432;
-        this._height = 8.64;
     }
 
     sortEvent(withEndTime = false)
@@ -205,6 +207,11 @@ export default class Judgeline
         if (!this.isText)
         {
             this.sprite = new Sprite(zipFiles[this.texture] ? zipFiles[this.texture] : texture.judgeline);
+
+            if (this.texture)
+            {
+                this.baseScaleX = this.baseScaleY = 1;
+            }
         }
         else
         {
@@ -243,6 +250,15 @@ export default class Judgeline
             lineInfoContainer.addChild(linePosBlock);
 
             this.debugSprite = lineInfoContainer;
+        }
+
+        if (this.extendEvent.scaleX.length > 0 && this.extendEvent.scaleX[0].startTime <= 0)
+        {
+            this.scaleX = this.extendEvent.scaleX[0].start;
+        }
+        if (this.extendEvent.scaleY.length > 0 && this.extendEvent.scaleY[0].startTime <= 0)
+        {
+            this.scaleY = this.extendEvent.scaleY[0].start;
         }
         
         return this.sprite;
@@ -284,11 +300,7 @@ export default class Judgeline
             let timePercentStart = 1 - timePercentEnd;
 
             this.scaleX = event.start * timePercentStart + event.end * timePercentEnd;
-            if (this.sprite)
-            {
-                if (this.isText) this.sprite.scale.x = this.scaleX;
-                else this.sprite.width = this._width * this.scaleX;
-            }
+            if (this.sprite) this.sprite.scale.x = this.scaleX * this.baseScaleX;
         }
 
         for (const event of this.extendEvent.scaleY)
@@ -300,11 +312,7 @@ export default class Judgeline
             let timePercentStart = 1 - timePercentEnd;
 
             this.scaleY = event.start * timePercentStart + event.end * timePercentEnd;
-            if (this.sprite)
-            {
-                if (this.isText) this.sprite.scale.y = this.scaleY;
-                else this.sprite.height = this._height * this.scaleY;
-            }
+            if (this.sprite) this.sprite.scale.y = this.scaleY * this.baseScaleY;
         }
 
         if (this.isText && this.sprite)

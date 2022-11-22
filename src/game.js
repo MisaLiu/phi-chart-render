@@ -612,6 +612,7 @@ export default class Game
         if (this.render.sizer.widerScreen && this.render.mainContainer)
         {
             this.render.mainContainer.mask = this.render.mainContainerMask;
+            this.render.mainContainerMask.visible = true;
 
             this.render.mainContainerMask.clear()
                 .beginFill(0xFFFFFF)
@@ -621,6 +622,7 @@ export default class Game
         else
         {
             this.render.mainContainer.mask = null;
+            this.render.mainContainerMask.visible = false;
         }
         // 主舞台超宽屏覆盖计算
         if (this.render.sizer.widerScreen && this.render.mainContainerCover)

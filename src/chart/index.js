@@ -148,7 +148,7 @@ export default class Chart
             if (judgeline.texture && judgeline.useOfficialScale)
             {
                 let oldScaleY = judgeline.extendEvent.scaleY[0].start;
-                judgeline.extendEvent.scaleY[0].start = judgeline.extendEvent.scaleY[0].end = (1080 / judgeline.sprite.texture.baseTexture.height) * (oldScaleY * (judgeline.extendEvent.scaleY[0].start < 0 ? -1 : 1));
+                judgeline.extendEvent.scaleY[0].start = judgeline.extendEvent.scaleY[0].end = (1080 / judgeline.sprite.texture.height) * (oldScaleY * (oldScaleY < 0 ? -1 : 1));
                 judgeline.extendEvent.scaleX[0].start = judgeline.extendEvent.scaleX[0].end = judgeline.extendEvent.scaleY[0].start * judgeline.extendEvent.scaleX[0].start;
             }
         });
@@ -212,22 +212,18 @@ export default class Chart
                 {
                     judgeline.sprite.style.fontSize = 70 * this.renderSize.heightPercent;
                 }
+
+                if (judgeline.texture || judgeline.isText)
+                {
+                    judgeline.baseScaleX = judgeline.baseScaleY = this.renderSize.heightPercent;
+                }
                 else
                 {
-                    if (judgeline.texture)
-                    {
-                        judgeline._width  = judgeline.sprite.texture.baseTexture.width * this.renderSize.heightPercent;
-                        judgeline._height = judgeline.sprite.texture.baseTexture.height * this.renderSize.heightPercent;
-                    }
-                    else
-                    {
-                        judgeline._height = this.renderSize.lineScale * 18.75 * 0.008;
-                        judgeline._width = judgeline._height * judgeline.sprite.texture.baseTexture.width / judgeline.sprite.texture.baseTexture.height * 1.042;
-                    }
-                    
-                    judgeline.sprite.width = judgeline._width * judgeline.scaleX;
-                    judgeline.sprite.height = judgeline._height * judgeline.scaleY;
+                    judgeline.baseScaleX = (this.renderSize.width / judgeline.sprite.texture.width) * 3;
+                    judgeline.baseScaleY = ((this.renderSize.lineScale * 18.75 * 0.008) / judgeline.sprite.texture.height);
                 }
+
+                judgeline.sprite.scale.set(judgeline.scaleX * judgeline.baseScaleX, judgeline.scaleY * judgeline.baseScaleY);
 
                 judgeline.sprite.position.x = judgeline.x * this.renderSize.width;
                 judgeline.sprite.position.y = judgeline.y * this.renderSize.height;
