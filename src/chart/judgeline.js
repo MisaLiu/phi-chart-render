@@ -55,6 +55,11 @@ export default class Judgeline
             this.sprite.alpha = 1;
             this.sprite.angle = 0;
             this.sprite.scale.set(1);
+
+            if (this.isText)
+            {
+                this.sprite.text = '';
+            }
         }
     }
 
@@ -322,15 +327,12 @@ export default class Judgeline
             this.sprite.scale.y = this.scaleY * this.baseScaleY;
         }
 
-        if (this.isText && this.sprite)
+        for (const event of this.extendEvent.text)
         {
-            for (const event of this.extendEvent.text)
-            {
-                if (event.endTime < currentTime) continue;
-                if (event.startTime > currentTime) break;
+            if (event.endTime < currentTime) continue;
+            if (event.startTime > currentTime) break;
 
-                this.sprite.text = event.value;
-            }
+            this.sprite.text = event.value;
         }
 
         for (const event of this.extendEvent.color)
