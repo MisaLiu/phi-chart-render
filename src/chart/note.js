@@ -163,115 +163,112 @@ export default class Note
 
     calcTime(currentTime, size)
     {
-        if (this.sprite)
+        let _yOffset = size.height * this.yOffset,
+            yOffset = _yOffset * (this.isAbove ? -1 : 1),
+            originX = size.widthPercent * this.positionX,
+            _originY = (this.floorPosition - this.judgeline.floorPosition) * (this.type === 3 && this.useOfficialSpeed ? 1 : this.speed) * size.noteSpeed + _yOffset,
+            originY = _originY * (this.isAbove ? -1 : 1),
+
+            realX = originY * this.judgeline.sinr * -1,
+            realY = originY * this.judgeline.cosr,
+
+            _holdLength = this.type === 3 ? (this.useOfficialSpeed ? (this.holdTimeLength - currentTime) : (this.endPosition - this.judgeline.floorPosition)) * this.speed * size.noteSpeed : _originY,
+            holdLength = this.type === 3 ? _holdLength * (this.isAbove ? -1 : 1) : originY;
+        
+        if (!isNaN(this.judgeline.inclineSinr) && this.type !== 3)
         {
-            let _yOffset = size.height * this.yOffset,
-                yOffset = _yOffset * (this.isAbove ? -1 : 1),
-                originX = size.widthPercent * this.positionX,
-                _originY = (this.floorPosition - this.judgeline.floorPosition) * (this.type === 3 && this.useOfficialSpeed ? 1 : this.speed) * size.noteSpeed + _yOffset,
-                originY = _originY * (this.isAbove ? -1 : 1),
-
-                realX = originY * this.judgeline.sinr * -1,
-                realY = originY * this.judgeline.cosr,
-
-                _holdLength = this.type === 3 ? (this.useOfficialSpeed ? (this.holdTimeLength - currentTime) : (this.endPosition - this.judgeline.floorPosition)) * this.speed * size.noteSpeed : _originY,
-                holdLength = this.type === 3 ? _holdLength * (this.isAbove ? -1 : 1) : originY;
-            
-            if (!isNaN(this.judgeline.inclineSinr) && this.type !== 3)
+            let inclineValue = 1 - ((this.judgeline.inclineSinr * _originY) / 360);
+            this.sprite.scale.set(inclineValue * this.sprite.baseScale * this.xScale, inclineValue * this.sprite.baseScale);
+            originX *= inclineValue;
+        }
+        
+        if (this.type === 3) // Hold 长度计算
+        {
+            if (this.time <= currentTime && this.holdTimeLength > currentTime)
             {
-                let inclineValue = 1 - ((this.judgeline.inclineSinr * _originY) / 360);
-                this.sprite.scale.set(inclineValue * this.sprite.baseScale * this.xScale, inclineValue * this.sprite.baseScale);
-                originX *= inclineValue;
+                realX = realY = 0;
+
+                this.sprite.children[0].visible = false;
+                this.sprite.children[1].height = _holdLength / size.noteScale;
+                this.sprite.children[2].position.y = this.sprite.children[1].height * -1;
             }
-            
-            if (this.type === 3) // Hold 长度计算
+            else
             {
-                if (this.time <= currentTime && this.holdTimeLength > currentTime)
-                {
-                    realX = realY = 0;
+                this.sprite.children[0].visible = true;
+            }
+        }
+        
+        // Note 落在判定线时的绝对位置计算
+        this.sprite.judgelineX = originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
+        this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
 
-                    this.sprite.children[0].visible = false;
-                    this.sprite.children[1].height = _holdLength / size.noteScale;
-                    this.sprite.children[2].position.y = this.sprite.children[1].height * -1;
-                }
-                else
+        // Note 的绝对位置计算
+        realX += this.sprite.judgelineX;
+        realY += this.sprite.judgelineY;
+
+        // Note 落在判定线时的绝对位置计算（补 y 轴偏移）
+        this.sprite.judgelineX += yOffset * this.judgeline.sinr * -1;
+        this.sprite.judgelineY += yOffset * this.judgeline.cosr;
+
+        // Note 是否在舞台可视范围内
+        this.sprite.outScreen = !isInArea({
+            startX : realX,
+            endX   : originX * this.judgeline.cosr - holdLength * this.judgeline.sinr + this.judgeline.sprite.position.x,
+            startY : realY,
+            endY   : holdLength * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y
+        }, size);
+
+        // 推送计算结果到精灵
+        this.sprite.visible = !this.sprite.outScreen;
+        if (this.debugSprite) this.debugSprite.visible = !this.sprite.outScreen;
+
+        this.sprite.position.x = realX;
+        this.sprite.position.y = realY;
+        
+        this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
+
+        // Note 在舞台可视范围之内时做进一步计算
+        if (!this.sprite.outScreen)
+        {
+            // Note 特殊位置是否可视控制
+            if (this.type !== 3 && this.time > currentTime && _originY < 0 && this.judgeline.isCover) this.sprite.visible = false;
+            if (this.type !== 3 && this.isFake && this.time <= currentTime) this.sprite.visible = false;
+            if (
+                this.type === 3 &&
+                (
+                    (this.time > currentTime && _originY < 0 && this.judgeline.isCover) || // 时间未开始时 Hold 在判定线对面
+                    (this.holdTimeLength <= currentTime) // Hold 已经被按完
+                )
+            ) this.sprite.visible = false;
+            
+            if (!isNaN(this.visibleTime) && this.time - currentTime > this.visibleTime) this.sprite.visible = false;
+
+            if (this.judgeline.alpha < 0)
+            {
+                if (this.judgeline.alpha >= -1) this.sprite.visible = false;
+                else if (this.judgeline.alpha >= -2)
                 {
-                    this.sprite.children[0].visible = true;
+                    if (this.originY > 0) this.sprite.visible = false;
+                    else if (this.originY < 0) this.sprite.visible = true;
                 }
             }
-            
-            // Note 落在判定线时的绝对位置计算
-            this.sprite.judgelineX = originX * this.judgeline.cosr + this.judgeline.sprite.position.x;
-            this.sprite.judgelineY = originX * this.judgeline.sinr + this.judgeline.sprite.position.y;
 
-            // Note 的绝对位置计算
-            realX += this.sprite.judgelineX;
-            realY += this.sprite.judgelineY;
-
-            // Note 落在判定线时的绝对位置计算（补 y 轴偏移）
-            this.sprite.judgelineX += yOffset * this.judgeline.sinr * -1;
-            this.sprite.judgelineY += yOffset * this.judgeline.cosr;
-
-            // Note 是否在舞台可视范围内
-            this.sprite.outScreen = !isInArea({
-                startX : realX,
-                endX   : originX * this.judgeline.cosr - holdLength * this.judgeline.sinr + this.judgeline.sprite.position.x,
-                startY : realY,
-                endY   : holdLength * this.judgeline.cosr + originX * this.judgeline.sinr + this.judgeline.sprite.position.y
-            }, size);
-
-            // 推送计算结果到精灵
-            this.sprite.visible = !this.sprite.outScreen;
-            if (this.debugSprite) this.debugSprite.visible = !this.sprite.outScreen;
-
-            this.sprite.position.x = realX;
-            this.sprite.position.y = realY;
-            
-            this.sprite.angle = this.judgeline.sprite.angle + (this.isAbove ? 0 : 180);
-
-            // Note 在舞台可视范围之内时做进一步计算
-            if (!this.sprite.outScreen)
+            if (this.debugSprite)
             {
-                // Note 特殊位置是否可视控制
-                if (this.type !== 3 && this.time > currentTime && _originY < 0 && this.judgeline.isCover) this.sprite.visible = false;
-                if (this.type !== 3 && this.isFake && this.time <= currentTime) this.sprite.visible = false;
-                if (
-                    this.type === 3 &&
-                    (
-                        (this.time > currentTime && _originY < 0 && this.judgeline.isCover) || // 时间未开始时 Hold 在判定线对面
-                        (this.holdTimeLength <= currentTime) // Hold 已经被按完
-                    )
-                ) this.sprite.visible = false;
-                
-                if (!isNaN(this.visibleTime) && this.time - currentTime > this.visibleTime) this.sprite.visible = false;
+                this.debugSprite.position = this.sprite.position;
+                this.debugSprite.angle = this.sprite.angle;
+                this.debugSprite.alpha = 0.2 + (this.sprite.visible ? (this.sprite.alpha * 0.8) : 0);
 
-                if (this.judgeline.alpha < 0)
+                if (this.time > currentTime)
                 {
-                    if (this.judgeline.alpha >= -1) this.sprite.visible = false;
-                    else if (this.judgeline.alpha >= -2)
+                    if (!this.sprite.visible)
                     {
-                        if (this.originY > 0) this.sprite.visible = false;
-                        else if (this.originY < 0) this.sprite.visible = true;
+                        this.sprite.visible = true;
+                        this.sprite.alpha = 0.2;
                     }
-                }
-
-                if (this.debugSprite)
-                {
-                    this.debugSprite.position = this.sprite.position;
-                    this.debugSprite.angle = this.sprite.angle;
-                    this.debugSprite.alpha = 0.2 + (this.sprite.visible ? (this.sprite.alpha * 0.8) : 0);
-
-                    if (this.time > currentTime)
+                    else
                     {
-                        if (!this.sprite.visible)
-                        {
-                            this.sprite.visible = true;
-                            this.sprite.alpha = 0.2;
-                        }
-                        else
-                        {
-                            this.sprite.alpha = this.basicAlpha;
-                        }
+                        this.sprite.alpha = this.basicAlpha;
                     }
                 }
             }

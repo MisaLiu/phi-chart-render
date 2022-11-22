@@ -300,7 +300,7 @@ export default class Judgeline
             let timePercentStart = 1 - timePercentEnd;
 
             this.scaleX = event.start * timePercentStart + event.end * timePercentEnd;
-            if (this.sprite) this.sprite.scale.x = this.scaleX * this.baseScaleX;
+            this.sprite.scale.x = this.scaleX * this.baseScaleX;
         }
 
         for (const event of this.extendEvent.scaleY)
@@ -312,7 +312,7 @@ export default class Judgeline
             let timePercentStart = 1 - timePercentEnd;
 
             this.scaleY = event.start * timePercentStart + event.end * timePercentEnd;
-            if (this.sprite) this.sprite.scale.y = this.scaleY * this.baseScaleY;
+            this.sprite.scale.y = this.scaleY * this.baseScaleY;
         }
 
         if (this.isText && this.sprite)
@@ -357,27 +357,24 @@ export default class Judgeline
             this.y = oldPosX * this.parentLine.sinr + oldPosY * this.parentLine.cosr + this.parentLine.y;
         }
 
-        if (this.sprite)
-        {
-            this.sprite.position.x = (this.x + 0.5) * size.width;
-            this.sprite.position.y = (0.5 - this.y) * size.height;
-            this.sprite.alpha      = this.alpha >= 0 ? this.alpha : 0;
-            this.sprite.rotation   = this.deg;
+        this.sprite.position.x = (this.x + 0.5) * size.width;
+        this.sprite.position.y = (0.5 - this.y) * size.height;
+        this.sprite.alpha      = this.alpha >= 0 ? this.alpha : 0;
+        this.sprite.rotation   = this.deg;
 
-            if (this.sprite.alpha <= 0) this.sprite.visible = false;
-            else this.sprite.visible = true;
-            
-            /*
-            this.sprite.width = this._width * this.scaleX;
-            this.sprite.height = this._height * this.scaleY;
-            */
-            
-            if (this.debugSprite)
-            {
-                this.debugSprite.position = this.sprite.position;
-                this.debugSprite.rotation = this.sprite.rotation;
-                this.debugSprite.alpha = 0.2 + (this.sprite.alpha * 0.8);
-            }
+        if (this.sprite.alpha <= 0) this.sprite.visible = false;
+        else this.sprite.visible = true;
+        
+        /*
+        this.sprite.width = this._width * this.scaleX;
+        this.sprite.height = this._height * this.scaleY;
+        */
+        
+        if (this.debugSprite)
+        {
+            this.debugSprite.position = this.sprite.position;
+            this.debugSprite.rotation = this.sprite.rotation;
+            this.debugSprite.alpha = 0.2 + (this.sprite.alpha * 0.8);
         }
     }
 }
