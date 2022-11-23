@@ -213,10 +213,10 @@ export default class Chart
 
                 if (judgeline.isText)
                 {
-                    judgeline.sprite.style.fontSize = 76 * this.renderSize.heightPercent;
+                    judgeline.sprite.style.fontSize = 68 * this.renderSize.heightPercent;
+                    judgeline.baseScaleX = judgeline.baseScaleY = 1;
                 }
-
-                if (judgeline.texture || judgeline.isText)
+                else if (judgeline.texture)
                 {
                     judgeline.baseScaleX = judgeline.baseScaleY = this.renderSize.heightPercent;
                 }
