@@ -199,8 +199,8 @@ export default function RePhiEditChartConverter(_chart)
             });
             eventLayer.moveX.forEach((event) =>
             {
-                event.start = event.start / 1340;
-                event.end = event.end / 1340;
+                event.start = event.start / 1350;
+                event.end = event.end / 1350;
             });
             eventLayer.moveY.forEach((event) =>
             {
