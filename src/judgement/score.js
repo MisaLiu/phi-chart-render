@@ -198,11 +198,11 @@ export default class Score
 
                         if (this._showAPStatus)
                         {
-                            judgelines.forEach((judgeline) =>
+                            for (const judgeline of judgelines)
                             {
                                 if (!judgeline.sprite) return;
                                 judgeline.sprite.tint = 0xB4E1FF;
-                            });
+                            };
                         }
                     }
                 }
@@ -220,11 +220,11 @@ export default class Score
 
                     if (this._showAPStatus)
                     {
-                        judgelines.forEach((judgeline) =>
+                        for (const judgeline of judgelines)
                         {
                             if (!judgeline.sprite) return;
                             judgeline.sprite.tint = 0xFFFFFF;
-                        });
+                        };
                     }
                 }
                 

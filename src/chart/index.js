@@ -265,15 +265,15 @@ export default class Chart
 
     calcTime(currentTime)
     {
-        this.judgelines.forEach((judgeline) =>
+        for (const judgeline of this.judgelines)
         {
             judgeline.calcTime(currentTime, this.renderSize);
-        });
-        this.notes.forEach((note) =>
+        };
+        for (const note of this.notes)
         {
             note.calcTime(currentTime, this.renderSize);
             if (this.noteJudgeCallback) this.noteJudgeCallback(currentTime, note);
-        })
+        };
     }
 
     reset()
