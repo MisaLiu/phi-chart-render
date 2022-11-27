@@ -2,10 +2,10 @@ import Chart from './chart';
 import Game from './game';
 import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
-import JSZip, { file } from 'jszip';
+import JSZip from 'jszip';
 import { Loader, Texture, Rectangle, utils as PIXIutils } from 'pixi.js-legacy';
 import { Howl } from 'howler';
-import * as StackBlur from 'stackblur-canvas';
+import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';
 
@@ -94,9 +94,9 @@ const files = {
     charts: {},
     musics: {},
     images: {},
-    info: null,
-    line: null,
-    zip: null
+    infos: [],
+    lines: [],
+    all: {}
 };
 
 const currentFile = {
@@ -200,237 +200,233 @@ window.fullscreen = fullscreen;
 
 window.loader = new Loader();
 
-doms.chartPackFile.addEventListener('input', function ()
+doms.chartPackFile.addEventListener('input', async function ()
 {
-    if (this.files.length <= 0 || !this.files[0]) return;
+    if (this.files.length <= 0) return;
 
-    let reader = new FileReader();
-    let zip = new JSZip();
+    let fileList = [ ...this.files ];
 
-    reader.onload = function ()
+    for (let fileIndex = 0; fileIndex < fileList.length; fileIndex++)
     {
-        zip.loadAsync(this.result, { createFolders: false })
-            .then((e) => decodeZipFile(e));
-    };
+        if (!fileList[fileIndex]) continue;
 
-    reader.readAsArrayBuffer(this.files[0]);
+        let file = fileList[fileIndex];
+        let fileFormatSplit = file.name.split('.');
+        let fileFormat = fileFormatSplit[fileFormatSplit.length - 1];
 
-    async function decodeZipFile(zipDecodeResult)
-    {
-        doms.startBtn.disabled = true;
+        file.format = fileFormat;
 
-        files.charts = {};
-        files.musics = {};
-        files.images = {};
-        files.info = null;
-        files.line = null;
-        files.zip = null;
-        
-        currentFile.chart = null;
-        currentFile.music = null;
-        currentFile.bg = null;
+        doms.chartPackFileReadProgress.innerText = 'Loading files: ' + file.name + ' ...(' + (fileIndex + 1) + '/' + fileList.length + ')';
 
-        const chartFormat = ('json,pec').split(',');
-        const imageFormat = ('jpeg,jpg,gif,png,webp').split(',');
-		const audioFormat = ('aac,flac,mp3,ogg,wav,webm').split(',');
-        let zipFiles = zipDecodeResult.files;
-        let result = {};
-
-        // 文件预处理
-        for (const name in zipFiles)
+        if (file.name === 'info.csv')
         {
-            let zipFile = zipFiles[name];
-            if (zipFile.dir) continue;
+            try {
+                let rawText = await readText(file);
+                let infos = CsvReader(rawText);
 
-            zipFile.realName = name.split('/')[name.split('/').length - 1];
-            zipFile.format   = zipFile.realName.split('.')[zipFile.realName.split('.').length - 1];
-            zipFile.isHidden = zipFile.realName.indexOf('.') === 0;
+                files.infos.push(...infos);
+                files.all[file.name] = infos;
 
-            doms.chartPackFileReadProgress.innerHTML = 'Loading ' + zipFile.name + ' ...';
+            } catch (e) {
+                
+            }
+        }
+        else if (file.name === 'line.csv')
+        {
+            try {
+                let rawText = await readText(file);
+                let lines = CsvReader(rawText);
 
-            if (chartFormat.indexOf(zipFile.format.toLowerCase()) >= 0)
+                files.lines.push(...lines);
+                files.all[file.name] = lines;
+
+            } catch (e) {
+                
+            }
+        }
+        else if (file.name === 'Settings.txt' || file.name === 'info.txt')
+        {
+            try {
+                let rawText = await readText(file);
+                let info = SettingsReader(rawText);
+
+                files.infos.push(info);
+                files.all[file.name] = info;
+
+            } catch (e) {
+                
+            }
+        }
+        else
+        {
+            (await (new Promise(() =>
             {
-                let _text = (await zipFile.async('text'));
-                try {
-                    files.charts[name] = JSON.parse(_text);
-                } catch (e) {
-                    files.charts[name] = _text;
+                throw new Error('Just make a promise, plz ignore me');
+            }))
+            .catch(async () =>
+            {
+                let zipFiles = await JSZip.loadAsync(file, { createFolders: false });
+
+                for (const name in zipFiles.files)
+                {
+                    if (zipFiles.files[name].dir) continue;
+
+                    let zipFile = zipFiles.files[name];
+                    let newFile = new File(
+                        [ (await zipFile.async('blob')) ],
+                        name,
+                        {
+                            type: '',
+                            lastModified: zipFile.date
+                        }
+                    );
+
+                    fileList.push(newFile);
                 }
-            }
-            else if (imageFormat.indexOf(zipFile.format.toLowerCase()) >= 0)
+
+                return;
+            })
+            .catch(async () =>
             {
-                files.images[name] = 'data:image/' + zipFile.format.toLowerCase() + ';base64,' + (await zipFile.async('base64'));
-            }
-            else if (audioFormat.indexOf(zipFile.format.toLowerCase()) >= 0)
+                let imgBitmap = await createImageBitmap(file);
+                let texture = await new Texture.from(imgBitmap);
+
+                files.images[file.name] = texture;
+                files.all[file.name] = texture;
+                doms.file.bg.appendChild(createSelectOption(file));
+
+                return;
+            })
+            .catch(async () =>
             {
-                files.musics[name] = 'data:audio/' + zipFile.format.toLowerCase() + ';base64,' + (await zipFile.async('base64'));
-            }
-            else if (zipFile.name.toLowerCase() === 'info.csv')
+                let audio = await loadAudio(file);
+
+                files.musics[file.name] = audio;
+                files.all[file.name] = audio;
+                doms.file.music.appendChild(createSelectOption(file));
+
+                return;
+            })
+            .catch(async () =>
             {
-                files.info = (await zipFile.async('text'));
-            }
-            else if (zipFile.name.toLowerCase() === 'line.csv')
+                let chartRaw = await readText(file);
+                let chart;
+
+                try {
+                    chart = JSON.parse(chartRaw);
+                } catch (e) {
+                    chart = chartRaw;
+                }
+
+                chart = PhiChartRender.Chart.from(chart);
+
+                files.charts[file.name] = chart;
+                files.all[file.name] = chart;
+                doms.file.chart.appendChild(createSelectOption(file));
+
+                return;
+            })
+            .catch((e) =>
             {
-                files.line = (await zipFile.async('text'));
-            }
+                console.error('Unsupported file: ' + file.name);
+                return;
+            }));
         }
+    }
 
-        // 处理图片文件
-        doms.file.bg.innerHTML = '';
-        for (const name in files.images)
+    if (doms.file.chart.childNodes.length >= 1 && doms.file.music.childNodes.length >= 1)
+    {
+        doms.file.chart.dispatchEvent(new Event('input'));
+        doms.startBtn.disabled = false;
+    }
+
+    doms.chartPackFileReadProgress.innerText = 'All done!';
+
+    function readText(file)
+    {
+        return new Promise((res, rej) =>
         {
-            doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
+            let reader = new FileReader();
 
-            let _result = await Texture.from(files.images[name]);
-            files.images[name] = _result;
-            result[name] = _result;
-
-            let selectOption = document.createElement('option');
-            selectOption.innerText = selectOption.value = name;
-            doms.file.bg.appendChild(selectOption);
-
-            if (!currentFile.bg)
+            reader.onloadend = () =>
             {
-                currentFile.bg = _result;
-                doms.file.bg.value = name;
-            }
-        }
+                res(reader.result);
+            };
 
-        // 处理音频文件
-        doms.file.music.innerHTML = '';
-        for (const name in files.musics)
+            reader.onerror = (e) =>
+            {
+                rej(e);
+            };
+
+            reader.readAsText(file);
+        });
+    }
+
+    function readDataURL(file)
+    {
+        return new Promise((res, rej) =>
         {
-            doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
+            let reader = new FileReader();
 
-            let _result = new Howl({
-                src: files.musics[name],
+            reader.onloadend = () =>
+            {
+                res(reader.result);
+            };
+
+            reader.onerror = (e) =>
+            {
+                rej(e);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function loadAudio(file)
+    {
+        return new Promise(async (res, rej) =>
+        {
+            let dataUrl = await readDataURL(file);
+            let audio = new Howl({
+                src: dataUrl,
+                format: file.format,
                 preload: true,
                 autoPlay: false,
-                loop: false
+                loop: false,
+
+                onload: () =>
+                {
+                    res(audio);
+                },
+                onloaderror: (id, e) =>
+                {
+                    rej(id, e);
+                }
             });
 
-            _result.load();
-            files.musics[name] = _result;
-            result[name] = _result;
+            audio.load();
+        });
+    }
 
-            let selectOption = document.createElement('option');
-            selectOption.innerText = selectOption.value = name;
-            doms.file.music.appendChild(selectOption);
-
-            if (!currentFile.music)
-            {
-                currentFile.music = _result;
-                doms.file.music.value = name;
-            }
-        }
-
-        // 处理 info.csv
-        if (files.info)
-        {
-            try {
-                files.info = CsvReader(files.info);
-                result['info.csv'] = files.info;
-            } catch (e) {
-                files.info = null;
-            }
-        }
-
-        // 处理 line.csv
-        if (files.line)
-        {
-            try {
-                files.line = CsvReader(files.line);
-                result['line.csv'] = files.line;
-            } catch (e) {
-                files.line = null;
-            }
-        }
-
-        // 处理谱面文件
-        doms.file.chart.innerHTML = '';
-        for (const name in files.charts)
-        {
-            doms.chartPackFileReadProgress.innerHTML = 'Processing ' + name + ' ...';
-
-            let chartInfo = {};
-            let chartLineTextures = [];
-
-            if (files.info)
-            {
-                for (const info of files.info)
-                {
-                    if (info.Chart === name)
-                    {
-                        chartInfo = info;
-                        break;
-                    }
-                }
-
-                chartInfo.name = chartInfo.Name;
-                chartInfo.author = chartInfo.Designer;
-                chartInfo.bgAuthor = chartInfo.Illustrator;
-                chartInfo.difficult = chartInfo.Level;
-            }
-
-            if (files.line)
-            {
-                files.line.forEach((line) =>
-                {
-                    if (line.Chart !== name) return;
-                    chartLineTextures.push(line);
-                });
-            }
-
-            let _result = PhiChartRender.Chart.from(files.charts[name], chartInfo, chartLineTextures);
-            files.charts[name] = _result;
-            result[name] = _result;
-
-            let selectOption = document.createElement('option');
-            selectOption.innerText = selectOption.value = name;
-            doms.file.chart.appendChild(selectOption);
-
-            if (!currentFile.chart)
-            {
-                currentFile.chart = _result;
-                doms.file.chart.value = name;
-            }
-        }
-
-        doms.chartPackFileReadProgress.innerHTML = 'All done!';
-
-        files.zip = result;
-
-        if (files.info)
-        {
-            for (const info of files.info)
-            {
-                if (info.Chart === doms.file.chart.value)
-                {
-                    currentFile.music = files.zip[info.Music];
-                    currentFile.bg = files.zip[info.Image];
-
-                    doms.file.music.value = info.Music;
-                    doms.file.bg.value = info.Image;
-
-                    break;
-                }
-            }
-        }
-
-        doms.startBtn.disabled = false;
+    function createSelectOption(file)
+    {
+        let option = document.createElement('option');
+        option.innerText = option.value = file.name;
+        return option;
     }
 });
 
 doms.file.chart.addEventListener('input', function () {
-    currentFile.chart = files.zip[this.value];
-    if (files.info)
+    currentFile.chart = files.charts[this.value];
+
+    if (files.infos && files.infos.length > 0)
     {
-        for (const info of files.info)
+        for (const info of files.infos)
         {
             if (info.Chart === this.value)
             {
-                currentFile.music = files.zip[info.Music];
-                currentFile.bg = files.zip[info.Image];
+                currentFile.music = files.musics[info.Music];
+                currentFile.bg = files.images[info.Image];
 
                 doms.file.music.value = info.Music;
                 doms.file.bg.value = info.Image;
@@ -439,14 +435,17 @@ doms.file.chart.addEventListener('input', function () {
             }
         }
     }
+
+    doms.file.music.dispatchEvent(new Event('input'));
+    doms.file.bg.dispatchEvent(new Event('input'));
 });
 
 doms.file.music.addEventListener('input', function () {
-    currentFile.music = files.zip[this.value];
+    currentFile.music = files.musics[this.value];
 });
 
 doms.file.bg.addEventListener('input', function () {
-    currentFile.bg = files.zip[this.value];
+    currentFile.bg = files.images[this.value];
 });
 
 doms.startBtn.addEventListener('click', async () => {
@@ -462,12 +461,44 @@ doms.startBtn.addEventListener('click', async () => {
     }
 
     currentFile.chart.music = currentFile.music;
-    if (currentFile.bg) currentFile.chart.bg = await Texture.from(blurImage(currentFile.bg, doms.settings.bgBlur.value));
+    if (currentFile.bg) currentFile.chart.bg = await Texture.from(await blurImage(currentFile.bg, doms.settings.bgBlur.value));
+
+    if (files.infos && files.infos.length > 0)
+    {
+        for (const info of files.infos)
+        {
+            if (info.Chart === doms.file.chart.value)
+            {
+                currentFile.chart.info.name = info.Name;
+                currentFile.chart.info.artist = info.Composer;
+                currentFile.chart.info.author = info.Designer;
+                currentFile.chart.info.bgAuthor = info.Illustrator;
+                currentFile.chart.info.difficult = info.Level;
+
+                break;
+            }
+        }
+    }
+
+    if (files.lines && files.lines.length > 0)
+    {
+        let lines = [];
+
+        for (const line of files.lines)
+        {
+            if (line.Chart === doms.file.chart.value)
+            {
+                lines.push(line);
+            }
+        }
+
+        currentFile.chart.readLineTextureInfo(lines);
+    }
 
     window._game = new Game({
         chart: currentFile.chart,
         assets: assets,
-        zipFiles: files.zip,
+        zipFiles: files.all,
         render: {
             resizeTo: document.documentElement,
             resolution: doms.settings.lowResolution.checked ? 1 : window.devicePixelRatio,
@@ -659,6 +690,62 @@ function CsvReader(_text)
     return result;
 }
 
+function SettingsReader(_text)
+{
+    let rows = (_text + '').split(/\r\n|\n\r/);
+    let rowReg = /^([a-zA-Z]+):\s(.+)$/;
+    let result = {};
+
+    for (const row of rows)
+    {
+        let rowRegResult = rowReg.exec(row);
+    
+        if (!rowRegResult || rowRegResult.length < 3) continue;
+
+        let infoKey = rowRegResult[1];
+        let infoValue = rowRegResult[2];
+
+        switch (infoKey)
+        {
+            case 'Name':
+            {
+                result['Name'] = infoValue;
+                break;
+            }
+            case 'Level':
+            {
+                result['Level'] = infoValue;
+                break;
+            }
+            case 'Charter':
+            {
+                result['Designer'] = infoValue;
+                break;
+            }
+            case 'Chart':
+            {
+                result['Chart'] = infoValue;
+                break;
+            }
+            case 'Song':
+            {
+                result['Music'] = infoValue;
+                break;
+            }
+            case 'Picture':
+            {
+                result['Image'] = infoValue;
+                break;
+            }
+            default: {
+                result[infoKey] = infoValue;
+            }
+        }
+    }
+
+    return result;
+}
+
 function SoundLoader(soundList, options = {})
 {
     return new Promise(async (res) =>
@@ -728,15 +815,24 @@ function SoundLoader(soundList, options = {})
 function blurImage(_texture, radius = 10)
 {
     let canvas = document.createElement('canvas');
+    let ctx = canvas.getContext('2d');
     let texture;
 
     if (_texture.baseTexture) texture = _texture.baseTexture.resource.source;
     else texture = _texture;
 
-    // console.log(texture);
+    canvas.width = texture.width;
+    canvas.height = texture.height;
 
-    StackBlur.image(texture, canvas, radius);
-    return canvas;
+    ctx.drawImage(texture, 0, 0);
+
+    StackBlur(canvas, 0, 0, texture.width, texture.height, radius);
+    return new Promise((res, rej) =>
+    {
+        createImageBitmap(canvas)
+            .then(result => res(result))
+            .catch(e => rej(e))
+    });
 }
 
 function calcHeightPercent()
@@ -812,9 +908,9 @@ function showGameResultPopup(game)
     let chart = game.chart;
     let judge = game.judgement;
 
-    qs('.play-result .song-info .title').innerHTML = chart.info.name;
-    qs('.play-result .song-info .subtitle.artist').innerHTML = chart.info.artist;
-    qs('.play-result .song-info .subtitle.diff').innerHTML = chart.info.difficult;
+    qs('.play-result .song-info .title').innerHTML = (chart.info.name || 'Untitled');
+    qs('.play-result .song-info .subtitle.artist').innerHTML = (chart.info.artist || 'Unknown');
+    qs('.play-result .song-info .subtitle.diff').innerHTML = (chart.info.difficult || 'SP Lv.?');
     if (game._settings.challengeMode) qs('.play-result .song-info .subtitle.diff').innerHTML += ' (challenge)';
     if (Number((game._settings.speed).toFixed(2)) !== 1) qs('.play-result .song-info .subtitle.diff').innerHTML += ' (x' + (game._settings.speed).toFixed(2) + ')';
 
@@ -888,7 +984,7 @@ function showGameResultPopup(game)
     }
 
     {
-        let diffType = /([a-zA-Z]+)\s[lL][vV]\.?(.+)/.exec(chart.info.difficult);
+        let diffType = chart.info.difficult ? /([a-zA-Z]+)\s[lL][vV]\.?(.+)/.exec(chart.info.difficult) : null;
         diffType = (diffType && diffType.length >= 1 ? diffType[1] : 'IN');
 
         switch ((diffType ? diffType.toLowerCase() : 'in'))
