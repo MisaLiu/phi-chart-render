@@ -21,8 +21,8 @@
   },
   "homepage": "https://github.com/MisaLiu/phi-chart-render",
   "devDependencies": {
-    "@sentry/browser": "^7.20.0",
-    "@sentry/tracing": "^7.20.0",
+    "@sentry/browser": "^7.21.1",
+    "@sentry/tracing": "^7.21.1",
     "fontfaceobserver": "^2.3.0",
     "jszip": "^3.10.1",
     "stackblur-canvas": "^2.5.0",
@@ -32,6 +32,6 @@
   },
   "dependencies": {
     "howler": "^2.2.3",
-    "pixi.js-legacy": "^6.5.4"
+    "pixi.js-legacy": "^7.0.4"
   }
 }

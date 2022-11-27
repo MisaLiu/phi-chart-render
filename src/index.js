@@ -1,7 +1,7 @@
 import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
-import { Loader, Texture, Rectangle, utils as PIXIutils } from 'pixi.js-legacy';
+import { Texture, Rectangle, utils as PIXIutils } from 'pixi.js-legacy';
 import { Howl } from 'howler';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
@@ -196,8 +196,6 @@ window.assets = assets;
 window.currentFile = currentFile;
 window.fullscreen = fullscreen;
 
-window.loader = new Loader();
-
 doms.chartPackFile.addEventListener('input', async function ()
 {
     if (this.files.length <= 0) return;
@@ -287,7 +285,7 @@ doms.chartPackFile.addEventListener('input', async function ()
             .catch(async () =>
             {
                 let imgBitmap = await createImageBitmap(file);
-                let texture = await new Texture.from(imgBitmap);
+                let texture = await Texture.from(imgBitmap);
 
                 Texture.addToCache(texture, file.name);
 
