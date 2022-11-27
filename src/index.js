@@ -575,13 +575,45 @@ window.addEventListener('load', async () =>
         }
     }
     document.body.classList.add('font-loaded');
-    
-    loader.onProgress.add((l, res) =>
-    {
-        doms.loadingStatus.innerText = 'Loading asset ' + res.name + ' ...';
-    });
 
-    loader.add([
+    (await (async (resources = []) =>
+    {
+        for (const resource of resources)
+        {
+            doms.loadingStatus.innerText = 'Loading asset ' + resource.name + ' ...';
+
+            try
+            {
+                let res = await requestFile(resource.url);
+                let imgBitmap = await createImageBitmap(res);
+                let texture = await Texture.from(imgBitmap);
+
+                Texture.addToCache(texture, resource.name);
+                assets.textures[resource.name] = texture;
+
+                if (resource.name == 'clickRaw')
+                {
+                    let _clickTextures = [];
+                    
+                    for (let i = 0; i < Math.floor(assets.textures[resource.name].height / assets.textures[resource.name].width); i++) {
+                        let rectangle = new Rectangle(0, i * assets.textures[resource.name].width, assets.textures[resource.name].width, assets.textures[resource.name].width);
+                        let texture = new Texture(assets.textures[resource.name].baseTexture, rectangle);
+
+                        Texture.addToCache(texture, resource.name + (i + 0));
+
+                        texture.defaultAnchor.set(0.5);
+                        _clickTextures.push(texture);
+                    }
+                    
+                    assets.textures[resource.name] = _clickTextures;
+                }
+            }
+            catch (e)
+            {
+                console.error('Failed getting resource: ' + resource.name, e);
+            }
+        }
+    })([
         { name: 'tap', url: './assets/Tap.png' },
         { name: 'tapHL', url: './assets/TapHL.png' },
         { name: 'drag', url: './assets/Drag.png' },
@@ -597,59 +629,66 @@ window.addEventListener('load', async () =>
         { name: 'clickRaw', url: './assets/clickRaw128.png' },
 
         { name: 'pauseButton', url: './assets/pauseButton.png' }
-    ]).load((loader, resources) => {
-        for (const name in resources) {
-            assets.textures[name] = resources[name].texture;
+    ]));
 
-            if (name == 'clickRaw')
+    (await (async (resources = []) =>
+    {
+        for (const resource of resources)
+        {
+            doms.loadingStatus.innerText = 'Loading hitsound ' + resource.name + ' ...';
+
+            try
             {
-                let _clickTextures = [];
-                
-                for (let i = 0; i < Math.floor(assets.textures[name].height / assets.textures[name].width); i++) {
-                    let rectangle = new Rectangle(0, i * assets.textures[name].width, assets.textures[name].width, assets.textures[name].width);
-                    let texture = new Texture(assets.textures[name].baseTexture, rectangle);
+                let res = await requestFile(resource.url);
+                let dataUrl = await readDataURL(res);
+                let audio = await decodeAudio(dataUrl);
 
-                    Texture.addToCache(texture, name + (i + 0));
 
-                    texture.defaultAnchor.set(0.5);
-                    _clickTextures.push(texture);
-                }
-                
-                assets.textures[name] = _clickTextures;
+                if (!assets.sounds) assets.sounds = {};
+                assets.sounds[resource.name] = audio;
+            }
+            catch (e)
+            {
+                console.error('Failed getting resource: ' + resource.name, e);
             }
         }
-    });
+    })([
+        { name: 'tap', url: './assets/sounds/Hitsound-Tap.ogg' },
+        { name: 'drag', url: './assets/sounds/Hitsound-Drag.ogg' },
+        { name: 'flick', url: './assets/sounds/Hitsound-Flick.ogg' }
+    ]));
 
-    loader.onComplete.add((l, res) =>
+    (await (async (resources = [], options = {}) =>
     {
-        doms.loadingStatus.innerText = 'Loading hitsounds...';
-
-        SoundLoader([
-            { name: 'tap', url: './assets/sounds/Hitsound-Tap.ogg' },
-            { name: 'drag', url: './assets/sounds/Hitsound-Drag.ogg' },
-            { name: 'flick', url: './assets/sounds/Hitsound-Flick.ogg' }
-        ]).then((result) =>
+        for (const resource of resources)
         {
-            assets.sounds = result;
+            doms.loadingStatus.innerText = 'Loading result music ' + resource.name + ' ...';
 
-            doms.loadingStatus.innerText = 'Loading result musics...';
-            assets.sounds.result = {};
-
-            SoundLoader([
-                { name: 'ez', url: './assets/sounds/result/ez.ogg' },
-                { name: 'hd', url: './assets/sounds/result/hd.ogg' },
-                { name: 'in', url: './assets/sounds/result/in.ogg' },
-                { name: 'at', url: './assets/sounds/result/at.ogg' }
-            ], { loop: true }).then((result) =>
+            try
             {
-                assets.sounds.result = result;
+                let res = await requestFile(resource.url);
+                let dataUrl = await readDataURL(res);
+                let audio = await decodeAudio(dataUrl, options);
 
-                doms.loadingStatus.innerText = 'All done!';
-                doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
-                doms.chartPackFile.disabled = false;
-            });
-        });
-    });
+
+                if (!assets.sounds.result) assets.sounds.result = {};
+                assets.sounds.result[resource.name] = audio;
+            }
+            catch (e)
+            {
+                console.error('Failed getting resource: ' + resource.name, e);
+            }
+        }
+    })([
+        { name: 'ez', url: './assets/sounds/result/ez.ogg' },
+        { name: 'hd', url: './assets/sounds/result/hd.ogg' },
+        { name: 'in', url: './assets/sounds/result/in.ogg' },
+        { name: 'at', url: './assets/sounds/result/at.ogg' }
+    ], { loop: true }));
+
+    doms.loadingStatus.innerText = 'All done!';
+    doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
+    doms.chartPackFile.disabled = false;
 
     calcHeightPercent();
 
@@ -671,6 +710,77 @@ window.addEventListener('load', async () =>
     });
 
     doms.playResult.scoreBar.addEventListener('click', () => doms.playResult.accBar.classList.toggle('show'));
+
+    function requestFile(url)
+    {
+        return new Promise((res, rej) =>
+        {
+            let xhr = new XMLHttpRequest();
+
+            xhr.responseType = 'blob';
+
+            xhr.onreadystatechange = () =>
+            {
+                if (xhr.readyState === 4 && xhr.status === 200)
+                {
+                    res(xhr.response);
+                }
+            };
+
+            xhr.onerror = (e) =>
+            {
+                rej(e);
+            };
+
+            xhr.open('GET', url);
+            xhr.send();
+        });
+    }
+
+    function readDataURL(file)
+    {
+        return new Promise((res, rej) =>
+        {
+            let reader = new FileReader();
+
+            reader.onloadend = () =>
+            {
+                res(reader.result);
+            };
+
+            reader.onerror = (e) =>
+            {
+                rej(e);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function decodeAudio(dataUrl, options = {})
+    {
+        return new Promise((res, rej) =>
+        {
+            let sound = new Howl({
+                src: dataUrl,
+                preload: true,
+                autoplay: false,
+                loop: false,
+                ...options,
+
+                onload: () =>
+                {
+                    res(sound);
+                },
+                onloaderror: (id, code) =>
+                {
+                    rej(id, code);
+                }
+            });
+
+            sound.load();
+        });
+    }
 });
 
 function CsvReader(_text)
@@ -751,72 +861,6 @@ function SettingsReader(_text)
     }
 
     return result;
-}
-
-function SoundLoader(soundList, options = {})
-{
-    return new Promise(async (res) =>
-    {
-        let result = {};
-
-        for (const soundObj of soundList)
-        {
-            try
-            {
-                result[soundObj.name] = await (new Promise((_res, _rej) =>
-                {
-                    let xhr = new XMLHttpRequest();
-                    let reader = new FileReader();
-
-                    xhr.responseType = 'blob';
-
-                    xhr.onreadystatechange = function ()
-                    {
-                        if (this.readyState === 4 && this.status == 200)
-                        {
-                            reader.readAsDataURL(this.response);
-                        }
-                    };
-
-                    xhr.onerror = (e) => _rej(e);
-
-                    reader.onloadend = function ()
-                    {
-                        let sound = new Howl({
-                            src: this.result,
-                            preload: true,
-                            autoplay: false,
-                            loop: false,
-                            ...options,
-
-                            onload: () =>
-                            {
-                                _res(sound);
-                            },
-                            onloaderror: (id, code) =>
-                            {
-                                _rej(id, code);
-                            }
-                        });
-
-                        sound.load();
-                    }
-
-                    reader.onerror = (e) => _rej(e);
-
-                    xhr.open('GET', soundObj.url);
-                    xhr.send();
-                }));
-            }
-            catch (e)
-            {
-                console.error(e);
-                result[soundObj.name] = null;
-            }
-        }
-
-        res(result);
-    });
 }
 
 function blurImage(_texture, radius = 10)
