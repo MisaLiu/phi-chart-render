@@ -1,5 +1,3 @@
-import Chart from './chart';
-import Game from './game';
 import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
@@ -495,7 +493,7 @@ doms.startBtn.addEventListener('click', async () => {
         currentFile.chart.readLineTextureInfo(lines);
     }
 
-    window._game = new Game({
+    window._game = new PhiChartRender.Game({
         chart: currentFile.chart,
         assets: assets,
         zipFiles: files.all,
