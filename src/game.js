@@ -12,7 +12,10 @@ const ProgressBarCache = (() =>
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, 1920, 12);
 
-    return Texture.from(canvas);
+    const result = Texture.from(canvas);
+    Texture.addToCache(result, 'progressBar');
+
+    return result;
 })();
 
 /**

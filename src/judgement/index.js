@@ -29,6 +29,9 @@ const ClickAnimatePointCache = (() =>
 
     const result = Texture.from(canvas);
     result.defaultAnchor.set(0.5);
+
+    Texture.addToCache(result, 'clickAnimatePoint');
+
     return result;
 })();
 
