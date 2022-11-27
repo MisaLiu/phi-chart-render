@@ -289,6 +289,8 @@ doms.chartPackFile.addEventListener('input', async function ()
                 let imgBitmap = await createImageBitmap(file);
                 let texture = await new Texture.from(imgBitmap);
 
+                Texture.addToCache(texture, file.name);
+
                 files.images[file.name] = texture;
                 files.all[file.name] = texture;
                 doms.file.bg.appendChild(createSelectOption(file));
@@ -459,7 +461,12 @@ doms.startBtn.addEventListener('click', async () => {
     }
 
     currentFile.chart.music = currentFile.music;
-    if (currentFile.bg) currentFile.chart.bg = await Texture.from(await blurImage(currentFile.bg, doms.settings.bgBlur.value));
+    if (currentFile.bg)
+    {
+        let bgBlur = await Texture.from(await blurImage(currentFile.bg, doms.settings.bgBlur.value));
+        Texture.addToCache(bgBlur, doms.file.bg.value + '_blured');
+        currentFile.chart.bg = bgBlur;
+    }
 
     if (files.infos && files.infos.length > 0)
     {
@@ -601,7 +608,9 @@ window.addEventListener('load', async () =>
                 for (let i = 0; i < Math.floor(assets.textures[name].height / assets.textures[name].width); i++) {
                     let rectangle = new Rectangle(0, i * assets.textures[name].width, assets.textures[name].width, assets.textures[name].width);
                     let texture = new Texture(assets.textures[name].baseTexture, rectangle);
-                    
+
+                    Texture.addToCache(texture, name + (i + 0));
+
                     texture.defaultAnchor.set(0.5);
                     _clickTextures.push(texture);
                 }
