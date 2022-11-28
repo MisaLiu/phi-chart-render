@@ -1,5 +1,3 @@
-const getTime = () => performance ? performance.now() : Date.now();
-
 export default class InputPoint
 {
     constructor(x, y)
@@ -15,13 +13,13 @@ export default class InputPoint
         this._deltaY = 0;
         this._lastDeltaX = 0;
         this._lastDeltaY = 0;
-        this._currentTime = getTime();
+        this._currentTime = Date.now();
         this._deltaTime   = this._currentTime;
     }
 
     move(x, y)
     {
-        const currentTime = getTime();
+        const currentTime = Date.now();
 
         this._lastDeltaX = this._deltaX;
         this._lastDeltaY = this._deltaY;

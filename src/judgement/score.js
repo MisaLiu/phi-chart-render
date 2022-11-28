@@ -1,7 +1,5 @@
 import { Text, Container } from 'pixi.js-legacy';
 
-const getTime = () => performance ? performance.now() : Date.now();
-
 export default class Score
 {
     constructor(notesCount = 0, showAPStatus = true, isChallengeMode = false, autoPlay = false)
@@ -112,7 +110,7 @@ export default class Score
         {
             this.sprites.score.currentValue = Math.round(
                 this.sprites.score.oldValue + (
-                    this.sprites.score.addedValue * ((getTime() - this.sprites.score.valueChangedTime) / 400)
+                    this.sprites.score.addedValue * ((Date.now() - this.sprites.score.valueChangedTime) / 400)
                 )
             );
 
@@ -129,7 +127,7 @@ export default class Score
         {
             this.sprites.acc.currentValue = (
                 this.sprites.acc.oldValue + (
-                    this.sprites.acc.addedValue * ((getTime() - this.sprites.acc.valueChangedTime) / 400)
+                    this.sprites.acc.addedValue * ((Date.now() - this.sprites.acc.valueChangedTime) / 400)
                 )
             );
 
@@ -260,12 +258,12 @@ export default class Score
             // this.sprites.acc.text = 'ACCURACY ' + (this.acc * 100).toFixed(2) + '%';
             this.sprites.acc.oldValue = this.sprites.acc.currentValue;
             this.sprites.acc.addedValue = this.acc - this.sprites.acc.oldValue;
-            this.sprites.acc.valueChangedTime = getTime();
+            this.sprites.acc.valueChangedTime = Date.now();
 
             // this.sprites.score.text = fillZero((this.score).toFixed(0));
             this.sprites.score.oldValue = this.sprites.score.currentValue;
             this.sprites.score.addedValue = this.score - this.sprites.score.oldValue;
-            this.sprites.score.valueChangedTime = getTime();
+            this.sprites.score.valueChangedTime = Date.now();
 
             this.sprites.combo.text.position.x = this.sprites.combo.number.width + this.renderSize.heightPercent * 6;
         }
