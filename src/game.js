@@ -288,6 +288,8 @@ export default class Game
             }, 500);
         }
 
+        this.chart.music.once('play', () => { this._audioTimer.start() });
+
         this._animateStatus = 0;
         this._gameStartTime = Date.now();
 
@@ -356,6 +358,7 @@ export default class Game
 
         this.render.ticker.remove(this._calcTick);
         this.chart.music.stop();
+        this.chart.music.off();
         this._audioTimer.reset();
         this._musicId = null;
 
@@ -371,6 +374,8 @@ export default class Game
         this._animateStatus = 0;
         this._gameStartTime = Date.now();
         this._gameEndTime   = NaN;
+
+        this.chart.music.once('play', () => { this._audioTimer.start() });
 
         this.render.ticker.add(this._calcTick);
         if (this._settings.showAPStatus) this.sprites.fakeJudgeline.tint = 0xFFECA0;
@@ -531,7 +536,7 @@ export default class Game
                 setTimeout(async () =>
                 {
                     this._musicId = this.chart.music.play();
-                    this._audioTimer.start();
+                    // this._audioTimer.start();
 
                     for (const judgeline of this.chart.judgelines)
                     {
