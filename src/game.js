@@ -1,4 +1,5 @@
 import Judgement from './judgement';
+import Timer from './timer';
 import { Application, Container, Texture, Sprite, Graphics, Text, Rectangle } from 'pixi.js-legacy';
 
 const ProgressBarCache = (() =>
@@ -128,6 +129,7 @@ export default class Game
         this._watermarkText = params.watermark && params.watermark != '' ? params.watermark : 'github/MisaLiu/phi-chart-render';
 
         this._musicId = null;
+        this._audioTimer = new Timer(this._settings.speed);
         this._audioOffset = 0;
         this._animateStatus = NaN;
         this._gameStartTime = NaN;
@@ -335,6 +337,8 @@ export default class Game
         this.judgement.input._isPaused = this._isPaused;
 
         if (!this._musicId) return;
+
+        this._audioTimer.pause();
         if (this._isPaused)
         {
             this.chart.music.pause();
@@ -352,6 +356,7 @@ export default class Game
 
         this.render.ticker.remove(this._calcTick);
         this.chart.music.stop();
+        this._audioTimer.reset();
         this._musicId = null;
 
         this.chart.reset();
@@ -470,13 +475,12 @@ export default class Game
             }
             case 1:
             {
-                let currentTime = (this.chart.music.seek() || 0) - this.chart.offset + this._settings.offset;
-                currentTime = currentTime > 0 ? currentTime : 0;
+                let currentTime = this._audioTimer.time - this.chart.offset + this._settings.offset;
 
                 this.chart.calcTime(currentTime);
                 if (!this._isPaused) this.judgement.calcTick();
 
-                this.sprites.progressBar.width = ((this.chart.music.seek() || 0) / this.chart.music._duration) * this.render.sizer.width;
+                this.sprites.progressBar.width = (this._audioTimer.time / this.chart.music._duration) * this.render.sizer.width;
                 break;
             }
             case 2:
@@ -527,6 +531,7 @@ export default class Game
                 setTimeout(async () =>
                 {
                     this._musicId = this.chart.music.play();
+                    this._audioTimer.start();
 
                     for (const judgeline of this.chart.judgelines)
                     {
@@ -553,6 +558,7 @@ export default class Game
                 this._isPaused = true;
                 this._isEnded = true;
                 this._runCallback('end');
+                this._audioTimer.reset();
             }
         }
     }
