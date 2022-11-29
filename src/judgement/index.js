@@ -293,7 +293,7 @@ function calcNoteJudge(currentTime, note)
             if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(input, 3));
         } else if (note.type === 3) {
             if (!note.isScored && timeBetween <= 0) this.judgePoints.push(new JudgePoint(input, 1));
-            else if (note.isScored && currentTime - note.lastHoldTime >= 0.15) this.judgePoints.push(new JudgePoint(input, 3));
+            else if (note.isScored && currentTime - note.lastHoldTime >= this._holdBetween) this.judgePoints.push(new JudgePoint(input, 3));
         } else if (note.type === 4) {
             if (timeBetween <= this.judgeTimes.bad) this.judgePoints.push(new JudgePoint(input, 2));
         }
