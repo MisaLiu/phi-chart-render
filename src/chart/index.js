@@ -237,7 +237,7 @@ export default class Chart
                 }
                 else if (judgeline.texture)
                 {
-                    judgeline.baseScaleX = judgeline.baseScaleY = this.renderSize.textureScale;
+                    judgeline.baseScaleX = judgeline.baseScaleY = this.renderSize.heightPercent;
                 }
                 else
                 {
