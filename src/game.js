@@ -698,7 +698,7 @@ export default class Game
         {
             this.render.watermark.position.x     = this.render.sizer.width;
             this.render.watermark.position.y     = this.render.sizer.height;
-            this.render.watermark.style.fontSize = this.render.sizer.heightPercent * 20;
+            this.render.watermark.style.fontSize = this.render.sizer.heightPercent * 24;
         }
         
         if (withChartSprites)
