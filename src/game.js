@@ -191,9 +191,6 @@ export default class Game
             };
         }
 
-        this.chart.music.rate(this._settings.speed);
-        this.chart.music.on('end', this._gameEndCallback);
-
         this.judgement.stage = this.render.mainContainer;
         this.judgement.createSprites(this._settings.showInputPoint);
 
@@ -288,8 +285,9 @@ export default class Game
             }, 500);
         }
 
+        this.chart.music.rate(this._settings.speed);
         this.chart.music.once('play', () => { this._audioTimer.start() });
-        this.chart.music.on('end', () => { this._animateStatus = 2 });
+        this.chart.music.on('end', this._gameEndCallback);
 
         this._animateStatus = 0;
         this._gameStartTime = Date.now();
