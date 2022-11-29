@@ -289,6 +289,7 @@ export default class Game
         }
 
         this.chart.music.once('play', () => { this._audioTimer.start() });
+        this.chart.music.on('end', () => { this._animateStatus = 2 });
 
         this._animateStatus = 0;
         this._gameStartTime = Date.now();
@@ -340,11 +341,13 @@ export default class Game
 
         if (!this._musicId) return;
 
-        this._audioTimer.pause();
         if (this._isPaused)
         {
             this.chart.music.pause();
             this._runCallback('pause');
+            this._audioTimer.pause();
+
+            this.chart.music.once('play', () => { this._audioTimer.pause() });
         }
         else
         {
@@ -358,7 +361,7 @@ export default class Game
 
         this.render.ticker.remove(this._calcTick);
         this.chart.music.stop();
-        this.chart.music.off();
+        this.chart.music.off('play');
         this._audioTimer.reset();
         this._musicId = null;
 
@@ -404,6 +407,9 @@ export default class Game
 
         this.render.ticker.remove(this._calcTick);
         this.chart.music.stop();
+        this.chart.music.off('play');
+        this.chart.music.off('end');
+        this._audioTimer.reset();
 
         if (this.render.fpsText) clearInterval(this.render.fpsCounter);
 
