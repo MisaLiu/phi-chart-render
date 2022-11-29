@@ -42,6 +42,11 @@ export default class Timer
 
     get time()
     {
-        return (((!isNaN(this.pauseTime) ? this.pauseTime : Date.now()) - this.startTime) * this.speed) / 1000;
+        return (
+            !isNaN(this.startTime) ?
+            (
+                (((!isNaN(this.pauseTime) ? this.pauseTime : Date.now()) - this.startTime) * this.speed) / 1000
+            ) : 0
+        );
     }
 }
