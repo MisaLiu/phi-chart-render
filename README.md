@@ -27,8 +27,8 @@ This project is still working.
     * [x] Judgeline cover type
     * [x] Parent judgeline
     * [x] Easing start/end point
+    * [x] judgeline z order *(Need test)*
     * [ ] Event link group *(?)*
-    * [ ] judgeline z order
     * [ ] BPM factor *(?)*
     * [ ] Note controls *(?)*
     * [ ] ~~attachUI (wont support)~~

@@ -8,6 +8,7 @@ export default class Judgeline
         this.id               = !isNaN(params.id) ? Number(params.id) : -1;
         this.texture          = params.texture ? params.texture : null;
         this.parentLine       = params.parentLine ? params.parentLine : null;
+        this.zIndex           = !isNaN(params.zIndex) && Number(params.zIndex) > 0 ? Number(params.zIndex) : NaN;
         this.isCover          = params.isCover !== undefined && params.isCover !== null ? !!params.isCover : true;
         this.useOfficialScale = false;
 

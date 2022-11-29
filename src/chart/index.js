@@ -114,6 +114,8 @@ export default class Chart
 
     createSprites(stage, size, textures, zipFiles = {}, speed = 1, bgDim = 0.5, multiNoteHL = true, debug = false)
     {
+        let linesWithZIndex = [];
+
         if (this.bg)
         {
             this.sprites.bg = new Sprite(this.bg);
@@ -141,7 +143,9 @@ export default class Chart
 
             judgeline.sprite.position.x = size.width / 2;
             judgeline.sprite.position.y = size.height / 2;
-            judgeline.sprite.zIndex = index + 1;
+            judgeline.sprite.zIndex = 10 + index;
+
+            if (!isNaN(judgeline.zIndex)) linesWithZIndex.push(judgeline);
 
             stage.addChild(judgeline.sprite);
             if (judgeline.debugSprite)
@@ -160,11 +164,19 @@ export default class Chart
                 judgeline.useOfficialScale = false;
             }
         });
+
+        linesWithZIndex.sort((a, b) => a.zIndex - b.zIndex);
+        linesWithZIndex.forEach((judgeline, index) =>
+        {
+            judgeline.sprite.zIndex = 10 + this.judgelines.length + index;
+            if (judgeline.debugSprite) judgeline.debugSprite.zIndex = 999 + judgeline.sprite.zIndex;
+        });
+
         this.notes.forEach((note, index) =>
         {
             note.createSprite(textures, zipFiles, multiNoteHL, debug);
 
-            note.sprite.zIndex = this.judgelines.length + (note.type === 3 ? index : index + 10) + 1;
+            note.sprite.zIndex = 10 + (this.judgelines.length + linesWithZIndex.length) + (note.type === 3 ? index : index + 10);
 
             stage.addChild(note.sprite);
             if (note.debugSprite)
