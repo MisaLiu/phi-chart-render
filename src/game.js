@@ -129,7 +129,7 @@ export default class Game
         this._watermarkText = params.watermark && params.watermark != '' ? params.watermark : 'github/MisaLiu/phi-chart-render';
 
         this._musicId = null;
-        this._audioTimer = new Timer(this._settings.speed);
+        this._audioTimer = new Timer(this._settings.speed, (this.chart.offset + this._settings.offset));
         this._audioOffset = 0;
         this._animateStatus = NaN;
         this._gameStartTime = NaN;
@@ -484,9 +484,7 @@ export default class Game
             }
             case 1:
             {
-                let currentTime = this._audioTimer.time - this.chart.offset + this._settings.offset;
-
-                this.chart.calcTime(currentTime);
+                this.chart.calcTime(this._audioTimer.time);
                 if (!this._isPaused) this.judgement.calcTick();
 
                 this.sprites.progressBar.width = (this._audioTimer.time / this.chart.music._duration) * this.render.sizer.width;

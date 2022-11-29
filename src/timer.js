@@ -1,8 +1,9 @@
 export default class Timer
 {
-    constructor(speed = 1)
+    constructor(speed = 1, offset = 0)
     {
         this.speed = !isNaN(parseFloat(speed)) ? parseFloat((speed).toFixed(2)) : 1;
+        this.offset = !isNaN(parseFloat(offset)) ? parseFloat((offset * 1000).toFixed(2)) : 0;
 
         this.reset();
     }
@@ -18,7 +19,7 @@ export default class Timer
     {
         if (!isNaN(this.startTime)) return;
 
-        this.startTime = Date.now();
+        this.startTime = Date.now() + this.offset;
         this.isPaused = false;
     }
 
@@ -34,7 +35,7 @@ export default class Timer
         }
         else
         {
-            this.startTime = Date.now() - (this.pauseTime - this.startTime);
+            this.startTime = Date.now() - (this.pauseTime - this.startTime) + this.offset;
             this.pauseTime = NaN;
         }
     }
