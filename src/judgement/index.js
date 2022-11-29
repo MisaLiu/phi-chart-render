@@ -72,6 +72,8 @@ export default class Judgement
         this.judgePoints = [];
         this.score.reset();
         this.input.reset();
+
+        this._holdBetween = 0.15;
     }
 
     createSprites(showInputPoint = true)
@@ -361,7 +363,7 @@ function calcNoteJudge(currentTime, note)
         {
             if (note.isScored)
             {
-                if (currentTime - note.lastHoldTime >= 0.15)
+                if (currentTime - note.lastHoldTime >= this._holdBetween)
                 {
                     this.createClickAnimate(note);
                 }
@@ -373,7 +375,7 @@ function calcNoteJudge(currentTime, note)
                     break;
                 }
 
-                if (currentTime - note.lastHoldTime >= 0.15)
+                if (currentTime - note.lastHoldTime >= this._holdBetween)
                 {
                     note.lastHoldTime = currentTime;
                     note.isHolding = false;

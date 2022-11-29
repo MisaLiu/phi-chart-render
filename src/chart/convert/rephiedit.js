@@ -439,7 +439,9 @@ export default function RePhiEditChartConverter(_chart)
         }
         else judgeline.parentLine = null;
     });
-    
+
+    chart.bpmList = utils.calculateHoldBetween(rawChart.BPMList);
+
     return chart;
 }
 

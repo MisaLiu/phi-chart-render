@@ -513,6 +513,8 @@ export default function PhiEditChartConverter(_chart)
     chart.judgelines.sort((a, b) => a.id - b.id);
     chart.notes.sort((a, b) => a.time - b.time);
 
+    chart.bpmList = utils.calculateHoldBetween(chartSimple.bpm);
+
     return chart;
 }
 

@@ -8,6 +8,7 @@ export default class Chart
     {
         this.judgelines = [];
         this.notes      = [];
+        this.bpmList    = [];
         this.offset     = !isNaN(parseFloat(params.offset)) ? parseFloat(params.offset) : 0;
 
         this.music      = params.music ? params.music : null;
@@ -23,6 +24,7 @@ export default class Chart
 
         this.sprites = {};
         this.noteJudgeCallback = null;
+        this.holdBetween = 0.15;
     }
 
     static from(rawChart, _chartInfo = {}, _chartLineTexture = [])
@@ -282,6 +284,14 @@ export default class Chart
 
     calcTime(currentTime)
     {
+        for (const bpm of this.bpmList)
+        {
+            if (bpm.endTime < currentTime) continue;
+            if (bpm.startTime > currentTime) break;
+
+            this.holdBetween = bpm.holdBetween;
+        };
+
         for (const judgeline of this.judgelines)
         {
             judgeline.calcTime(currentTime, this.renderSize);
@@ -295,6 +305,8 @@ export default class Chart
 
     reset()
     {
+        this.holdBetween = this.bpmList[0].holdBetween;
+
         this.judgelines.forEach((judgeline) =>
         {
             judgeline.reset();

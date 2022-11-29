@@ -10,6 +10,8 @@ export default function OfficialChartConverter(_chart)
     let rawChart = convertOfficialVersion(_chart);
     let notes = [];
     let sameTimeNoteCount = {};
+    let bpmList = [];
+    let newBpmList = [];
 
     chart.offset = rawChart.offset;
 
@@ -106,10 +108,55 @@ export default function OfficialChartConverter(_chart)
     notes.forEach((note) =>
     {
         if (sameTimeNoteCount[note.time] > 1) note.isMulti = true;
-        chart.notes.push(pushNote(note));
+        chart.notes.push(pushNote(note));      
     });
-
     chart.notes.sort((a, b) => a.time - b.time);
+
+    notes.sort((a, b) => a.time - b.time);
+    notes.forEach((note) =>
+    {
+        if (bpmList.length <= 0)
+        {
+            bpmList.push({
+                startTime   : note.time,
+                endTime     : note.time,
+                bpm         : note.bpm,
+                holdBetween : ((-1.2891 * note.bpm) + 396.71) / 1000
+            });
+        }
+        else
+        {
+            bpmList[bpmList.length - 1].endTime = note.time;
+
+            if (bpmList[bpmList.length - 1].bpm != note.bpm)
+            {
+                bpmList.push({
+                    startTime   : note.time,
+                    endTime     : note.time,
+                    bpm         : note.bpm,
+                    holdBetween : ((-1.2891 * note.bpm) + 396.71) / 1000
+                });
+            }
+        }
+    });
+    bpmList.sort((a, b) => a.startTime - b.startTime);
+
+    if (bpmList.length > 0)
+    {
+        bpmList[0].startTime = 1 - 1000;
+        bpmList[bpmList.length - 1].endTime = 1e4;
+    }
+    else
+    {
+        bpmList.push({
+            startTime   : 1 - 1000,
+            endTime     : 1e4,
+            bpm         : 120,
+            holdBetween : 0.242018
+        });
+    }
+
+    chart.bpmList = bpmList.slice();
 
     return chart;
 
