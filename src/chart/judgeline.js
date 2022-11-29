@@ -49,6 +49,7 @@ export default class Judgeline
         else this.scaleY = 1;
 
         this.inclineSinr = NaN;
+        this.color = NaN;
 
         if (this.sprite)
         {
@@ -340,7 +341,7 @@ export default class Judgeline
             if (event.endTime < currentTime) continue;
             if (event.startTime > currentTime) break;
 
-            this.sprite.tint = event.value;
+            this.color = this.sprite.tint = event.value;
         }
 
         for (const event of this.extendEvent.incline)

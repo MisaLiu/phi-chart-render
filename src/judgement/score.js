@@ -198,6 +198,7 @@ export default class Score
                         {
                             for (const judgeline of judgelines)
                             {
+                                if (!isNaN(judgeline.color)) return;
                                 if (!judgeline.sprite) return;
                                 judgeline.sprite.tint = 0xB4E1FF;
                             };
@@ -220,6 +221,7 @@ export default class Score
                     {
                         for (const judgeline of judgelines)
                         {
+                            if (!isNaN(judgeline.color)) return;
                             if (!judgeline.sprite) return;
                             judgeline.sprite.tint = 0xFFFFFF;
                         };
