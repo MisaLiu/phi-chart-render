@@ -576,6 +576,9 @@ export default class Game
         this._animateStatus = 2;
         this._gameEndTime = Date.now();
         this.sprites.fakeJudgeline.visible = true;
+
+        this.judgement.clickParticleContainer.removeChildren()
+
         if (this._settings.showAPStatus)
         {
             if (this.judgement.score.APType === 1) this.sprites.fakeJudgeline.tint = 0xB4E1FF;

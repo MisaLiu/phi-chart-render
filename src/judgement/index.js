@@ -2,7 +2,9 @@ import Input from './input';
 import Score from './score';
 import InputPoint from './input/point';
 import JudgePoint from './point';
-import { Container, AnimatedSprite, Texture, Graphics, Sprite  } from 'pixi.js-legacy';
+import { Container, AnimatedSprite, Texture, Sprite  } from 'pixi.js-legacy';
+
+const particleCountPerClickAnim = 4;
 
 const AllJudgeTimes = {
     bad     : 180,
@@ -14,7 +16,8 @@ const AllJudgeTimes = {
     perfectChallenge : 40
 };
 
-const ClickAnimatePointCache = (() =>
+var ClickAnimatePointCache;
+(async () =>
 {
     const pointSize = 26;
     const canvas = document.createElement('canvas');
@@ -27,12 +30,12 @@ const ClickAnimatePointCache = (() =>
     ctx.fillStyle = '#FFFFFF';
     ctx.fill();
 
-    const result = Texture.from(canvas);
+    const result = Texture.from(await createImageBitmap(canvas));
     result.defaultAnchor.set(0.5);
 
     Texture.addToCache(result, 'clickAnimatePoint');
 
-    return result;
+    ClickAnimatePointCache = result;
 })();
 
 export default class Judgement
@@ -60,7 +63,7 @@ export default class Judgement
             good    : (!params.challangeMode ? AllJudgeTimes.good : AllJudgeTimes.goodChallenge) / 1000,
             bad     : (!params.challangeMode ? AllJudgeTimes.bad : AllJudgeTimes.badChallenge) / 1000
         };
-        
+
         this.calcTick = this.calcTick.bind(this);
         this.calcNote = calcNoteJudge.bind(this);
 
@@ -74,12 +77,23 @@ export default class Judgement
         this.input.reset();
 
         this._holdBetween = 0.15;
+
+        if (this.clickParticleContainer) this.clickParticleContainer.removeChildren();
     }
 
     createSprites(showInputPoint = true)
     {
+        this.clickParticleContainer = new Container();
+        this.clickParticleContainer.zIndex = 99999;
+        this.stage.addChild(this.clickParticleContainer);
+
         this.score.createSprites(this.stage);
         this.input.createSprite(this.stage, showInputPoint);
+
+        this._clickAnimBaseScale = {
+            normal : 256 / this.textures.normal[0].baseTexture.width,
+            bad    : 256 / this.textures.bad[0].baseTexture.width
+        };
         // this.stage.addChild(this.input.sprite);
     }
 
@@ -98,6 +112,27 @@ export default class Judgement
         this.input.calcTick();
 
         this.score.calcTick();
+
+        for (const particle of this.clickParticleContainer.children)
+        {
+            if (!particle) break;
+            const currentTimeProgress = (Date.now() - particle.startTime) / 500;
+            
+            if (currentTimeProgress >= 1)
+            {
+                // this.clickParticleContainer.removeChild(particle);
+                particle.destroy(false);
+                continue;
+            }
+
+            particle.alpha = 1 - currentTimeProgress;
+
+            particle.scale.set((((0.2078 * currentTimeProgress - 1.6524) * currentTimeProgress + 1.6399) * currentTimeProgress + 0.4988) * particle.baseScale);
+            particle.distance = particle._distance * (9 * currentTimeProgress / (8 * currentTimeProgress + 1)) * 0.6;
+
+            particle.position.x = particle.distance * particle.cosr - particle.distance * particle.sinr + particle.basePos.x;
+            particle.position.y = particle.distance * particle.cosr + particle.distance * particle.sinr + particle.basePos.y;
+        }
     }
 
     createJudgePoints()
@@ -134,68 +169,56 @@ export default class Judgement
 
     createClickAnimate(note)
     {
-        let cont = new Container();
-        let anim = new AnimatedSprite(note.score >= 3 ? this.textures.normal : this.textures.bad);
-        let blocks = [ null, null, null, null ];
+        let anim = new AnimatedSprite(note.score >= 3 ? this.textures.normal : this.textures.bad),
+            baseScale = this.renderSize.noteScale * 5.6;
 
-        if (note.score >= 3 && note.type != 3) cont.position.set(note.sprite.judgelineX, note.sprite.judgelineY);
-        else cont.position.set(note.sprite.position.x, note.sprite.position.y);
-        cont.scale.set(this.renderSize.noteScale * 5.6);
+        if (note.score >= 3 && note.type != 3) anim.position.set(note.sprite.judgelineX, note.sprite.judgelineY);
+        else anim.position.copyFrom(note.sprite.position);
 
-        anim.position.set(0, 0);
+        anim.scale.set((note.score >= 3 ? this._clickAnimBaseScale.normal : this._clickAnimBaseScale.bad) * baseScale);
         anim.tint = note.score === 4 ? 0xFFECA0 : note.score === 3 ? 0xB4E1FF : 0x6c4343;
 
-        anim.scale.set(256 / anim.texture.baseTexture.width);
-        anim.type = note.score;
         anim.loop = false;
 
         if (note.score >= 3)
         {
-            for (let i = 0; i < blocks.length; i++)
+            let currentParticleCount = 0;
+            while (currentParticleCount < particleCountPerClickAnim)
             {
-                blocks[i] = new Sprite(ClickAnimatePointCache);
+                let particle = new Sprite(ClickAnimatePointCache);
 
-                blocks[i].tint = note.score === 4 ? 0xFFECA0 : 0xB4E1FF;
+                particle.tint = note.score === 4 ? 0xFFECA0 : 0xB4E1FF;
 
-                blocks[i].distance = blocks[i]._distance = Math.random() * 100 + 240;
-                blocks[i].direction = Math.floor(Math.random() * 360);
-				blocks[i].sinr = Math.sin(blocks[i].direction);
-				blocks[i].cosr = Math.cos(blocks[i].direction);
+                particle.startTime = Date.now();
+                particle.basePos   = anim.position;
+                particle.baseScale = baseScale;
 
-                cont.addChild(blocks[i]);
+                particle.distance  = particle._distance = Math.random() * 100 + 240;
+                particle.direction = Math.floor(Math.random() * 360);
+				particle.sinr = Math.sin(particle.direction);
+				particle.cosr = Math.cos(particle.direction);
+
+                this.clickParticleContainer.addChild(particle);
+
+                currentParticleCount++;
             }
-            anim.blocks = blocks;
         }
         else
         {
-            cont.angle = note.sprite.angle;
+            anim.angle = note.sprite.angle;
         }
 
         anim.onFrameChange = function () {
-            let currentFrameProgress = (this.currentFrame / this.totalFrames);
-            this.parent.alpha = 1 - currentFrameProgress;
-
-            if (this.blocks instanceof Array)
-            {
-                for (let i = 0; i < this.blocks.length; i++)
-                {
-                    this.blocks[i].scale.set(((0.2078 * currentFrameProgress - 1.6524) * currentFrameProgress + 1.6399) * currentFrameProgress + 0.4988);
-                    this.blocks[i].distance = this.blocks[i]._distance * (9 * currentFrameProgress / (8 * currentFrameProgress + 1)) * 0.6;
-
-                    this.blocks[i].position.x = this.blocks[i].distance * this.blocks[i].cosr - this.blocks[i].distance * this.blocks[i].sinr;
-				    this.blocks[i].position.y = this.blocks[i].distance * this.blocks[i].cosr + this.blocks[i].distance * this.blocks[i].sinr;
-                }
-            }
+            this.alpha = 1 - (this.currentFrame / this.totalFrames);
         };
         anim.onComplete = function () {
-            this.parent.destroy();
+            this.destroy(false);
         };
 
-        cont.addChild(anim);
-        this.stage.addChild(cont);
+        this.stage.addChild(anim);
         anim.play();
 
-        return cont;
+        return anim;
     }
 
     playHitsound(note)
@@ -229,6 +252,8 @@ export default class Judgement
     destroySprites()
     {
         this.reset();
+
+        this.clickParticleContainer.destroy({ children: true, texture: false, baseTexture: false });
 
         this.input.destroySprites();
         this.score.destroySprites();
