@@ -35,7 +35,7 @@ export default class Timer
         }
         else
         {
-            this.startTime = Date.now() - (this.pauseTime - this.startTime) + this.offset;
+            this.startTime = Date.now() - (this.pauseTime - this.startTime);
             this.pauseTime = NaN;
         }
     }
