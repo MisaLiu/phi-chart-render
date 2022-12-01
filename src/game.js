@@ -1,6 +1,8 @@
 import Judgement from './judgement';
 import Timer from './timer';
-import { Application, Container, Texture, Sprite, Graphics, Text, Rectangle } from 'pixi.js-legacy';
+import { Application, Container, Texture, Sprite, Graphics, Text, Rectangle, settings as PIXISettings } from 'pixi.js-legacy';
+
+PIXISettings.RENDER_OPTIONS.hello = true;
 
 const ProgressBarCache = (() =>
 {
