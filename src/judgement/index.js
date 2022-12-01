@@ -128,7 +128,7 @@ export default class Judgement
             particle.alpha = 1 - currentTimeProgress;
 
             particle.scale.set((((0.2078 * currentTimeProgress - 1.6524) * currentTimeProgress + 1.6399) * currentTimeProgress + 0.4988) * particle.baseScale);
-            particle.distance = particle._distance * (9 * currentTimeProgress / (8 * currentTimeProgress + 1)) * 0.6;
+            particle.distance = particle._distance * (9 * currentTimeProgress / (8 * currentTimeProgress + 1)) * 0.6 * particle.baseScale;
 
             particle.position.x = particle.distance * particle.cosr - particle.distance * particle.sinr + particle.basePos.x;
             particle.position.y = particle.distance * particle.cosr + particle.distance * particle.sinr + particle.basePos.y;
@@ -193,7 +193,7 @@ export default class Judgement
                 particle.basePos   = anim.position;
                 particle.baseScale = baseScale;
 
-                particle.distance  = particle._distance = Math.random() * 100 + 240;
+                particle.distance  = particle._distance = Math.random() * 100 + 250;
                 particle.direction = Math.floor(Math.random() * 360);
 				particle.sinr = Math.sin(particle.direction);
 				particle.cosr = Math.cos(particle.direction);
