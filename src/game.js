@@ -312,20 +312,6 @@ export default class Game
             if (note.hitsound) note.hitsound.volume(this.judgement._hitsoundVolume);
         };
 
-        this.judgement.createClickAnimate({
-            type: 1,
-            score: 3,
-            sprite: {
-                position: {
-                    x: -200,
-                    y: -200
-                },
-                angle: 180,
-                judgelineX: -200,
-                judgelineY: -200
-            }
-        });
-
         for (const name in this.judgement.sounds)
         {
             this.judgement.sounds[name].volume(this.judgement._hitsoundVolume);
