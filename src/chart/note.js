@@ -184,7 +184,10 @@ export default class Note
             this.sprite.scale.set(inclineValue * this.sprite.baseScale * this.xScale, inclineValue * this.sprite.baseScale);
             originX *= inclineValue;
         }
-        
+
+        // _originY *= this.judgeline.calcNoteControl(_originY, 'y', 1);
+        originX *= this.judgeline.calcNoteControl(_originY, 'x', 1);
+
         if (this.type === 3) // Hold 长度计算
         {
             if (this.time <= currentTime && this.holdTimeLength > currentTime)
@@ -233,6 +236,10 @@ export default class Note
         // Note 在舞台可视范围之内时做进一步计算
         if (!this.sprite.outScreen)
         {
+            let noteCtrlScale = this.judgeline.calcNoteControl(_originY, 'scale', 1);
+            if (_originY > 0) this.sprite.alpha = this.basicAlpha * this.judgeline.calcNoteControl(_originY, 'alpha', 1);
+            this.sprite.scale.set(this.sprite.baseScale * this.xScale * noteCtrlScale, this.sprite.baseScale * noteCtrlScale);
+
             this.sprite.visible = (this.sprite.alpha > 0);
 
             // Note 特殊位置是否可视控制
