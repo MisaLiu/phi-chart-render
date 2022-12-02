@@ -712,10 +712,10 @@ function calcResizer(width, height, noteScale = 8000)
 
     result.widerScreen = result.width < width ? true : false;
 
-    result.startX = -result.width / 6;
-    result.endX   = result.width + result.width / 6;
-    result.startY = -result.height / 6;
-    result.endY   = result.height + result.height / 6;
+    result.startX = -result.width / 12;
+    result.endX   = result.width * (13 / 12);
+    result.startY = -result.height / 12;
+    result.endY   = result.height * (13 / 12);
 
     result.noteSpeed     = result.height * 0.6;
     result.noteScale     = result.width / noteScale;
