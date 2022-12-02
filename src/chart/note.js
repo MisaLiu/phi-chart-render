@@ -237,7 +237,7 @@ export default class Note
         if (!this.sprite.outScreen)
         {
             let noteCtrlScale = this.judgeline.calcNoteControl(_originY, 'scale', 1);
-            if (_originY > 0) this.sprite.alpha = this.basicAlpha * this.judgeline.calcNoteControl(_originY, 'alpha', 1);
+            this.sprite.alpha = this.isScoreAnimated && this.type !== 3 ? 0 : this.basicAlpha * this.judgeline.calcNoteControl(_originY, 'alpha', 1);
             this.sprite.scale.set(this.sprite.baseScale * this.xScale * noteCtrlScale, this.sprite.baseScale * noteCtrlScale);
 
             this.sprite.visible = (this.sprite.alpha > 0);
