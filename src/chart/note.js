@@ -230,6 +230,8 @@ export default class Note
         // Note 在舞台可视范围之内时做进一步计算
         if (!this.sprite.outScreen)
         {
+            this.sprite.visible = (this.sprite.alpha > 0);
+
             // Note 特殊位置是否可视控制
             if (this.type !== 3 && this.time > currentTime && _originY < 0 && this.judgeline.isCover) this.sprite.visible = false;
             if (this.type !== 3 && this.isFake && this.time <= currentTime) this.sprite.visible = false;
