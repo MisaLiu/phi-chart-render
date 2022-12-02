@@ -38,6 +38,7 @@ function onKeyPressCallback(e)
 
         for (const note of this.chart.notes)
         {
+            if (note.isFake) continue;
             if (note.score <= 0) break;
             if (note.time < currentTime)
             {
