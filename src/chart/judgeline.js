@@ -15,13 +15,18 @@ export default class Judgeline
 
         this.eventLayers = [];
         this.floorPositions = [];
-        
         this.extendEvent = {
             color: [],
             scaleX: [],
             scaleY: [],
             text: [],
             incline: []
+        };
+        this.noteControls = {
+            alpha: [],
+            scale: [],
+            x: [],
+            /* y: [] */
         };
         this.isText = false;
         
@@ -88,6 +93,11 @@ export default class Judgeline
                 start     : 0,
                 end       : 0
             });
+        }
+
+        for (const name in this.noteControls)
+        {
+            this.noteControls[name].sort((a, b) => b.y - a.y);
         }
     }
 
@@ -398,6 +408,21 @@ export default class Judgeline
             this.debugSprite.rotation = this.sprite.rotation;
             this.debugSprite.alpha = 0.2 + (this.sprite.alpha * 0.8);
         }
+    }
+
+    calcNoteControl(y, valueType, defaultValue)
+    {
+        if (this.noteControls[valueType].length <= 0) return defaultValue;
+
+        let lastValue = defaultValue;
+
+        for (const control of this.noteControls[valueType])
+        {
+            if (control.y < y) break;
+            lastValue = control.value;
+        }
+
+        return lastValue;
     }
 }
 

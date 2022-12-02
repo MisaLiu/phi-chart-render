@@ -8,64 +8,34 @@ import { utils as PIXIutils } from 'pixi.js-legacy';
 
 const calcBetweenTime = 0.125;
 const Easing = [
-    (x) => { return x; },
-    (x) => { return Math.sin((x * Math.PI) / 2); },
-    (x) => { return 1 - Math.cos((x * Math.PI) / 2); },
-    (x) => { return 1 - (1 - x) * (1 - x); },
-    (x) => { return x * x; },
-    (x) => { return -(Math.cos(Math.PI * x) - 1) / 2; },
-    (x) => { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; },
-    (x) => { return 1 - Math.pow(1 - x, 3); },
-    (x) => { return x * x * x; },
-    (x) => { return 1 - Math.pow(1 - x, 4); },
-    (x) => { return x * x * x * x; },
-    (x) => { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; },
-    (x) => { return x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2; },
-    (x) => { return 1 - Math.pow(1 - x, 5); },
-    (x) => { return x * x * x * x * x; },
-    (x) => { return x === 1 ? 1 : 1 - Math.pow(2, -10 * x); },
-    (x) => { return x === 0 ? 0 : Math.pow(2, 10 * x - 10); },
-    (x) => { return Math.sqrt(1 - Math.pow(x - 1, 2)); },
-    (x) => { return 1 - Math.sqrt(1 - Math.pow(x, 2)); },
-    (x) => { return 1 + 2.70158 * Math.pow(x - 1, 3) + 1.70158 * Math.pow(x - 1, 2); },
-    (x) => { return 2.70158 * x * x * x - 1.70158 * x * x; },
-    (x) => {
-        return x < 0.5
-            ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2
-            : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2;
-    },
-    (x) => {
-        return x < 0.5
-            ? (Math.pow(2 * x, 2) * ((2.594910 + 1) * 2 * x - 2.594910)) / 2
-            : (Math.pow(2 * x - 2, 2) * ((2.594910 + 1) * (x * 2 - 2) + 2.594910) + 2) / 2;
-    },
-    (x) => {
-        return x === 0
-            ? 0
-            : x === 1
-            ? 1
-            : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * ((2 * Math.PI) / 3)) + 1;
-    },
-    (x) => {
-        return x === 0
-            ? 0
-            : x === 1
-            ? 1
-            : -Math.pow(2, 10 * x - 10) * Math.sin((x * 10 - 10.75) * ((2 * Math.PI) / 3));
-    },
-    (x) => {
-        if (x < 1 / 2.75) {
-            return 7.5625 * x * x;
-        } else if (x < 2 / 2.75) {
-            return 7.5625 * (x -= 1.5 / 2.75) * x + 0.75;
-        } else if (x < 2.5 / 2.75) {
-            return 7.5625 * (x -= 2.25 / 2.75) * x + 0.9375;
-        } else {
-            return 7.5625 * (x -= 2.625 / 2.75) * x + 0.984375;
-        }
-    },
-    (x) => { return 1 - Easing[25](1 - x); },
-    (x) => { return x < 0.5 ? (1 - Easing[25](1 - 2 * x)) / 2 : (1 + Easing[25](2 * x - 1)) / 2; }
+    (x) => x,
+    (x) => Math.sin((x * Math.PI) / 2),
+    (x) => 1 - Math.cos((x * Math.PI) / 2),
+    (x) => 1 - (1 - x) * (1 - x),
+    (x) => x * x,
+    (x) => -(Math.cos(Math.PI * x) - 1) / 2,
+    (x) => x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2,
+    (x) => 1 - Math.pow(1 - x, 3),
+    (x) => x * x * x,
+    (x) => 1 - Math.pow(1 - x, 4),
+    (x) => x * x * x * x,
+    (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2,
+    (x) => x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2,
+    (x) => 1 - Math.pow(1 - x, 5),
+    (x) => x * x * x * x * x,
+    (x) => x === 1 ? 1 : 1 - Math.pow(2, -10 * x),
+    (x) => x === 0 ? 0 : Math.pow(2, 10 * x - 10),
+    (x) => Math.sqrt(1 - Math.pow(x - 1, 2)),
+    (x) => 1 - Math.sqrt(1 - Math.pow(x, 2)),
+    (x) => 1 + 2.70158 * Math.pow(x - 1, 3) + 1.70158 * Math.pow(x - 1, 2),
+    (x) => 2.70158 * x * x * x - 1.70158 * x * x,
+    (x) => x < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2,
+    (x) => x < 0.5 ? (Math.pow(2 * x, 2) * ((2.594910 + 1) * 2 * x - 2.594910)) / 2 : (Math.pow(2 * x - 2, 2) * ((2.594910 + 1) * (x * 2 - 2) + 2.594910) + 2) / 2,
+    (x) => x === 0 ? 0 : x === 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * ((2 * Math.PI) / 3)) + 1,
+    (x) => x === 0 ? 0 : x === 1 ? 1 : -Math.pow(2, 10 * x - 10) * Math.sin((x * 10 - 10.75) * ((2 * Math.PI) / 3)),
+    (x) => x < 1 / 2.75 ? 7.5625 * x * x : x < 2 / 2.75 ? 7.5625 * (x -= 1.5 / 2.75) * x + 0.75 : x < 2.5 / 2.75 ? 7.5625 * (x -= 2.25 / 2.75) * x + 0.9375 : 7.5625 * (x -= 2.625 / 2.75) * x + 0.984375,
+    (x) => 1 - Easing[25](1 - x),
+    (x) => x < 0.5 ? (1 - Easing[25](1 - 2 * x)) / 2 : (1 + Easing[25](2 * x - 1)) / 2
 ];
 
 export default function RePhiEditChartConverter(_chart)
@@ -342,6 +312,11 @@ export default function RePhiEditChartConverter(_chart)
             }
         }
 
+        judgeline.noteControls.alpha = calculateNoteControls(_judgeline.alphaControl, 'alpha', 1);
+        judgeline.noteControls.scale = calculateNoteControls(_judgeline.sizeControl, 'size', 1);
+        judgeline.noteControls.x = calculateNoteControls(_judgeline.posControl, 'pos', 1);
+        // judgeline.noteControls.y = calculateNoteControls(_judgeline.yControl, 'y', 1);
+
         // 事件排序并计算 floorPosition
         judgeline.sortEvent();
         judgeline.calcFloorPosition();
@@ -599,6 +574,93 @@ function calculateColorEventEase(event)
     }
 
     return result;
+}
+
+function calculateNoteControls(_noteControls, valueName = 'alpha', defaultValue = 1)
+{
+    if (!_noteControls || !(_noteControls instanceof Array) || _noteControls.length <= 0) return [];
+    if (
+        _noteControls.length == 2 &&
+        (_noteControls[0].x == 0 && _noteControls[1].x >= 10000) &&
+        (_noteControls[0][valueName] == defaultValue && _noteControls[1][valueName] == defaultValue)
+    ) { return [] };
+
+    let noteControls = _noteControls.slice().sort((a, b) => b.x - a.x);
+    let result = [];
+
+    for (let controlIndex = 0; controlIndex < noteControls.length; controlIndex++)
+    {
+        const control = noteControls[controlIndex];
+        const nextControl = noteControls[controlIndex + 1];
+
+        result = [ ...result, ...separateNoteControl(control, nextControl, valueName) ];
+    }
+
+    result = arrangeSameValueControls(result);
+    if (result[0].y < 10000) result.unshift({ y: 9999999, value: result[0].value });
+
+    return result;
+
+    function arrangeSameValueControls(controls)
+    {
+        let result = [];
+
+        for (const control of controls)
+        {
+            if (result.length > 0 && result[result.length - 1].value == control.value)
+            {
+                continue;
+            }
+
+            result.push(control);
+        }
+
+        return result.slice();
+    }
+
+    function separateNoteControl(control, nextControl = null, valueName = 'alpha')
+    {
+        let result = [];
+        let xBetween = control.x - (nextControl ? nextControl.x : 0);
+        let valueBetween = control[valueName] - (nextControl ? nextControl[valueName] : control[valueName]);
+        let easingFunc = Easing[control.easing - 1];
+        let currentX = control.x;
+
+        if (control[valueName] == (nextControl ? nextControl[valueName] : control[valueName]))
+        {
+            return [ { y: control.x, value: control[valueName] } ];
+        }
+
+        while (currentX > (nextControl ? nextControl.x : 0))
+        {
+            let currentPercent = (control.x - currentX) / xBetween;
+            let currentValue = parseFloat((control[valueName] - valueBetween * easingFunc(currentPercent)).toFixed(2));
+
+            if (result.length > 0 && parseFloat((result[result.length - 1].value).toFixed(2)) == currentValue)
+            {
+                result[result.length - 1].y = currentX;
+            }
+            else
+            {
+                result.push({
+                    y     : currentX,
+                    value : currentValue
+                });
+            }
+
+            currentX -= 2;
+        }
+
+        if (result[result.length - 1].value != (nextControl ? nextControl[valueName] : control[valueName]))
+        {
+            result.push({
+                y     : (nextControl ? nextControl.x : 0),
+                value : (nextControl ? nextControl[valueName] : control[valueName])
+            });
+        }
+
+        return result;
+    }
 }
 
 function separateSpeedEvent(event)

@@ -326,6 +326,7 @@ doms.chartPackFile.addEventListener('input', async function ()
             })
             .catch((e) =>
             {
+                console.error(e);
                 console.error('Unsupported file: ' + file.name);
                 return;
             }));
