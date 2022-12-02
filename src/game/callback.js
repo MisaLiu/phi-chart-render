@@ -47,7 +47,6 @@ function onKeyPressCallback(e)
             }
 
             note.reset();
-            note.sprite.alpha = note.basicAlpha;
         }
 
         this.judgement.score.perfect = this.judgement.score.judgedNotes = this.judgement.score.combo = this.judgement.score.maxCombo = calcedNoteCount;

@@ -42,6 +42,8 @@ export default class Note
         this.lastHoldTime    = NaN;
         this.score           = 0;
         this.scoreTime       = 0;
+
+        if (this.sprite) this.sprite.alpha = this.basicAlpha;
     }
 
     createSprite(texture, zipFiles, multiHL = true, debug = false)
