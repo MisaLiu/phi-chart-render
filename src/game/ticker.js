@@ -49,7 +49,7 @@ function calcTick()
             this.judgement._holdBetween = this.chart.holdBetween;
             if (!this._isPaused) this.judgement.calcTick();
 
-            this.sprites.progressBar.width = (this._audioTimer.time / this.chart.music._duration) * this.render.sizer.width;
+            this.sprites.progressBar.scale.x = (this._audioTimer.time / this.chart.music._duration) * this.sprites.progressBar.baseScaleX;
             break;
         }
         case 2:

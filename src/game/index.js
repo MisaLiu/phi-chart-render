@@ -488,7 +488,7 @@ export default class Game
             {
                 this.sprites.progressBar.position.set(0, 0);
                 this.sprites.progressBar.scale.y = this.render.sizer.heightPercent;
-                this.sprites.progressBar.width = this._music ? this._music.progress * this.render.sizer.width : 0;
+                this.sprites.progressBar.baseScaleX = this.render.sizer.width / this.sprites.progressBar.texture.baseTexture.width;
             }
 
             if (this.sprites.pauseButton)
