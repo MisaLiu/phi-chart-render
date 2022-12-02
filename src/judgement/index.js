@@ -111,8 +111,6 @@ export default class Judgement
         this.input.tap.length = 0;
         this.input.calcTick();
 
-        this.score.calcTick();
-
         for (const particle of this.clickParticleContainer.children)
         {
             if (!particle) break;
