@@ -1,3 +1,4 @@
+import { number as verifyNum } from '@/verify';
 import Chart from '../index';
 import Judgeline from '../judgeline';
 import EventLayer from '../eventlayer';
@@ -640,9 +641,9 @@ function _valueCalculator(event, currentTime, startValue = 0, endValue = 1)
     let timePercentStart = (currentTime - event.startTime) / (event.endTime - event.startTime);
     let timePercentEnd = 1 - timePercentStart;
     let easeFunction = Easing[event.easingType - 1] ? Easing[event.easingType - 1] : Easing[0];
-    let easePercent = easeFunction((!isNaN(event.easingLeft) ? event.easingLeft : 0) * timePercentEnd + (!isNaN(event.easingRight) ? event.easingRight : 1) * timePercentStart);
-    let easePercentStart = easeFunction(!isNaN(event.easingLeft) ? event.easingLeft : 0);
-    let easePercentEnd = easeFunction(!isNaN(event.easingRight) ? event.easingRight : 1);
+    let easePercent = easeFunction(verifyNum(event.easingLeft, 0, 0, 1) * timePercentEnd + verifyNum(event.easingRight, 1, 0, 1) * timePercentStart);
+    let easePercentStart = easeFunction(verifyNum(event.easingLeft, 0, 0, 1));
+    let easePercentEnd = easeFunction(verifyNum(event.easingRight, 1, 0, 1));
 
     easePercent = (easePercent - easePercentStart) / (easePercentEnd - easePercentStart);
 

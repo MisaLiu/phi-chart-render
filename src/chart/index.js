@@ -1,3 +1,4 @@
+import { number as verifyNum } from '@/verify';
 import * as Convert from './convert';
 import utils from './convert/utils';
 import { Sprite, Graphics, Text } from 'pixi.js-legacy';
@@ -9,7 +10,7 @@ export default class Chart
         this.judgelines = [];
         this.notes      = [];
         this.bpmList    = [];
-        this.offset     = !isNaN(parseFloat(params.offset)) ? parseFloat(params.offset) : 0;
+        this.offset     = verifyNum(params.offset, 0);
 
         this.music      = params.music ? params.music : null;
         this.bg         = params.bg ? params.bg : null;

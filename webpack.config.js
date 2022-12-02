@@ -18,6 +18,11 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         filename: 'script.js'
     },
+    resolve: {
+        alias: {
+            '@': path.join(__dirname, './src')
+        }
+    },
     devServer: {
         client: {
             logging: 'info',

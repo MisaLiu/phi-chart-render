@@ -1,3 +1,5 @@
+import { number as verifyNum } from '@/verify';
+
 const calcBetweenTime = 0.125; // 1/32
 
 /**
@@ -46,9 +48,9 @@ function valueCalculator(event, Easings, currentTime, easingsOffset = 1)
     let timePercentStart = (currentTime - event.startTime) / (event.endTime - event.startTime);
     let timePercentEnd = 1 - timePercentStart;
     let easeFunction = Easings[event.easingType - easingsOffset] ? Easings[event.easingType - easingsOffset] : Easings[0];
-    let easePercent = easeFunction((!isNaN(event.easingLeft) ? event.easingLeft : 0) * timePercentEnd + (!isNaN(event.easingRight) ? event.easingRight : 1) * timePercentStart);
-    let easePercentStart = easeFunction(!isNaN(event.easingLeft) ? event.easingLeft : 0);
-    let easePercentEnd = easeFunction(!isNaN(event.easingRight) ? event.easingRight : 1);
+    let easePercent = easeFunction(verifyNum(event.easingLeft, 0, 0, 1) * timePercentEnd + verifyNum(event.easingRight, 1, 0, 1) * timePercentStart);
+    let easePercentStart = easeFunction(verifyNum(event.easingLeft, 0, 0, 1));
+    let easePercentEnd = easeFunction(verifyNum(event.easingRight, 1, 0, 1));
 
     easePercent = (easePercent - easePercentStart) / (easePercentEnd - easePercentStart);
 

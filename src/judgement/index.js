@@ -1,3 +1,4 @@
+import * as verify from '@/verify';
 import Input from './input';
 import Score from './score';
 import InputPoint from './input/point';
@@ -50,11 +51,11 @@ export default class Judgement
         if (!params.stage) throw new Error('You cannot do judgement without a stage');
         if (!params.chart) throw new Error('You cannot do judgement without a chart');
 
-        this._autoPlay       = params.autoPlay !== undefined && params.autoPlay !== null ? !!params.autoPlay : false;
-        this._hitsound       = params.hitsound !== undefined && params.hitsound !== null ? !!params.hitsound : true;
-        this._hitsoundVolume = !isNaN(Number(params.hitsoundVolume)) ? Number(params.hitsoundVolume) : 1;
+        this._autoPlay       = verify.bool(params.autoPlay, false);
+        this._hitsound       = verify.bool(params.hitsound, true);
+        this._hitsoundVolume = verify.number(params.hitsoundVolume, 1, 0, 1);
 
-        this.score = new Score(this.chart.totalRealNotes, !!params.showAPStatus, !!params.challangeMode, this._autoPlay);
+        this.score = new Score(this.chart.totalRealNotes, verify.bool(params.showAPStatus, true), verify.bool(params.challangeMode, false), this._autoPlay);
         this.input = new Input({ canvas: params.canvas, autoPlay: this._autoPlay });
 
         /* ===== 判定用时间计算 ===== */

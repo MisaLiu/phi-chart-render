@@ -1,9 +1,11 @@
+import { number as verifyNum } from '@/verify';
+
 export default class Timer
 {
     constructor(speed = 1, offset = 0)
     {
-        this.speed = !isNaN(parseFloat(speed)) ? parseFloat((speed).toFixed(2)) : 1;
-        this.offset = !isNaN(parseFloat(offset)) ? parseFloat((offset * 1000).toFixed(2)) : 0;
+        this.speed  = parseFloat((verifyNum(speed, 1, 0, 2)).toFixed(2));
+        this.offset = verifyNum(offset, 0) * 1000;
 
         this.reset();
     }

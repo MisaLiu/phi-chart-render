@@ -1,3 +1,4 @@
+import * as verify from '@/verify';
 import utils from './convert/utils';
 import { Sprite, Container, Text, Graphics } from 'pixi.js-legacy';
 
@@ -5,11 +6,11 @@ export default class Judgeline
 {
     constructor(params)
     {
-        this.id               = !isNaN(params.id) ? Number(params.id) : -1;
+        this.id               = verify.number(params.id, -1, 0);
         this.texture          = params.texture ? params.texture : null;
         this.parentLine       = params.parentLine ? params.parentLine : null;
-        this.zIndex           = !isNaN(params.zIndex) && Number(params.zIndex) > 0 ? Number(params.zIndex) : NaN;
-        this.isCover          = params.isCover !== undefined && params.isCover !== null ? !!params.isCover : true;
+        this.zIndex           = verify.number(params.zIndex, NaN, 1);
+        this.isCover          = verify.bool(params.isCover, true);
         this.useOfficialScale = false;
 
         this.eventLayers = [];

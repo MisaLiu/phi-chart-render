@@ -1,27 +1,28 @@
+import * as verify from '@/verify';
 import { Sprite, Container, Text, Graphics } from 'pixi.js-legacy';
 
 export default class Note
 {
     constructor(params)
     {
-        this.id               = !isNaN(Number(params.id)) ? Number(params.id) : -1;
-        this.type             = !isNaN(Number(params.type)) ? Number(params.type) : 1;
-        this.time             = !isNaN(parseFloat(params.time)) ? parseFloat(params.time) : -1; // Note 开始时间
-        this.holdTime         = (this.type === 3 && !isNaN(parseFloat(params.holdTime))) ? parseFloat(params.holdTime) : 0; // Note 按住需要经过的时间，仅 Hold
+        this.id               = verify.number(params.id, -1, 0);
+        this.type             = verify.number(params.type, 1, 1, 4);
+        this.time             = verify.number(params.time, -1); // Note 开始时间
+        this.holdTime         = this.type === 3 ? verify.number(params.holdTime, 0) : 0; // Note 按住需要经过的时间，仅 Hold
         this.holdTimeLength   = this.type === 3 ? parseFloat(this.time + this.holdTime) : 0; // Note 按完的时间，自动计算，仅 Hold
-        this.speed            = !isNaN(parseFloat(params.speed)) ? parseFloat(params.speed) : 1;
-        this.floorPosition    = !isNaN(parseFloat(params.floorPosition)) ? parseFloat(params.floorPosition) : this.time;
-        this.holdLength       = (this.type === 3 && !isNaN(parseFloat(params.holdLength))) ? parseFloat(params.holdLength) : 0;
+        this.speed            = verify.number(params.speed, 1);
+        this.floorPosition    = verify.number(params.floorPosition, this.time);
+        this.holdLength       = this.type === 3 ? verify.number(params.holdLength, 0) : 0;
         this.endPosition      = parseFloat(this.floorPosition + this.holdLength);
-        this.positionX        = !isNaN(parseFloat(params.positionX)) ? parseFloat(params.positionX) : 0;
-        this.basicAlpha       = (!isNaN(parseFloat(params.basicAlpha)) && parseFloat(params.basicAlpha) >= 0 && parseFloat(params.basicAlpha) <= 1) ? parseFloat(params.basicAlpha) : 1;
-        this.visibleTime      = (!isNaN(parseFloat(params.visibleTime)) && params.visibleTime < 999999) ? parseFloat(params.visibleTime) : NaN;
-        this.yOffset          = !isNaN(parseFloat(params.yOffset)) ? parseFloat(params.yOffset) : 0;
-        this.xScale           = !isNaN(parseFloat(params.xScale)) ? parseFloat(params.xScale) : 1;
-        this.isAbove          = !!params.isAbove;
-        this.isFake           = !!params.isFake;
-        this.isMulti          = !!params.isMulti;
-        this.useOfficialSpeed = !!params.useOfficialSpeed;
+        this.positionX        = verify.number(params.positionX, 0);
+        this.basicAlpha       = verify.number(params.basicAlpha, 1, 0, 1);
+        this.visibleTime      = verify.number(params.visibleTime, NaN, 0, 999998);
+        this.yOffset          = verify.number(params.yOffset, 0);
+        this.xScale           = verify.number(params.xScale, 1, 0);
+        this.isAbove          = verify.bool(params.isAbove, true);
+        this.isFake           = verify.bool(params.isFake, false);
+        this.isMulti          = verify.bool(params.isMulti, false);
+        this.useOfficialSpeed = verify.bool(params.useOfficialSpeed, false);
         this.texture          = (params.texture && params.texture != '') ? params.texture : null;
         this.hitsound         = (params.hitsound && params.hitsound != '') ? params.hitsound : null;
         this.judgeline        = params.judgeline;

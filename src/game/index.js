@@ -1,4 +1,5 @@
-import Judgement from '../judgement';
+import * as verify from '@/verify';
+import Judgement from '@/judgement';
 import Timer from './timer';
 import * as TickerFunc from './ticker';
 import * as CallbackFunc from './callback';
@@ -57,8 +58,13 @@ const ProgressBarCache = (() =>
  **/
 export default class Game
 {
-    constructor(params)
+    constructor(_params)
     {
+        let params = { ..._params };
+
+        if (!params.render) params.render = {};
+        if (!params.settings) params.settings = {};
+
         /* ===== 加载谱面基本信息 ===== */
         this.chart    = params.chart;
         this.assets   = params.assets;
@@ -70,12 +76,12 @@ export default class Game
 
        /* ===== 创建 render ===== */
         this.render = new Application({
-            width           : !isNaN(Number(params.render.width)) ? Number(params.render.width) : document.documentElement.clientWidth,
-            height          : !isNaN(Number(params.render.height)) ? Number(params.render.height) : document.documentElement.clientHeight,
-            resolution      : !isNaN(Number(params.render.resolution)) ? Number(params.render.resolution) : window.devicePixelRatio,
-            autoDensity     : params.render.autoDensity !== undefined && params.settings.autoDensity !== null ? !!params.render.autoDensity : true,
-            antialias       : params.render.antialias !== undefined && params.render.antialias !== null ? !!params.render.antialias : true,
-            forceCanvas     : params.render.forceCanvas !== undefined && params.render.forceCanvas !== null ? !!params.render.forceCanvas : false,
+            width           : verify.number(params.render.width, document.documentElement.clientWidth, 0),
+            height          : verify.number(params.render.height, document.documentElement.clientHeight, 0),
+            resolution      : verify.number(params.render.resolution, window.devicePixelRatio, 1),
+            autoDensity     : verify.bool(params.render.autoDensity, true),
+            antialias       : verify.bool(params.render.antialias, true),
+            forceCanvas     : verify.bool(params.render.forceCanvas, false),
             view            : params.render.canvas ? params.render.canvas : undefined,
             backgroundAlpha : 1
         });
@@ -103,11 +109,11 @@ export default class Game
                     flick : this.assets.sounds.flick
                 },
             },
-            hitsound       : params.settings && params.settings.hitsound !== undefined && params.settings.hitsound !== null ? !!params.settings.hitsound : true,
-            hitsoundVolume : params.settings && !isNaN(Number(params.settings.hitsoundVolume)) ? Number(params.settings.hitsoundVolume) : 1,
-            showAPStatus   : params.settings && params.settings.showAPStatus !== undefined && params.settings.showAPStatus !== null ? !!params.settings.showAPStatus : true,
-            challengeMode  : params.settings && params.settings.challengeMode !== undefined && params.settings.challengeMode !== null ? !!params.settings.challengeMode : false,
-            autoPlay       : params.settings && params.settings.autoPlay !== undefined && params.settings.autoPlay !== null ? !!params.settings.autoPlay : false
+            hitsound       : verify.bool(params.settings.hitsound, true),
+            hitsoundVolume : verify.number(params.settings.hitsoundVolume, 1, 0, 1),
+            showAPStatus   : verify.bool(params.settings.showAPStatus, true),
+            challengeMode  : verify.bool(params.settings.challengeMode, false),
+            autoPlay       : verify.bool(params.settings.autoPlay, false)
         });
 
         this.sprites = {};
@@ -118,19 +124,20 @@ export default class Game
         };
 
         /* ===== 用户设置暂存 ===== */
-        this._settings = {};
-        this._settings.noteScale      = params.settings && !isNaN(Number(params.settings.noteScale)) ? Number(params.settings.noteScale) : 8000;
-        this._settings.bgDim          = params.settings && !isNaN((Number(params.settings.bgDim))) ? Number(params.settings.bgDim) : 0.5;
-        this._settings.offset         = params.settings && !isNaN(Number(params.settings.audioOffset)) ? Number(params.settings.audioOffset) : 0;
-        this._settings.speed          = params.settings && !isNaN(Number(params.settings.speed)) ? Number(params.settings.speed) : 1;
-        this._settings.showFPS        = params.settings && params.settings.showFPS !== undefined && params.settings.showFPS !== null ? !!params.settings.showFPS : true;
-        this._settings.showInputPoint = params.settings && params.settings.showInputPoint !== undefined && params.settings.showInputPoint !== null ? !!params.settings.showInputPoint : true;
-        this._settings.multiNoteHL    = params.settings && params.settings.multiNoteHL !== undefined && params.settings.multiNoteHL !== null ? !!params.settings.multiNoteHL : true;
-        this._settings.showAPStatus   = params.settings && params.settings.showAPStatus !== undefined && params.settings.showAPStatus !== null ? !!params.settings.showAPStatus : true;
-        this._settings.challengeMode  = params.settings && params.settings.challengeMode !== undefined && params.settings.challengeMode !== null ? !!params.settings.challengeMode : false;
-        this._settings.debug          = params.settings && params.settings.debug ? !!params.settings.debug : false;
+        this._settings = {
+            noteScale      : verify.number(params.settings.noteScale, 8000),
+            bgDim          : verify.number(params.settings.bgDim, 0.5, 0, 1),
+            offset         : verify.number(params.settings.audioOffset, 0),
+            speed          : verify.number(params.settings.speed, 1, 0, 2),
+            showFPS        : verify.bool(params.settings.showFPS, true),
+            showInputPoint : verify.bool(params.settings.showInputPoint, true),
+            multiNoteHL    : verify.bool(params.settings.multiNoteHL, true),
+            showAPStatus   : verify.bool(params.settings.showAPStatus, true),
+            challengeMode  : verify.bool(params.settings.challengeMode, false),
+            debug          : verify.bool(params.settings.debug, false)
+        };
 
-        this._watermarkText = params.watermark && params.watermark != '' ? params.watermark : 'github/MisaLiu/phi-chart-render';
+        this._watermarkText = verify.text(params.watermark, 'github/MisaLiu/phi-chart-render');
 
         this._musicId = null;
         this._audioTimer = new Timer(this._settings.speed, (this.chart.offset + this._settings.offset));
