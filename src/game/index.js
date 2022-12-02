@@ -134,6 +134,7 @@ export default class Game
             multiNoteHL    : verify.bool(params.settings.multiNoteHL, true),
             showAPStatus   : verify.bool(params.settings.showAPStatus, true),
             challengeMode  : verify.bool(params.settings.challengeMode, false),
+            autoPlay       : verify.bool(params.settings.autoPlay, false),
             debug          : verify.bool(params.settings.debug, false)
         };
 
@@ -164,6 +165,7 @@ export default class Game
 
         this.resize(false);
         window.addEventListener('resize', this.resize);
+        if (this._settings.autoPlay) window.addEventListener('keydown', this._onKeyPressCallback);
     }
 
     createSprites()
@@ -223,6 +225,7 @@ export default class Game
 
         this.sprites.pauseButton.interactive = true;
         this.sprites.pauseButton.buttonMode = true;
+        this.sprites.pauseButton.cursor = 'pointer';
         this.sprites.pauseButton.on('pointerdown', this._pauseBtnClickCallback);
 
         this.sprites.pauseButton.hitArea = new Rectangle(
@@ -419,7 +422,9 @@ export default class Game
         this.judgement.destroySprites();
 
         this.judgement.input.removeListenerFromCanvas(canvas);
+
         window.removeEventListener('resize', this.resize);
+        window.removeEventListener('keydown', this._onKeyPressCallback);
 
         canvas.width = canvas.height = 0;
 

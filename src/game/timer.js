@@ -42,6 +42,13 @@ export default class Timer
         }
     }
 
+    skip(time)
+    {
+        if (isNaN(this.pauseTime)) return;
+        this.startTime += time;
+        if (this.startTime > this.pauseTime) this.startTime = this.pauseTime;
+    }
+
     get time()
     {
         return (

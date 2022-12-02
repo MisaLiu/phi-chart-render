@@ -1,4 +1,84 @@
 
+function onKeyPressCallback(e)
+{
+    let keyCode     = e.keyCode,
+        isHoldCtrl  = e.ctrlKey,
+        isHoldShift = e.shiftKey,
+        skipTime    = 0;
+
+    if (this._isPaused) return;
+    if (!this._settings.autoPlay) return;
+    if (this._animateStatus !== 1) return;
+
+    switch (keyCode)
+    {
+        case 37: {
+            skipTime = 2000;
+            break;
+        }
+        case 39: {
+            skipTime = -2000;
+            break;
+        }
+        default: {
+            return;
+        }
+    }
+    
+    if (isHoldCtrl && isHoldShift) skipTime *= 5;
+    else if (isHoldCtrl) skipTime *= 2;
+    else if (isHoldShift) skipTime *= 0.5;
+
+    this._audioTimer.pause();
+    this._audioTimer.skip(skipTime);
+
+    {
+        let currentTime = this._audioTimer.time;
+        let calcedNoteCount = 0;
+
+        for (const note of this.chart.notes)
+        {
+            if (note.score <= 0) break;
+            if (note.time < currentTime)
+            {
+                calcedNoteCount++;
+                continue;
+            }
+
+            note.reset();
+            note.sprite.alpha = note.basicAlpha;
+        }
+
+        this.judgement.score.perfect = this.judgement.score.judgedNotes = this.judgement.score.combo = this.judgement.score.maxCombo = calcedNoteCount;
+        this.judgement.score._score = (this.judgement.score.scorePerNote + this.judgement.score.scorePerCombo) * calcedNoteCount;
+
+        if (this.judgement.score.sprites)
+        {
+            this.judgement.score.sprites.combo.number.text = this.judgement.score.combo;
+
+            this.judgement.score.sprites.acc.text = 'ACCURACY ' + (this.judgement.score.acc * 100).toFixed(2) + '%';
+            this.judgement.score.sprites.score.text = fillZero((this.judgement.score.score).toFixed(0), 7);
+
+            this.judgement.score.sprites.combo.text.position.x = this.judgement.score.sprites.combo.number.width + this.render.sizer.heightPercent * 6;
+        }
+
+        function fillZero(num, length = 3)
+        {
+            let result = num + '';
+            while (result.length < length)
+            {
+                result = '0' + result;
+            }
+            return result;
+        }
+    }
+
+    this.chart.music.once('play', () => { this._audioTimer.pause() });
+    this.chart.music.pause();
+    this.chart.music.seek(this._audioTimer.time);
+    this.chart.music.play();
+}
+
 function pauseBtnClickCallback()
 {
     let pauseButton = this.sprites.pauseButton;
@@ -53,6 +133,7 @@ function runCallback(type)
 }
 
 export {
+    onKeyPressCallback,
     pauseBtnClickCallback,
     gameEndCallback,
     runCallback
