@@ -7,10 +7,11 @@ export default class Chart
 {
     constructor(params = {})
     {
-        this.judgelines = [];
-        this.notes      = [];
-        this.bpmList    = [];
-        this.offset     = verifyNum(params.offset, 0);
+        this.judgelines          = [];
+        this.notes               = [];
+        this.bpmList             = [];
+        this.offset              = verifyNum(params.offset, 0);
+        this.isLineTextureReaded = false;
 
         this.music      = params.music ? params.music : null;
         this.bg         = params.bg ? params.bg : null;
@@ -90,6 +91,11 @@ export default class Chart
 
     readLineTextureInfo(infos = [])
     {
+        if (this.isLineTextureReaded) return;
+        if (infos.length <= 0) return;
+
+        let isReaded = false;
+
         infos.forEach((lineInfo) =>
         {
             if (!this.judgelines[lineInfo.LineId]) return;
@@ -112,7 +118,11 @@ export default class Chart
                 start: this.judgelines[lineInfo.LineId].scaleY,
                 end: this.judgelines[lineInfo.LineId].scaleY
             });
+
+            isReaded = true;
         });
+
+        if (isReaded) this.isLineTextureReaded = true;
     }
 
     createSprites(stage, size, textures, zipFiles = {}, speed = 1, bgDim = 0.5, multiNoteHL = true, debug = false)
