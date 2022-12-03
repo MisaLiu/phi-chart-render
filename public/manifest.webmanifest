@@ -1,7 +1,7 @@
 {
     "background_color": "black",
     "description": "A Phigros chart render based on Pixi.js",
-    "display": "fullscreen",
+    "display": "standalone",
     "orientation": "landscape",
     "icons": [
         {
