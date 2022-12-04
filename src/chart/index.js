@@ -252,7 +252,7 @@ export default class Chart
                 }
                 else
                 {
-                    judgeline.baseScaleX = (this.renderSize.width / judgeline.sprite.texture.width) * 3;
+                    judgeline.baseScaleX = (4000 / judgeline.sprite.texture.width) * (this.renderSize.width / 1350);
                     judgeline.baseScaleY = ((this.renderSize.lineScale * 18.75 * 0.008) / judgeline.sprite.texture.height);
                 }
 
