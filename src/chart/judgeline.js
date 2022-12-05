@@ -287,8 +287,9 @@ export default class Judgeline
         this.alpha = 0;
         this.deg   = 0;
 
-        for (const eventLayer of this.eventLayers)
+        for (let i = 0, length = this.eventLayers.length; i < length; i++)
         {
+            let eventLayer = this.eventLayers[i];
             eventLayer.calcTime(currentTime);
 
             this.speed  += eventLayer._speed;
@@ -298,16 +299,18 @@ export default class Judgeline
             this.deg    += eventLayer._rotate;
         }
 
-        for (const event of this.floorPositions)
+        for (let i = 0, length = this.floorPositions.length; i < length; i++)
         {
+            let event = this.floorPositions[i];
             if (event.endTime < currentTime) continue;
             if (event.startTime > currentTime) break;
 
             this.floorPosition = (currentTime - event.startTime) * this.speed + event.floorPosition;
         };
 
-        for (const event of this.extendEvent.scaleX)
+        for (let i = 0, length = this.extendEvent.scaleX.length; i < length; i++)
         {
+            let event = this.extendEvent.scaleX[i];
             if (event.endTime < currentTime) continue;
             if (event.startTime > currentTime) break;
 
@@ -318,8 +321,9 @@ export default class Judgeline
             this.sprite.scale.x = this.scaleX * this.baseScaleX;
         }
 
-        for (const event of this.extendEvent.scaleY)
+        for (let i = 0, length = this.extendEvent.scaleY.length; i < length; i++)
         {
+            let event = this.extendEvent.scaleY[i];
             if (event.endTime < currentTime) continue;
             if (event.startTime > currentTime) break;
 
@@ -330,24 +334,27 @@ export default class Judgeline
             this.sprite.scale.y = this.scaleY * this.baseScaleY;
         }
 
-        for (const event of this.extendEvent.text)
+        for (let i = 0, length = this.extendEvent.text.length; i < length; i++)
         {
+            let event = this.extendEvent.text[i];
             if (event.endTime < currentTime) continue;
             if (event.startTime > currentTime) break;
 
             this.sprite.text = event.value;
         }
 
-        for (const event of this.extendEvent.color)
+        for (let i = 0, length = this.extendEvent.color.length; i < length; i++)
         {
+            let event = this.extendEvent.color[i];
             if (event.endTime < currentTime) continue;
             if (event.startTime > currentTime) break;
 
             this.color = this.sprite.tint = event.value;
         }
 
-        for (const event of this.extendEvent.incline)
+        for (let i = 0, length = this.extendEvent.incline.length; i < length; i++)
         {
+            let event = this.extendEvent.incline[i];
             if (event.endTime < currentTime) continue;
             if (event.startTime > currentTime) break;
 

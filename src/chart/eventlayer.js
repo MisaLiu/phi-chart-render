@@ -32,8 +32,9 @@ export default class EventLayer
         this._alpha  = valueCalculator(this.alpha, currentTime, this._alpha);
         this._rotate = valueCalculator(this.rotate, currentTime, this._rotate);
 
-        for (const event of this.speed)
+        for (let i = 0, length = this.speed.length; i < length; i++)
         {
+            let event = this.speed[i];
             if (event.endTime < currentTime) continue;
             if (event.startTime > currentTime) break;
 
@@ -44,8 +45,9 @@ export default class EventLayer
 
 function valueCalculator(events, currentTime, originValue = 0)
 {
-    for (const event of events)
+    for (let i = 0, length = events.length; i < length; i++)
     {
+        let event = events[i];
         if (event.endTime < currentTime) continue;
         if (event.startTime > currentTime) break;
         if (event.start == event.end) return event.start

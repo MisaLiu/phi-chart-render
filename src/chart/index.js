@@ -295,22 +295,24 @@ export default class Chart
 
     calcTime(currentTime)
     {
-        for (const bpm of this.bpmList)
+        for (let i = 0, length = this.bpmList.length; i < length; i++)
         {
+            let bpm = this.bpmList[i];
+
             if (bpm.endTime < currentTime) continue;
             if (bpm.startTime > currentTime) break;
 
             this.holdBetween = bpm.holdBetween;
         };
 
-        for (const judgeline of this.judgelines)
+        for (let i = 0, length = this.judgelines.length; i < length; i++)
         {
-            judgeline.calcTime(currentTime, this.renderSize);
+            this.judgelines[i].calcTime(currentTime, this.renderSize);
         };
-        for (const note of this.notes)
+        for (let i = 0, length = this.notes.length; i < length; i++)
         {
-            note.calcTime(currentTime, this.renderSize);
-            if (this.noteJudgeCallback) this.noteJudgeCallback(currentTime, note);
+            this.notes[i].calcTime(currentTime, this.renderSize);
+            if (this.noteJudgeCallback) this.noteJudgeCallback(currentTime, this.notes[i]);
         };
     }
 
