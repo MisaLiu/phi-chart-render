@@ -458,6 +458,20 @@ doms.startBtn.addEventListener('click', async () => {
         return;
     }
 
+    let zipFiles = { ...files.all };
+
+    if (!zipFiles['Tap.png']) zipFiles['Tap.png'] = assets.textures.tap;
+    if (!zipFiles['TapHL.png']) zipFiles['TapHL.png'] = assets.textures.tapHL;
+    if (!zipFiles['Drag.png']) zipFiles['Drag.png'] = assets.textures.drag;
+    if (!zipFiles['DragHL.png']) zipFiles['DragHL.png'] = assets.textures.dragHL;
+    if (!zipFiles['Flick.png']) zipFiles['Flick.png'] = assets.textures.flick;
+    if (!zipFiles['FlickHL.png']) zipFiles['FlickHL.png'] = assets.textures.flickHL;
+    if (!zipFiles['HoldHead.png']) zipFiles['HoldHead.png'] = assets.textures.holdHeadHL;
+    if (!zipFiles['HoldHeadHL.png']) zipFiles['HoldHeadHL.png'] = assets.textures.holdHeadHL;
+    if (!zipFiles['Hold.png']) zipFiles['Hold.png'] = assets.textures.holdBody;
+    if (!zipFiles['HoldHL.png']) zipFiles['HoldHL.png'] = assets.textures.holdBodyHL;
+    if (!zipFiles['HoldEnd.png']) zipFiles['HoldEnd.png'] = assets.textures.holdEnd;
+
     currentFile.chart.music = currentFile.music;
     if (currentFile.bg)
     {
@@ -501,7 +515,7 @@ doms.startBtn.addEventListener('click', async () => {
     window._game = new PhiChartRender.Game({
         chart: currentFile.chart,
         assets: assets,
-        zipFiles: files.all,
+        zipFiles: zipFiles,
         render: {
             resizeTo: document.documentElement,
             resolution: doms.settings.lowResolution.checked ? 1 : window.devicePixelRatio,
