@@ -261,6 +261,14 @@ export default class Chart
                 judgeline.sprite.position.x = judgeline.x * this.renderSize.width;
                 judgeline.sprite.position.y = judgeline.y * this.renderSize.height;
 
+                for (const name in judgeline.noteControls)
+                {
+                    for (const control of judgeline.noteControls[name])
+                    {
+                        control.y = control._y * size.height
+                    }
+                }
+
                 if (isEnded) judgeline.sprite.alpha = 0;
                 if (judgeline.debugSprite) judgeline.debugSprite.scale.set(this.renderSize.heightPercent);
             });

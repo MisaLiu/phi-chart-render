@@ -597,7 +597,7 @@ function calculateNoteControls(_noteControls, valueName = 'alpha', defaultValue 
     }
 
     result = arrangeSameValueControls(result);
-    if (result[0].y < 10000) result.unshift({ y: 9999999, value: result[0].value });
+    if (result[0].y < 10000) result.unshift({ _y: 9999999 / 900, y: 9999999, value: result[0].value });
 
     return result;
 
@@ -628,7 +628,7 @@ function calculateNoteControls(_noteControls, valueName = 'alpha', defaultValue 
 
         if (control[valueName] == (nextControl ? nextControl[valueName] : control[valueName]))
         {
-            return [ { y: control.x, value: control[valueName] } ];
+            return [ { _y: control.x / 900, y: control.x, value: control[valueName] } ];
         }
 
         while (currentX > (nextControl ? nextControl.x : 0))
@@ -638,11 +638,13 @@ function calculateNoteControls(_noteControls, valueName = 'alpha', defaultValue 
 
             if (result.length > 0 && parseFloat((result[result.length - 1].value).toFixed(2)) == currentValue)
             {
+                result[result.length - 1]._y = currentX / 900;
                 result[result.length - 1].y = currentX;
             }
             else
             {
                 result.push({
+                    _y    : currentX / 900,
                     y     : currentX,
                     value : currentValue
                 });
@@ -654,6 +656,7 @@ function calculateNoteControls(_noteControls, valueName = 'alpha', defaultValue 
         if (result[result.length - 1].value != (nextControl ? nextControl[valueName] : control[valueName]))
         {
             result.push({
+                _y    : (nextControl ? nextControl.x : 0) / 900,
                 y     : (nextControl ? nextControl.x : 0),
                 value : (nextControl ? nextControl[valueName] : control[valueName])
             });
