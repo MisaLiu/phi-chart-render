@@ -412,16 +412,13 @@ export default class Judgeline
 
     calcNoteControl(y, valueType, defaultValue)
     {
-        if (this.noteControls[valueType].length <= 0) return defaultValue;
-
         let lastValue = defaultValue;
-
-        for (const control of this.noteControls[valueType])
+        for (let i = 0, length = this.noteControls[valueType].length; i < length; i++)
         {
+            let control = this.noteControls[valueType][i];
             if (control.y < y) break;
             lastValue = control.value;
         }
-
         return lastValue;
     }
 }
