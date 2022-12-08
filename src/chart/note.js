@@ -239,11 +239,15 @@ export default class Note
         // Note 在舞台可视范围之内时做进一步计算
         if (!this.sprite.outScreen)
         {
-            this.sprite.alpha = this.isScoreAnimated && this.type !== 3 ? 0 : this.basicAlpha * this.judgeline.calcNoteControl(_originY, 'alpha', 1);
             if (this.type !== 3)
             {
                 let noteCtrlScale = this.judgeline.calcNoteControl(_originY, 'scale', 1);
                 this.sprite.scale.set(this.sprite.baseScale * this.xScale * noteCtrlScale, this.sprite.baseScale * noteCtrlScale);
+                this.sprite.alpha = this.isScoreAnimated ? 0 : this.basicAlpha * this.judgeline.calcNoteControl(_originY, 'alpha', 1);
+            }
+            else
+            {
+                this.sprite.alpha = this.isScored && this.score <= 1 ? 0.5 : this.basicAlpha * this.judgeline.calcNoteControl(_originY, 'alpha', 1);
             }
 
             this.sprite.visible = (this.sprite.alpha > 0);
