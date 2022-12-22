@@ -43,6 +43,8 @@ const doms = {
     fileSelect: document.querySelector('div.file-select'),
     chartPackFile: document.querySelector('input#file-chart-pack'),
     chartPackFileReadProgress: document.querySelector('div#file-read-progress'),
+    skinPackFile: document.querySelector('input#file-skin-pack'),
+    skinPackFileReadProgress: document.querySelector('div#loading-skin-pack'),
 
     file : {
         chart: document.querySelector('select#file-chart'),
@@ -415,6 +417,152 @@ doms.chartPackFile.addEventListener('input', async function ()
     }
 });
 
+doms.skinPackFile.addEventListener('input', function ()
+{
+    if (this.files.length <= 0 || !this.files[0]) return;
+
+    JSZip.loadAsync(this.files[0], { createFolders: false })
+        .then(async (result) =>
+        {
+            let loadSuccessCount = 0;
+
+            for (const name in result.files)
+            {
+                let file = result.files[name];
+                if (file.dir) continue;
+
+                let fileFormatSplit = file.name.split('.');
+                let fileFormat = fileFormatSplit[fileFormatSplit.length - 1];
+                let newFile = new File(
+                    [ (await file.async('blob')) ],
+                    name,
+                    {
+                        type: '',
+                        lastModified: file.date
+                    }
+                );
+
+                newFile.format = fileFormat;
+
+                (await (new Promise(() =>
+                {
+                    throw new Error('Just make a promise, plz ignore me');
+                }))
+                .catch(async () =>
+                {
+                    let imgBitmap = await createImageBitmap(newFile);
+                    let texture = await Texture.from(imgBitmap);
+
+                    let textureName = /^([a-zA-Z]+)\.[a-zA-Z]+$/.exec(newFile.name)[1];
+                    textureName = textureName.replace(textureName[0], textureName[0].toLowerCase());
+
+                    if (textureName.toLowerCase() == 'judgeline' || textureName.toLowerCase() == 'pauseButton') return;
+                    if (!assets.textures[textureName]) return;
+
+                    Texture.addToCache(texture, textureName);
+                    assets.textures[textureName] = texture;
+
+                    loadSuccessCount++;
+                    doms.skinPackFileReadProgress.innerText = 'Load ' + newFile.name + ' successfully.';
+
+                    return;
+                })
+                .catch(async () =>
+                {
+                    let audio = await loadAudio(newFile);
+
+                    if (newFile.name.indexOf('Hitsound-') == 0)
+                    {
+                        let audioName = /^Hitsound\-([a-zA-Z]+)\.[a-zA-Z\d]+$/.exec(newFile.name)[1].toLowerCase();
+                        if (!assets.sounds[audioName]) return;
+
+                        assets.sounds[audioName] = audio;
+
+                        loadSuccessCount++;
+                        doms.skinPackFileReadProgress.innerText = 'Load ' + newFile.name + ' successfully.';
+                    }
+
+                    return;
+                })
+                .catch((e) =>
+                {
+                    /* No */
+                }));
+            }
+
+            if (!(assets.textures.clickRaw instanceof Array))
+            {
+                let _clickTextures = [];
+
+                for (let i = 0; i < Math.floor(assets.textures.clickRaw.height / assets.textures.clickRaw.width); i++) {
+                    let rectangle = new Rectangle(0, i * assets.textures.clickRaw.width, assets.textures.clickRaw.width, assets.textures.clickRaw.width);
+                    let texture = new Texture(assets.textures.clickRaw.baseTexture, rectangle);
+
+                    Texture.addToCache(texture, 'clickRaw' + (i + 0));
+
+                    texture.defaultAnchor.set(0.5);
+                    _clickTextures.push(texture);
+                }
+                
+                assets.textures.clickRaw = _clickTextures;
+            }
+
+            doms.skinPackFileReadProgress.innerText = 'Successfully load ' + loadSuccessCount + ' skin file(s).';
+        })
+        .catch((e) =>
+        {
+            doms.skinPackFileReadProgress.innerText = this.files[0].name + ' may not a vaild zip file.';
+            console.error(e);
+        }
+    );
+
+    function readDataURL(file)
+    {
+        return new Promise((res, rej) =>
+        {
+            let reader = new FileReader();
+
+            reader.onloadend = () =>
+            {
+                res(reader.result);
+            };
+
+            reader.onerror = (e) =>
+            {
+                rej(e);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function loadAudio(file)
+    {
+        return new Promise(async (res, rej) =>
+        {
+            let dataUrl = await readDataURL(file);
+            let audio = new Howl({
+                src: dataUrl,
+                format: file.format,
+                preload: true,
+                autoPlay: false,
+                loop: false,
+
+                onload: () =>
+                {
+                    res(audio);
+                },
+                onloaderror: (id, e) =>
+                {
+                    rej(id, e);
+                }
+            });
+
+            audio.load();
+        });
+    }
+});
+
 doms.file.chart.addEventListener('input', function () {
     currentFile.chart = files.charts[this.value];
 
@@ -702,6 +850,7 @@ window.addEventListener('load', async () =>
     doms.loadingStatus.innerText = 'All done!';
     doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
     doms.chartPackFile.disabled = false;
+    doms.skinPackFile.disabled = false;
 
     calcHeightPercent();
 
