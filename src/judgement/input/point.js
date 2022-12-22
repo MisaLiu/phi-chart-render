@@ -36,12 +36,12 @@ export default class InputPoint
 
         const moveSpeed = (this._deltaX * this._lastDeltaX + this._deltaY * this._lastDeltaY) / Math.sqrt(this._lastDeltaX ** 2 + this._lastDeltaY ** 2) / this._deltaTime;
 
-        if (!this.isFlickable && moveSpeed > 0.8)
+        if (!this.isFlickable && moveSpeed > 0.6)
         {
             this.isFlickable = true;
             this.isFlicked = false;
         }
-        else if (this.isFlickable && moveSpeed < 0.3)
+        else if (this.isFlickable && moveSpeed < 0.2)
         {
             this.isFlickable = false;
         }
