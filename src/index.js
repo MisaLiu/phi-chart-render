@@ -844,7 +844,9 @@ window.addEventListener('load', async () =>
         { name: 'ez', url: './assets/sounds/result/ez.ogg' },
         { name: 'hd', url: './assets/sounds/result/hd.ogg' },
         { name: 'in', url: './assets/sounds/result/in.ogg' },
-        { name: 'at', url: './assets/sounds/result/at.ogg' }
+        { name: 'at', url: './assets/sounds/result/at.ogg' },
+        { name: 'sp', url: './assets/sounds/result/sp.ogg' },
+        { name: 'spGlitch', url: './assets/sounds/result/sp_glitch.ogg' },
     ], { loop: true }));
 
     doms.loadingStatus.innerText = 'All done!';
@@ -1218,6 +1220,21 @@ function showGameResultPopup(game)
             {
                 assets.sounds.result.at.stop();
                 assets.sounds.result.at.play();
+                break;
+            }
+            case 'sp':
+            {
+                if (judge.score.levelPassed)
+                {
+                    assets.sounds.result.spGlitch.stop();
+                    assets.sounds.result.spGlitch.play();
+                }
+                else
+                {
+                    assets.sounds.result.sp.stop();
+                    assets.sounds.result.sp.play();
+                }
+                
                 break;
             }
             case 'in' :
