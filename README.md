@@ -60,12 +60,6 @@ You must have a Node.js enviorment to helping development.
 2. `npm install`
 3. `npm run dev`
 
-## Copyrights of the materials
-
-All of the materials are from [Ph1gr0s-Emulator](https://github.com/MisaWorkGroup/Ph1gr0s-Emulator).
-
-Any unauthorized use of these materials is __*NOT*__ allowed.
-
 ## Thanks
 
 * [pixijs](https://github.com/pixijs/pixijs)
@@ -97,3 +91,5 @@ Any unauthorized use of these materials is __*NOT*__ allowed.
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
+
+All assets used in this project are licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
