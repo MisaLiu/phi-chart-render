@@ -1,3 +1,5 @@
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';

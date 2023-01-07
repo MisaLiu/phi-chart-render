@@ -23,8 +23,12 @@
   "devDependencies": {
     "@sentry/browser": "^7.21.1",
     "@sentry/tracing": "^7.21.1",
+    "babel-loader": "^9.1.2",
+    "browserlist": "^1.0.1",
+    "core-js": "^3.27.1",
     "fontfaceobserver": "^2.3.0",
     "jszip": "^3.10.1",
+    "regenerator-runtime": "^0.13.11",
     "stackblur-canvas": "^2.5.0",
     "webpack": "^5.73.0",
     "webpack-cli": "^4.10.0",
@@ -33,5 +37,10 @@
   "dependencies": {
     "howler": "^2.2.3",
     "pixi.js-legacy": "^7.0.4"
-  }
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not dead",
+    "> 0.2%"
+  ]
 }
