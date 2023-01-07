@@ -9,7 +9,7 @@ export default class Judgeline
         this.id               = verify.number(params.id, -1, 0);
         this.texture          = params.texture ? params.texture : null;
         this.parentLine       = params.parentLine ? params.parentLine : null;
-        this.zIndex           = verify.number(params.zIndex, NaN, 1);
+        this.zIndex           = verify.number(params.zIndex, NaN);
         this.isCover          = verify.bool(params.isCover, true);
         this.useOfficialScale = false;
 

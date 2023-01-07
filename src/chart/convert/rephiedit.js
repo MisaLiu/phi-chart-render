@@ -82,7 +82,7 @@ export default function RePhiEditChartConverter(_chart)
             id         : judgelineIndex,
             texture    : _judgeline.Texture != 'line.png' ? _judgeline.Texture : null,
             parentLine : _judgeline.father >= 0 ? _judgeline.father : null,
-            zIndex     : _judgeline.zOrder,
+            zIndex     : _judgeline.zOrder != 0 ? _judgeline.zOrder : NaN,
             isCover    : _judgeline.isCover == 1
         });
 
