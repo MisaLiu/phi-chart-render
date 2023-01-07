@@ -81,7 +81,7 @@ export default function RePhiEditChartConverter(_chart)
         let judgeline = new Judgeline({
             id         : judgelineIndex,
             texture    : _judgeline.Texture != 'line.png' ? _judgeline.Texture : null,
-            parentLine : _judgeline.father >= 0 ? _judgeline.father : null,
+            parentLine : _judgeline.father >= 0 ? _judgeline.father : NaN,
             zIndex     : _judgeline.zOrder != 0 ? _judgeline.zOrder : NaN,
             isCover    : _judgeline.isCover == 1
         });
@@ -399,7 +399,7 @@ export default function RePhiEditChartConverter(_chart)
 
     chart.judgelines.forEach((judgeline, judgelineIndex, judgelines) =>
     {
-        if (judgeline.parentLine && judgeline.parentLine > 0)
+        if (!isNaN(judgeline.parentLine) && judgeline.parentLine >= 0)
         {
             let parentLineId = judgeline.parentLine;
             judgeline.parentLine = null;

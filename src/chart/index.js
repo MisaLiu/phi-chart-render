@@ -85,6 +85,26 @@ export default class Chart
 
         chart.readLineTextureInfo(_chartLineTexture);
 
+        chart.judgelines.sort((a, b) =>
+        {
+            if (a.parentLine && b.parentLine)
+            {
+                return a.parentLine.id - b.parentLine.id;
+            }
+            else if (a.parentLine)
+            {
+                return 1;
+            }
+            else if (b.parentLine)
+            {
+                return -1;
+            }
+            else
+            {
+                return a.id - b.id;
+            }
+        });
+
         // console.log(chart);
         return chart;
     }
