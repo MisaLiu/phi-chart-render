@@ -8,7 +8,7 @@ export default class Judgeline
     {
         this.id               = verify.number(params.id, -1, 0);
         this.texture          = params.texture ? params.texture : null;
-        this.parentLine       = params.parentLine ? params.parentLine : null;
+        this.parentLine       = params.parentLine || params.parentLine === 0 ? params.parentLine : null;
         this.zIndex           = verify.number(params.zIndex, NaN);
         this.isCover          = verify.bool(params.isCover, true);
         this.useOfficialScale = false;
@@ -379,11 +379,11 @@ export default class Judgeline
 
         if (this.parentLine)
         {
-            let oldPosX = this.x,
-                oldPosY = this.y;
-            
-            this.x = oldPosX * this.parentLine.cosr + oldPosY * this.parentLine.sinr + this.parentLine.x;
-            this.y = oldPosX * this.parentLine.sinr + oldPosY * this.parentLine.cosr + this.parentLine.y;
+            let newPosX = this.x * this.parentLine.cosr + this.y * this.parentLine.sinr + this.parentLine.x,
+                newPosY = this.y * this.parentLine.cosr - this.x * this.parentLine.sinr + this.parentLine.y;
+
+            this.x = newPosX;
+            this.y = newPosY;
         }
 
         this.sprite.position.x = (this.x + 0.5) * size.width;
