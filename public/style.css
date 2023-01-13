@@ -170,7 +170,7 @@ div.error-window pre * {
 .play-result .judge-icon {
     position: absolute;
     top: calc(304px * var(--height-percent));
-    left: 110%;
+    left: 120%;
     font-size: calc(204px * var(--height-percent));
 
     /* 以下内容皆为测试专用 */
