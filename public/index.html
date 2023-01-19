@@ -9,17 +9,10 @@
         <link rel="shortcut icon" href="./icons/favicon.ico" />
         <link rel="manifest" href="./manifest.webmanifest" />
         <link href="./style.css" rel="stylesheet" />
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9YT2TVFV"></script>
         <!--script src="./eruda.min.js"></script>
         <script>eruda.init();</script-->
         <script>
             const GITHUB_CURRENT_GIT_HASH = `{{CURRENT_HASH}}`;
-
-            // Init google analytics
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-PW9YT2TVFV');
 
             function setCookie(cname,cvalue,exdays)
             {
@@ -61,6 +54,21 @@
                 return null;
             }
 
+            async function unregistServiceWorker()
+            {
+                if (navigator.serviceWorker.getRegistrations)
+                {
+                    let sws = await navigator.serviceWorker.getRegistrations();
+                    if (sws.length > 1)
+                    {
+                        for (const sw of sws)
+                        {
+                            sw.unregister();
+                        }
+                    }
+                }
+            }
+
             if (getSearchString('debug') === 'true')
             {
                 let xhr = new XMLHttpRequest();
@@ -90,22 +98,22 @@
             // Init service worker
             if (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}' && 'serviceWorker' in navigator)
             {
-                (async () =>
+                if (navigator.userAgent.indexOf('like Mac OS X') > -1)
                 {
-                    if (navigator.serviceWorker.getRegistrations)
+                    if (getCookie('ios-unregist') != 'true')
                     {
-                        let sws = await navigator.serviceWorker.getRegistrations();
-                        if (sws.length > 1)
-                        {
-                            for (const sw of sws)
-                            {
-                                sw.unregister();
-                            }
-                        }
+                        unregistServiceWorker();
+                        setCookie('ios-unregist', 'true');
                     }
-
+                }
+                else if (getSearchString('unregistServiceWorker') == 'true')
+                {
+                    unregistServiceWorker();
+                }
+                else
+                {
                     navigator.serviceWorker.register('./sw.js');
-                })();
+                }
             }
         </script>
     </head>

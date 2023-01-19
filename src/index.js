@@ -877,6 +877,23 @@ window.addEventListener('load', async () =>
 
     doms.playResult.scoreBar.addEventListener('click', () => doms.playResult.accBar.classList.toggle('show'));
 
+    fetch('https://www.googletagmanager.com/gtag/js?id=G-PW9YT2TVFV')
+        .then(res => res.text())
+        .then(res =>
+        {
+            eval(res);
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = function() {dataLayer.push(arguments);};
+            gtag('js', new Date());
+            gtag('config', 'G-PW9YT2TVFV');
+        })
+        .catch(e =>
+        {
+            console.error('Failed to load Google Analytics');
+            console.error(e);
+        }
+    );
+
     function requestFile(url)
     {
         return new Promise((res, rej) =>
