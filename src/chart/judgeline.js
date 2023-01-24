@@ -379,8 +379,8 @@ export default class Judgeline
 
         if (this.parentLine)
         {
-            let newPosX = this.x * this.parentLine.cosr + this.y * this.parentLine.sinr + this.parentLine.x,
-                newPosY = this.y * this.parentLine.cosr - this.x * this.parentLine.sinr + this.parentLine.y;
+            let newPosX = (this.x * this.parentLine.cosr + this.y * this.parentLine.sinr) * 0.918554 + this.parentLine.x,
+                newPosY = (this.y * this.parentLine.cosr - this.x * this.parentLine.sinr) * 1.088662 + this.parentLine.y;
 
             this.x = newPosX;
             this.y = newPosY;
