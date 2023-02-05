@@ -454,8 +454,12 @@ function convertChartFormat(rawChart)
     {
 
     }
+    if (chart.META.RPEVersion <= 123)
+    {
+        
+    }
 
-    if (chart.META.RPEVersion > 113)
+    if (chart.META.RPEVersion > 123)
     {
         console.warn('Unsupported chart version: ' + chart.META.RPEVersion + ', some features may not supported');
     }

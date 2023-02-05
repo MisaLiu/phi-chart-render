@@ -28,6 +28,7 @@ This project is still working.
     * [x] Parent judgeline
     * [x] Easing start/end point
     * [x] judgeline z order *(Need test)*
+    * [x] Bezier event easing *(Need test)*
     * [ ] Event link group *(?)*
     * [ ] BPM factor *(?)*
     * [ ] ~~attachUI (wont support)~~

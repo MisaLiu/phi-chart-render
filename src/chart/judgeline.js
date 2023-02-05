@@ -86,6 +86,7 @@ export default class Judgeline
         for (const name in this.eventLayers[0])
         {
             if (name == 'speed' || !(this.eventLayers[0][name] instanceof Array)) continue;
+            if (this.eventLayers[0][name].length <= 0) continue;
             if (this.eventLayers[0][name][0].startTime <= 0) continue;
             this.eventLayers[0][name].unshift({
                 startTime : 1 - 100,
