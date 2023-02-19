@@ -829,10 +829,7 @@ window.addEventListener('load', async () =>
 
             try
             {
-                let res = await requestFile(resource.url);
-                let dataUrl = await readDataURL(res);
-                let audio = await decodeAudio(dataUrl, options);
-
+                let audio = await decodeAudio(resource.url, options);
 
                 if (!assets.sounds.result) assets.sounds.result = {};
                 assets.sounds.result[resource.name] = audio;
