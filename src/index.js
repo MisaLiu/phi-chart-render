@@ -1,10 +1,7 @@
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
 import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
 import { Texture, Rectangle, utils as PIXIutils } from 'pixi.js-legacy';
-import { Howl } from 'howler';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';
@@ -24,7 +21,7 @@ import { BrowserTracing } from '@sentry/tracing';
             beforeSend: (event, hint) => {
                 let err = hint.originalException;
 
-                doms.errorWindow.content.innerText = err.stack ? err.stack : err.message ? err.message : err;
+                doms.errorWindow.content.innerText = (err.stack ? err.stack : err.message ? err.message : err);
                 doms.errorWindow.window.style.display = 'block';
 
                 return event;
@@ -32,7 +29,6 @@ import { BrowserTracing } from '@sentry/tracing';
         });
     }
 })();
-
 
 const qs = (selector) => document.querySelector(selector);
 
@@ -301,16 +297,6 @@ doms.chartPackFile.addEventListener('input', async function ()
             })
             .catch(async () =>
             {
-                let audio = await loadAudio(file);
-
-                files.musics[file.name] = audio;
-                files.all[file.name] = audio;
-                doms.file.music.appendChild(createSelectOption(file));
-
-                return;
-            })
-            .catch(async () =>
-            {
                 let chartRaw = await readText(file);
                 let chart;
 
@@ -325,6 +311,16 @@ doms.chartPackFile.addEventListener('input', async function ()
                 files.charts[file.name] = chart;
                 files.all[file.name] = chart;
                 doms.file.chart.appendChild(createSelectOption(file));
+
+                return;
+            })
+            .catch(async () =>
+            {
+                let audio = await loadAudio(file, false, false);
+
+                files.musics[file.name] = audio;
+                files.all[file.name] = audio;
+                doms.file.music.appendChild(createSelectOption(file));
 
                 return;
             })
@@ -362,52 +358,6 @@ doms.chartPackFile.addEventListener('input', async function ()
             };
 
             reader.readAsText(file);
-        });
-    }
-
-    function readDataURL(file)
-    {
-        return new Promise((res, rej) =>
-        {
-            let reader = new FileReader();
-
-            reader.onloadend = () =>
-            {
-                res(reader.result);
-            };
-
-            reader.onerror = (e) =>
-            {
-                rej(e);
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function loadAudio(file)
-    {
-        return new Promise(async (res, rej) =>
-        {
-            let dataUrl = await readDataURL(file);
-            let audio = new Howl({
-                src: dataUrl,
-                format: file.format,
-                preload: true,
-                autoPlay: false,
-                loop: false,
-
-                onload: () =>
-                {
-                    res(audio);
-                },
-                onloaderror: (id, e) =>
-                {
-                    rej(id, e);
-                }
-            });
-
-            audio.load();
         });
     }
 
@@ -471,7 +421,7 @@ doms.skinPackFile.addEventListener('input', function ()
                 })
                 .catch(async () =>
                 {
-                    let audio = await loadAudio(newFile);
+                    let audio = await loadAudio(newFile, false, true);
 
                     if (newFile.name.indexOf('Hitsound-') == 0)
                     {
@@ -517,52 +467,6 @@ doms.skinPackFile.addEventListener('input', function ()
             console.error(e);
         }
     );
-
-    function readDataURL(file)
-    {
-        return new Promise((res, rej) =>
-        {
-            let reader = new FileReader();
-
-            reader.onloadend = () =>
-            {
-                res(reader.result);
-            };
-
-            reader.onerror = (e) =>
-            {
-                rej(e);
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function loadAudio(file)
-    {
-        return new Promise(async (res, rej) =>
-        {
-            let dataUrl = await readDataURL(file);
-            let audio = new Howl({
-                src: dataUrl,
-                format: file.format,
-                preload: true,
-                autoPlay: false,
-                loop: false,
-
-                onload: () =>
-                {
-                    res(audio);
-                },
-                onloaderror: (id, e) =>
-                {
-                    rej(id, e);
-                }
-            });
-
-            audio.load();
-        });
-    }
 });
 
 doms.file.chart.addEventListener('input', function () {
@@ -794,7 +698,7 @@ window.addEventListener('load', async () =>
         { name: 'pauseButton', url: './assets/pauseButton.png' }
     ]));
 
-    (await (async (resources = []) =>
+    (await (async (resources = [], options = {}) =>
     {
         for (const resource of resources)
         {
@@ -803,9 +707,7 @@ window.addEventListener('load', async () =>
             try
             {
                 let res = await requestFile(resource.url);
-                let dataUrl = await readDataURL(res);
-                let audio = await decodeAudio(dataUrl);
-
+                let audio = await loadAudio(res, false, options.noTimer);
 
                 if (!assets.sounds) assets.sounds = {};
                 assets.sounds[resource.name] = audio;
@@ -819,7 +721,7 @@ window.addEventListener('load', async () =>
         { name: 'tap', url: './assets/sounds/Hitsound-Tap.ogg' },
         { name: 'drag', url: './assets/sounds/Hitsound-Drag.ogg' },
         { name: 'flick', url: './assets/sounds/Hitsound-Flick.ogg' }
-    ]));
+    ], { noTimer: true }));
 
     (await (async (resources = [], options = {}) =>
     {
@@ -829,7 +731,8 @@ window.addEventListener('load', async () =>
 
             try
             {
-                let audio = await decodeAudio(resource.url, options);
+                let res = await requestFile(resource.url);
+                let audio = await loadAudio(res, options.loop, options.noTimer);
 
                 if (!assets.sounds.result) assets.sounds.result = {};
                 assets.sounds.result[resource.name] = audio;
@@ -846,7 +749,7 @@ window.addEventListener('load', async () =>
         { name: 'at', url: './assets/sounds/result/at.ogg' },
         { name: 'sp', url: './assets/sounds/result/sp.ogg' },
         { name: 'spGlitch', url: './assets/sounds/result/sp_glitch.ogg' },
-    ], { loop: true }));
+    ], { loop: true, noTimer: true }));
 
     doms.loadingStatus.innerText = 'All done!';
     doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
@@ -916,52 +819,38 @@ window.addEventListener('load', async () =>
             xhr.send();
         });
     }
-
-    function readDataURL(file)
-    {
-        return new Promise((res, rej) =>
-        {
-            let reader = new FileReader();
-
-            reader.onloadend = () =>
-            {
-                res(reader.result);
-            };
-
-            reader.onerror = (e) =>
-            {
-                rej(e);
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function decodeAudio(dataUrl, options = {})
-    {
-        return new Promise((res, rej) =>
-        {
-            let sound = new Howl({
-                src: dataUrl,
-                preload: true,
-                autoplay: false,
-                loop: false,
-                ...options,
-
-                onload: () =>
-                {
-                    res(sound);
-                },
-                onloaderror: (id, code) =>
-                {
-                    rej(id, code);
-                }
-            });
-
-            sound.load();
-        });
-    }
 });
+
+function readArrayBuffer(file)
+    {
+    return new Promise((res, rej) =>
+    {
+        let reader = new FileReader();
+
+        reader.onloadend = () =>
+        {
+            res(reader.result);
+        };
+
+        reader.onerror = (e) =>
+        {
+            rej(e);
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+function loadAudio(file, loop = false, noTimer = false)
+{
+    return new Promise(async (res, rej) =>
+    {
+        let arrayBuffer = await readArrayBuffer(file);
+        let audio = await PhiChartRender.WAudio.from(arrayBuffer, loop, noTimer);
+
+        res(audio);
+    });
+}
 
 function CsvReader(_text)
 {

@@ -13,11 +13,11 @@ function onKeyPressCallback(e)
     switch (keyCode)
     {
         case 37: {
-            skipTime = 2000;
+            skipTime = -2;
             break;
         }
         case 39: {
-            skipTime = -2000;
+            skipTime = 2;
             break;
         }
         default: {
@@ -29,11 +29,13 @@ function onKeyPressCallback(e)
     else if (isHoldCtrl) skipTime *= 2;
     else if (isHoldShift) skipTime *= 0.5;
 
+    /*
     this._audioTimer.pause();
     this._audioTimer.skip(skipTime);
+    */
 
     {
-        let currentTime = this._audioTimer.time;
+        let currentTime = this.chart.music.currentTime;
         let calcedNoteCount = 0;
 
         for (const note of this.chart.notes)
@@ -73,10 +75,14 @@ function onKeyPressCallback(e)
         }
     }
 
+    this.chart.music.seek(skipTime);
+
+    /*
     this.chart.music.once('play', () => { this._audioTimer.pause() });
     this.chart.music.pause();
     this.chart.music.seek(this._audioTimer.time);
     this.chart.music.play();
+    */
 }
 
 function pauseBtnClickCallback()

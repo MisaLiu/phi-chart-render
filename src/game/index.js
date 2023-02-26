@@ -1,9 +1,8 @@
 import * as verify from '@/verify';
 import Judgement from '@/judgement';
-import Timer from './timer';
 import * as TickerFunc from './ticker';
 import * as CallbackFunc from './callback';
-import { Application, Container, Texture, Sprite, Graphics, Text, Rectangle, settings as PIXISettings, Ticker } from 'pixi.js-legacy';
+import { Application, Container, Texture, Sprite, Graphics, Text, Rectangle, settings as PIXISettings } from 'pixi.js-legacy';
 
 PIXISettings.RENDER_OPTIONS.hello = true;
 
@@ -141,7 +140,7 @@ export default class Game
         this._watermarkText = verify.text(params.watermark, 'github/MisaLiu/phi-chart-render');
 
         this._musicId = null;
-        this._audioTimer = new Timer(this._settings.speed, (this.chart.offset + this._settings.offset));
+        // this._audioTimer = new Timer(this._settings.speed, (this.chart.offset + this._settings.offset));
         this._audioOffset = 0;
         this._animateStatus = NaN;
         this._gameStartTime = NaN;
@@ -279,21 +278,19 @@ export default class Game
         this.render.stage.sortChildren();
 
         // 预播放 hitsound，也许能减轻打击未打击过的某类 note 时的卡顿问题？
+        /*
         for (const name in this.judgement.sounds)
         {
             this.judgement.sounds[name].load();
-            /*
-            this.judgement.sounds[name].volume(0);
-            this.judgement.sounds[name].play();
-            */
         }
+        */
     }
 
     start()
     {
         if (!this.render) return;
         if (!this.chart.music) throw new Error('You must have a music to play');
-        if (this._musicId) throw new Error('You have already started');
+        // if (this._musicId) throw new Error('You have already started');
 
         this.resize();
 
@@ -305,9 +302,13 @@ export default class Game
             }, 500);
         }
 
-        this.chart.music.rate(this._settings.speed);
+        this.chart.music.speed = this._settings.speed;
+        this.chart.music.onend = this._gameEndCallback;
+
+        /*
         this.chart.music.once('play', () => { this._audioTimer.start() });
         this.chart.music.on('end', this._gameEndCallback);
+        */
 
         this._animateStatus = 0;
         this._gameStartTime = Date.now();
@@ -329,12 +330,12 @@ export default class Game
 
             note.sprite.alpha = 0;
             if (note.debugSprite) note.debugSprite.visible = false;
-            if (note.hitsound) note.hitsound.volume(this.judgement._hitsoundVolume);
+            if (note.hitsound) note.hitsound.volume = this.judgement._hitsoundVolume;
         };
 
         for (const name in this.judgement.sounds)
         {
-            this.judgement.sounds[name].volume(this.judgement._hitsoundVolume);
+            this.judgement.sounds[name].volume = this.judgement._hitsoundVolume;
         }
     }
 
@@ -343,30 +344,34 @@ export default class Game
         this._isPaused = !this._isPaused;
         this.judgement.input._isPaused = this._isPaused;
 
-        if (!this._musicId) return;
+        // if (!this._musicId) return;
 
         if (this._isPaused)
         {
             this.chart.music.pause();
             this._runCallback('pause');
+            /*
             this._audioTimer.pause();
 
             this.chart.music.once('play', () => { this._audioTimer.pause() });
+            */
         }
         else
         {
-            this.chart.music.play(this._musicId);
+            this.chart.music.play();
         }
     }
 
     restart()
     {
-        if (!this._musicId) return;
+        // if (!this._musicId) return;
 
         this.render.ticker.remove(this._calcTick);
         this.chart.music.stop();
+        /*
         this.chart.music.off('play');
         this._audioTimer.reset();
+        */
         this._musicId = null;
 
         this.chart.reset();
@@ -382,7 +387,9 @@ export default class Game
         this._gameStartTime = Date.now();
         this._gameEndTime   = NaN;
 
+        /*
         this.chart.music.once('play', () => { this._audioTimer.start() });
+        */
 
         this.render.ticker.add(this._calcTick);
         if (this._settings.showAPStatus) this.sprites.fakeJudgeline.tint = 0xFFECA0;
@@ -411,9 +418,11 @@ export default class Game
 
         this.render.ticker.remove(this._calcTick);
         this.chart.music.stop();
+        /*
         this.chart.music.off('play');
         this.chart.music.off('end');
         this._audioTimer.reset();
+        */
 
         if (this.render.fpsText) clearInterval(this.render.fpsCounter);
 

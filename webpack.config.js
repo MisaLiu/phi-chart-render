@@ -38,5 +38,14 @@ module.exports = {
         compress: true,
         port: 9000,
         open: true
+    },
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: [{ loader: 'babel-loader' }]
+            }
+        ]
     }
 };

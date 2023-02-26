@@ -45,11 +45,11 @@ function calcTick()
         }
         case 1:
         {
-            this.chart.calcTime(this._audioTimer.time);
+            this.chart.calcTime(this.chart.music.currentTime - (this.chart.offset + this._settings.offset));
             this.judgement._holdBetween = this.chart.holdBetween;
             if (!this._isPaused) this.judgement.calcTick();
 
-            this.sprites.progressBar.scale.x = (this._audioTimer.time / this.chart.music._duration) * this.sprites.progressBar.baseScaleX;
+            this.sprites.progressBar.scale.x = this.chart.music.progress * this.sprites.progressBar.baseScaleX;
             break;
         }
         case 2:
@@ -99,7 +99,7 @@ function calcGameAnimateTick(isStart = true)
 
             setTimeout(async () =>
             {
-                this._musicId = this.chart.music.play();
+                /* this._musicId = */this.chart.music.play();
                 // this._audioTimer.start();
 
                 for (const judgeline of this.chart.judgelines)
