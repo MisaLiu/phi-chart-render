@@ -1,6 +1,6 @@
 import * as verify from '@/verify';
 import utils from './convert/utils';
-import { Sprite, Container, Text, Graphics } from 'pixi.js-legacy';
+import { Sprite, Container, Text, Graphics } from 'pixi.js';
 
 export default class Judgeline
 {

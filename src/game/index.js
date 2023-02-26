@@ -2,7 +2,7 @@ import * as verify from '@/verify';
 import Judgement from '@/judgement';
 import * as TickerFunc from './ticker';
 import * as CallbackFunc from './callback';
-import { Application, Container, Texture, Sprite, Graphics, Text, Rectangle, settings as PIXISettings } from 'pixi.js-legacy';
+import { Application, Container, Texture, Sprite, Graphics, Text, Rectangle, settings as PIXISettings } from 'pixi.js';
 
 PIXISettings.RENDER_OPTIONS.hello = true;
 

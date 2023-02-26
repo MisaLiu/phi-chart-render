@@ -1,7 +1,7 @@
 import { number as verifyNum } from '@/verify';
 import * as Convert from './convert';
 import utils from './convert/utils';
-import { Sprite, Graphics, Text } from 'pixi.js-legacy';
+import { Sprite, Graphics, Text } from 'pixi.js';
 
 export default class Chart
 {

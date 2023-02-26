@@ -3,7 +3,7 @@ import Input from './input';
 import Score from './score';
 import InputPoint from './input/point';
 import JudgePoint from './point';
-import { Container, AnimatedSprite, Texture, Sprite  } from 'pixi.js-legacy';
+import { Container, AnimatedSprite, Texture, Sprite  } from 'pixi.js';
 
 const particleCountPerClickAnim = 4;
 

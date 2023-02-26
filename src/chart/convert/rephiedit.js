@@ -4,7 +4,7 @@ import Judgeline from '../judgeline';
 import EventLayer from '../eventlayer';
 import Note from '../note';
 import utils from './utils';
-import { utils as PIXIutils } from 'pixi.js-legacy';
+import { utils as PIXIutils } from 'pixi.js';
 
 const calcBetweenTime = 0.125;
 const Easing = [

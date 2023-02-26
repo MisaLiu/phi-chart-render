@@ -98,6 +98,7 @@
             // Init service worker
             if (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}' && 'serviceWorker' in navigator)
             {
+                /*
                 if (navigator.userAgent.indexOf('like Mac OS X') > -1)
                 {
                     if (getCookie('ios-unregist') != 'true')
@@ -106,7 +107,8 @@
                         setCookie('ios-unregist', 'true');
                     }
                 }
-                else if (getSearchString('unregistServiceWorker') == 'true')
+                else */
+                if (getSearchString('unregistServiceWorker') == 'true')
                 {
                     unregistServiceWorker();
                 }
@@ -120,7 +122,8 @@
     <body>
         <div class="file-select">
             <div>
-                <b>Hey Apple, Fuck You.</b>
+                <b>For iOS users:</b><br />
+                Please use Quark Browser for better experience (not ad) .
             </div>
             <hr />
             <div>
@@ -157,7 +160,7 @@
             <label><input type="checkbox" id="settings-challenge-mode" />Challenge Mode</label><br>
             <label><input type="checkbox" id="settings-autoplay" />AutoPlay</label><br>
             <label>
-                <input type="checkbox" id="settings-force-canvas" />Force canvas renderer
+                <input type="checkbox" id="settings-force-canvas" disabled />Force canvas renderer
                 <div style="margin-left:20px"><i>(may get better performance on some devices/browsers,<br>disabled if your device/browser doesn't support WebGL)</i></div>
             </label>
             <label><input type="checkbox" id="settings-anti-alias" checked />Anti-alias</label><br>
