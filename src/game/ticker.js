@@ -127,7 +127,7 @@ function calcGameAnimateTick(isStart = true)
             this._isPaused = true;
             this._isEnded = true;
             this._runCallback('end');
-            this._audioTimer.reset();
+            // this._audioTimer.reset();
         }
     }
 }

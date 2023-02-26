@@ -1,7 +1,7 @@
 import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
-import { Texture, Rectangle, utils as PIXIutils } from 'pixi.js-legacy';
+import { Texture, Rectangle, utils as PIXIutils } from 'pixi.js';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';

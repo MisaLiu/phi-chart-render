@@ -1,4 +1,4 @@
-import { Text, Container } from 'pixi.js-legacy';
+import { Text, Container } from 'pixi.js';
 
 export default class Score
 {

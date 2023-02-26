@@ -1,6 +1,6 @@
 import ListenerCallback from './callback';
 import InputPoint from './point';
-import { Graphics } from 'pixi.js-legacy';
+import { Graphics } from 'pixi.js';
 
 export default class Input
 {
