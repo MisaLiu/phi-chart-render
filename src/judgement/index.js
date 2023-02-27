@@ -3,7 +3,7 @@ import Input from './input';
 import Score from './score';
 import InputPoint from './input/point';
 import JudgePoint from './point';
-import { Container, AnimatedSprite, Texture, Sprite  } from 'pixi.js';
+import { ParticleContainer, AnimatedSprite, Texture, Sprite  } from 'pixi.js';
 
 const particleCountPerClickAnim = 4;
 
@@ -84,7 +84,12 @@ export default class Judgement
 
     createSprites(showInputPoint = true)
     {
-        this.clickParticleContainer = new Container();
+        this.clickParticleContainer = new ParticleContainer(1500, {
+            vertices: true,
+            position: true,
+            scale: true,
+            tint: true
+        });
         this.clickParticleContainer.zIndex = 99999;
         this.stage.addChild(this.clickParticleContainer);
 

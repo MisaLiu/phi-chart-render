@@ -99,8 +99,7 @@ function calcGameAnimateTick(isStart = true)
 
             setTimeout(async () =>
             {
-                /* this._musicId = */this.chart.music.play();
-                // this._audioTimer.start();
+                this.chart.music.play();
 
                 for (const judgeline of this.chart.judgelines)
                 {
@@ -127,7 +126,6 @@ function calcGameAnimateTick(isStart = true)
             this._isPaused = true;
             this._isEnded = true;
             this._runCallback('end');
-            // this._audioTimer.reset();
         }
     }
 }

@@ -126,11 +126,6 @@ export default class Note
         if (this.hitsound)
         {
             this.hitsound = zipFiles[this.hitsound];
-            this.hitsound.load();
-            /*
-            this.hitsound.volume(0);
-            this.hitsound.play();
-            */
         }
 
         // For debug propose
