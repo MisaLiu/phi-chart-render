@@ -8,7 +8,7 @@ import { BrowserTracing } from '@sentry/tracing';
 
 (() =>
 {
-    if (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}')
+    if (process.env.NODE_ENV === 'production')
     {
         // Init sentry
         Sentry.init({
@@ -16,12 +16,12 @@ import { BrowserTracing } from '@sentry/tracing';
             integrations: [ new BrowserTracing() ],
             tracesSampleRate: 1.0,
             maxBreadcrumbs: 50,
-            debug: (GITHUB_CURRENT_GIT_HASH == '{{' + 'CURRENT_HASH' + '}}'),
-            release: (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}'),
+            debug: (process.env.NODE_ENV === 'development'),
+            release: (process.env.NODE_ENV === 'production'),
             beforeSend: (event, hint) => {
                 let err = hint.originalException;
 
-                doms.errorWindow.content.innerText = (err.stack ? err.stack : err.message ? err.message : err);
+                doms.errorWindow.content.innerText = (err.stack ? err.stack : err.message ? err.message : JSON.stringify(err, null, 4));
                 doms.errorWindow.window.style.display = 'block';
 
                 return event;
@@ -594,7 +594,7 @@ doms.startBtn.addEventListener('click', async () => {
             autoPlay: doms.settings.autoPlay.checked,
             debug : doms.settings.debug.checked
         },
-        watermark: 'github/MisaLiu/phi-chart-render ' + GITHUB_CURRENT_GIT_HASH
+        watermark: 'github/MisaLiu/phi-chart-render ' + GIT_VERSION + (process.env.NODE_ENV === 'development' ? ' [Develop Mode]' : '')
     });
 
     document.body.appendChild(_game.render.view);
@@ -777,22 +777,25 @@ window.addEventListener('load', async () =>
 
     doms.playResult.scoreBar.addEventListener('click', () => doms.playResult.accBar.classList.toggle('show'));
 
-    fetch('https://www.googletagmanager.com/gtag/js?id=G-PW9YT2TVFV')
-        .then(res => res.text())
-        .then(res =>
-        {
-            eval(res);
-            window.dataLayer = window.dataLayer || [];
-            window.gtag = function() {dataLayer.push(arguments);};
-            gtag('js', new Date());
-            gtag('config', 'G-PW9YT2TVFV');
-        })
-        .catch(e =>
-        {
-            console.error('Failed to load Google Analytics');
-            console.error(e);
-        }
-    );
+    if (process.env.NODE_ENV === 'production')
+    {
+        fetch('https://www.googletagmanager.com/gtag/js?id=G-PW9YT2TVFV')
+            .then(res => res.text())
+            .then(res =>
+            {
+                eval(res);
+                window.dataLayer = window.dataLayer || [];
+                window.gtag = function() {dataLayer.push(arguments);};
+                gtag('js', new Date());
+                gtag('config', 'G-PW9YT2TVFV');
+            })
+            .catch(e =>
+            {
+                console.error('Failed to load Google Analytics');
+                console.error(e);
+            }
+        );
+    }
 
     function requestFile(url)
     {

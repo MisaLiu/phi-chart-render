@@ -169,7 +169,7 @@
             <hr />
             <button id="start" disabled>Start</button>
             <hr />
-            Current git hash: {{CURRENT_HASH}}<br>
+            Current version: <%= GIT_VERSION %><br>
             GitHub homepage: <a href="https://github.com/MisaLiu/phi-chart-render" target="_blank">https://github.com/MisaLiu/phi-chart-render</a><br>
             Report bugs <a href="https://github.com/MisaLiu/phi-chart-render/issues/new/choose" target="_blank">Here</a>
             <hr />
@@ -248,6 +248,5 @@
             <pre><code class="content">Test Text Not A Real Error</code></pre>
             <div>The infomation about this error will upload to <a href="https://sentry.io" target="_blank">Sentry.io</a> for analyze and debug.</div>
         </div>
-        <script src="./script.js?hash={{CURRENT_HASH}}"></script>
     </body>
 </html>

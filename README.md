@@ -57,7 +57,7 @@ This project is still working.
 
 You must have a Node.js enviorment to helping development.
 
-1. Clone this repo.
+1. `git clone https://github.com/MisaLiu/phi-chart-render`
 2. `npm install`
 3. `npm run dev`
 
