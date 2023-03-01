@@ -1,6 +1,6 @@
 import { number as verifyNum } from '@/verify';
 import * as Convert from './convert';
-import utils from './convert/utils';
+import md5Encrypt from 'md5';
 import { Sprite, Graphics, Text } from 'pixi.js';
 
 export default class Chart
@@ -21,7 +21,8 @@ export default class Chart
             artist    : params.artist,
             author    : params.author,
             bgAuthor  : params.bgAuthor,
-            difficult : params.difficult
+            difficult : params.difficult,
+            md5       : params.md5
         };
 
         this.sprites = {};
@@ -33,15 +34,22 @@ export default class Chart
     {
         let chart;
         let chartInfo = _chartInfo;
+        let chartMD5;
 
         if (typeof rawChart == 'object')
         {
             if (!isNaN(Number(rawChart.formatVersion)))
             {
                 chart = Convert.Official(rawChart);
+                chartMD5 = null;
             }
             else if (rawChart.META && !isNaN(Number(rawChart.META.RPEVersion)))
             {
+                let chartWithoutInfo = { ...rawChart };
+                delete chartWithoutInfo.META;
+                delete chartWithoutInfo.judgeLineGroup;
+                chartMD5 = md5Encrypt(JSON.stringify(chartWithoutInfo));
+
                 chart = Convert.RePhiEdit(rawChart);
                 chartInfo = chart.info;
             }
@@ -49,6 +57,7 @@ export default class Chart
         else if (typeof rawChart == 'string')
         {
             chart = Convert.PhiEdit(rawChart);
+            chartMD5 = md5Encrypt(rawChart);
         }
 
         if (!chart) throw new Error('Unsupported chart format');
@@ -58,7 +67,8 @@ export default class Chart
             artist    : chartInfo.artist,
             author    : chartInfo.author,
             bgAuthor  : chartInfo.bgAuthor,
-            difficult : chartInfo.difficult
+            difficult : chartInfo.difficult,
+            md5       : chartMD5
         };
 
         chart.judgelines.forEach((judgeline) =>

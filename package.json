@@ -39,6 +39,7 @@
     "webpack-dev-server": "^4.11.1"
   },
   "dependencies": {
+    "md5": "^2.3.0",
     "oggmented": "^1.0.1",
     "pixi.js": "^7.1.3"
   },
