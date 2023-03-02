@@ -138,6 +138,7 @@
                     <div data-tab-id="visual">Visual</div>
                     <div data-tab-id="sound">Sound</div>
                     <div data-tab-id="other">Other</div>
+                    <div data-tab-id="phizone">PhiZone</div>
                 </div>
                 <div class="content">
                     <div id="tab-file">
@@ -178,6 +179,12 @@
                         <label><input type="checkbox" id="settings-anti-alias" checked />Anti-alias</label><br>
                         <label><input type="checkbox" id="settings-low-resolution" />Low resolution mode</label><br>
                         <label><input type="checkbox" id="settings-debug" />Debug</label><br>
+                    </div>
+                    <div id="tab-phizone">
+                        <label>Paste chart link/ID from <a href="https://www.phi.zone/" target="_href">PhiZone</a> here: <input id="phizone-chart-link" /></label>
+                        <button id="phizone-download-chart">Download</button>
+                        <hr />
+                        <div class="loading" id="phizone-download-progress">No download task</div>
                     </div>
                 </div>
             </div>

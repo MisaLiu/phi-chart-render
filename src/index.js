@@ -5,6 +5,7 @@ import { Texture, Rectangle, utils as PIXIutils } from 'pixi.js';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';
+import './phizone';
 
 (() =>
 {
@@ -196,177 +197,11 @@ window.assets = assets;
 window.currentFile = currentFile;
 window.fullscreen = fullscreen;
 
-doms.chartPackFile.addEventListener('input', async function ()
+doms.chartPackFile.addEventListener('input', function ()
 {
     if (this.files.length <= 0) return;
-
-    let fileList = [ ...this.files ];
-
-    for (let fileIndex = 0; fileIndex < fileList.length; fileIndex++)
-    {
-        if (!fileList[fileIndex]) continue;
-
-        let file = fileList[fileIndex];
-        let fileFormatSplit = file.name.split('.');
-        let fileFormat = fileFormatSplit[fileFormatSplit.length - 1];
-
-        file.format = fileFormat;
-
-        doms.chartPackFileReadProgress.innerText = 'Loading files: ' + file.name + ' ...(' + (fileIndex + 1) + '/' + fileList.length + ')';
-
-        if (file.name === 'info.csv')
-        {
-            try {
-                let rawText = await readText(file);
-                let infos = CsvReader(rawText);
-
-                files.infos.push(...infos);
-                files.all[file.name] = infos;
-
-            } catch (e) {
-                
-            }
-        }
-        else if (file.name === 'line.csv')
-        {
-            try {
-                let rawText = await readText(file);
-                let lines = CsvReader(rawText);
-
-                files.lines.push(...lines);
-                files.all[file.name] = lines;
-
-            } catch (e) {
-                
-            }
-        }
-        else if (file.name === 'Settings.txt' || file.name === 'info.txt')
-        {
-            try {
-                let rawText = await readText(file);
-                let info = SettingsReader(rawText);
-
-                files.infos.push(info);
-                files.all[file.name] = info;
-
-            } catch (e) {
-                
-            }
-        }
-        else
-        {
-            (await (new Promise(() =>
-            {
-                throw new Error('Just make a promise, plz ignore me');
-            }))
-            .catch(async () =>
-            {
-                let zipFiles = await JSZip.loadAsync(file, { createFolders: false });
-
-                for (const name in zipFiles.files)
-                {
-                    if (zipFiles.files[name].dir) continue;
-
-                    let zipFile = zipFiles.files[name];
-                    let newFile = new File(
-                        [ (await zipFile.async('blob')) ],
-                        name,
-                        {
-                            type: '',
-                            lastModified: zipFile.date
-                        }
-                    );
-
-                    fileList.push(newFile);
-                }
-
-                return;
-            })
-            .catch(async () =>
-            {
-                let imgBitmap = await createImageBitmap(file);
-                let texture = await Texture.from(imgBitmap);
-
-                Texture.addToCache(texture, file.name);
-
-                files.images[file.name] = texture;
-                files.all[file.name] = texture;
-                doms.file.bg.appendChild(createSelectOption(file));
-
-                return;
-            })
-            .catch(async () =>
-            {
-                let chartRaw = await readText(file);
-                let chart;
-
-                try {
-                    chart = JSON.parse(chartRaw);
-                } catch (e) {
-                    chart = chartRaw;
-                }
-
-                chart = PhiChartRender.Chart.from(chart);
-
-                files.charts[file.name] = chart;
-                files.all[file.name] = chart;
-                doms.file.chart.appendChild(createSelectOption(file));
-
-                return;
-            })
-            .catch(async () =>
-            {
-                let audio = await loadAudio(file, false, false);
-
-                files.musics[file.name] = audio;
-                files.all[file.name] = audio;
-                doms.file.music.appendChild(createSelectOption(file));
-
-                return;
-            })
-            .catch((e) =>
-            {
-                console.error(e);
-                console.error('Unsupported file: ' + file.name);
-                return;
-            }));
-        }
-    }
-
-    if (doms.file.chart.childNodes.length >= 1 && doms.file.music.childNodes.length >= 1)
-    {
-        doms.file.chart.dispatchEvent(new Event('input'));
-        doms.startBtn.disabled = false;
-    }
-
-    doms.chartPackFileReadProgress.innerText = 'All done!';
-
-    function readText(file)
-    {
-        return new Promise((res, rej) =>
-        {
-            let reader = new FileReader();
-
-            reader.onloadend = () =>
-            {
-                res(reader.result);
-            };
-
-            reader.onerror = (e) =>
-            {
-                rej(e);
-            };
-
-            reader.readAsText(file);
-        });
-    }
-
-    function createSelectOption(file)
-    {
-        let option = document.createElement('option');
-        option.innerText = option.value = file.name;
-        return option;
-    }
+    console.log(this.files);
+    loadChartFiles(this.files);
 });
 
 doms.skinPackFile.addEventListener('input', function ()
@@ -1205,3 +1040,176 @@ function switchTab(e)
     targetTab.classList.add('active');
     document.querySelector('div.tab div.content > *#tab-' + targetTabContent).style.display = 'block';
 }
+
+async function loadChartFiles(_files)
+{
+    let fileList = [ ..._files ];
+
+    for (let fileIndex = 0; fileIndex < fileList.length; fileIndex++)
+    {
+        if (!fileList[fileIndex]) continue;
+
+        let file = fileList[fileIndex];
+        let fileFormatSplit = file.name.split('.');
+        let fileFormat = fileFormatSplit[fileFormatSplit.length - 1];
+
+        file.format = fileFormat;
+
+        doms.chartPackFileReadProgress.innerText = 'Loading files: ' + file.name + ' ...(' + (fileIndex + 1) + '/' + fileList.length + ')';
+
+        if (file.name === 'info.csv')
+        {
+            try {
+                let rawText = await readText(file);
+                let infos = CsvReader(rawText);
+
+                files.infos.push(...infos);
+                files.all[file.name] = infos;
+
+            } catch (e) {
+                
+            }
+        }
+        else if (file.name === 'line.csv')
+        {
+            try {
+                let rawText = await readText(file);
+                let lines = CsvReader(rawText);
+
+                files.lines.push(...lines);
+                files.all[file.name] = lines;
+
+            } catch (e) {
+                
+            }
+        }
+        else if (file.name === 'Settings.txt' || file.name === 'info.txt')
+        {
+            try {
+                let rawText = await readText(file);
+                let info = SettingsReader(rawText);
+
+                files.infos.push(info);
+                files.all[file.name] = info;
+
+            } catch (e) {
+                
+            }
+        }
+        else
+        {
+            (await (new Promise(() =>
+            {
+                throw new Error('Just make a promise, plz ignore me');
+            }))
+            .catch(async () =>
+            {
+                let zipFiles = await JSZip.loadAsync(file, { createFolders: false });
+
+                for (const name in zipFiles.files)
+                {
+                    if (zipFiles.files[name].dir) continue;
+
+                    let zipFile = zipFiles.files[name];
+                    let newFile = new File(
+                        [ (await zipFile.async('blob')) ],
+                        name,
+                        {
+                            type: '',
+                            lastModified: zipFile.date
+                        }
+                    );
+
+                    fileList.push(newFile);
+                }
+
+                return;
+            })
+            .catch(async () =>
+            {
+                let imgBitmap = await createImageBitmap(file);
+                let texture = await Texture.from(imgBitmap);
+
+                Texture.addToCache(texture, file.name);
+
+                files.images[file.name] = texture;
+                files.all[file.name] = texture;
+                doms.file.bg.appendChild(createSelectOption(file));
+
+                return;
+            })
+            .catch(async () =>
+            {
+                let chartRaw = await readText(file);
+                let chart;
+
+                try {
+                    chart = JSON.parse(chartRaw);
+                } catch (e) {
+                    chart = chartRaw;
+                }
+
+                chart = PhiChartRender.Chart.from(chart);
+
+                files.charts[file.name] = chart;
+                files.all[file.name] = chart;
+                doms.file.chart.appendChild(createSelectOption(file));
+
+                return;
+            })
+            .catch(async () =>
+            {
+                let audio = await loadAudio(file, false, false);
+
+                files.musics[file.name] = audio;
+                files.all[file.name] = audio;
+                doms.file.music.appendChild(createSelectOption(file));
+
+                return;
+            })
+            .catch((e) =>
+            {
+                console.error(e);
+                console.error('Unsupported file: ' + file.name);
+                return;
+            }));
+        }
+    }
+
+    if (doms.file.chart.childNodes.length >= 1 && doms.file.music.childNodes.length >= 1)
+    {
+        doms.file.chart.dispatchEvent(new Event('input'));
+        doms.startBtn.disabled = false;
+    }
+
+    doms.chartPackFileReadProgress.innerText = 'All done!';
+
+    function readText(file)
+    {
+        return new Promise((res, rej) =>
+        {
+            let reader = new FileReader();
+
+            reader.onloadend = () =>
+            {
+                res(reader.result);
+            };
+
+            reader.onerror = (e) =>
+            {
+                rej(e);
+            };
+
+            reader.readAsText(file);
+        });
+    }
+
+    function createSelectOption(file)
+    {
+        let option = document.createElement('option');
+        option.innerText = option.value = file.name;
+        return option;
+    }
+}
+
+export { loadChartFiles };
