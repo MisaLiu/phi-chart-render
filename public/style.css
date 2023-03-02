@@ -481,6 +481,7 @@ div.debug-value {
     .tab .bar > * {
         background-color: #4a4a4a;
         border: 1px solid #ebebeb;
+        border-right: unset;
     }
     .tab .bar > *.active {
         border-bottom: 1px solid #202124;
