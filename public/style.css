@@ -24,6 +24,55 @@ div.file-select {
     z-index: 10;
 }
 
+.tab .bar {
+    display: flex;
+    position: relative;
+    z-index: 1;
+    word-wrap: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+.tab .bar > * {
+    padding: 2px 8px;
+    background-color: #eee;
+    border: 1px solid #666;
+    border-right: unset;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+}
+.tab .bar > *:first-child {
+    border-radius: 4px 0 0 0;
+}
+.tab .bar > *:last-child {
+    border-right: 1px solid #666;
+    border-radius: 0 4px 0 0;
+}
+.tab .bar > *.active {
+    background-color: transparent;
+    border-bottom: 1px solid #FFF;
+}
+
+.tab .content {
+    position: relative;
+    top: -1px;
+    padding: 4px 8px;
+    border: 1px solid #666;
+    border-radius: 0 0 4px 4px;
+    box-sizing: border-box;
+}
+.tab .content > * {
+    display: none;
+}
+.tab .content > *:first-child {
+    display: block;
+}
+
 button#fullscreen {
     position: absolute;
     top: 0;
@@ -420,4 +469,24 @@ div.debug-value {
     top: 0;
     right: 0;
     color: white;
+}
+
+
+@media screen and (prefers-color-scheme: dark) {
+    html, body, div.file-select {
+        background-color: #202124;
+        color: #d6d6d6;
+    }
+
+    .tab .bar > * {
+        background-color: #4a4a4a;
+        border: 1px solid #ebebeb;
+    }
+    .tab .bar > *.active {
+        border-bottom: 1px solid #202124;
+    }
+
+    .tab .content, div.file-select {
+        border: 1px solid #ebebeb;
+    }
 }

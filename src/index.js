@@ -777,6 +777,23 @@ window.addEventListener('load', async () =>
 
     doms.playResult.scoreBar.addEventListener('click', () => doms.playResult.accBar.classList.toggle('show'));
 
+    {
+        let listTabs = document.querySelectorAll('div.tab div.bar > *');
+        let listTabContents = document.querySelectorAll('div.tab div.content > *[id^="tab-"]');
+
+        for (const tab of listTabs)
+        {
+            tab.addEventListener('click', switchTab);
+        }
+
+        for (let i = 0; i < listTabContents.length; i++)
+        {
+            let content = listTabContents[i];
+            if (i === 0) content.style.display = 'block';
+            else content.style.display = 'none';
+        }
+    }
+
     if (process.env.NODE_ENV === 'production')
     {
         fetch('https://www.googletagmanager.com/gtag/js?id=G-PW9YT2TVFV')
@@ -1166,4 +1183,25 @@ function showGameResultPopup(game)
         }
         return result;
     }
+}
+
+function switchTab(e)
+{
+    let targetTab = e.target;
+    let targetTabContent = targetTab.dataset.tabId;
+
+    if (!document.querySelector('div.tab div.content > *#tab-' + targetTabContent)) return;
+
+    for (const tab of document.querySelectorAll('div.tab div.bar > *'))
+    {
+        tab.classList.remove('active');
+    }
+    
+    for (const content of document.querySelectorAll('div.tab div.content > *[id^="tab-"]'))
+    {
+        content.style.display = 'none';
+    }
+
+    targetTab.classList.add('active');
+    document.querySelector('div.tab div.content > *#tab-' + targetTabContent).style.display = 'block';
 }
