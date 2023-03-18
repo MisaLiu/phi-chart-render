@@ -700,10 +700,13 @@ function loadAudio(file, loop = false, noTimer = false)
 {
     return new Promise(async (res, rej) =>
     {
-        let arrayBuffer = await readArrayBuffer(file);
-        let audio = await PhiChartRender.WAudio.from(arrayBuffer, loop, noTimer);
-
-        res(audio);
+        try {
+            let arrayBuffer = await readArrayBuffer(file);
+            let audio = await PhiChartRender.WAudio.from(arrayBuffer, loop, noTimer);
+            res(audio);
+        } catch (e) {
+            rej(e);
+        }
     });
 }
 
@@ -1127,19 +1130,6 @@ async function loadChartFiles(_files)
             })
             .catch(async () =>
             {
-                let imgBitmap = await createImageBitmap(file);
-                let texture = await Texture.from(imgBitmap);
-
-                Texture.addToCache(texture, file.name);
-
-                files.images[file.name] = texture;
-                files.all[file.name] = texture;
-                doms.file.bg.appendChild(createSelectOption(file));
-
-                return;
-            })
-            .catch(async () =>
-            {
                 let chartRaw = await readText(file);
                 let chart;
 
@@ -1154,6 +1144,19 @@ async function loadChartFiles(_files)
                 files.charts[file.name] = chart;
                 files.all[file.name] = chart;
                 doms.file.chart.appendChild(createSelectOption(file));
+
+                return;
+            })
+            .catch(async () =>
+            {
+                let imgBitmap = await createImageBitmap(file);
+                let texture = await Texture.from(imgBitmap);
+
+                Texture.addToCache(texture, file.name);
+
+                files.images[file.name] = texture;
+                files.all[file.name] = texture;
+                doms.file.bg.appendChild(createSelectOption(file));
 
                 return;
             })

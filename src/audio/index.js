@@ -30,15 +30,32 @@ class WAudio
     {
         return new Promise(async (res, rej) =>
         {
+            try {
+                let track = await GlobalAudioCtx.decodeAudioData(src);
+                if (!track) rej('Unsupported source type');
+                let audio = new WAudio(track, loop, noTimer);
+                res(audio);
+            } catch (e) {
+                rej(e);
+            }
+            
+            res();
+            /*
+                )
+                .then(track =>
+                {
+                    // if (!track) rej('Unsupported source type');
+                    let audio = new WAudio(track, loop, noTimer);
+                    res(audio);
+                })
+                .catch(e => rej(e));
+                */
+                /*
             let track;
             if (src instanceof HTMLAudioElement) track = GlobalAudioCtx.createMediaElementSource(src);
-            else if (src instanceof ArrayBuffer) track = await GlobalAudioCtx.decodeAudioData(src);
+            else if (src instanceof ArrayBuffer) track = await ;
 
-            if (!track) rej('Unsupported source type');
-
-            let audio = new WAudio(track, loop, noTimer);
-            
-            res(audio);
+            */
         });
     }
 
