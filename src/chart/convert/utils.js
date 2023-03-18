@@ -1,49 +1,7 @@
 import { number as verifyNum } from '@/verify';
+import Bezier from 'bezier-easing';
 
 const calcBetweenTime = 0.125; // 1/32
-
-// 定义一个三阶贝塞尔公式，来自 https://codepen.io/delbertbeta/pen/VRxxgM
-// 精度相对不错的一个类
-class CubicBezier {
-    constructor (a, b, c, d, epsilon = 1e-6) {
-        this.px3 = 3 * a;
-        this.px2 = 3 * (c - a) - this.px3;
-        this.px1 = 1 - this.px3 - this.px2;
-        this.py3 = 3 * b;
-        this.py2 = 3 * (d - b) - this.py3;
-        this.py1 = 1 - this.py3 - this.py2;
-        this.epsilon = epsilon; // 目标精度
-    }
-    
-    getX(t) {
-        return ((this.px1 * t + this.px2) * t + this.px3) * t;
-    }
-    
-    getY(t) {
-        return ((this.py1 * t + this.py2) * t + this.py3) * t;
-    }
-    
-    solve(x) {
-        if (x === 0 || x === 1) return this.getY(x); // 特殊值跳过精度验证
-        if (x < 0) return 0; // 本程序不包含 x < 0 或 x > 1 时的应用场景，故过滤相关值
-        if (x > 1) return 1;
-        
-        let t = x;
-
-        for (let i = 0; i < 8; i++)
-        {
-            let g = this.getX(t) - x;
-            if (Math.abs(g) < this.epsilon) return this.getY(t);
-            
-            let d = (3 * this.px1 * t + 2 * this.px2) * t + this.px3;
-            if (Math.abs(d) < 1e-6) break;
-
-            t = t - g / d;
-        }
-        
-        return this.getY(t);
-    }
-}
 
 /**
  * 将一个事件的拍数数组转换为拍数小数
@@ -93,8 +51,8 @@ function valueCalculator(event, Easings, currentTime, easingsOffset = 1)
 
     if (event.bezier === 1)
     {
-        let bezier = new CubicBezier(event.bezierPoints[0], event.bezierPoints[1], event.bezierPoints[2], event.bezierPoints[3]);
-        return event.start * bezier.solve(timePercentStart) + event.end * bezier.solve(timePercentEnd);
+        let bezier = Bezier(event.bezierPoints[0], event.bezierPoints[1], event.bezierPoints[2], event.bezierPoints[3]);
+        return event.start * bezier(timePercentStart) + event.end * bezier(timePercentEnd);
     }
     else
     {
