@@ -222,7 +222,7 @@ export default class Game
 
         this.sprites.pauseButton.interactive = true;
         this.sprites.pauseButton.buttonMode = true;
-        this.sprites.pauseButton.cursor = 'pointer';
+        // this.sprites.pauseButton.cursor = 'pointer';
         this.sprites.pauseButton.on('pointerdown', this._pauseBtnClickCallback);
 
         this.sprites.pauseButton.hitArea = new Rectangle(
