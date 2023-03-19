@@ -1,63 +1,55 @@
-function InputStart(e, type = 0)
+function touchStart(e)
 {
     e.preventDefault();
-    if (this._isPaused) return;
-
-    if (type === 1)
+    for (const i of e.changedTouches)
     {
-        for (const touch of e.changedTouches)
-        {
-            this.addInput(touch.clientX - this.renderSize.widthOffset, touch.clientY, touch.identifier);
-        }
-    }
-    else
-    {
-        this.addInput(e.clientX - this.renderSize.widthOffset, e.clientY, e.button);
+        const { clientX, clientY, identifier } = i;
+        this.addInput('touch', identifier, clientX - this.renderSize.widthOffset, clientY);
     }
 }
 
-function InputMove(e, type = 0)
+function touchMove(e)
 {
     e.preventDefault();
-
-    if (type === 1)
+    for (const i of e.changedTouches)
     {
-        for (const touch of e.changedTouches)
-        {
-            if (this.inputs[touch.identifier])
-            {
-                this.inputs[touch.identifier].move(touch.clientX - this.renderSize.widthOffset, touch.clientY);
-            }
-        }
-    }
-    else
-    {
-        if (this.inputs[e.button])
-        {
-            this.inputs[e.button].move(e.clientX - this.renderSize.widthOffset, e.clientY);
-        }
+        const { clientX, clientY, identifier } = i;
+        this.moveInput('touch', identifier, clientX - this.renderSize.widthOffset, clientY);
     }
 }
 
-function InputEnd(e, type = 0)
+function touchEnd(e)
 {
     e.preventDefault();
+    for (const i of e.changedTouches)
+    {
+        this.removeInput('touch', i.identifier);
+    }
+}
 
-    if (type === 1)
-    {
-        for (const touch of e.changedTouches)
-        {
-            delete this.inputs[touch.identifier];
-        }
-    }
-    else
-    {
-        delete this.inputs[e.button];
-    }
+function mouseStart(e)
+{
+    e.preventDefault();
+    const { clientX, clientY, button } = e;
+    this.addInput('mouse', button, clientX - this.renderSize.widthOffset, clientY);
+}
+
+function mouseMove(e)
+{
+    const { clientX, clientY, button } = e;
+    this.moveInput('mouse', button, clientX - this.renderSize.widthOffset, clientY);
+}
+
+function mouseEnd(e)
+{
+    this.removeInput('mouse', e.button);
 }
 
 export default {
-    InputStart,
-    InputMove,
-    InputEnd
+    touchStart,
+    touchMove,
+    touchEnd,
+    mouseStart,
+    mouseMove,
+    mouseEnd
 }

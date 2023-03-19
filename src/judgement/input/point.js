@@ -1,10 +1,15 @@
 export default class InputPoint
 {
-    constructor(x, y)
+    constructor(type, id, x, y)
     {
+        this.type = type;
+        this.id = id;
+
         this.x = x;
         this.y = y;
-        this.tick = 0;
+
+        this.isActive = true;
+        this.isTapped = false;
         this.isMoving = false;
         this.isFlickable = false;
         this.isFlicked = false;
@@ -13,42 +18,42 @@ export default class InputPoint
         this._deltaY = 0;
         this._lastDeltaX = 0;
         this._lastDeltaY = 0;
-        this._currentTime = Date.now();
-        this._deltaTime   = this._currentTime;
+        this._currentTime = performance.now();
+        this._deltaTime = this._currentTime;
     }
 
     move(x, y)
     {
-        const currentTime = Date.now();
-
         this._lastDeltaX = this._deltaX;
         this._lastDeltaY = this._deltaY;
+
         this._deltaX = x - this.x;
         this._deltaY = y - this.y;
+
         this.x = x;
         this.y = y;
 
-        this.tick = 0;
         this.isMoving = true;
 
-        this._deltaTime = currentTime - this._currentTime;
-        this._currentTime = currentTime;
-
-        const moveSpeed = (this._deltaX * this._lastDeltaX + this._deltaY * this._lastDeltaY) / Math.sqrt(this._lastDeltaX ** 2 + this._lastDeltaY ** 2) / this._deltaTime;
-
-        if (!this.isFlickable && moveSpeed > 0.6)
         {
-            this.isFlickable = true;
-            this.isFlicked = false;
-        }
-        else if (this.isFlickable && moveSpeed < 0.2)
-        {
-            this.isFlickable = false;
-        }
-    }
+            let currentTime = performance.now();
 
-    calcTick()
-    {
-        this.tick++;
+            this._deltaTime = currentTime - this._currentTime;
+            this._currentTime = currentTime;
+        }
+
+        {
+            let moveSpeed = (this._deltaX * this._lastDeltaX + this._deltaY * this._lastDeltaY) / Math.sqrt(this._lastDeltaX ** 2 + this._lastDeltaY ** 2) / this._deltaTime;
+
+            if (this.isFlickable && moveSpeed < 0.50)
+            {
+                this.isFlickable = false;
+                this.isFlicked = false;
+            }
+            else if (!this.isFlickable && moveSpeed > 1.00)
+            {
+                this.isFlickable = true;
+            }
+        }
     }
 }
