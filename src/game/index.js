@@ -300,7 +300,6 @@ export default class Game
         this.chart.noteJudgeCallback = this.judgement.calcNote;
         this.render.ticker.add(this._calcTick);
 
-        this.chart.calcTime(0);
         for (const judgeline of this.chart.judgelines)
         {
             if (!judgeline.sprite) continue;
@@ -335,7 +334,7 @@ export default class Game
         }
         else
         {
-            this.chart.music.play();
+            this.chart.music.play(true);
         }
     }
 
@@ -348,7 +347,6 @@ export default class Game
         this.judgement.reset();
 
         this.resize();
-        this.chart.calcTime(0);
 
         this._isPaused = false;
         this._isEnded = false;

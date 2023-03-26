@@ -1,12 +1,17 @@
+import { number as verifyNum } from '@/verify';
+
+
+
 const getCurrentTime = () => performance.now() || Date.now();
 
 
 
 class AudioTimer
 {
-    constructor(speed = 1)
+    constructor(speed = 1, offset = 0)
     {
-        this.speed = speed;
+        this.speed = verifyNum(speed);
+        this.offset = verifyNum(offset);
         this.startTime = NaN;
         this.pausedTime = NaN;
         this.status = 3;
@@ -61,7 +66,7 @@ class AudioTimer
 
     get time()
     {
-        return (isNaN(this.pausedTime) ? getCurrentTime() - this.startTime : this.pausedTime - this.startTime) * this.speed / 1000;
+        return (isNaN(this.pausedTime) ? getCurrentTime() - this.startTime : this.pausedTime - this.startTime) * this.speed / 1000 - this.offset;
     }
 }
 

@@ -64,7 +64,6 @@ You must have a Node.js enviorment to helping development.
 ## Thanks
 
 * [pixijs](https://github.com/pixijs/pixijs)
-* [howler.js](https://github.com/goldfire/howler.js)
 * [@lchzh3473](https://github.com/lchzh3473)
 * [@luch4736](https://github.com/luch4736)
 * [@Naptie](https://github.com/Naptie)

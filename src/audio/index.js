@@ -1,26 +1,25 @@
 import oggmentedAudioContext from 'oggmented';
 import AudioTimer from './timer';
-import { number as verifyNum, bool as verifyBool } from '@/verify';
+import { number as verifyNum } from '@/verify';
 
 
 
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 const GlobalAudioCtx = (new Audio().canPlayType('audio/ogg') == '') ? new oggmentedAudioContext() : new AudioCtx();
+const GlobalAudioLatency = (!isNaN(GlobalAudioCtx.baseLatency) ? GlobalAudioCtx.baseLatency : 0) + (!isNaN(GlobalAudioCtx.outputLatency) ? GlobalAudioCtx.outputLatency : 0);
 
 
 
 class WAudio
 {
-    constructor(src, loop = false, noTimer = false, volume = 1, speed = 1, onend = undefined)
+    constructor(src, loop = false, volume = 1, speed = 1, onend = undefined)
     {
         this.source = src;
         this.loop = loop;
         this.onend = onend;
-        this._noTimer = verifyBool(noTimer, false);
         this._volume = verifyNum(volume, 1);
         this._speed = verifyNum(speed, 1);
         this._gain = GlobalAudioCtx.createGain();
-        this._timer = new AudioTimer(this._speed);
 
         this._gain.gain.value = this._volume;
         this._gain.connect(GlobalAudioCtx.destination);
@@ -38,51 +37,41 @@ class WAudio
             } catch (e) {
                 rej(e);
             }
-            
-            res();
-            /*
-                )
-                .then(track =>
-                {
-                    // if (!track) rej('Unsupported source type');
-                    let audio = new WAudio(track, loop, noTimer);
-                    res(audio);
-                })
-                .catch(e => rej(e));
-                */
-                /*
-            let track;
-            if (src instanceof HTMLAudioElement) track = GlobalAudioCtx.createMediaElementSource(src);
-            else if (src instanceof ArrayBuffer) track = await ;
-
-            */
         });
     }
 
-    play()
+    play(withTimer = false)
     {
+        if (withTimer && !this._timer) this._timer = new AudioTimer(this._speed, GlobalAudioLatency);
         this._buffer = GlobalAudioCtx.createBufferSource();
         this._buffer.buffer = this.source;
         this._buffer.loop = this.loop;
         this._buffer.connect(this._gain);
 
-        this._timer.speed = this._speed;
         this._gain.gain.value = this._volume;
         this._buffer.playbackRate.value = this._speed;
 
-        this._buffer.start(0, (this._noTimer || this._timer.status === 3 ? 0 : this._timer.time));
-        if (!this._noTimer) this._timer.start();
+        if (this._timer)
+        {
+            this._timer.speed = this._speed;
+            this._buffer.start(0, (this._timer.status !== 3 ? this._timer.time : 0));
+            this._timer.start();
+        }
+        else
+        {
+            this._buffer.start(0, 0);
+        }
 
         this._buffer.onended = () =>
         {
-            if (!this._noTimer) this._timer.stop();
+            if (this._timer) this._timer.stop();
             if (this.onend instanceof Function) this.onend();
         };
     }
 
     pause()
     {
-        if (!this._noTimer) this._timer.pause();
+        if (this._timer) this._timer.pause();
         if (!this._buffer) return;
 
         this._buffer.onended = undefined;
@@ -92,12 +81,12 @@ class WAudio
     stop()
     {
         this.pause();
-        if (!this._noTimer) this._timer.stop();
+        if (this._timer) this._timer.stop();
     }
 
     seek(duration)
     {
-        if (this._noTimer) return;
+        if (!this._timer) return;
 
         let playedBeforeSeek = false;
 
@@ -129,12 +118,12 @@ class WAudio
 
     get currentTime()
     {
-        return this._timer.time;
+        return this._timer ? this._timer.time : NaN;
     }
 
     get progress()
     {
-        return this._timer.time / this.source.duration;
+        return this.currentTime / this.source.duration;
     }
 
     get volume()
@@ -156,7 +145,7 @@ class WAudio
     set speed(value)
     {
         this._speed = verifyNum(value, 1);
-        this._timer.speed = this._speed;
+        if (this._timer) this._timer.speed = this._speed;
         if (this._buffer) this._buffer.playbackRate.value = this._speed;
     }
 }

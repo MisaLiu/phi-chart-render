@@ -120,7 +120,7 @@ function calcGameAnimateTick(isStart = true)
 
             setTimeout(async () =>
             {
-                this.chart.music.play();
+                this.chart.music.play(true);
 
                 for (const judgeline of this.chart.judgelines)
                 {
