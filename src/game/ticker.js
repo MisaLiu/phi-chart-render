@@ -45,11 +45,32 @@ function calcTick()
         }
         case 1:
         {
-            this.chart.calcTime(this.chart.music.currentTime - (this.chart.offset + this._settings.offset));
-            this.judgement._holdBetween = this.chart.holdBetween;
-            if (!this._isPaused) this.judgement.calcTick();
+            let { chart, judgement, sprites, render, _settings: settings } = this;
+            let currentTime = chart.music.currentTime - (chart.offset + settings.offset);
 
-            this.sprites.progressBar.scale.x = this.chart.music.progress * this.sprites.progressBar.baseScaleX;
+            for (let i = 0, length = chart.bpmList.length; i < length; i++)
+            {
+                let bpm = chart.bpmList[i];
+
+                if (bpm.endTime < currentTime) continue;
+                if (bpm.startTime > currentTime) break;
+
+                judgement._holdBetween = bpm.holdBetween;
+            };
+
+            for (let i = 0, length = chart.judgelines.length; i < length; i++)
+            {
+                chart.judgelines[i].calcTime(currentTime, render.sizer);
+            };
+            for (let i = 0, length = chart.notes.length; i < length; i++)
+            {
+                chart.notes[i].calcTime(currentTime, render.sizer);
+                judgement.calcNote(currentTime, chart.notes[i]);
+            };
+
+            if (!this._isPaused) judgement.calcTick();
+
+            sprites.progressBar.scale.x = chart.music.progress * sprites.progressBar.baseScaleX;
             break;
         }
         case 2:

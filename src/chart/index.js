@@ -26,8 +26,6 @@ export default class Chart
         };
 
         this.sprites = {};
-        this.noteJudgeCallback = null;
-        this.holdBetween = 0.15;
     }
 
     static from(rawChart, _chartInfo = {}, _chartLineTexture = [])
@@ -329,29 +327,6 @@ export default class Chart
         this.sprites.info.songDiff.style.fontSize = size.heightPercent * 20;
         this.sprites.info.songDiff.position.x = size.heightPercent * 57;
         this.sprites.info.songDiff.position.y = size.height - size.heightPercent * 42;
-    }
-
-    calcTime(currentTime)
-    {
-        for (let i = 0, length = this.bpmList.length; i < length; i++)
-        {
-            let bpm = this.bpmList[i];
-
-            if (bpm.endTime < currentTime) continue;
-            if (bpm.startTime > currentTime) break;
-
-            this.holdBetween = bpm.holdBetween;
-        };
-
-        for (let i = 0, length = this.judgelines.length; i < length; i++)
-        {
-            this.judgelines[i].calcTime(currentTime, this.renderSize);
-        };
-        for (let i = 0, length = this.notes.length; i < length; i++)
-        {
-            this.notes[i].calcTime(currentTime, this.renderSize);
-            if (this.noteJudgeCallback) this.noteJudgeCallback(currentTime, this.notes[i]);
-        };
     }
 
     reset()
