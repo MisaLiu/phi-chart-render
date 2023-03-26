@@ -121,6 +121,10 @@ export default class Game
             pause: [],
             end: []
         };
+        this.processors = {
+            judgeline: [],
+            note: []
+        };
 
         /* ===== 用户设置暂存 ===== */
         this._settings = {
@@ -405,6 +409,13 @@ export default class Game
         if (!this.functions[type]) return;
         if (!(callback instanceof Function)) return;
         this.functions[type].push(callback);
+    }
+
+    addProcessor(type, callback)
+    {
+        if (!this.processors[type]) return;
+        if (!(callback instanceof Function)) return;
+        this.processors[type].push(callback);
     }
 
     resize(withChartSprites = true, shouldResetFakeJudgeLine = true)

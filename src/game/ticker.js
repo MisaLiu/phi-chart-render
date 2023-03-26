@@ -45,7 +45,7 @@ function calcTick()
         }
         case 1:
         {
-            let { chart, judgement, sprites, render, _settings: settings } = this;
+            let { chart, judgement, processors, sprites, render, _settings: settings } = this;
             let currentTime = chart.music.currentTime - (chart.offset + settings.offset);
 
             for (let i = 0, length = chart.bpmList.length; i < length; i++)
@@ -60,12 +60,16 @@ function calcTick()
 
             for (let i = 0, length = chart.judgelines.length; i < length; i++)
             {
-                chart.judgelines[i].calcTime(currentTime, render.sizer);
+                const judgeline = chart.judgelines[i];
+                judgeline.calcTime(currentTime, render.sizer);
+                for (let x = 0, length = processors.judgeline.length; x < length; x++) processors.judgeline[x](judgeline, currentTime);
             };
             for (let i = 0, length = chart.notes.length; i < length; i++)
             {
-                chart.notes[i].calcTime(currentTime, render.sizer);
-                judgement.calcNote(currentTime, chart.notes[i]);
+                const note = chart.notes[i];
+                note.calcTime(currentTime, render.sizer);
+                for (let x = 0, length = processors.note.length; x < length; x++) processors.note[x](note, currentTime);
+                judgement.calcNote(currentTime, note);
             };
 
             if (!this._isPaused) judgement.calcTick();
