@@ -118,6 +118,7 @@ export default class Game
         this.sprites = {};
         this.functions = {
             start: [],
+            tick: [],
             pause: [],
             end: []
         };

@@ -45,7 +45,7 @@ function calcTick()
         }
         case 1:
         {
-            let { chart, judgement, processors, sprites, render, _settings: settings } = this;
+            let { chart, judgement, functions, processors, sprites, render, _settings: settings } = this;
             let currentTime = chart.music.currentTime - (chart.offset + settings.offset);
 
             for (let i = 0, length = chart.bpmList.length; i < length; i++)
@@ -72,7 +72,11 @@ function calcTick()
                 judgement.calcNote(currentTime, note);
             };
 
-            if (!this._isPaused) judgement.calcTick();
+            if (!this._isPaused)
+            {
+                judgement.calcTick();
+                for (let x = 0, length = functions.tick.length; x < length; x++) functions.tick[x](this, currentTime);
+            }
 
             sprites.progressBar.scale.x = chart.music.progress * sprites.progressBar.baseScaleX;
             break;
