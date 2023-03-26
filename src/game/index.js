@@ -220,7 +220,8 @@ export default class Game
         // 暂停按钮
         this.sprites.pauseButton = new Sprite(this.assets.textures.pauseButton);
 
-        this.sprites.pauseButton.interactive = true;
+        // this.sprites.pauseButton.interactive = true;
+        this.sprites.pauseButton.eventMode = 'static';
         this.sprites.pauseButton.buttonMode = true;
         // this.sprites.pauseButton.cursor = 'pointer';
         this.sprites.pauseButton.on('pointerdown', this._pauseBtnClickCallback);
