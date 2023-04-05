@@ -6,7 +6,15 @@ import { number as verifyNum } from '@/verify';
 
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 const GlobalAudioCtx = (new Audio().canPlayType('audio/ogg') == '') ? new oggmentedAudioContext() : new AudioCtx();
-const GlobalAudioLatency = (!isNaN(GlobalAudioCtx.baseLatency) ? GlobalAudioCtx.baseLatency : 0) + (!isNaN(GlobalAudioCtx.outputLatency) ? GlobalAudioCtx.outputLatency : 0);
+var GlobalAudioLatency = 0;
+
+GlobalAudioCtx.addEventListener('statechange', () =>
+{
+    if (GlobalAudioCtx.state === 'running')
+    {
+        GlobalAudioLatency = (!isNaN(GlobalAudioCtx.baseLatency) ? GlobalAudioCtx.baseLatency : 0) + (!isNaN(GlobalAudioCtx.outputLatency) ? GlobalAudioCtx.outputLatency : 0);
+    }
+});
 
 
 
@@ -152,12 +160,14 @@ class WAudio
 
 
 
-window.addEventListener('load', () =>
+window.addEventListener('load', async () =>
 {
     window.addEventListener('click', ResumeGlobalAudioContext);
     window.addEventListener('touchend', ResumeGlobalAudioContext);
     window.addEventListener('mousemove', ResumeGlobalAudioContext);
     window.addEventListener('scroll', ResumeGlobalAudioContext);
+
+    if (GlobalAudioCtx.state === 'suspended') await GlobalAudioCtx.resume();
 });
 
 async function ResumeGlobalAudioContext()
