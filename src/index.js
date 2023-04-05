@@ -59,6 +59,7 @@ const doms = {
         bgBlur: document.querySelector('input#settings-bg-blur'),
 
         offset: document.querySelector('input#settings-audio-offset'),
+        useBrowserLatency: document.querySelector('input#settings-use-browser-latency'),
         testInputDelay: document.querySelector('button#settings-test-input-delay'),
         speed: document.querySelector('input#settings-audio-speed'),
 
@@ -419,7 +420,7 @@ doms.startBtn.addEventListener('click', async () => {
             bgDim: doms.settings.bgDim.value,
             noteScale: 10000 - doms.settings.noteScale.value,
 
-            audioOffset: doms.settings.offset.value / 1000,
+            audioOffset: doms.settings.offset.value / 1000 + (doms.settings.useBrowserLatency.checked ? PhiChartRender.audioLatency : 0),
             speed: doms.settings.speed.value,
 
             hitsound: doms.settings.hitsound.checked,
