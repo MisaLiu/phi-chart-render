@@ -8,9 +8,8 @@ const getCurrentTime = () => performance.now() || Date.now();
 
 class AudioTimer
 {
-    constructor(speed = 1, offset = 0)
+    constructor(speed = 1)
     {
-        this.offset = verifyNum(offset);
         this.startTime = NaN;
         this.pausedTime = NaN;
         this.status = 3;
@@ -75,14 +74,15 @@ class AudioTimer
 
     set speed(value)
     {
-        if (this.status !== 3) this._lastSpeedChangedProgress += ((this.status === 1 ? getCurrentTime() : this.endTime) - this.startTime) * this._speed;
+        if (this.status !== 3) this._lastSpeedChangedProgress += ((this.status === 1 ? getCurrentTime() : this.pausedTime) - this.startTime) * this._speed;
         this.startTime = getCurrentTime();
+        if (this.status === 2) this.pausedTime = getCurrentTime();
         this._speed = verifyNum(value);
     }
 
     get time()
     {
-        return ((isNaN(this.pausedTime) ? getCurrentTime() - this.startTime : this.pausedTime - this.startTime) * this._speed + this._lastSpeedChangedProgress) / 1000 - this.offset;
+        return ((isNaN(this.pausedTime) ? getCurrentTime() - this.startTime : this.pausedTime - this.startTime) * this._speed + this._lastSpeedChangedProgress) / 1000;
     }
 }
 
