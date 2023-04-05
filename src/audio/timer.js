@@ -10,11 +10,13 @@ class AudioTimer
 {
     constructor(speed = 1, offset = 0)
     {
-        this.speed = verifyNum(speed);
         this.offset = verifyNum(offset);
         this.startTime = NaN;
         this.pausedTime = NaN;
         this.status = 3;
+
+        this._speed = verifyNum(speed);
+        this._lastSpeedChangedProgress = 0;
     }
 
     start()
@@ -53,6 +55,8 @@ class AudioTimer
 
         this.startTime = NaN;
         this.pausedTime = NaN;
+        this._lastSpeedChangedProgress = 0;
+
         this.status = 3;
     }
 
@@ -60,13 +64,25 @@ class AudioTimer
     {
         if (this.status === 3) return;
         this.startTime -= duration * 1000;
-        if (isNaN(this.pausedTime) && getCurrentTime() - this.startTime < 0) this.startTime = getCurrentTime();
+        if (isNaN(this.pausedTime) && getCurrentTime() - (this.startTime - this._lastSpeedChangedProgress) < 0) this.startTime = getCurrentTime();
         else if (!isNaN(this.pausedTime) && this.startTime > this.pausedTime) this.startTime = this.pausedTime;
+    }
+
+    get speed()
+    {
+        return this._speed;
+    }
+
+    set speed(value)
+    {
+        if (this.status !== 3) this._lastSpeedChangedProgress += ((this.status === 1 ? getCurrentTime() : this.endTime) - this.startTime) * this._speed;
+        this.startTime = getCurrentTime();
+        this._speed = verifyNum(value);
     }
 
     get time()
     {
-        return (isNaN(this.pausedTime) ? getCurrentTime() - this.startTime : this.pausedTime - this.startTime) * this.speed / 1000 - this.offset;
+        return ((isNaN(this.pausedTime) ? getCurrentTime() - this.startTime : this.pausedTime - this.startTime) * this._speed + this._lastSpeedChangedProgress) / 1000 - this.offset;
     }
 }
 
