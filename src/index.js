@@ -67,6 +67,7 @@ const doms = {
         hitsoundVolume: document.querySelector('input#settings-hitsound-volume'),
 
         challengeMode: document.querySelector('input#settings-challenge-mode'),
+        plyndb: document.querySelector('input#settings-plyndb'),
         autoPlay: document.querySelector('input#settings-autoplay'),
         forceCanvas: document.querySelector('input#settings-force-canvas'),
         antiAlias: document.querySelector('input#settings-anti-alias'),
@@ -445,6 +446,8 @@ doms.startBtn.addEventListener('click', async () => {
         console.log('Game ended!');
         showGameResultPopup(game);
     });
+
+    if (doms.settings.plyndb.checked) _game.on('tick', PlayLikeYouNeverDidBefore);
 
     _game.createSprites();
     _game.start();
@@ -1214,6 +1217,13 @@ async function loadChartFiles(_files)
         option.innerText = option.value = file.name;
         return option;
     }
+}
+
+function PlayLikeYouNeverDidBefore(game, currentTime)
+{
+    let currentSpeed = 1 + 0.5 * Math.sin(1.5708 * (currentTime % 2));
+    game.chart.music.speed = currentSpeed;
+    game.chart.sprites.info.songName.text = game.chart.info.name + ' (x' + Math.round(currentSpeed * 100) / 100 + ')';
 }
 
 export { loadChartFiles };
