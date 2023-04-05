@@ -13,6 +13,11 @@ GlobalAudioCtx.addEventListener('statechange', () =>
     if (GlobalAudioCtx.state === 'running')
     {
         GlobalAudioLatency = (!isNaN(GlobalAudioCtx.baseLatency) ? GlobalAudioCtx.baseLatency : 0) + (!isNaN(GlobalAudioCtx.outputLatency) ? GlobalAudioCtx.outputLatency : 0);
+
+        window.removeEventListener('click', ResumeGlobalAudioContext);
+        window.removeEventListener('touchend', ResumeGlobalAudioContext);
+        window.removeEventListener('mousemove', ResumeGlobalAudioContext);
+        window.removeEventListener('scroll', ResumeGlobalAudioContext);
     }
 });
 
@@ -50,7 +55,7 @@ class WAudio
 
     play(withTimer = false)
     {
-        if (withTimer && !this._timer) this._timer = new AudioTimer(this._speed, GlobalAudioLatency);
+        if (withTimer && !this._timer) this._timer = new AudioTimer(this._speed);
         this._buffer = GlobalAudioCtx.createBufferSource();
         this._buffer.buffer = this.source;
         this._buffer.loop = this.loop;
@@ -167,19 +172,17 @@ window.addEventListener('load', async () =>
     window.addEventListener('mousemove', ResumeGlobalAudioContext);
     window.addEventListener('scroll', ResumeGlobalAudioContext);
 
-    if (GlobalAudioCtx.state === 'suspended') await GlobalAudioCtx.resume();
+    ResumeGlobalAudioContext();
 });
 
 async function ResumeGlobalAudioContext()
 {
     if (GlobalAudioCtx.state === 'suspended') await GlobalAudioCtx.resume();
-
-    window.removeEventListener('click', ResumeGlobalAudioContext);
-    window.removeEventListener('touchend', ResumeGlobalAudioContext);
-    window.removeEventListener('mousemove', ResumeGlobalAudioContext);
-    window.removeEventListener('scroll', ResumeGlobalAudioContext);
 }
 
 
 
-export default WAudio;
+export {
+    WAudio,
+    GlobalAudioLatency as audioLatency
+};
