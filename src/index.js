@@ -1,4 +1,5 @@
 import * as PhiChartRender from './main';
+import PrprEffectConverter from './chart/convert/prpr'; /// !!!! TEST ONLY, REMOVE BEFORE MERGE TO MAIN BRANCH
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
 import { Shader } from './game/shader';
@@ -1123,15 +1124,25 @@ async function loadChartFiles(_files)
                 
             }
         }
-        else if (file.name === 'extra.json') {
+        else if (file.name === 'extra.json')
+        {
+            if (files.effects instanceof Array)
+            {
+                console.warn('Already loaded an extra.json, previously loaded file will be overwritten');
+                files.effects = null;
+            }
+
             try {
                 let rawText = await readText(file);
-                let effects = JSON.parse(rawText);
+                let effects = PrprEffectConverter(JSON.parse(rawText));
 
-                files.effects.push(...effects);
-                files.all[file.name] = lines;
+                console.log(effects);
+
+                files.effects = effects;
+                files.all[file.name] = effects;
+
             } catch (e) {
-                
+                console.error(e);
             } 
         }
         else if (file.name === 'Settings.txt' || file.name === 'info.txt')

@@ -1,17 +1,29 @@
-export default class Effect{
-    constructor() {
-        this.shader= '';
-        this.start = [];
-        this.end = [];
-        this.global = false;
-        this.vars = {}
+import { bool as verifyBool } from '@/verify';
+
+
+export default class Effect
+{
+    constructor(params)
+    {
+        this.shader = params.shader;
+        this.startTime = params.startTime;
+        this.endTime = params.endTime;
+        this.isGlobal = verifyBool(params.isGlobal, false);
+        this.vars = {};
     }
 
-    preProcessVars() {
+    preProcessVars()
+    {
         varName = Object.getOwnPropertyNames(this.vars)
         varName.forEach((n) => { 
             this[n] = 0;
         })
+    }
+
+    initShader(shaders)
+    {
+        // WIP
+        // Goal: load correct shader to this.shader when call this func
     }
     
     calcTime(currentTime) {
@@ -38,7 +50,10 @@ function valueCalculator(events, currentTime, originValue = 0) {
 }
 
 // The thing that needs to be done:
-// 1. Calculate values in ./game/ticker
+// 1. Calculate values in ./game/ticker (Now pre-calced)
 // 2. Integrate effects into the chart (./chart/index)
 // 3. Update uniforms in ./game/index
 // If there's anything left that's probably bugfixing.
+
+// Effects should act on Game rather than Chart since
+// the filter is loaded by Game and effected on Containers

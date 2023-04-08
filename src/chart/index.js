@@ -2,7 +2,7 @@ import { number as verifyNum } from '@/verify';
 import * as Convert from './convert';
 import md5Encrypt from 'md5';
 import { Sprite, Graphics, Text } from 'pixi.js';
-import { Effect } from './effect'
+import Effect from './effect'
 
 export default class Chart
 {

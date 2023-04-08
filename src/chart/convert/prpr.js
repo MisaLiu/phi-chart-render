@@ -1,8 +1,7 @@
-import EventLayer from '../eventlayer';
+import Effect from '../effect'
 import Note from '../note';
 import utils from './utils';
 
-const calcBetweenTime = 0.125;
 const Easing = [
     (x) => x,
     (x) => Math.sin((x * Math.PI) / 2),
@@ -34,129 +33,117 @@ const Easing = [
     (x) => x < 0.5 ? (1 - Easing[25](1 - 2 * x)) / 2 : (1 + Easing[25](2 * x - 1)) / 2
 ];
 
-export default function PrprChartConverter(chart) {
-    let effectList = {};
-    let rawEffect = chart;
+export default function PrprEffectConverter(effect)
+{
+    let effectList = [];
+    let rawEffects = [ ...effect.effects ];
+    let bpmList = [ ...effect.bpm ];
+    
     { // 将 Beat 计算为对应的时间（秒）
         let currentBeatRealTime = 0.5; // 当前每个 Beat 的实际时长（秒）
         let bpmChangedBeat = 0; // 当前 BPM 是在什么时候被更改的（Beat）
         let bpmChangedTime = 0; // 当前 BPM 是在什么时候被更改的（秒）
 
-        rawEffect.bpm.forEach((bpm, index) => {
-            bpm.beat = bpm.time[0] + bpm.time[1] / bpm.time[2];
-            bpmChangedTime += currentBeatRealTime * (bpm.beat - bpmChangedBeat);
-            bpm.time = bpmChangedTime;
+        bpmList.forEach((bpm, index) =>
+        {
+            bpm.endTime = bpmList[index + 1] ? bpmList[index + 1].time : [ 1e4, 0, 1 ];
+
+            bpm.startBeat = bpm.time[0] + bpm.time[1] / bpm.time[2];
+            bpm.endBeat = bpm.endTime[0] + bpm.endTime[1] / bpm.endTime[2];
+
+            bpmChangedTime += currentBeatRealTime * (bpm.startBeat - bpmChangedBeat);
+            bpm.startTime = bpmChangedTime;
+            bpm.endTime = currentBeatRealTime * (bpm.endBeat - bpmChangedBeat);
+
             bpmChangedBeat += (bpm.beat - bpmChangedBeat);
+
             currentBeatRealTime = 60 / bpm.bpm;
             bpm.beatTime = 60 / bpm.bpm;
         });
 
-        rawEffect.bpm.sort((a, b) => b.beat - a.beat);
+        bpmList.sort((a, b) => b.beat - a.beat);
     }
 
+    if (bpmList.length <= 0)
+    {
+        bpmList.push({
+            startBeat : 0,
+            endBeat   : 1e4,
+            startTime : 0,
+            endTime   : 1e6 - 1,
+            bpm       : 120,
+            beatTime  : 0.5 
+        });
+    }
+
+    // console.log(bpmList);
+
+    utils.calculateRealTime(bpmList, calculateEffectsBeat(rawEffects))
+        .forEach((_effect) =>
+        {
+            let effect = new Effect({
+                startTime: _effect.startTime,
+                endTime: _effect.endTime,
+                shader: _effect.shader,
+                isGlobal: _effect.global || false,
+                vars: {},
+            });
+
+            for (const name in _effect.vars)
+            {
+                let _values = _effect.vars[name];
+
+                if (_values instanceof Array)
+                {
+                    let values = [];
+
+                    utils.calculateRealTime(bpmList, utils.calculateEventsBeat(_values))
+                        .forEach((_value) =>
+                        {
+                            values = [ ...values, ...utils.calculateEventEase(_value, Easing) ];
+                        }
+                    );
+
+                    values.sort((a, b) => a.startTime - b.startTime);
+                    effect.vars[name] = values;
+                }
+                else
+                {
+                    effect.vars[name] = _values;
+                }
+            }
+
+            effectList.push(effect);
+            // console.log(effect);
+        }
+    );
+
+    effectList.sort((a, b) => a.startTime  - b.startTime);
+
+    /*
     effectName = Object.getOwnPropertyNames(rawEffect.effects)
     effectName.forEach((e) => {
         effectList.effects['e'].push(calculateEffectEase(effect))
     })
-
-    effectList.bpm = calculateHoldBetween(rawEffect.bpm);
+    */
 
     return effectList;
 }
 
-function calculateEffectEase(event) {
-    let timeBetween = event.endTime - event.startTime;
-    let result = [];
 
-    if (!event) return [];
 
-    varName = Object.getOwnPropertyNames(event.vars)
-    varName.forEach((n) => {
-        let currentValue = 0;
-        let currentTime = 0;
-        let nextTime = 0;
-        event.vars[n].forEach((t,index) => {
-            for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++) {
-                currentTime = t.startTime + (timeIndex * calcBetweenTime);
-                nextTime = (t.startTime + ((timeIndex + 1) * calcBetweenTime)) <= t.endTime ? t.startTime + ((timeIndex + 1) * calcBetweenTime) : t.endTime;
-                currentValue = _valueCalculator(t, nextTime, start, end);
-                result.vars[n][index].push({
-                    startTime: currentTime,
-                    endTime: nextTime,
-                    value: currentValue
-                });
-            }
-        })
-        if (nextTime != event.endTime) {
-            result.vars[n].push({
-                startTime: nextTime,
-                endTime: endTime,
-                value: currentValue
-            });
-        }
-    })
-    return result;
+function calculateEffectBeat(effect)
+{
+    effect.startTime = parseFloat((effect.start[0] + (effect.start[1] / effect.start[2])).toFixed(3));
+    effect.endTime = parseFloat((effect.end[0] + (effect.end[1] / effect.end[2])).toFixed(3));
+    return effect;
 }
 
-function _valueCalculator(event, currentTime, startValue = 0, endValue = 1) {
-    if (startValue == endValue) return startValue;
-    if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
-    if (event.endTime < currentTime) throw new Error('currentTime must smaller than endTime');
-
-    let timePercentStart = (currentTime - event.startTime) / (event.endTime - event.startTime);
-    let timePercentEnd = 1 - timePercentStart;
-    let easeFunction = Easing[event.easingType - 1] ? Easing[event.easingType - 1] : Easing[0];
-    let easePercent = easeFunction(verifyNum(event.easingLeft, 0, 0, 1) * timePercentEnd + verifyNum(event.easingRight, 1, 0, 1) * timePercentStart);
-    let easePercentStart = easeFunction(verifyNum(event.easingLeft, 0, 0, 1));
-    let easePercentEnd = easeFunction(verifyNum(event.easingRight, 1, 0, 1));
-
-    easePercent = (easePercent - easePercentStart) / (easePercentEnd - easePercentStart);
-
-    return startValue * (1 - easePercent) + endValue * easePercent;
-}
-
-function calculateHoldBetween(_bpm) {
-    let bpm = _bpm.slice();
-    let result = [];
-
-    bpm.sort((a, b) => a.time - b.time);
-    bpm.forEach((bpm) => {
-        if (result.length <= 0) {
-            result.push({
-                startTime: bpm.time,
-                endTime: bpm.time,
-                bpm: bpm.bpm,
-                holdBetween: ((-1.2891 * bpm.bpm) + 396.71) / 1000
-            });
-        }
-        else {
-            result[result.length - 1].endTime = bpm.time;
-
-            if (result[result.length - 1].bpm != bpm.bpm) {
-                result.push({
-                    startTime: bpm.time,
-                    endTime: bpm.time,
-                    bpm: bpm.bpm,
-                    holdBetween: ((-1.2891 * bpm.bpm) + 396.71) / 1000
-                });
-            }
-        }
+function calculateEffectsBeat(effects)
+{
+    effects.forEach((effect) =>
+    {
+        effect = calculateEffectBeat(effect);
     });
-
-    result.sort((a, b) => a.time - b.time);
-
-    if (result.length > 0) {
-        result[0].startTime = 1 - 1000;
-        result[result.length - 1].endTime = 1e4;
-    }
-    else {
-        result.push({
-            startTime: 1 - 1000,
-            endTime: 1e4,
-            bpm: 120,
-            holdBetween: 0.242018
-        });
-    }
-
-    return result;
+    return effects;
 }
