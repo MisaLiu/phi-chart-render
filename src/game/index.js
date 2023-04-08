@@ -1,3 +1,4 @@
+import { Shader } from './shader';
 import * as verify from '@/verify';
 import Judgement from '@/judgement';
 import * as TickerFunc from './ticker';
@@ -139,7 +140,8 @@ export default class Game
             showAPStatus   : verify.bool(params.settings.showAPStatus, true),
             challengeMode  : verify.bool(params.settings.challengeMode, false),
             autoPlay       : verify.bool(params.settings.autoPlay, false),
-            debug          : verify.bool(params.settings.debug, false)
+            debug          : verify.bool(params.settings.debug, false),
+            shader          : verify.bool(params.settings.shader, true)
         };
 
         this._watermarkText = verify.text(params.watermark, 'github/MisaLiu/phi-chart-render');
@@ -200,7 +202,8 @@ export default class Game
             this._settings.speed,
             this._settings.bgDim,
             this._settings.multiNoteHL,
-            this._settings.debug
+            this._settings.debug,
+            this._settings.shader
         );
         
         if (this._settings.showAPStatus)
@@ -210,6 +213,12 @@ export default class Game
                 if (!judgeline.sprite) continue;
                 judgeline.sprite.tint = 0xFFECA0;
             };
+        }
+
+        // Shaders
+        if (this._settings.shader) {
+            this.filter = new Shader(this.assets.shaders['glitch']);
+            this.render.mainContainer.filters = [this.filter];
         }
 
         this.judgement.stage = this.render.mainContainer;
@@ -302,6 +311,12 @@ export default class Game
 
         this._animateStatus = 0;
         this._gameStartTime = Date.now();
+
+        if(this._settings.shader)
+        {
+            this.filter.update(this.gameTimeInSec(), [this.render.parentNode.clientWidth, this.render.parentNode.clientHeight], [1.0, 1.0])
+            this.render.render()
+        }
 
         this.chart.noteJudgeCallback = this.judgement.calcNote;
         this.render.ticker.add(this._calcTick);
@@ -513,6 +528,10 @@ export default class Game
             this.judgement.resizeSprites(this.render.sizer, this._isEnded);
             this.chart.resizeSprites(this.render.sizer, this._isEnded);
         }
+    }
+
+    gameTimeInSec() {
+        return (Date.now() - this._gameStartTime) / 1000;
     }
 }
 

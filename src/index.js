@@ -1,7 +1,7 @@
 import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
-import { Texture, Rectangle, utils as PIXIutils } from 'pixi.js';
+import { Texture, Rectangle, Filter, utils as PIXIutils } from 'pixi.js';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';
@@ -72,7 +72,8 @@ const doms = {
         forceCanvas: document.querySelector('input#settings-force-canvas'),
         antiAlias: document.querySelector('input#settings-anti-alias'),
         lowResolution: document.querySelector('input#settings-low-resolution'),
-        debug: document.querySelector('input#settings-debug')
+        debug: document.querySelector('input#settings-debug'),
+        shader: document.querySelector('input#settings-shader')
     },
     startBtn : document.querySelector('button#start'),
     loadingStatus : document.querySelector('div#loading-status'),
@@ -108,6 +109,7 @@ const currentFile = {
 
 const assets = {
     textures: {},
+    shaders: {},
     sounds: {}
 };
 
@@ -429,7 +431,8 @@ doms.startBtn.addEventListener('click', async () => {
 
             challengeMode: doms.settings.challengeMode.checked,
             autoPlay: doms.settings.autoPlay.checked,
-            debug : doms.settings.debug.checked
+            debug: doms.settings.debug.checked,
+            shader: doms.settings.shader.checked
         },
         watermark: 'github/MisaLiu/phi-chart-render ' + GIT_VERSION + (process.env.NODE_ENV === 'development' ? ' [Develop Mode]' : '')
     });
@@ -588,6 +591,35 @@ window.addEventListener('load', async () =>
         { name: 'at', url: './assets/sounds/result/at.ogg' },
         { name: 'sp', url: './assets/sounds/result/sp.ogg' },
         { name: 'spGlitch', url: './assets/sounds/result/sp_glitch.ogg' },
+    ], { loop: true, noTimer: true }));
+
+    (await (async (resources = [], options = {}) => {
+        for (const resource of resources) {
+            doms.loadingStatus.innerText = 'Loading shader ' + resource.name + ' ...';
+
+            try {
+                let res = await requestFile(resource.url);
+                let rawShader = await res.text();
+
+                if (!assets.shaders) assets.shaders = {};
+                assets.shaders[resource.name] = rawShader;
+            }
+            catch (e) {
+                console.error('Failed getting resource: ' + resource.name, e);
+            }
+        }
+    })([
+        { name: 'chromatic', url: './assets/shaders/chromatic.glsl' },
+        { name: 'circle_blur', url: './assets/shaders/circle_blur.glsl' },
+        { name: 'fisheye', url: './assets/shaders/fisheye.glsl' },
+        { name: 'glitch', url: './assets/shaders/glitch.glsl' },
+        { name: 'grayscale', url: './assets/shaders/grayscale.glsl' },
+        { name: 'noise', url: './assets/shaders/noise.glsl' },
+        { name: 'pixel', url: './assets/shaders/pixel.glsl' },
+        { name: 'radial_blur', url: './assets/shaders/radial_blur.glsl' },
+        { name: 'shockwave', url: './assets/shaders/shockwave.glsl' },
+        { name: 'vignette', url: './assets/shaders/vignette.glsl' },
+
     ], { loop: true, noTimer: true }));
 
     doms.loadingStatus.innerText = 'All done!';

@@ -53,6 +53,9 @@ This project is still working.
         * [x] yOffset
         * [x] visible time
 
+* prpr features
+    * [ ] Shaders
+
 ## Development
 
 You must have a Node.js enviorment to helping development.
