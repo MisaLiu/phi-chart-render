@@ -38,9 +38,9 @@ export class Shader extends Filter {
         filterManager.applyFilter(this, input, output, clear);
     }
 
-    update(time, screenSize, UVScale) { 
-        this.uniforms['time'] = time;
-        this.uniforms['screenSize'] = screenSize;
-        this.uniforms['UVScale'] = UVScale;
+    update(uniforms) { 
+        uniforms.forEach((e) => {
+            this.uniforms[e[0]] = e[1];
+        })
     }
 }

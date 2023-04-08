@@ -1,6 +1,7 @@
 import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
+import { Shader } from './game/shader';
 import { Texture, Rectangle, Filter, utils as PIXIutils } from 'pixi.js';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
@@ -602,7 +603,7 @@ window.addEventListener('load', async () =>
                 let rawShader = await res.text();
 
                 if (!assets.shaders) assets.shaders = {};
-                assets.shaders[resource.name] = rawShader;
+                assets.shaders[resource.name] = new Shader(rawShader);
             }
             catch (e) {
                 console.error('Failed getting resource: ' + resource.name, e);
