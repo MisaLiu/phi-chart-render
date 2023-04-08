@@ -160,7 +160,7 @@ export default class Chart
         if (isReaded) this.isLineTextureReaded = true;
     }
 
-    createSprites(stage, size, textures, zipFiles = {}, speed = 1, bgDim = 0.5, multiNoteHL = true, debug = false)
+    createSprites(stage, size, textures, zipFiles = {}, speed = 1, bgDim = 0.5, multiNoteHL = true, debug = false, useShaders = false, uiStage = null)
     {
         let linesWithZIndex = [];
 
@@ -243,7 +243,8 @@ export default class Chart
         this.sprites.info.songName.anchor.set(0, 1);
         this.sprites.info.songName.zIndex = 99999;
 
-        stage.addChild(this.sprites.info.songName);
+        if (uiStage) uiStage.addChild(this.sprites.info.songName);
+        else stage.addChild(this.sprites.info.songName);
 
 
         this.sprites.info.songDiff = new Text((this.info.difficult || 'SP Lv.?'), {
@@ -253,7 +254,8 @@ export default class Chart
         this.sprites.info.songDiff.anchor.set(0, 1);
         this.sprites.info.songDiff.zIndex = 99999;
 
-        stage.addChild(this.sprites.info.songDiff);
+        if (uiStage) uiStage.addChild(this.sprites.info.songDiff);
+        else stage.addChild(this.sprites.info.songDiff);
     }
 
     resizeSprites(size, isEnded)

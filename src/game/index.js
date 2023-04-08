@@ -91,6 +91,16 @@ export default class Game
         this.render.mainContainer.zIndex = 10;
         this.render.stage.addChild(this.render.mainContainer);
 
+        // 创建游戏精灵容器
+        this.render.gameContainer = new Container();
+        this.render.gameContainer.zIndex = 20;
+        this.render.mainContainer.addChild(this.render.gameContainer);
+
+        // 创建 UI 容器
+        this.render.UIContainer = new Container();
+        this.render.UIContainer.zIndex = 30;
+        this.render.mainContainer.addChild(this.render.UIContainer);
+
         // 创建舞台主渲染区可见范围
         this.render.mainContainerMask = new Graphics();
         this.render.mainContainerMask.cacheAsBitmap = true;
@@ -98,7 +108,7 @@ export default class Game
         /* ===== 创建判定 ===== */
         this.judgement = new Judgement({
             chart          : this.chart,
-            stage          : this.render.mainContainer,
+            stage          : this.render.UIContainer,
             canvas         : this.render.view,
             assets         : {
                 textures : { normal: this.assets.textures.clickRaw, bad: this.assets.textures.clickRaw },
@@ -194,7 +204,7 @@ export default class Game
         }
 
         this.chart.createSprites(
-            this.render.mainContainer,
+            this.render.gameContainer,
             this.render.sizer,
             this.assets.textures,
             this.zipFiles,
@@ -202,7 +212,8 @@ export default class Game
             this._settings.bgDim,
             this._settings.multiNoteHL,
             this._settings.debug,
-            this._settings.shader
+            this._settings.shader,
+            this.render.UIContainer
         );
         
         if (this._settings.showAPStatus)
@@ -220,7 +231,7 @@ export default class Game
             this.render.mainContainer.filters = [this.filter];
         }
 
-        this.judgement.stage = this.render.mainContainer;
+        this.judgement.stage = this.render.UIContainer;
         this.judgement.createSprites(this._settings.showInputPoint);
 
         // 进度条
@@ -228,7 +239,7 @@ export default class Game
         this.sprites.progressBar.width = 0;
         this.sprites.progressBar.alpha = 0.75;
         this.sprites.progressBar.zIndex = 99999;
-        this.render.mainContainer.addChild(this.sprites.progressBar);
+        this.render.UIContainer.addChild(this.sprites.progressBar);
 
         // 暂停按钮
         this.sprites.pauseButton = new Sprite(this.assets.textures.pauseButton);
@@ -253,14 +264,14 @@ export default class Game
         this.sprites.pauseButton.anchor.set(1, 0);
         this.sprites.pauseButton.alpha = 0.5;
         this.sprites.pauseButton.zIndex = 99999;
-        this.render.mainContainer.addChild(this.sprites.pauseButton);
+        this.render.UIContainer.addChild(this.sprites.pauseButton);
 
         // 假判定线，过场动画用
         this.sprites.fakeJudgeline = new Sprite(this.assets.textures.judgeline);
         this.sprites.fakeJudgeline.anchor.set(0.5);
         this.sprites.fakeJudgeline.zIndex = 99999;
         if (this._settings.showAPStatus) this.sprites.fakeJudgeline.tint = 0xFFECA0;
-        this.render.mainContainer.addChild(this.sprites.fakeJudgeline);
+        this.render.UIContainer.addChild(this.sprites.fakeJudgeline);
 
         if (this._settings.showFPS)
         {
@@ -273,7 +284,7 @@ export default class Game
             this.render.fpsText.alpha = 0.5;
             this.render.fpsText.zIndex = 999999;
 
-            this.render.mainContainer.addChild(this.render.fpsText);
+            this.render.UIContainer.addChild(this.render.fpsText);
         }
 
         this.render.watermark = new Text(this._watermarkText, {
@@ -284,8 +295,10 @@ export default class Game
         this.render.watermark.anchor.set(1);
         this.render.watermark.alpha = 0.5;
         this.render.watermark.zIndex = 999999;
-        this.render.mainContainer.addChild(this.render.watermark);
+        this.render.UIContainer.addChild(this.render.watermark);
 
+        this.render.gameContainer.sortChildren();
+        this.render.UIContainer.sortChildren();
         this.render.mainContainer.sortChildren();
         this.render.stage.sortChildren();
     }
