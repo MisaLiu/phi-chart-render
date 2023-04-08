@@ -26,6 +26,7 @@ export default class Chart
         };
 
         this.sprites = {};
+        this.effects = {}
     }
 
     static from(rawChart, _chartInfo = {}, _chartLineTexture = [])
@@ -33,6 +34,7 @@ export default class Chart
         let chart;
         let chartInfo = _chartInfo;
         let chartMD5;
+        let effect;
 
         if (typeof rawChart == 'object')
         {
@@ -50,6 +52,11 @@ export default class Chart
 
                 chart = Convert.RePhiEdit(rawChart);
                 chartInfo = chart.info;
+            }
+            else if (rawChart.bpm && rawChart.effects)
+            {
+                // That's *probably* effect.json
+                effect = Convert.Prpr(rawChart);
             }
         }
         else if (typeof rawChart == 'string')

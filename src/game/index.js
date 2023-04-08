@@ -1,4 +1,3 @@
-import { Shader } from './shader';
 import * as verify from '@/verify';
 import Judgement from '@/judgement';
 import * as TickerFunc from './ticker';
@@ -217,7 +216,7 @@ export default class Game
 
         // Shaders
         if (this._settings.shader) {
-            this.filter = new Shader(this.assets.shaders['glitch']);
+            this.filter = this.assets.shaders['glitch'];
             this.render.mainContainer.filters = [this.filter];
         }
 
@@ -314,7 +313,11 @@ export default class Game
 
         if(this._settings.shader)
         {
-            this.filter.update(this.gameTimeInSec(), [this.render.parentNode.clientWidth, this.render.parentNode.clientHeight], [1.0, 1.0])
+            this.filter.update([
+                ['time', this.gameTimeInSec()],
+                ['screenSize', [this.render.parentNode.clientWidth, this.render.parentNode.clientHeight]],
+                ['UVScale', [1.0, 1.0]]
+            ])
             this.render.render()
         }
 
