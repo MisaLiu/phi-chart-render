@@ -35,7 +35,7 @@ const Easing = [
 ];
 
 export default function PrprChartConverter(chart) {
-    let effect = {};
+    let effectList = {};
     let rawEffect = chart;
     { // 将 Beat 计算为对应的时间（秒）
         let currentBeatRealTime = 0.5; // 当前每个 Beat 的实际时长（秒）
@@ -43,65 +43,120 @@ export default function PrprChartConverter(chart) {
         let bpmChangedTime = 0; // 当前 BPM 是在什么时候被更改的（秒）
 
         rawEffect.bpm.forEach((bpm, index) => {
-            bpm.endTime = rawChart.BPMList[index + 1] ? rawChart.BPMList[index + 1].startTime : [1e4, 0, 1];
-
-            bpm.startBeat = bpm.startTime[0] + bpm.startTime[1] / bpm.startTime[2];
-            bpm.endBeat = bpm.endTime[0] + bpm.endTime[1] / bpm.endTime[2];
-
-            bpmChangedTime += currentBeatRealTime * (bpm.startBeat - bpmChangedBeat);
-            bpm.startTime = bpmChangedTime;
-            bpm.endTime = currentBeatRealTime * (bpm.endBeat - bpmChangedBeat);
-
-            bpmChangedBeat += (bpm.startBeat - bpmChangedBeat);
-
+            bpm.beat = bpm.time[0] + bpm.time[1] / bpm.time[2];
+            bpmChangedTime += currentBeatRealTime * (bpm.beat - bpmChangedBeat);
+            bpm.time = bpmChangedTime;
+            bpmChangedBeat += (bpm.beat - bpmChangedBeat);
             currentBeatRealTime = 60 / bpm.bpm;
             bpm.beatTime = 60 / bpm.bpm;
         });
 
-        rawEffect.bpm.sort((a, b) => b.startBeat - a.startBeat);
+        rawEffect.bpm.sort((a, b) => b.beat - a.beat);
     }
 
-    rawEffect.effects.forEach((effect) => {
-        effect.effects.push(calculateEffectEase(effect.vars.power))
-    });
-    effect.bpmList = utils.calculateHoldBetween(rawEffect.bpm);
+    effectName = Object.getOwnPropertyNames(rawEffect.effects)
+    effectName.forEach((e) => {
+        effectList.effects['e'].push(calculateEffectEase(effect))
+    })
 
-    return effect;
+    effectList.bpm = calculateHoldBetween(rawEffect.bpm);
+
+    return effectList;
 }
 
-// WIP
 function calculateEffectEase(event) {
     let timeBetween = event.endTime - event.startTime;
     let result = [];
 
     if (!event) return [];
 
-            let currentValue = [];
-
+    varName = Object.getOwnPropertyNames(event.vars)
+    varName.forEach((n) => {
+        let currentValue = 0;
+        let currentTime = 0;
+        let nextTime = 0;
+        event.vars[n].forEach((t,index) => {
             for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++) {
-                let currentTime = event.startTime + (timeIndex * calcBetweenTime);
-                let nextTime = (event.startTime + ((timeIndex + 1) * calcBetweenTime)) <= event.endTime ? event.startTime + ((timeIndex + 1) * calcBetweenTime) : event.endTime;
-                let currentTextIndex = Math.floor(_valueCalculator(event, nextTime, 0, event.end.length - 1));
-
-                if (lastTextIndex + 1 < currentTextIndex) {
-                    for (let extraTextIndex = lastTextIndex + 1; extraTextIndex < currentTextIndex; extraTextIndex++) {
-                        currentText.push(event.end[extraTextIndex]);
-                    }
-                }
-                else if (lastTextIndex + 1 > currentTextIndex) {
-                    currentText.length = currentTextIndex;
-                }
-
-                if (event.end[currentTextIndex]) currentText.push(event.end[currentTextIndex]);
-
-                result.push({
+                currentTime = t.startTime + (timeIndex * calcBetweenTime);
+                nextTime = (t.startTime + ((timeIndex + 1) * calcBetweenTime)) <= t.endTime ? t.startTime + ((timeIndex + 1) * calcBetweenTime) : t.endTime;
+                currentValue = _valueCalculator(t, nextTime, start, end);
+                result.vars[n][index].push({
                     startTime: currentTime,
                     endTime: nextTime,
-                    value: currentText.join('')
+                    value: currentValue
                 });
-
-                lastTextIndex = currentTextIndex;
             }
+        })
+        if (nextTime != event.endTime) {
+            result.vars[n].push({
+                startTime: nextTime,
+                endTime: endTime,
+                value: currentValue
+            });
+        }
+    })
+    return result;
+}
+
+function _valueCalculator(event, currentTime, startValue = 0, endValue = 1) {
+    if (startValue == endValue) return startValue;
+    if (event.startTime > currentTime) throw new Error('currentTime must bigger than startTime');
+    if (event.endTime < currentTime) throw new Error('currentTime must smaller than endTime');
+
+    let timePercentStart = (currentTime - event.startTime) / (event.endTime - event.startTime);
+    let timePercentEnd = 1 - timePercentStart;
+    let easeFunction = Easing[event.easingType - 1] ? Easing[event.easingType - 1] : Easing[0];
+    let easePercent = easeFunction(verifyNum(event.easingLeft, 0, 0, 1) * timePercentEnd + verifyNum(event.easingRight, 1, 0, 1) * timePercentStart);
+    let easePercentStart = easeFunction(verifyNum(event.easingLeft, 0, 0, 1));
+    let easePercentEnd = easeFunction(verifyNum(event.easingRight, 1, 0, 1));
+
+    easePercent = (easePercent - easePercentStart) / (easePercentEnd - easePercentStart);
+
+    return startValue * (1 - easePercent) + endValue * easePercent;
+}
+
+function calculateHoldBetween(_bpm) {
+    let bpm = _bpm.slice();
+    let result = [];
+
+    bpm.sort((a, b) => a.time - b.time);
+    bpm.forEach((bpm) => {
+        if (result.length <= 0) {
+            result.push({
+                startTime: bpm.time,
+                endTime: bpm.time,
+                bpm: bpm.bpm,
+                holdBetween: ((-1.2891 * bpm.bpm) + 396.71) / 1000
+            });
+        }
+        else {
+            result[result.length - 1].endTime = bpm.time;
+
+            if (result[result.length - 1].bpm != bpm.bpm) {
+                result.push({
+                    startTime: bpm.time,
+                    endTime: bpm.time,
+                    bpm: bpm.bpm,
+                    holdBetween: ((-1.2891 * bpm.bpm) + 396.71) / 1000
+                });
+            }
+        }
+    });
+
+    result.sort((a, b) => a.time - b.time);
+
+    if (result.length > 0) {
+        result[0].startTime = 1 - 1000;
+        result[result.length - 1].endTime = 1e4;
+    }
+    else {
+        result.push({
+            startTime: 1 - 1000,
+            endTime: 1e4,
+            bpm: 120,
+            holdBetween: 0.242018
+        });
+    }
 
     return result;
 }

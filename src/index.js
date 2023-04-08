@@ -1123,6 +1123,17 @@ async function loadChartFiles(_files)
                 
             }
         }
+        else if (file.name === 'extra.json') {
+            try {
+                let rawText = await readText(file);
+                let effects = JSON.parse(rawText);
+
+                files.effects.push(...effects);
+                files.all[file.name] = lines;
+            } catch (e) {
+                
+            } 
+        }
         else if (file.name === 'Settings.txt' || file.name === 'info.txt')
         {
             try {
