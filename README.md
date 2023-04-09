@@ -54,7 +54,8 @@ This project is still working.
         * [x] visible time
 
 * prpr features
-    * [ ] Shaders
+    * [x] Shaders *(Need test)*
+    * [ ] Videos
 
 ## Development
 
@@ -68,6 +69,7 @@ You must have a Node.js enviorment to helping development.
 
 * [pixijs](https://github.com/pixijs/pixijs)
 * [@lchzh3473](https://github.com/lchzh3473)
+* [@IcedDog](https://github.com/IcedDog)
 * [@luch4736](https://github.com/luch4736)
 * [@Naptie](https://github.com/Naptie)
 * [@Greenball233](https://github.com/Greenball233)
