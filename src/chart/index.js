@@ -170,7 +170,7 @@ export default class Chart
         if (isReaded) this.isLineTextureReaded = true;
     }
 
-    createSprites(stage, size, textures, zipFiles = {}, speed = 1, bgDim = 0.5, multiNoteHL = true, debug = false, useShaders = false, uiStage = null, mainStage = null)
+    createSprites(stage, size, textures, uiStage = null, zipFiles = {}, speed = 1, bgDim = 0.5, multiNoteHL = true, debug = false)
     {
         let linesWithZIndex = [];
 
@@ -192,8 +192,7 @@ export default class Chart
             this.sprites.bg.anchor.set(0.5);
             this.sprites.bg.cover = bgCover;
 
-            if (mainStage) mainStage.addChild(this.sprites.bg);
-            else stage.addChild(this.sprites.bg);
+            stage.addChild(this.sprites.bg);
         }
 
         this.judgelines.forEach((judgeline, index) =>

@@ -212,14 +212,12 @@ export default class Game
             this.render.gameContainer,
             this.render.sizer,
             this.assets.textures,
+            this.render.UIContainer,
             this.zipFiles,
             this._settings.speed,
             this._settings.bgDim,
             this._settings.multiNoteHL,
-            this._settings.debug,
-            this._settings.shader,
-            this.render.UIContainer,
-            this.render.mainContainer
+            this._settings.debug
         );
         
         if (this._settings.showAPStatus)
