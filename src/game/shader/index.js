@@ -1,38 +1,50 @@
 import { Filter, UniformGroup } from 'pixi.js';
 
+const defaultValueReg = /uniform\s+(\w+)\s+(\w+);\s+\/\/\s+%([^%]+)%/g;
+
 export class Shader extends Filter {
-    constructor(shader) {
-        const fixedShader = "// " + shader.replaceAll('uv','vTextureCoord').replaceAll('screenTexture','uSampler')
-        var re = new RegExp('uniform\\s+(\\w+)\\s+(\\w+);\\s+//\\s+%([^%]+)%', 'g');
-        const defaults = Array.from(fixedShader.matchAll(re), m => {
-            const typeName = m[1];
-            const name = m[2];
-            const value = m[3];
-            switch (typeName) {
-                case 'float':
-                    return [name, parseFloat(value)];
-                case 'vec2':
-                    const [x, y] = value.split(',');
-                    return [name, [parseFloat(x.trim()), parseFloat(y.trim())]];
-                case 'vec4':
-                    const [r, g, b, a] = value.split(',').map(v => parseFloat(v.trim()));
-                    return [name, [r, g, b, a]];
-                default:
-                    throw Error('Unknown type: ' + typeName);
-            }
-        });
+    constructor(_shaderText)
+    {
+        const shaderText = "// " + _shaderText.replaceAll('uv', 'vTextureCoord').replaceAll('screenTexture', 'uSampler');
+        const defaultValues = {};
+        let uniforms = {
+            time: 0,
+            screenSize: [ 0, 0 ],
+            UVScale: [ 0, 0 ]
+        };
         
-        const newUniforms = {}
-        defaults.forEach((e) => { newUniforms[e[0]] = e[1] });
-        newUniforms['time'] = 0;
-        newUniforms['screenSize'] = [0.0, 0.0];
-        newUniforms['UVScale'] = [0.0, 0.0];
-        super(null, fixedShader, newUniforms)
-        // why...
-        defaults.forEach((e) => { this.uniforms[e[0]] = e[1] });
-        this.uniforms['time'] = 0;
-        this.uniforms['screenSize'] = [0.0, 0.0];
-        this.uniforms['UVScale'] = [0.0, 0.0];
+        [ ...shaderText.matchAll(defaultValueReg) ].map((uniform) =>
+            {
+                const type = uniform[1];
+                const name = uniform[2];
+                const value = uniform[3];
+
+                switch (type)
+                {
+                    case 'float':
+                    {
+                        defaultValues[name] = parseFloat(value);
+                        break;
+                    }
+                    case 'vec2':
+                    case 'vec4':
+                    {
+                        defaultValues[name] = value.split(',').map(v => parseFloat(v.trim()));
+                        break;
+                    }
+                    default:
+                    {
+                        throw Error('Unknown type: ' + typeName);
+                    }
+                }
+            }
+        );
+
+        uniforms = { ...defaultValues, ...uniforms };
+        super(null, shaderText, uniforms);
+
+        for (const name in uniforms) this.uniforms[name] = uniforms[name];
+        this.defaultValues = defaultValues;
     }
     
     apply(filterManager, input, output, clear) {
