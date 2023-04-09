@@ -94,9 +94,9 @@ function calcTick()
                     if (effect.endTime < currentTime) continue;
                     if (effect.startTime > currentTime) break;
 
-                    effect.calcTime(currentTime, screenSize);
                     if (effect.isGlobal) render.mainContainer.filters.push(effect.shader);
                     else render.gameContainer.filters.push(effect.shader);
+                    effect.calcTime(currentTime, screenSize);
                 }
             }
 
