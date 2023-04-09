@@ -107,7 +107,7 @@ export default function PrprEffectConverter(effect)
                     );
 
                     values.sort((a, b) => a.startTime - b.startTime);
-                    effect.vars[name] = fillVarsTimeGap(values, effect);
+                    effect.vars[name] = values;
                 }
                 else
                 {
@@ -148,41 +148,4 @@ function calculateEffectsBeat(effects)
         effect = calculateEffectBeat(effect);
     });
     return effects;
-}
-
-function fillVarsTimeGap(_values, effect)
-{
-    let values = [ ..._values ];
-    let newValues = [ values.shift() ];
-
-
-    for (const _value of values)
-    {
-        let lastNewValue = newValues[newValues.length - 1];
-
-        if (lastNewValue.endTime == _value.startTime)
-        {
-            newValues.push(_value);
-        }
-        else if (lastNewValue.endTime < _value.startTime)
-        {
-            newValues.push({
-                startTime: lastNewValue.endTime,
-                endTime: _value.startTime,
-                start: lastNewValue.end,
-                end: lastNewValue.end
-            }, _value);
-        }
-        else if (lastNewValue.endTime > _value.startTime)
-        {
-            // ?
-        }
-    }
-
-    if (newValues.length > 0)
-    {
-        newValues[newValues.length - 1].endTime = effect.endTime;
-    }
-
-    return newValues;
 }

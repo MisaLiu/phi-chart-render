@@ -62,3 +62,5 @@ function valueCalculator(values, currentTime, defaultValue)
 
 // Effects should act on Game rather than Chart since
 // the filter is loaded by Game and effected on Containers
+
+// I guess now it's all done
