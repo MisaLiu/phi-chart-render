@@ -74,7 +74,7 @@ const doms = {
         antiAlias: document.querySelector('input#settings-anti-alias'),
         lowResolution: document.querySelector('input#settings-low-resolution'),
         debug: document.querySelector('input#settings-debug'),
-        shader: document.querySelector('input#settings-shader')
+        prprExtra: document.querySelector('input#settings-prpr-extra')
     },
     startBtn : document.querySelector('button#start'),
     loadingStatus : document.querySelector('div#loading-status'),
@@ -434,7 +434,7 @@ doms.startBtn.addEventListener('click', async () => {
             challengeMode: doms.settings.challengeMode.checked,
             autoPlay: doms.settings.autoPlay.checked,
             debug: doms.settings.debug.checked,
-            shader: doms.settings.shader.checked
+            shader: doms.settings.prprExtra.checked
         },
         watermark: 'github/MisaLiu/phi-chart-render ' + GIT_VERSION + (process.env.NODE_ENV === 'development' ? ' [Develop Mode]' : '')
     });
