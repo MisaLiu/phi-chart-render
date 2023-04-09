@@ -588,8 +588,11 @@ function calcResizer(width, height, noteScale = 8000)
 {
     let result = {};
 
-    result.width  = height / 9 * 16 < width ? height / 9 * 16 : width;
-    result.height = height;
+    result.widthRaw = width;
+    result.heightRaw = height;
+
+    result.width  = result.heightRaw / 9 * 16 < result.widthRaw ? result.heightRaw / 9 * 16 : result.widthRaw;
+    result.height = result.heightRaw;
     result.widthPercent = result.width * (9 / 160);
     result.widthOffset  = (width - result.width) / 2;
 

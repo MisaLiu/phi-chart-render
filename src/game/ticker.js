@@ -82,7 +82,7 @@ function calcTick()
 
             if (settings.shader)
             {
-                const screenSize = [ render.sizer.width, render.sizer.height ];
+                const screenSize = [ render.sizer.widthRaw, render.sizer.heightRaw ];
 
                 render.gameContainer.filters = [];
                 render.UIContainer.filters = [];
