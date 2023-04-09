@@ -213,7 +213,8 @@ export default class Game
             this._settings.multiNoteHL,
             this._settings.debug,
             this._settings.shader,
-            this.render.UIContainer
+            this.render.UIContainer,
+            this.render.mainContainer
         );
         
         if (this._settings.showAPStatus)
@@ -295,7 +296,7 @@ export default class Game
         this.render.watermark.anchor.set(1);
         this.render.watermark.alpha = 0.5;
         this.render.watermark.zIndex = 999999;
-        this.render.UIContainer.addChild(this.render.watermark);
+        this.render.mainContainer.addChild(this.render.watermark);
 
         this.render.gameContainer.sortChildren();
         this.render.UIContainer.sortChildren();
