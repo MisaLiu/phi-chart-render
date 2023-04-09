@@ -1,5 +1,4 @@
 import Effect from '../effect'
-import Note from '../note';
 import utils from './utils';
 
 const Easing = [
@@ -32,8 +31,6 @@ const Easing = [
     (x) => 1 - Easing[25](1 - x),
     (x) => x < 0.5 ? (1 - Easing[25](1 - 2 * x)) / 2 : (1 + Easing[25](2 * x - 1)) / 2
 ];
-
-console.log(utils.calculateEventsBeat);
 
 export default function PrprEffectConverter(effect)
 {
@@ -78,8 +75,6 @@ export default function PrprEffectConverter(effect)
         });
     }
 
-    // console.log(bpmList);
-
     utils.calculateRealTime(bpmList, calculateEffectsBeat(rawEffects))
         .forEach((_effect) =>
         {
@@ -116,18 +111,10 @@ export default function PrprEffectConverter(effect)
             }
 
             effectList.push(effect);
-            // console.log(effect);
         }
     );
 
     effectList.sort((a, b) => a.startTime  - b.startTime);
-
-    /*
-    effectName = Object.getOwnPropertyNames(rawEffect.effects)
-    effectName.forEach((e) => {
-        effectList.effects['e'].push(calculateEffectEase(effect))
-    })
-    */
 
     return effectList;
 }

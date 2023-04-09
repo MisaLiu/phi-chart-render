@@ -1,4 +1,4 @@
-import { Filter, UniformGroup } from 'pixi.js';
+import { Filter } from 'pixi.js';
 
 const defaultValueReg = /uniform\s+(\w+)\s+(\w+);\s+\/\/\s+%([^%]+)%/g;
 
@@ -47,18 +47,8 @@ export class Shader extends Filter {
         this.defaultValues = defaultValues;
     }
     
-    /*
-    apply(filterManager, input, output, clear) {
-        filterManager.applyFilter(this, input, output, clear);
-    }
-    */
 
     update(uniforms) {
         for (const name in uniforms) this.uniforms[name] = uniforms[name];
-        /* 
-        uniforms.forEach((e) => {
-            this.uniforms[e[0]] = e[1];
-        })
-        */
     }
 }

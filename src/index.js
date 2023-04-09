@@ -2,9 +2,7 @@ import * as PhiChartRender from './main';
 import PrprEffectConverter from './chart/convert/prpr'; /// !!!! TEST ONLY, REMOVE BEFORE MERGE TO MAIN BRANCH
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
-import { Shader } from './game/shader';
-import * as Shaders from './game/shader/presets';
-import { Texture, Rectangle, Filter, utils as PIXIutils } from 'pixi.js';
+import { Texture, Rectangle, utils as PIXIutils } from 'pixi.js';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';
@@ -32,9 +30,6 @@ import './phizone';
             }
         });
     }
-
-    console.log(Shaders);
-    console.log((new Shader(Shaders.glitch)));
 })();
 
 const qs = (selector) => document.querySelector(selector);
@@ -1143,13 +1138,11 @@ async function loadChartFiles(_files)
                 let rawText = await readText(file);
                 let effects = PrprEffectConverter(JSON.parse(rawText));
 
-                console.log(effects);
-
                 files.effects = effects;
                 files.all[file.name] = effects;
 
             } catch (e) {
-                console.error(e);
+
             } 
         }
         else if (file.name === 'Settings.txt' || file.name === 'info.txt')
