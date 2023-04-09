@@ -76,29 +76,29 @@ function calcTick()
             {
                 judgement.calcTick();
                 for (let x = 0, length = functions.tick.length; x < length; x++) functions.tick[x](this, currentTime);
+
+                if (settings.shader)
+                {
+                    const screenSize = [ render.sizer.widthRaw, render.sizer.heightRaw ];
+
+                    render.gameContainer.filters = [];
+                    render.mainContainer.filters = [];
+
+                    for (let i = 0, length = effects.length; i < length; i++)
+                    {
+                        const effect = effects[i];
+                        if (effect.shader === null) continue;
+                        if (effect.endTime < currentTime) continue;
+                        if (effect.startTime > currentTime) break;
+
+                        if (effect.isGlobal) render.mainContainer.filters.push(effect.shader);
+                        else render.gameContainer.filters.push(effect.shader);
+                        effect.calcTime(currentTime, screenSize);
+                    }
+                }
             }
 
             sprites.progressBar.scale.x = chart.music.progress * sprites.progressBar.baseScaleX;
-
-            if (settings.shader)
-            {
-                const screenSize = [ render.sizer.widthRaw, render.sizer.heightRaw ];
-
-                render.gameContainer.filters = [];
-                render.mainContainer.filters = [];
-
-                for (let i = 0, length = effects.length; i < length; i++)
-                {
-                    const effect = effects[i];
-                    if (effect.shader === null) continue;
-                    if (effect.endTime < currentTime) continue;
-                    if (effect.startTime > currentTime) break;
-
-                    if (effect.isGlobal) render.mainContainer.filters.push(effect.shader);
-                    else render.gameContainer.filters.push(effect.shader);
-                    effect.calcTime(currentTime, screenSize);
-                }
-            }
 
             break;
         }
