@@ -10,6 +10,15 @@ export default class Effect
         this.endTime = params.endTime;
         this.isGlobal = verifyBool(params.isGlobal, false);
         this.vars = {};
+        
+        this._currentValue = {};
+
+        this.reset();
+    }
+
+    reset()
+    {
+        this._isPushed = false;
     }
 
     preProcessVars()

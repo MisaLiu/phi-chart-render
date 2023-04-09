@@ -33,6 +33,8 @@ const Easing = [
     (x) => x < 0.5 ? (1 - Easing[25](1 - 2 * x)) / 2 : (1 + Easing[25](2 * x - 1)) / 2
 ];
 
+console.log(utils.calculateEventsBeat);
+
 export default function PrprEffectConverter(effect)
 {
     let effectList = [];
@@ -97,15 +99,15 @@ export default function PrprEffectConverter(effect)
                 {
                     let values = [];
 
-                    utils.calculateRealTime(bpmList, utils.calculateEventsBeat(_values))
+                    utils.calculateEventsBeat(_values)
                         .forEach((_value) =>
                         {
-                            values = [ ...values, ...utils.calculateEventEase(_value, Easing) ];
+                            values = [ ...values, ...utils.calculateRealTime(bpmList, utils.calculateEventEase(_value, Easing)) ];
                         }
                     );
 
                     values.sort((a, b) => a.startTime - b.startTime);
-                    effect.vars[name] = values;
+                    effect.vars[name] = fillVarsTimeGap(values, effect);
                 }
                 else
                 {
@@ -146,4 +148,41 @@ function calculateEffectsBeat(effects)
         effect = calculateEffectBeat(effect);
     });
     return effects;
+}
+
+function fillVarsTimeGap(_values, effect)
+{
+    let values = [ ..._values ];
+    let newValues = [ values.shift() ];
+
+
+    for (const _value of values)
+    {
+        let lastNewValue = newValues[newValues.length - 1];
+
+        if (lastNewValue.endTime == _value.startTime)
+        {
+            newValues.push(_value);
+        }
+        else if (lastNewValue.endTime < _value.startTime)
+        {
+            newValues.push({
+                startTime: lastNewValue.endTime,
+                endTime: _value.startTime,
+                start: lastNewValue.end,
+                end: lastNewValue.end
+            }, _value);
+        }
+        else if (lastNewValue.endTime > _value.startTime)
+        {
+            // ?
+        }
+    }
+
+    if (newValues.length > 0)
+    {
+        newValues[newValues.length - 1].endTime = effect.endTime;
+    }
+
+    return newValues;
 }
