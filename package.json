@@ -32,6 +32,7 @@
     "git-revision-webpack-plugin": "^5.0.0",
     "html-webpack-plugin": "^5.5.0",
     "jszip": "^3.10.1",
+    "raw-loader": "^4.0.2",
     "regenerator-runtime": "^0.13.11",
     "stackblur-canvas": "^2.5.0",
     "webpack": "^5.75.0",

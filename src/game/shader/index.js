@@ -1,4 +1,5 @@
-import { Filter, UniformGroup } from 'pixi.js'
+import { Filter, UniformGroup } from 'pixi.js';
+
 export class Shader extends Filter {
     constructor(shader) {
         const fixedShader = "// " + shader.replaceAll('uv','vTextureCoord').replaceAll('screenTexture','uSampler')

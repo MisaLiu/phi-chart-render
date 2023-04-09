@@ -3,6 +3,7 @@ import PrprEffectConverter from './chart/convert/prpr'; /// !!!! TEST ONLY, REMO
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
 import { Shader } from './game/shader';
+import * as Shaders from './game/shader/shaders';
 import { Texture, Rectangle, Filter, utils as PIXIutils } from 'pixi.js';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
@@ -31,6 +32,9 @@ import './phizone';
             }
         });
     }
+
+    console.log(Shaders);
+    console.log((new Shader(Shaders.glitch)));
 })();
 
 const qs = (selector) => document.querySelector(selector);
@@ -595,6 +599,7 @@ window.addEventListener('load', async () =>
         { name: 'spGlitch', url: './assets/sounds/result/sp_glitch.ogg' },
     ], { loop: true, noTimer: true }));
 
+    /*
     (await (async (resources = [], options = {}) => {
         for (const resource of resources) {
             doms.loadingStatus.innerText = 'Loading shader ' + resource.name + ' ...';
@@ -623,7 +628,8 @@ window.addEventListener('load', async () =>
         { name: 'vignette', url: './assets/shaders/vignette.glsl' },
 
     ], { loop: true, noTimer: true }));
-
+    */
+    
     doms.loadingStatus.innerText = 'All done!';
     doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
     doms.chartPackFile.disabled = false;
