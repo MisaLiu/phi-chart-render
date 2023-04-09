@@ -415,6 +415,7 @@ doms.startBtn.addEventListener('click', async () => {
     window._game = new PhiChartRender.Game({
         chart: currentFile.chart,
         assets: assets,
+        effects: files.effects,
         zipFiles: zipFiles,
         render: {
             resizeTo: document.documentElement,

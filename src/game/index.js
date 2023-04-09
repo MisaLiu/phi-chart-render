@@ -39,6 +39,7 @@ const ProgressBarCache = (() =>
   *     },
   *     chart,
   *     assets,
+  *     effects?,
   *     zipFiles?,
   *     watermark?,
   *     settings: {
@@ -69,6 +70,7 @@ export default class Game
         /* ===== 加载谱面基本信息 ===== */
         this.chart    = params.chart;
         this.assets   = params.assets;
+        this.effects  = (!!params.settings.shader && params.effects instanceof Array && params.effects.length > 0) ? params.effects : [];
         this.zipFiles = params.zipFiles;
 
         if (!this.chart) throw new Error('You must select a chart to play');
@@ -152,7 +154,7 @@ export default class Game
             challengeMode  : verify.bool(params.settings.challengeMode, false),
             autoPlay       : verify.bool(params.settings.autoPlay, false),
             debug          : verify.bool(params.settings.debug, false),
-            shader          : verify.bool(params.settings.shader, true)
+            shader         : verify.bool(params.settings.shader, true)
         };
 
         this._watermarkText = verify.text(params.watermark, 'github/MisaLiu/phi-chart-render');
@@ -163,6 +165,7 @@ export default class Game
         this._gameEndTime   = NaN;
         this._isPaused = false;
         this._isEnded = false;
+        this._currentEffects = [];
 
         this.resize = this.resize.bind(this);
 
@@ -304,6 +307,33 @@ export default class Game
         this.render.UIContainer.sortChildren();
         this.render.mainContainer.sortChildren();
         this.render.stage.sortChildren();
+
+        // 加载 Shaders
+        this.effects.forEach((effect) =>
+        {
+            if (!effect.shader) return;
+            if (typeof effect.shader !== 'string') return;
+
+            const shaderName = effect.shader;
+
+            if (/^\/shader/.test(effect.shader))
+            {
+                const shaderNameReal = shaderName.replace(/^\/shader/, '');
+                effect.shader = new Shader(this.zipFiles[shaderNameReal]);
+            }
+            else
+            {
+                effect.shader = new Shader(Shaders[effect.shader]);
+            }
+            
+            if (!effect.shader)
+            {
+                console.log('\'' + shaderName + '\' not found, will be ignored');
+                effect.shader = null;
+            }
+
+            effect.reset();
+        });
     }
 
     start()

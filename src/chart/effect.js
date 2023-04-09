@@ -10,52 +10,48 @@ export default class Effect
         this.endTime = params.endTime;
         this.isGlobal = verifyBool(params.isGlobal, false);
         this.vars = {};
-        
-        this._currentValue = {};
 
         this.reset();
     }
 
     reset()
     {
-        this._isPushed = false;
-    }
-
-    preProcessVars()
-    {
-        varName = Object.getOwnPropertyNames(this.vars)
-        varName.forEach((n) => { 
-            this[n] = 0;
-        })
-    }
-
-    initShader(shaders)
-    {
-        // WIP
-        // Goal: load correct shader to this.shader when call this func
+        this._currentValue = (this.shader !== null && typeof this.shader !== 'string') ? this.shader.defaultValues : {};
     }
     
-    calcTime(currentTime) {
-        varName = Object.getOwnPropertyNames(this.vars)
-        varName.forEach((n) => {
-            this[n] = valueCalculator(this.vars[n], currentTime, this[n]);
-        })
+    calcTime(currentTime, screenSize)
+    {
+        if (this.shader === null) return;
+
+        const { vars, shader, _currentValue } = this;
+
+        for (const name in vars)
+        {
+            const values = vars[name];
+            if (typeof values === 'object') _currentValue[name] = valueCalculator(values, currentTime, shader.defaultValues[name]);
+            else _currentValue[name] = values;
+        }
+
+        shader.update({ ..._currentValue, time: currentTime, screenSize: screenSize });
     }
 }
 
-function valueCalculator(events, currentTime, originValue = 0) {
-    for (let i = 0, length = events.length; i < length; i++) {
-        let event = events[i];
-        if (event.endTime < currentTime) continue;
-        if (event.startTime > currentTime) break;
-        if (event.start == event.end) return event.start
+function valueCalculator(values, currentTime, defaultValue)
+{
+    for (let i = 0, length = values.length; i < length; i++)
+    {
+        const value = values[i];
+        if (value.endTime < currentTime) continue;
+        if (value.startTime > currentTime) break;
+        if (value.start === value.end) return value.start;
 
-        let timePercentEnd = (currentTime - event.startTime) / (event.endTime - event.startTime);
+        let timePercentEnd = (currentTime - value.startTime) / (value.endTime - value.startTime);
         let timePercentStart = 1 - timePercentEnd;
 
-        return event.start * timePercentStart + event.end * timePercentEnd;
+        return value.start * timePercentStart + value.end * timePercentEnd;
     }
-    return originValue;
+
+    return defaultValue;
 }
 
 // The thing that needs to be done:

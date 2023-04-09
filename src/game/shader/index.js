@@ -47,13 +47,18 @@ export class Shader extends Filter {
         this.defaultValues = defaultValues;
     }
     
+    /*
     apply(filterManager, input, output, clear) {
         filterManager.applyFilter(this, input, output, clear);
     }
+    */
 
-    update(uniforms) { 
+    update(uniforms) {
+        for (const name in uniforms) this.uniforms[name] = uniforms[name];
+        /* 
         uniforms.forEach((e) => {
             this.uniforms[e[0]] = e[1];
         })
+        */
     }
 }
