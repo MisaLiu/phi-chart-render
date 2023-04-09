@@ -2,7 +2,6 @@ import { number as verifyNum } from '@/verify';
 import * as Convert from './convert';
 import md5Encrypt from 'md5';
 import { Sprite, Graphics, Text } from 'pixi.js';
-import Effect from './effect'
 
 export default class Chart
 {
@@ -27,7 +26,6 @@ export default class Chart
         };
 
         this.sprites = {};
-        this.effects = [];
     }
 
     static from(rawChart, _chartInfo = {}, _chartLineTexture = [])
@@ -117,21 +115,6 @@ export default class Chart
 
         // console.log(chart);
         return chart;
-    }
-
-    loadEffects(rawEffects) {
-        let completeEffect = (Convert.Prpr(rawEffects)).effects
-        effectName = Object.getOwnPropertyNames(completeEffect)
-        effectName.forEach((n) => {
-            let effect = new Effect();
-            effect.shader = n;
-            effect.start = completeEffect[n].start;
-            effect.end = completeEffect[n].end;
-            effect.global = completeEffect[n].global;
-            effect.vars = completeEffect[n].vars;
-            effect.preProcessVars();
-            this.effects.push(effect);
-        })
     }
 
     readLineTextureInfo(infos = [])

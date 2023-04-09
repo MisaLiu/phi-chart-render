@@ -2,8 +2,7 @@ import * as verify from '@/verify';
 import Judgement from '@/judgement';
 import * as TickerFunc from './ticker';
 import * as CallbackFunc from './callback';
-import { Shader } from './shader';  /// !!!! TEST ONLY, REMOVE BEFORE MERGE TO MAIN BRANCH
-import * as Shaders from './shader/presets';  /// !!!! TEST ONLY, REMOVE BEFORE MERGE TO MAIN BRANCH
+import { Shader } from '@/main';
 import { Application, Container, Texture, Sprite, Graphics, Text, Rectangle, settings as PIXISettings } from 'pixi.js';
 
 PIXISettings.RENDER_OPTIONS.hello = true;
@@ -229,12 +228,6 @@ export default class Game
             };
         }
 
-        // Shaders
-        if (this._settings.shader) {
-            this.filter = (new Shader(Shaders.glitch));
-            this.render.gameContainer.filters = [this.filter];
-        }
-
         this.judgement.stage = this.render.UIContainer;
         this.judgement.createSprites(this._settings.showInputPoint);
 
@@ -321,7 +314,7 @@ export default class Game
             }
             else
             {
-                effect.shader = new Shader(Shaders[effect.shader]);
+                effect.shader = new Shader(Shader.presets[effect.shader]);
             }
             
             if (!effect.shader)
@@ -329,8 +322,6 @@ export default class Game
                 console.log('\'' + shaderName + '\' not found, will be ignored');
                 effect.shader = null;
             }
-
-            effect.reset();
         });
     }
 
@@ -340,6 +331,7 @@ export default class Game
         if (!this.chart.music) throw new Error('You must have a music to play');
 
         this.resize();
+        for (const effect of this.effects) effect.reset();
 
         if (this.render.fpsText)
         {
@@ -354,16 +346,6 @@ export default class Game
 
         this._animateStatus = 0;
         this._gameStartTime = Date.now();
-
-        if(this._settings.shader)
-        {
-            this.filter.update([
-                ['time', this.gameTimeInSec()],
-                ['screenSize', [this.render.parentNode.clientWidth, this.render.parentNode.clientHeight]],
-                ['UVScale', [1.0, 1.0]]
-            ])
-            this.render.render()
-        }
 
         this.chart.noteJudgeCallback = this.judgement.calcNote;
         this.render.ticker.add(this._calcTick);
@@ -415,6 +397,7 @@ export default class Game
         this.judgement.reset();
 
         this.resize();
+        for (const effect of this.effects) effect.reset();
 
         this._isPaused = false;
         this._isEnded = false;

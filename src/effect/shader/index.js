@@ -1,8 +1,9 @@
+import * as presets from './presets';
 import { Filter } from 'pixi.js';
 
 const defaultValueReg = /uniform\s+(\w+)\s+(\w+);\s+\/\/\s+%([^%]+)%/g;
 
-export class Shader extends Filter {
+export default class Shader extends Filter {
     constructor(_shaderText)
     {
         const shaderText = "// " + _shaderText.replaceAll('uv', 'vTextureCoord').replaceAll('screenTexture', 'uSampler');
@@ -47,6 +48,10 @@ export class Shader extends Filter {
         this.defaultValues = defaultValues;
     }
     
+    static get presets()
+    {
+        return presets;
+    }
 
     update(uniforms) {
         for (const name in uniforms) this.uniforms[name] = uniforms[name];

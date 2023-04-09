@@ -1,5 +1,4 @@
 import * as PhiChartRender from './main';
-import PrprEffectConverter from './chart/convert/prpr'; /// !!!! TEST ONLY, REMOVE BEFORE MERGE TO MAIN BRANCH
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
 import { Texture, Rectangle, utils as PIXIutils } from 'pixi.js';
@@ -1136,7 +1135,7 @@ async function loadChartFiles(_files)
 
             try {
                 let rawText = await readText(file);
-                let effects = PrprEffectConverter(JSON.parse(rawText));
+                let effects = PhiChartRender.Effect.from(JSON.parse(rawText));
 
                 files.effects = effects;
                 files.all[file.name] = effects;

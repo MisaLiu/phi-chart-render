@@ -1,5 +1,5 @@
-import Effect from '../effect'
-import utils from './utils';
+import Effect from '../index'
+import utils from '@/chart/convert/utils';
 
 const Easing = [
     (x) => x,
@@ -32,7 +32,7 @@ const Easing = [
     (x) => x < 0.5 ? (1 - Easing[25](1 - 2 * x)) / 2 : (1 + Easing[25](2 * x - 1)) / 2
 ];
 
-export default function PrprEffectConverter(effect)
+export default function PrprEffectReader(effect)
 {
     let effectList = [];
     let rawEffects = [ ...effect.effects ];

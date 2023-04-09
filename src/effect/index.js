@@ -1,4 +1,5 @@
 import { bool as verifyBool } from '@/verify';
+import * as Reader from './reader';
 
 
 export default class Effect
@@ -17,6 +18,23 @@ export default class Effect
     reset()
     {
         this._currentValue = (this.shader !== null && typeof this.shader !== 'string') ? this.shader.defaultValues : {};
+    }
+
+    static from(json)
+    {
+        let result;
+
+        if (typeof json === 'object')
+        {
+            result = Reader.PrprEffectReader(json);
+        }
+        
+        if (!result || result.length <= 0)
+        {
+            throw new Error('Unsupported file format');
+        }
+
+        return result;
     }
     
     calcTime(currentTime, screenSize)
