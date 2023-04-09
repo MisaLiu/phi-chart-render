@@ -3,7 +3,7 @@ import Judgement from '@/judgement';
 import * as TickerFunc from './ticker';
 import * as CallbackFunc from './callback';
 import { Shader } from './shader';  /// !!!! TEST ONLY, REMOVE BEFORE MERGE TO MAIN BRANCH
-import * as Shaders from './shader/shaders';  /// !!!! TEST ONLY, REMOVE BEFORE MERGE TO MAIN BRANCH
+import * as Shaders from './shader/presets';  /// !!!! TEST ONLY, REMOVE BEFORE MERGE TO MAIN BRANCH
 import { Application, Container, Texture, Sprite, Graphics, Text, Rectangle, settings as PIXISettings } from 'pixi.js';
 
 PIXISettings.RENDER_OPTIONS.hello = true;

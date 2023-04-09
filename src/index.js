@@ -3,7 +3,7 @@ import PrprEffectConverter from './chart/convert/prpr'; /// !!!! TEST ONLY, REMO
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
 import { Shader } from './game/shader';
-import * as Shaders from './game/shader/shaders';
+import * as Shaders from './game/shader/presets';
 import { Texture, Rectangle, Filter, utils as PIXIutils } from 'pixi.js';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
