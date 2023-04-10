@@ -92,16 +92,29 @@ export default function PrprEffectReader(effect)
 
                 if (_values instanceof Array)
                 {
+                    let _timedValues = [];
                     let values = [];
 
                     utils.calculateEventsBeat(_values)
-                        .forEach((_value) =>
+                        .sort((a, b) => a.startTime - b.startTime || b.endTime - a.startTime)
+                        .forEach((_value, index, arr) =>
                         {
-                            values = [ ...values, ...utils.calculateRealTime(bpmList, utils.calculateEventEase(_value, Easing)) ];
+                            let prevValue = arr[index - 1];
+
+                            if (!prevValue) _timedValues.push(_value);
+                            else if (_value.startTime == prevValue.startTime)
+                            {
+                                if (_value.endTime >= prevValue.endTime) _timedValues[_timedValues.length - 1] =  _value;
+                            }
+                            else _timedValues.push(_value);
                         }
                     );
 
-                    values.sort((a, b) => a.startTime - b.startTime);
+                    for (const _value of _timedValues)
+                    {
+                        values.push(...utils.calculateRealTime(bpmList, utils.calculateEventEase(_value, Easing)));
+                    }
+                    values.sort((a, b) => a.startTime - b.startTime || b.endTime - a.startTime);
                     effect.vars[name] = values;
                 }
                 else
