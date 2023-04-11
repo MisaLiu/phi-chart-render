@@ -6,14 +6,11 @@ import { number as verifyNum } from '@/verify';
 
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 const GlobalAudioCtx = (new Audio().canPlayType('audio/ogg') == '') ? new oggmentedAudioContext() : new AudioCtx();
-var GlobalAudioLatency = 0;
 
 GlobalAudioCtx.addEventListener('statechange', () =>
 {
     if (GlobalAudioCtx.state === 'running')
     {
-        GlobalAudioLatency = (!isNaN(GlobalAudioCtx.baseLatency) ? GlobalAudioCtx.baseLatency : 0) + (!isNaN(GlobalAudioCtx.outputLatency) ? GlobalAudioCtx.outputLatency : 0);
-
         window.removeEventListener('click', ResumeGlobalAudioContext);
         window.removeEventListener('touchend', ResumeGlobalAudioContext);
         window.removeEventListener('mousemove', ResumeGlobalAudioContext);
@@ -23,7 +20,7 @@ GlobalAudioCtx.addEventListener('statechange', () =>
 
 
 
-class WAudio
+export default class WAudio
 {
     constructor(src, loop = false, volume = 1, speed = 1, onend = undefined)
     {
@@ -162,6 +159,11 @@ class WAudio
         if (this._timer) this._timer.speed = this._speed;
         if (this._buffer) this._buffer.playbackRate.value = this._speed;
     }
+
+    static get globalLatency()
+    {
+        return (!isNaN(GlobalAudioCtx.baseLatency) ? GlobalAudioCtx.baseLatency : 0) + (!isNaN(GlobalAudioCtx.outputLatency) ? GlobalAudioCtx.outputLatency : 0);
+    }
 }
 
 
@@ -180,10 +182,3 @@ async function ResumeGlobalAudioContext()
 {
     if (GlobalAudioCtx.state === 'suspended') await GlobalAudioCtx.resume();
 }
-
-
-
-export {
-    WAudio,
-    GlobalAudioLatency as audioLatency
-};

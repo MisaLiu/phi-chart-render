@@ -424,7 +424,7 @@ doms.startBtn.addEventListener('click', async () => {
             bgDim: doms.settings.bgDim.value,
             noteScale: 10000 - doms.settings.noteScale.value,
 
-            audioOffset: doms.settings.offset.value / 1000 + (doms.settings.useBrowserLatency.checked ? PhiChartRender.audioLatency : 0),
+            audioOffset: doms.settings.offset.value / 1000 + (doms.settings.useBrowserLatency.checked ? PhiChartRender.WAudio.globalLatency : 0),
             speed: doms.settings.speed.value,
 
             hitsound: doms.settings.hitsound.checked,
