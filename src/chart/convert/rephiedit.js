@@ -4,7 +4,7 @@ import Judgeline from '../judgeline';
 import EventLayer from '../eventlayer';
 import Note from '../note';
 import utils from './utils';
-import { utils as PIXIutils } from 'pixi.js';
+import { Color } from 'pixi.js';
 
 const calcBetweenTime = 0.125;
 const Easing = [
@@ -556,11 +556,11 @@ function calculateColorEventEase(event)
             result.push({
                 startTime : currentTime,
                 endTime   : nextTime,
-                value     : PIXIutils.rgb2hex([
+                value     : (new Color([
                     Math.round(_valueCalculator(event, nextTime, event.start[0], event.end[0])) / 255,
                     Math.round(_valueCalculator(event, nextTime, event.start[1], event.end[1])) / 255,
                     Math.round(_valueCalculator(event, nextTime, event.start[2], event.end[2])) / 255
-                ])
+                ]).toArray())
             });
         }
     }
@@ -569,11 +569,11 @@ function calculateColorEventEase(event)
         result.push({
             startTime : event.startTime,
             endTime   : event.endTime,
-            value     : PIXIutils.rgb2hex([
+            value     : (new Color([
                 event.start[0] / 255,
                 event.start[1] / 255,
                 event.start[2] / 255
-            ])
+            ]).toArray())
         });
     }
 
