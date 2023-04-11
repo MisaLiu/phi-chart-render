@@ -142,6 +142,7 @@ export default class Game
 
         /* ===== 用户设置暂存 ===== */
         this._settings = {
+            resolution     : verify.number(params.render.resolution, window.devicePixelRatio, 1),
             noteScale      : verify.number(params.settings.noteScale, 8000),
             bgDim          : verify.number(params.settings.bgDim, 0.5, 0, 1),
             offset         : verify.number(params.settings.audioOffset, 0),
@@ -471,7 +472,7 @@ export default class Game
         this.render.renderer.resize(this.render.parentNode.clientWidth, this.render.parentNode.clientHeight);
 
         // 计算新尺寸相关数据
-        this.render.sizer = calcResizer(this.render.screen.width, this.render.screen.height, this._settings.noteScale);
+        this.render.sizer = calcResizer(this.render.screen.width, this.render.screen.height, this._settings.noteScale, this._settings.resolution);
 
         // 主舞台区位置重计算
         this.render.mainContainer.position.x = this.render.sizer.widthOffset;
@@ -565,15 +566,15 @@ export default class Game
     }
 }
 
-function calcResizer(width, height, noteScale = 8000)
+function calcResizer(width, height, noteScale = 8000, resolution = window.devicePixelRatio)
 {
     let result = {};
 
-    result.widthRaw = width;
-    result.heightRaw = height;
+    result.widthRaw = width * resolution;
+    result.heightRaw = height * resolution;
 
-    result.width  = result.heightRaw / 9 * 16 < result.widthRaw ? result.heightRaw / 9 * 16 : result.widthRaw;
-    result.height = result.heightRaw;
+    result.width  = height / 9 * 16 < width ? height / 9 * 16 : width;
+    result.height = height;
     result.widthPercent = result.width * (9 / 160);
     result.widthOffset  = (width - result.width) / 2;
 
