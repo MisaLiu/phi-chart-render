@@ -32,7 +32,6 @@ const ProgressBarCache = (() =>
   *         resolution?,
   *         autoDensity?,
   *         antialias?,
-  *         forceCanvas?,
   *         view?,
   *         resizeTo?
   *     },
@@ -52,7 +51,6 @@ const ProgressBarCache = (() =>
   *         showInputPoint?,
   *         challengeMode?,
   *         autoPlay?,
-  *         forceCanvas?,
   *         debug?
   *     }
   * }
@@ -83,7 +81,6 @@ export default class Game
             resolution      : verify.number(params.render.resolution, window.devicePixelRatio, 1),
             autoDensity     : verify.bool(params.render.autoDensity, true),
             antialias       : verify.bool(params.render.antialias, true),
-            forceCanvas     : verify.bool(params.render.forceCanvas, false),
             view            : params.render.canvas ? params.render.canvas : undefined,
             backgroundAlpha : 1
         });

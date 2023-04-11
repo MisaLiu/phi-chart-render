@@ -1,7 +1,7 @@
 import * as PhiChartRender from './main';
 import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
-import { Texture, Rectangle, utils as PIXIutils } from 'pixi.js';
+import { Texture, Rectangle } from 'pixi.js';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
 import * as Sentry from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';
@@ -69,7 +69,6 @@ const doms = {
         challengeMode: document.querySelector('input#settings-challenge-mode'),
         plyndb: document.querySelector('input#settings-plyndb'),
         autoPlay: document.querySelector('input#settings-autoplay'),
-        forceCanvas: document.querySelector('input#settings-force-canvas'),
         antiAlias: document.querySelector('input#settings-anti-alias'),
         lowResolution: document.querySelector('input#settings-low-resolution'),
         debug: document.querySelector('input#settings-debug'),
@@ -414,8 +413,7 @@ doms.startBtn.addEventListener('click', async () => {
         render: {
             resizeTo: document.documentElement,
             resolution: doms.settings.lowResolution.checked ? 1 : window.devicePixelRatio,
-            antialias: doms.settings.antiAlias.checked,
-            forceCanvas: doms.settings.forceCanvas.checked
+            antialias: doms.settings.antiAlias.checked
         },
         settings: {
             multiNoteHL: doms.settings.multiNoteHL.checked,
@@ -631,12 +629,6 @@ window.addEventListener('load', async () =>
     doms.skinPackFile.disabled = false;
 
     calcHeightPercent();
-
-    if (!PIXIutils.isWebGLSupported())
-    {
-        doms.settings.forceCanvas.checked = true;
-        doms.settings.forceCanvas.disabled = true;
-    }
 
     doms.settings.testInputDelay.testTimes = 0;
     doms.settings.testInputDelay.testDelays = 0;
