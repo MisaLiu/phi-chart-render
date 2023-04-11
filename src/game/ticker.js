@@ -82,7 +82,7 @@ function calcTick()
                     const screenSize = [ render.sizer.widthRaw, render.sizer.heightRaw ];
 
                     render.gameContainer.filters = [];
-                    render.mainContainer.filters = [];
+                    render.stage.filters = [];
 
                     for (let i = 0, length = effects.length; i < length; i++)
                     {
@@ -91,9 +91,9 @@ function calcTick()
                         if (effect.endTime < currentTime) continue;
                         if (effect.startTime > currentTime) break;
 
-                        if (effect.isGlobal) render.mainContainer.filters.push(effect.shader);
-                        else render.gameContainer.filters.push(effect.shader);
                         effect.calcTime(currentTime, screenSize);
+                        if (effect.isGlobal) render.stage.filters.push(effect.shader);
+                        else render.gameContainer.filters.push(effect.shader);
                     }
                 }
             }
