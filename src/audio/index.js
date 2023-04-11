@@ -107,7 +107,8 @@ class WAudio
         if (this._timer.status === 1)
         {
             playedBeforeSeek = true;
-            this.pause();
+            this._buffer.onended = undefined;
+            this._buffer.stop();
         }
 
         this._timer.seek(duration);
