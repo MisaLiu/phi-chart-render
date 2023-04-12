@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "bezier-easing": "^2.1.0",
-    "md5": "^2.3.0",
+    "md5-js": "^0.0.3",
     "oggmented": "^1.0.1",
     "pixi.js": "^7.2.4"
   },

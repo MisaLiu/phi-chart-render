@@ -1,6 +1,6 @@
 import { number as verifyNum } from '@/verify';
 import * as Convert from './convert';
-import md5Encrypt from 'md5';
+import md5Hash from 'md5-js';
 import { Sprite, Graphics, Text } from 'pixi.js';
 
 export default class Chart
@@ -39,23 +39,19 @@ export default class Chart
             if (!isNaN(Number(rawChart.formatVersion)))
             {
                 chart = Convert.Official(rawChart);
-                chartMD5 = null;
             }
             else if (rawChart.META && !isNaN(Number(rawChart.META.RPEVersion)))
             {
-                let chartWithoutInfo = { ...rawChart };
-                delete chartWithoutInfo.META;
-                delete chartWithoutInfo.judgeLineGroup;
-                chartMD5 = md5Encrypt(JSON.stringify(chartWithoutInfo));
-
                 chart = Convert.RePhiEdit(rawChart);
                 chartInfo = chart.info;
             }
+
+            chartMD5 = md5Hash(JSON.stringify(rawChart));
         }
         else if (typeof rawChart == 'string')
         {
             chart = Convert.PhiEdit(rawChart);
-            chartMD5 = md5Encrypt(rawChart);
+            chartMD5 = md5Hash(rawChart);
         }
 
         if (!chart) throw new Error('Unsupported chart format');
