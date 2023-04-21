@@ -574,8 +574,7 @@ function calcResizer(width, height, noteScale = 8000, resolution = window.device
 {
     let result = {};
 
-    result.widthRaw = width * resolution;
-    result.heightRaw = height * resolution;
+    result.shaderScreenSize = [ width * resolution, height * resolution ];
 
     result.width  = height / 9 * 16 < width ? height / 9 * 16 : width;
     result.height = height;
