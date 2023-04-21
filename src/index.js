@@ -97,6 +97,7 @@ const files = {
     images: {},
     infos: [],
     lines: [],
+    shaders: {},
     all: {}
 };
 
@@ -108,7 +109,6 @@ const currentFile = {
 
 const assets = {
     textures: {},
-    shaders: {},
     sounds: {}
 };
 
@@ -1220,9 +1220,16 @@ async function loadChartFiles(_files)
 
                 return;
             })
+            .catch(async () =>
+            {
+                let shaderRaw = await readText(file);
+                let shader = PhiChartRender.Shader.from(shaderRaw);
+
+                files.shaders[file.name] = shader;
+                files.all[file.name] = shader;
+            })
             .catch((e) =>
             {
-                console.error(e);
                 console.error('Unsupported file: ' + file.name);
                 return;
             }));

@@ -47,6 +47,30 @@ export default class Shader extends Filter {
         for (const name in uniforms) this.uniforms[name] = uniforms[name];
         this.defaultValues = defaultValues;
     }
+
+    static from(shaderText)
+    {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl');
+
+        if (!gl) throw 'Your browser doesn\'t support WebGL.';
+
+        // Clear canvas
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        // Init shader
+        const shader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(shader, shaderText);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+        {
+            throw `An error occurred compiling the shaders.\n${gl.getShaderInfoLog(shader)}`;
+        }
+
+        return new Shader(shaderText);
+    }
     
     static get presets()
     {
