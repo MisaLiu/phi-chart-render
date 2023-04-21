@@ -300,20 +300,27 @@ export default class Game
         // 加载 Shaders
         this.effects.forEach((effect) =>
         {
-            if (!effect.shader) return;
-            if (typeof effect.shader !== 'string') return;
+            if (effect.shader instanceof Shader) return;
+            if (!effect.shader || typeof effect.shader !== 'string')
+            {
+                effect.shader = null;
+                return;
+            }
 
             const shaderName = effect.shader;
+            let shader = null;
 
-            if (/^\/shader/.test(effect.shader))
+            if (shaderName.indexOf('/') === 0)
             {
-                const shaderNameReal = shaderName.replace(/^\/shader/, '');
-                effect.shader = new Shader(this.zipFiles[shaderNameReal]);
+                const shaderNameReal = shaderName.substr(1);
+                if (this.zipFiles[shaderNameReal]) shader = this.zipFiles[shaderNameReal];
             }
-            else
+            else if (Shader.presets[shaderName])
             {
-                effect.shader = new Shader(Shader.presets[effect.shader]);
+                shader = new Shader(Shader.presets[shaderName], shaderName);
             }
+
+            effect.shader = shader;
             
             if (!effect.shader)
             {

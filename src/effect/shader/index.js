@@ -4,7 +4,7 @@ import { Filter } from 'pixi.js';
 const defaultValueReg = /uniform\s+(\w+)\s+(\w+);\s+\/\/\s+%([^%]+)%/g;
 
 export default class Shader extends Filter {
-    constructor(_shaderText)
+    constructor(_shaderText, name)
     {
         const shaderText = "// " + _shaderText.replaceAll('uv', 'vTextureCoord').replaceAll('screenTexture', 'uSampler');
         const defaultValues = {};
@@ -46,9 +46,11 @@ export default class Shader extends Filter {
 
         for (const name in uniforms) this.uniforms[name] = uniforms[name];
         this.defaultValues = defaultValues;
+
+        this.name = name;
     }
 
-    static from(shaderText)
+    static from(shaderText, name)
     {
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl');
@@ -69,7 +71,7 @@ export default class Shader extends Filter {
             throw `An error occurred compiling the shaders.\n${gl.getShaderInfoLog(shader)}`;
         }
 
-        return new Shader(shaderText);
+        return new Shader(shaderText, name);
     }
     
     static get presets()

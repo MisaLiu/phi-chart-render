@@ -1223,7 +1223,7 @@ async function loadChartFiles(_files)
             .catch(async () =>
             {
                 let shaderRaw = await readText(file);
-                let shader = PhiChartRender.Shader.from(shaderRaw);
+                let shader = PhiChartRender.Shader.from(shaderRaw, file.name);
 
                 files.shaders[file.name] = shader;
                 files.all[file.name] = shader;
