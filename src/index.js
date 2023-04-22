@@ -3,6 +3,7 @@ import FontFaceObserver from 'fontfaceobserver';
 import JSZip from 'jszip';
 import { Texture, Rectangle } from 'pixi.js';
 import { canvasRGB as StackBlur } from 'stackblur-canvas';
+import Pica from 'pica';
 import * as Sentry from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';
 import './phizone';
@@ -51,12 +52,14 @@ const doms = {
         bg: document.querySelector('select#file-bg')
     },
     settings: {
+        showBG: document.querySelector('input#settings-show-bg'),
         multiNoteHL: document.querySelector('input#settings-multi-note-hl'),
         showAPStatus: document.querySelector('input#settings-show-ap-status'),
         showInputPoint: document.querySelector('input#settings-show-input-point'),
         noteScale: document.querySelector('input#settings-note-scale'),
         bgDim: document.querySelector('input#settings-bg-dim'),
         bgBlur: document.querySelector('input#settings-bg-blur'),
+        bgQuality: document.querySelector('select#settings-bg-quality'),
 
         offset: document.querySelector('input#settings-audio-offset'),
         useBrowserLatency: document.querySelector('input#settings-use-browser-latency'),
@@ -366,11 +369,15 @@ doms.startBtn.addEventListener('click', async () => {
     if (!zipFiles['HoldEnd.png']) zipFiles['HoldEnd.png'] = assets.textures.holdEnd;
 
     currentFile.chart.music = currentFile.music;
-    if (currentFile.bg)
+    if (currentFile.bg && doms.settings.showBG.checked)
     {
-        let bgBlur = await Texture.from(await blurImage(currentFile.bg, doms.settings.bgBlur.value));
+        let bgBlur = await Texture.from(await blurImage(await resizeImage(currentFile.bg, parseInt(doms.settings.bgQuality.value)), doms.settings.bgBlur.value));
         Texture.addToCache(bgBlur, doms.file.bg.value + '_blured');
         currentFile.chart.bg = bgBlur;
+    }
+    else
+    {
+        currentFile.chart.bg = null;
     }
 
     if (files.infos && files.infos.length > 0)
@@ -592,37 +599,6 @@ window.addEventListener('load', async () =>
         { name: 'spGlitch', url: './assets/sounds/result/sp_glitch.ogg' },
     ], { loop: true, noTimer: true }));
 
-    /*
-    (await (async (resources = [], options = {}) => {
-        for (const resource of resources) {
-            doms.loadingStatus.innerText = 'Loading shader ' + resource.name + ' ...';
-
-            try {
-                let res = await requestFile(resource.url);
-                let rawShader = await res.text();
-
-                if (!assets.shaders) assets.shaders = {};
-                assets.shaders[resource.name] = new Shader(rawShader);
-            }
-            catch (e) {
-                console.error('Failed getting resource: ' + resource.name, e);
-            }
-        }
-    })([
-        { name: 'chromatic', url: './assets/shaders/chromatic.glsl' },
-        { name: 'circle_blur', url: './assets/shaders/circle_blur.glsl' },
-        { name: 'fisheye', url: './assets/shaders/fisheye.glsl' },
-        { name: 'glitch', url: './assets/shaders/glitch.glsl' },
-        { name: 'grayscale', url: './assets/shaders/grayscale.glsl' },
-        { name: 'noise', url: './assets/shaders/noise.glsl' },
-        { name: 'pixel', url: './assets/shaders/pixel.glsl' },
-        { name: 'radial_blur', url: './assets/shaders/radial_blur.glsl' },
-        { name: 'shockwave', url: './assets/shaders/shockwave.glsl' },
-        { name: 'vignette', url: './assets/shaders/vignette.glsl' },
-
-    ], { loop: true, noTimer: true }));
-    */
-    
     doms.loadingStatus.innerText = 'All done!';
     doms.chartPackFileReadProgress.innerText = 'No chart pack file selected';
     doms.chartPackFile.disabled = false;
@@ -842,6 +818,49 @@ function blurImage(_texture, radius = 10)
             .then(result => res(result))
             .catch(e => rej(e))
     });
+}
+
+function resizeImage(_texture, quality = 1)
+{
+    let canvas = document.createElement('canvas');
+    let texture;
+    let pica = Pica({
+        features: ['all']
+    });
+
+    if (_texture.baseTexture) texture = _texture.baseTexture.resource.source;
+    else texture = _texture;
+
+    switch (quality)
+    {
+        case 0: {
+            canvas.width = 480;
+            canvas.height = texture.height * (480 / texture.width);
+            break;
+        }
+        case 1:
+        {
+            canvas.width = 720;
+            canvas.height = texture.height * (720 / texture.width);
+            break;
+        }
+        case 2:
+        {
+            canvas.width = 1080;
+            canvas.height = texture.height * (1080 / texture.width);
+            break;
+        }
+        default:
+        {
+            canvas.width = texture.width;
+            canvas.height = texture.height;
+        }
+    }
+
+    return (new Promise(async (res, rej) =>
+    {
+        res(await createImageBitmap(await pica.resize(texture, canvas)));
+    }));
 }
 
 function calcHeightPercent()
