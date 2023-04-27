@@ -656,6 +656,8 @@ window.addEventListener('load', async () =>
         );
     }
 
+    initConsoleEasterEgg();
+
     function requestFile(url)
     {
         return new Promise((res, rej) =>
@@ -1288,6 +1290,65 @@ async function loadChartFiles(_files)
         let option = document.createElement('option');
         option.innerText = option.value = file.name;
         return option;
+    }
+}
+
+function initConsoleEasterEgg()
+{
+    const reg = /YouOpenedTheConsole!/;
+
+    reg.toString = async function ()
+    {
+        try {
+            let url = await getImageBase64('./icons/64.png');
+            console.log('%c ', 'padding:32px;background:url(' + url + ') center center no-repeat;');
+        } catch (e) {}
+        
+        console.log('%cphi-chart-render%c' + GIT_VERSION, 'padding:8px;background-color:#1C1C1C;color:#FFF', 'padding:8px;background-color:#1E90FF;color:#FFF;');
+        
+        try {
+            let url = await getImageBase64('./icons/github.png');
+            console.log('%chttps://github.com/MisaLiu/phi-chart-render', 'padding:4px;padding-left:22px;background:url(' + url + ') left center no-repeat;background-color:#1C1C1C;background-size:contain;color:#FFF;');
+        } catch (e) {
+            console.log('%cGitHub: https://github.com/MisaLiu/phi-chart-render', 'padding:4px;background-color:#1C1C1C;color:#FFF;');
+        }
+        
+        console.groupCollapsed('❤️ Support me');
+        try {
+            let url = await getImageBase64('./icons/patreon.png');
+            console.log('%chttps://patreon.com/HIMlaoS_Misa', 'padding:4px;padding-left:22px;background:url(' + url + ') left center no-repeat;background-color:#f3455c;background-size:contain;color:#FFF;');
+        } catch (e) {
+            console.log('%Patreon: https://patreon.com/HIMlaoS_Misa', 'padding:4px;background-color:#f3455c;color:#FFF;');
+        }
+        
+        try {
+            let url = await getImageBase64('./icons/afdian.png');
+            console.log('%chttps://afdian.net/@MisaLiu', 'padding:4px;padding-left:22px;background:url(' + url + ') left center no-repeat;background-color:#946CE6;background-size:contain;color:#FFF;');
+        } catch (e) {
+            console.log('%爱发电: https://afdian.net/@MisaLiu', 'padding:4px;background-color:#946CE6;color:#FFF;');
+        }
+
+        console.groupEnd();
+    }
+
+    console.log(reg);
+
+    function getImageBase64(url) {
+        return new Promise((resolve, reject) => {
+            fetch(url)
+                .then(res => res.blob())
+                .then(res => {
+                    let reader = new FileReader();
+                    reader.onload = () => {
+                        resolve(reader.result);
+                    };
+                    reader.onerror = (e) => {
+                        reject(e);
+                    };
+                    reader.readAsDataURL(res);
+                }
+            );
+        });
     }
 }
 

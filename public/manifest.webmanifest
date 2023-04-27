@@ -5,6 +5,11 @@
     "orientation": "landscape",
     "icons": [
         {
+            "src": "./icons/64.png",
+            "sizes": "64x64",
+            "type": "image/png"
+        },
+        {
         "src": "./icons/192.png",
         "sizes": "192x192",
         "type": "image/png"
