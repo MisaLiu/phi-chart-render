@@ -396,7 +396,7 @@ export default class Game
     restart()
     {
         this.render.ticker.remove(this._calcTick);
-        this.chart.music.stop();
+        this.chart.music.reset();
 
         this.chart.reset();
         this.judgement.reset();
@@ -437,7 +437,7 @@ export default class Game
         const canvas = this.render.view;
 
         this.render.ticker.remove(this._calcTick);
-        this.chart.music.stop();
+        this.chart.music.reset();
 
         if (this.render.fpsText) clearInterval(this.render.fpsCounter);
 

@@ -57,6 +57,20 @@ export default class WAudio
         });
     }
 
+    reset()
+    {
+        this._buffer.onended = undefined;
+        this._buffer.stop();
+        this._buffer.disconnect();
+        this._buffer = null;
+
+        if (this._timer)
+        {
+            this._timer.stop();
+            this._timer = null;
+        }
+    }
+
     play(withTimer = false)
     {
         if (withTimer && !this._timer) this._timer = new AudioTimer(this._speed);
