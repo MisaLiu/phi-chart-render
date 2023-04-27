@@ -2,7 +2,7 @@ import { number as verifyNum } from '@/verify';
 
 
 
-const getCurrentTime = () => performance.now() || Date.now();
+var AudioContextTimerDiff = 0;
 
 
 
@@ -18,15 +18,15 @@ class AudioTimer
         this._lastSpeedChangedProgress = 0;
     }
 
-    start()
+    start(audioCtxCurrentTime)
     {
         if (this.status === 2)
         {
-            this.startTime = getCurrentTime() - (this.pausedTime - this.startTime);
+            this.startTime = performance.now() - (this.pausedTime - this.startTime);
         }
         else
         {
-            this.startTime = getCurrentTime();
+            this.startTime = (audioCtxCurrentTime ? (audioCtxCurrentTime * 1000) + AudioContextTimerDiff : performance.now());
         }
         
         this.status = 1;
@@ -37,12 +37,12 @@ class AudioTimer
     {
         if (this.status === 1)
         {
-            this.pausedTime = getCurrentTime();
+            this.pausedTime = performance.now();
             this.status = 2;
         }
         else if (this.status === 2)
         {
-            this.startTime = getCurrentTime() - (this.pausedTime - this.startTime);
+            this.startTime = performance.now() - (this.pausedTime - this.startTime);
             this.pausedTime = NaN;
             this.status = 1;
         }
@@ -63,7 +63,7 @@ class AudioTimer
     {
         if (this.status === 3) return;
         this.startTime -= duration * 1000;
-        if (isNaN(this.pausedTime) && getCurrentTime() - (this.startTime - this._lastSpeedChangedProgress) < 0) this.startTime = getCurrentTime();
+        if (isNaN(this.pausedTime) && performance.now() - (this.startTime - this._lastSpeedChangedProgress) < 0) this.startTime = performance.now();
         else if (!isNaN(this.pausedTime) && this.startTime > this.pausedTime) this.startTime = this.pausedTime;
     }
 
@@ -74,15 +74,26 @@ class AudioTimer
 
     set speed(value)
     {
-        if (this.status !== 3) this._lastSpeedChangedProgress += ((this.status === 1 ? getCurrentTime() : this.pausedTime) - this.startTime) * this._speed;
-        this.startTime = getCurrentTime();
-        if (this.status === 2) this.pausedTime = getCurrentTime();
+        if (this.status !== 3) this._lastSpeedChangedProgress += ((this.status === 1 ? performance.now() : this.pausedTime) - this.startTime) * this._speed;
+        this.startTime = performance.now();
+        if (this.status === 2) this.pausedTime = performance.now();
         this._speed = verifyNum(value);
     }
 
     get time()
     {
-        return ((isNaN(this.pausedTime) ? getCurrentTime() - this.startTime : this.pausedTime - this.startTime) * this._speed + this._lastSpeedChangedProgress) / 1000;
+        return ((isNaN(this.pausedTime) ? performance.now() - this.startTime : this.pausedTime - this.startTime) * this._speed + this._lastSpeedChangedProgress) / 1000;
+    }
+
+    static initTimeDiff(audioCtxCurrentTime)
+    {
+        AudioContextTimerDiff = performance.now() - (audioCtxCurrentTime * 1000);
+        return AudioContextTimerDiff;
+    }
+
+    static get TimerDiff()
+    {
+        return AudioContextTimerDiff;
     }
 }
 

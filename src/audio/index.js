@@ -11,10 +11,17 @@ GlobalAudioCtx.addEventListener('statechange', () =>
 {
     if (GlobalAudioCtx.state === 'running')
     {
+        AudioTimer.initTimeDiff(GlobalAudioCtx.currentTime);
+        console.info('[WAudio] Audio context is now activated, current timer difference: ' + AudioTimer.TimerDiff + 'ms');
+
         window.removeEventListener('click', ResumeGlobalAudioContext);
         window.removeEventListener('touchend', ResumeGlobalAudioContext);
         window.removeEventListener('mousemove', ResumeGlobalAudioContext);
         window.removeEventListener('scroll', ResumeGlobalAudioContext);
+    }
+    else // Is it work?
+    {
+        ResumeGlobalAudioContext();
     }
 });
 
@@ -65,7 +72,7 @@ export default class WAudio
         {
             this._timer.speed = this._speed;
             this._buffer.start(0, (this._timer.status !== 3 ? this._timer.time : 0));
-            this._timer.start();
+            this._timer.start(GlobalAudioCtx.currentTime);
         }
         else
         {
@@ -160,6 +167,11 @@ export default class WAudio
         if (this._buffer) this._buffer.playbackRate.value = this._speed;
     }
 
+    static get AudioContext()
+    {
+        return GlobalAudioCtx;
+    }
+
     static get globalLatency()
     {
         return (!isNaN(GlobalAudioCtx.baseLatency) ? GlobalAudioCtx.baseLatency : 0) + (!isNaN(GlobalAudioCtx.outputLatency) ? GlobalAudioCtx.outputLatency : 0);
@@ -168,8 +180,10 @@ export default class WAudio
 
 
 
-window.addEventListener('load', async () =>
+window.addEventListener('load', () =>
 {
+    if (GlobalAudioCtx.state === 'running') return;
+    
     window.addEventListener('click', ResumeGlobalAudioContext);
     window.addEventListener('touchend', ResumeGlobalAudioContext);
     window.addEventListener('mousemove', ResumeGlobalAudioContext);
@@ -180,5 +194,6 @@ window.addEventListener('load', async () =>
 
 async function ResumeGlobalAudioContext()
 {
+    console.info('[WAudio] Trying resume audio context...');
     if (GlobalAudioCtx.state === 'suspended') await GlobalAudioCtx.resume();
 }
