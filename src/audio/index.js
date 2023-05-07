@@ -11,8 +11,8 @@ GlobalAudioCtx.addEventListener('statechange', () =>
 {
     if (GlobalAudioCtx.state === 'running')
     {
-        AudioTimer.initTimeDiff(GlobalAudioCtx.currentTime);
-        console.info('[WAudio] Audio context is now activated, current timer difference: ' + AudioTimer.TimerDiff + 'ms');
+        // AudioTimer.initTimeDiff(GlobalAudioCtx.currentTime);
+        // console.info('[WAudio] Audio context is now activated, current timer difference: ' + AudioTimer.TimerDiff + 'ms');
 
         window.removeEventListener('click', ResumeGlobalAudioContext);
         window.removeEventListener('touchend', ResumeGlobalAudioContext);
