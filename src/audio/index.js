@@ -88,7 +88,7 @@ export default class WAudio
         if (this._timer)
         {
             this._timer.speed = this._speed;
-            this._buffer.start(0, (this._timer.status !== 3 ? this._timer.time : 0));
+            this._buffer.start(0, (this._timer.status !== 3 && this._timer.time > 0 ? this._timer.time : 0));
             this._timer.start(GlobalAudioCtx.currentTime);
         }
         else
