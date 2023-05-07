@@ -59,10 +59,13 @@ export default class WAudio
 
     reset()
     {
-        this._buffer.onended = undefined;
-        this._buffer.stop();
-        this._buffer.disconnect();
-        this._buffer = null;
+        if (this._buffer)
+        {
+            this._buffer.onended = undefined;
+            this._buffer.stop();
+            this._buffer.disconnect();
+            this._buffer = null;
+        }
 
         if (this._timer)
         {
