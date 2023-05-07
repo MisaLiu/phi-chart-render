@@ -8,7 +8,7 @@
  * 
  * Copyright (c) 2022 by ${git_name_email}, All Rights Reserved. 
  */
-const ASSETS_VERSION = '0.2';
+const ASSETS_VERSION = '0.3';
 const GITHUB_CURRENT_GIT_HASH = `{{CURRENT_HASH}}`;
 
 self.addEventListener('install', (e) =>
