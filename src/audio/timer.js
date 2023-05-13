@@ -26,7 +26,8 @@ class AudioTimer
         }
         else
         {
-            this.startTime = (audioCtxCurrentTime ? (audioCtxCurrentTime * 1000) + AudioContextTimerDiff : performance.now());
+            // this.startTime = (audioCtxCurrentTime ? (audioCtxCurrentTime * 1000) + AudioContextTimerDiff : performance.now());
+            this.startTime = performance.now();
         }
         
         this.status = 1;
