@@ -98,4 +98,4 @@ You must have a Node.js enviorment to helping development.
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
 
-All assets used in this project are licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
+All assets used in this project are licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
