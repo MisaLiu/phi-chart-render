@@ -75,6 +75,7 @@ You must have a Node.js enviorment to helping development.
 * [@Greenball233](https://github.com/Greenball233)
 * [@inokana](https://github.com/GBTP)
 * [@totorowldox](https://github.com/totorowldox)
+* [osugame.online](http://osugame.online/)
 * [All contributors](https://github.com/MisaLiu/phi-chart-render/graphs/contributors)
 * And you
 

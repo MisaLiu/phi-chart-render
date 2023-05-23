@@ -49,7 +49,7 @@ export default class WAudio
         return new Promise(async (res, rej) =>
         {
             try {
-                let { startOffset, buffer } = parseAudio(src);
+                let { startOffset, buffer } = parseAudio(src); // Reference: https://github.com/111116/webosu/blob/b4c0ba419a6ba33d5b2e35d1d977b656befcac25/scripts/osu-audio.js#L107
                 let track = await GlobalAudioCtx.decodeAudioData(buffer || src);
                 if (!track) rej('Unsupported source type');
                 let audio = new WAudio(track, loop, startOffset);
