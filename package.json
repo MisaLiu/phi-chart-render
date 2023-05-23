@@ -44,7 +44,8 @@
     "bezier-easing": "^2.1.0",
     "md5-js": "^0.0.3",
     "oggmented": "^1.0.1",
-    "pixi.js": "^7.2.4"
+    "pixi.js": "^7.2.4",
+    "unify-mp3-timing": "^1.0.3"
   },
   "browserslist": [
     "last 10 versions",

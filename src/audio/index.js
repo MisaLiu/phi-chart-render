@@ -1,4 +1,5 @@
 import oggmentedAudioContext from 'oggmented';
+import Mp3Parser from 'unify-mp3-timing';
 import AudioTimer from './timer';
 import { number as verifyNum } from '@/verify';
 
@@ -29,11 +30,12 @@ GlobalAudioCtx.addEventListener('statechange', () =>
 
 export default class WAudio
 {
-    constructor(src, loop = false, volume = 1, speed = 1, onend = undefined)
+    constructor(src, loop = false, offset = 0, volume = 1, speed = 1, onend = undefined)
     {
         this.source = src;
         this.loop = loop;
         this.onend = onend;
+        this._offset = verifyNum(offset, 0) / 1000;
         this._volume = verifyNum(volume, 1);
         this._speed = verifyNum(speed, 1);
         this._gain = GlobalAudioCtx.createGain();
@@ -42,15 +44,18 @@ export default class WAudio
         this._gain.connect(GlobalAudioCtx.destination);
     }
 
-    static from(src, loop, noTimer = false)
+    static from(src, loop)
     {
         return new Promise(async (res, rej) =>
         {
             try {
-                let track = await GlobalAudioCtx.decodeAudioData(src);
+                let { startOffset, buffer } = parseAudio(src);
+                let track = await GlobalAudioCtx.decodeAudioData(buffer || src);
                 if (!track) rej('Unsupported source type');
-                let audio = new WAudio(track, loop, noTimer);
+                let audio = new WAudio(track, loop, startOffset);
                 res(audio);
+
+                console.log(startOffset, buffer);
             } catch (e) {
                 rej(e);
             }
@@ -153,7 +158,7 @@ export default class WAudio
 
     get currentTime()
     {
-        return this._timer ? this._timer.time : NaN;
+        return this._timer ? this._timer.time - this._offset : NaN;
     }
 
     get progress()
@@ -195,6 +200,95 @@ export default class WAudio
     }
 }
 
+
+
+function parseAudio(arrayBuffer)
+{
+    if (!detectIfIsMp3(arrayBuffer)) return { startOffset: 19 };
+
+    let mp3Tags = Mp3Parser.readTags(new DataView(arrayBuffer));
+
+    if (mp3Tags.length === 3 && mp3Tags[1]._section.type === 'Xing')
+    {
+        let uintArray = new Uint8Array(arrayBuffer.byteLength - mp3Tags[1]._section.byteLength);
+        let offsetAfterTag = mp3Tags[1]._section.offset + mp3Tags[1]._section.byteLength;
+
+        uintArray.set(new Uint8Array(arrayBuffer, 0, mp3Tags[1]._section.offset), 0);
+        uintArray.set(new Uint8Array(arrayBuffer, offsetAfterTag, arrayBuffer.byteLength - offsetAfterTag), mp3Tags[0]._section.offset);
+
+        return { startOffset: predictMp3Offset(mp3Tags), buffer: uintArray.buffer };
+    }
+
+    return { startOffset: predictMp3Offset(mp3Tags) };
+}
+
+function detectIfIsMp3(arrayBuffer)
+{
+    const Mp3FileHeads = [ [ 0x49, 0x44, 0x33 ], [ 0xFF, 0xFB, 0x50 ] ];
+    let uintArray = new Uint8Array(arrayBuffer);
+
+    for (const Mp3FileHead of Mp3FileHeads)
+    {
+        if (
+            uintArray[0] === Mp3FileHead[0] &&
+            uintArray[1] === Mp3FileHead[1] &&
+            uintArray[2] === Mp3FileHead[2]
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function predictMp3Offset(tags)
+{
+    const printWarn = (msg) => console.warn('Cannot predict MP3 offset:', msg);
+    const defaultOffset = 22;
+
+    if (!tags || !tags.length)
+    {
+        printWarn('MP3 tags not found');
+        return defaultOffset;
+    }
+
+    const frameTag = tags[tags.length-1];
+    let vbrTag;
+    let sampleRate;
+    
+    if (frameTag._section.sampleLength != 1152)
+    {
+        printWarn('Unexpected sample length');
+        return defaultOffset;
+    }
+
+    for (const tag of tags)
+    {
+        if (tag._section.type === 'Xing') vbrTag = tag;
+    }
+
+    if (!vbrTag) return defaultOffset;
+
+    if (!vbrTag.identifier)
+    {
+        printWarn('vbr tag identifier missing');
+        return defaultOffset;
+    }
+
+    if (!vbrTag.vbrinfo || vbrTag.vbrinfo.ENC_DELAY !== 576)
+    {
+        printWarn('vbr ENC_DELAY value unexpected');
+        return defaultOffset;
+    }
+
+    sampleRate = vbrTag.header.samplingRate;
+    if (sampleRate === 32000) return 89 - 1152000 / sampleRate;
+    if (sampleRate === 44100) return 68 - 1152000 / sampleRate;
+    if (sampleRate === 48000) return 68 - 1152000 / sampleRate;
+
+    printWarn('sampleRate unexpected');
+    return defaultOffset;
+}
 
 
 window.addEventListener('load', () =>
