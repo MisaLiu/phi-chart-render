@@ -54,8 +54,6 @@ export default class WAudio
                 if (!track) rej('Unsupported source type');
                 let audio = new WAudio(track, loop, startOffset);
                 res(audio);
-
-                console.log(startOffset, buffer);
             } catch (e) {
                 rej(e);
             }
