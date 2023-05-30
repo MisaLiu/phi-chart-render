@@ -469,12 +469,39 @@ function convertChartFormat(rawChart)
 
 function calculateTextEventEase(event)
 {
-    let timeBetween = event.endTime - event.startTime;
+    const NumberReg = /(.+)%P%/;
+    const isNumberRequired = NumberReg.test(event.start) && NumberReg.test(event.end);
+    const timeBetween = event.endTime - event.startTime;
     let result = [];
 
     if (!event) return [];
 
-    if (event.start != event.end)
+    if (isNumberRequired)
+    {
+        const startNum = Number(event.start.match(NumberReg)[1]) || 0;
+        const endNum = Number(event.end.match(NumberReg)[1]) || 0;
+        const NotFloatNum = Math.round(startNum) === startNum && Math.round(endNum) === endNum;
+
+        for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
+        {
+            let currentTime = event.startTime + (timeIndex * calcBetweenTime);
+            let nextTime = (event.startTime + ((timeIndex + 1) * calcBetweenTime)) <= event.endTime ? event.startTime + ((timeIndex + 1) * calcBetweenTime) : event.endTime;
+            let nextTimePercent = (nextTime - event.startTime) / timeBetween;
+            let currentNum = startNum * (1 - nextTimePercent) + endNum * nextTimePercent;
+
+            if (NotFloatNum)
+            {
+                currentNum = Math.round(currentNum);
+            }
+
+            result.push({
+                startTime : currentTime,
+                endTime   : nextTime,
+                value     : currentNum + '',
+            });
+        }
+    }
+    else if (event.start != event.end)
     {
         if (event.start == '')
         {
@@ -504,7 +531,7 @@ function calculateTextEventEase(event)
                 result.push({
                     startTime : currentTime,
                     endTime   : nextTime,
-                    value     : currentText.join('')
+                    value     : currentText.join(''),
                 });
 
                 lastTextIndex = currentTextIndex;
