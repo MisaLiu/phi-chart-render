@@ -157,6 +157,16 @@ export default function RePhiEditChartConverter(_chart)
             }
             eventLayer.sort();
 
+            if (
+                eventLayer.speed.length <= 0 &&
+                eventLayer.moveX.length <= 0 &&
+                eventLayer.moveY.length <= 0 &&
+                eventLayer.alpha.length <= 0 &&
+                eventLayer.rotate.length <= 0
+            ) {
+                return;
+            }
+
             // 计算事件的真实时间
             for (const name in eventLayer)
             {
