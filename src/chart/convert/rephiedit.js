@@ -495,6 +495,12 @@ function calculateTextEventEase(event)
                 currentNum = Math.round(currentNum);
             }
 
+            if (result[result.length - 1] && result[result.length - 1].value == currentNum)
+            {
+                result[result.length - 1].endTime = nextTime;
+                continue;
+            }
+
             result.push({
                 startTime : currentTime,
                 endTime   : nextTime,
@@ -504,7 +510,11 @@ function calculateTextEventEase(event)
     }
     else if (event.start != event.end)
     {
-        if (event.start == '')
+        const startText = event.start.length <= event.end.length ? event.start : event.end;
+        const endText = event.start.length <= event.end.length ? event.end : event.start;
+        const isProgressive = startText == '' || endText.indexOf(startText) === 0;
+
+        if (isProgressive)
         {
             let currentText = [];
             let lastTextIndex = -1;
@@ -513,13 +523,13 @@ function calculateTextEventEase(event)
             {
                 let currentTime = event.startTime + (timeIndex * _calcBetweenTime);
                 let nextTime = (event.startTime + ((timeIndex + 1) * _calcBetweenTime)) <= event.endTime ? event.startTime + ((timeIndex + 1) * _calcBetweenTime) : event.endTime;
-                let currentTextIndex = Math.floor(_valueCalculator(event, nextTime, 0, event.end.length - 1));
+                let currentTextIndex = Math.floor(_valueCalculator(event, nextTime, startText.length, endText.length - 1));
 
                 if (lastTextIndex + 1 < currentTextIndex)
                 {
                     for (let extraTextIndex = lastTextIndex + 1; extraTextIndex < currentTextIndex; extraTextIndex++)
                     {
-                        currentText.push(event.end[extraTextIndex]);
+                        currentText.push(endText[extraTextIndex]);
                     }
                 }
                 else if (lastTextIndex + 1 > currentTextIndex)
@@ -527,7 +537,23 @@ function calculateTextEventEase(event)
                     currentText.length = currentTextIndex;
                 }
 
-                if (event.end[currentTextIndex]) currentText.push(event.end[currentTextIndex]);
+                if (endText[currentTextIndex]) currentText.push(endText[currentTextIndex]);
+                if (result[result.length - 1] && result[result.length - 1].value == currentText.join(''))
+                {
+                    result[result.length - 1].endTime = nextTime;
+                    continue;
+                }
+
+                if (nextTime == event.endTime)
+                {
+                    result.push({
+                        startTime : currentTime,
+                        endTime   : nextTime,
+                        value     : event.end
+                    });
+
+                    break;
+                }
 
                 result.push({
                     startTime : currentTime,
