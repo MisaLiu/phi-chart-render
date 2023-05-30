@@ -469,6 +469,7 @@ function convertChartFormat(rawChart)
 
 function calculateTextEventEase(event)
 {
+    const _calcBetweenTime = calcBetweenTime / 2;
     const NumberReg = /(.+)%P%/;
     const isNumberRequired = NumberReg.test(event.start) && NumberReg.test(event.end);
     const timeBetween = event.endTime - event.startTime;
@@ -482,10 +483,10 @@ function calculateTextEventEase(event)
         const endNum = Number(event.end.match(NumberReg)[1]) || 0;
         const NotFloatNum = Math.round(startNum) === startNum && Math.round(endNum) === endNum;
 
-        for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
+        for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / _calcBetweenTime); timeIndex < timeCount; timeIndex++)
         {
-            let currentTime = event.startTime + (timeIndex * calcBetweenTime);
-            let nextTime = (event.startTime + ((timeIndex + 1) * calcBetweenTime)) <= event.endTime ? event.startTime + ((timeIndex + 1) * calcBetweenTime) : event.endTime;
+            let currentTime = event.startTime + (timeIndex * _calcBetweenTime);
+            let nextTime = (event.startTime + ((timeIndex + 1) * _calcBetweenTime)) <= event.endTime ? event.startTime + ((timeIndex + 1) * _calcBetweenTime) : event.endTime;
             let nextTimePercent = (nextTime - event.startTime) / timeBetween;
             let currentNum = startNum * (1 - nextTimePercent) + endNum * nextTimePercent;
 
@@ -508,10 +509,10 @@ function calculateTextEventEase(event)
             let currentText = [];
             let lastTextIndex = -1;
 
-            for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / calcBetweenTime); timeIndex < timeCount; timeIndex++)
+            for (let timeIndex = 0, timeCount = Math.ceil(timeBetween / _calcBetweenTime); timeIndex < timeCount; timeIndex++)
             {
-                let currentTime = event.startTime + (timeIndex * calcBetweenTime);
-                let nextTime = (event.startTime + ((timeIndex + 1) * calcBetweenTime)) <= event.endTime ? event.startTime + ((timeIndex + 1) * calcBetweenTime) : event.endTime;
+                let currentTime = event.startTime + (timeIndex * _calcBetweenTime);
+                let nextTime = (event.startTime + ((timeIndex + 1) * _calcBetweenTime)) <= event.endTime ? event.startTime + ((timeIndex + 1) * _calcBetweenTime) : event.endTime;
                 let currentTextIndex = Math.floor(_valueCalculator(event, nextTime, 0, event.end.length - 1));
 
                 if (lastTextIndex + 1 < currentTextIndex)
