@@ -1,30 +1,14 @@
 import oggmentedAudioContext from 'oggmented';
 import Mp3Parser from 'unify-mp3-timing';
+import unmuteAudio from './unmute';
 import AudioTimer from './timer';
 import { number as verifyNum } from '@/verify';
 
 
 
+const GlobalAudioCtxConfig = { latencyHint: 'interactive' };
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
-const GlobalAudioCtx = (new Audio().canPlayType('audio/ogg') == '') ? new oggmentedAudioContext() : new AudioCtx();
-
-GlobalAudioCtx.addEventListener('statechange', () =>
-{
-    if (GlobalAudioCtx.state === 'running')
-    {
-        // AudioTimer.initTimeDiff(GlobalAudioCtx.currentTime);
-        // console.info('[WAudio] Audio context is now activated, current timer difference: ' + AudioTimer.TimerDiff + 'ms');
-
-        window.removeEventListener('click', ResumeGlobalAudioContext);
-        window.removeEventListener('touchend', ResumeGlobalAudioContext);
-        window.removeEventListener('mousemove', ResumeGlobalAudioContext);
-        window.removeEventListener('scroll', ResumeGlobalAudioContext);
-    }
-    else // Is it work?
-    {
-        ResumeGlobalAudioContext();
-    }
-});
+const GlobalAudioCtx = (new Audio().canPlayType('audio/ogg') == '') ? new oggmentedAudioContext(GlobalAudioCtxConfig) : new AudioCtx(GlobalAudioCtxConfig);
 
 
 
@@ -35,7 +19,7 @@ export default class WAudio
         this.source = src;
         this.loop = loop;
         this.onend = onend;
-        this._offset = verifyNum(offset, 0) / 1000;
+        this._offset = verifyNum(offset, 0);
         this._volume = verifyNum(volume, 1);
         this._speed = verifyNum(speed, 1);
         this._gain = GlobalAudioCtx.createGain();
@@ -79,7 +63,7 @@ export default class WAudio
 
     play(withTimer = false)
     {
-        if (withTimer && !this._timer) this._timer = new AudioTimer(this._speed);
+        if (withTimer && !this._timer) this._timer = new AudioTimer(GlobalAudioCtx, this._offset, this._speed);
         this._buffer = GlobalAudioCtx.createBufferSource();
         this._buffer.buffer = this.source;
         this._buffer.loop = this.loop;
@@ -156,7 +140,7 @@ export default class WAudio
 
     get currentTime()
     {
-        return this._timer ? this._timer.time - this._offset : NaN;
+        return this._timer ? this._timer.time : NaN;
     }
 
     get progress()
@@ -291,18 +275,16 @@ function predictMp3Offset(tags)
 
 window.addEventListener('load', () =>
 {
-    if (GlobalAudioCtx.state === 'running') return;
-    
-    window.addEventListener('click', ResumeGlobalAudioContext);
-    window.addEventListener('touchend', ResumeGlobalAudioContext);
-    window.addEventListener('mousemove', ResumeGlobalAudioContext);
-    window.addEventListener('scroll', ResumeGlobalAudioContext);
+    window.addEventListener('mousedown', ResumeGlobalAudioContext);
+    window.addEventListener('touchstart', ResumeGlobalAudioContext);
 
     ResumeGlobalAudioContext();
 });
 
-async function ResumeGlobalAudioContext()
+function ResumeGlobalAudioContext()
 {
-    console.info('[WAudio] Trying resume audio context...');
-    if (GlobalAudioCtx.state === 'suspended') await GlobalAudioCtx.resume();
+    unmuteAudio(GlobalAudioCtx);
+
+    window.removeEventListener('mousedown', ResumeGlobalAudioContext);
+    window.removeEventListener('touchstart', ResumeGlobalAudioContext);
 }
