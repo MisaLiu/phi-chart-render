@@ -196,12 +196,17 @@ const fullscreen = {
 	}
 };
 
-window.qs = qs;
-window.doms = doms;
-window.files = files;
-window.assets = assets;
-window.currentFile = currentFile;
-window.fullscreen = fullscreen;
+var GlobalGame;
+
+if (process.env.NODE_ENV === 'development')
+{
+    window.qs = qs;
+    window.doms = doms;
+    window.files = files;
+    window.assets = assets;
+    window.currentFile = currentFile;
+    window.fullscreen = fullscreen;
+}
 
 doms.chartPackFile.addEventListener('input', function ()
 {
@@ -412,7 +417,7 @@ doms.startBtn.addEventListener('click', async () => {
         currentFile.chart.readLineTextureInfo(lines);
     }
 
-    window._game = new PhiChartRender.Game({
+    GlobalGame = new PhiChartRender.Game({
         chart: currentFile.chart,
         assets: assets,
         effects: files.effects,
@@ -443,25 +448,31 @@ doms.startBtn.addEventListener('click', async () => {
         watermark: 'github/MisaLiu/phi-chart-render ' + GIT_VERSION + (process.env.NODE_ENV === 'development' ? ' [Develop Mode]' : '')
     });
 
-    document.body.appendChild(_game.render.view);
-    _game.render.view.classList.add('canvas-game');
+    document.body.appendChild(GlobalGame.render.view);
+    GlobalGame.render.view.classList.add('canvas-game');
 
-    _game.on('start', () => console.log('Game started!'));
-    _game.on('pause', () => {
+    GlobalGame.on('start', () => console.log('Game started!'));
+    GlobalGame.on('pause', () => {
         console.log('Game paused!');
         qs('.game-paused').style.display = 'block';
     });
-    _game.on('end', (game) => {
+    GlobalGame.on('end', (game) => {
         console.log('Game ended!');
         showGameResultPopup(game);
     });
 
-    if (doms.settings.plyndb.checked) _game.on('tick', PlayLikeYouNeverDidBefore);
+    if (doms.settings.plyndb.checked) GlobalGame.on('tick', PlayLikeYouNeverDidBefore);
 
-    _game.createSprites();
-    _game.start();
+    GlobalGame.createSprites();
+    GlobalGame.start();
 
     // eruda.hide();
+
+    if (process.env.NODE_ENV === 'development')
+    {
+        window._game = GlobalGame;
+        window.globalThis.__PIXI_APP__ = GlobalGame.render;
+    }
 
     doms.fileSelect.style.display = 'none';
 });
@@ -875,11 +886,11 @@ function calcHeightPercent()
 
 function pauseGame()
 {
-    if (!_game) return;
+    if (!GlobalGame) return;
 
-    _game.pause();
+    GlobalGame.pause();
 
-    if (_game._isPaused)
+    if (GlobalGame._isPaused)
     {
         qs('.game-paused').style.display = 'block';
     }
@@ -892,9 +903,9 @@ function pauseGame()
 
 function restartGame()
 {
-    if (!_game) return;
+    if (!GlobalGame) return;
 
-    _game.restart();
+    GlobalGame.restart();
 
     for (const name in assets.sounds.result)
     {
@@ -909,10 +920,16 @@ function restartGame()
 
 function exitGame()
 {
-    if (!_game) return;
+    if (!GlobalGame) return;
 
-    _game.destroy(true);
-    _game = undefined;
+    GlobalGame.destroy(true);
+    GlobalGame = undefined;
+
+    if (process.env.NODE_ENV === 'development')
+    {
+        window._game = undefined;
+        window.globalThis.__PIXI_APP__ = undefined;
+    }
 
     for (const name in assets.sounds.result)
     {
@@ -927,11 +944,9 @@ function exitGame()
     doms.fileSelect.style.display = 'block';
 }
 
-
 window.pauseGame = pauseGame;
 window.restartGame  = restartGame;
 window.exitGame = exitGame;
-
 
 function showGameResultPopup(game)
 {
