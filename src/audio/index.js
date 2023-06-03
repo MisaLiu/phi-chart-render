@@ -9,7 +9,16 @@ import { number as verifyNum } from '@/verify';
 const GlobalAudioCtxConfig = { latencyHint: 'interactive' };
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 const GlobalAudioCtx = (new Audio().canPlayType('audio/ogg') == '') ? new oggmentedAudioContext(GlobalAudioCtxConfig) : new AudioCtx(GlobalAudioCtxConfig);
-
+GlobalAudioCtx.addEventListener('statechange', () =>
+{
+    if (GlobalAudioCtx.state === 'running')
+    {
+        console.log('[WAudio] Resume AudioContext success');
+        
+        window.removeEventListener('mousedown', ResumeGlobalAudioContext);
+        window.removeEventListener('touchstart', ResumeGlobalAudioContext);
+    }
+});
 
 
 export default class WAudio
@@ -278,13 +287,11 @@ window.addEventListener('load', () =>
     window.addEventListener('mousedown', ResumeGlobalAudioContext);
     window.addEventListener('touchstart', ResumeGlobalAudioContext);
 
-    ResumeGlobalAudioContext();
+    //ResumeGlobalAudioContext();
 });
 
 function ResumeGlobalAudioContext()
 {
+    console.log('[WAudio] Trying resume AudioContext...');
     unmuteAudio(GlobalAudioCtx);
-
-    window.removeEventListener('mousedown', ResumeGlobalAudioContext);
-    window.removeEventListener('touchstart', ResumeGlobalAudioContext);
 }
