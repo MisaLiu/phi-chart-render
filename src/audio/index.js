@@ -284,8 +284,11 @@ function predictMp3Offset(tags)
 
 window.addEventListener('load', () =>
 {
-    window.addEventListener('mousedown', ResumeGlobalAudioContext);
-    window.addEventListener('touchstart', ResumeGlobalAudioContext);
+    if (GlobalAudioCtx.state !== 'running')
+    {
+        window.addEventListener('mousedown', ResumeGlobalAudioContext);
+        window.addEventListener('touchstart', ResumeGlobalAudioContext);
+    }
 
     //ResumeGlobalAudioContext();
 });
