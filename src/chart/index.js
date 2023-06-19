@@ -46,12 +46,24 @@ export default class Chart
                 chartInfo = chart.info;
             }
 
-            chartMD5 = md5Hash(JSON.stringify(rawChart));
+            try {
+                chartMD5 = md5Hash(JSON.stringify(rawChart));
+            } catch (e) {
+                console.warn('Failed to calculate chart MD5.');
+                console.error(e);
+                chartMD5 = null
+            }
         }
         else if (typeof rawChart == 'string')
         {
             chart = Convert.PhiEdit(rawChart);
-            chartMD5 = md5Hash(rawChart);
+            try {
+                chartMD5 = md5Hash(rawChart);
+            } catch (e) {
+                console.warn('Failed to calculate chart MD5.');
+                console.error(e);
+                chartMD5 = null
+            }
         }
 
         if (!chart) throw new Error('Unsupported chart format');
