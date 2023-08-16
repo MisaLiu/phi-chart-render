@@ -83,6 +83,7 @@ export default function PrprEffectReader(effect)
                 endTime: _effect.endTime,
                 shader: _effect.shader,
                 isGlobal: _effect.global || false,
+                target: _effect.target || false,
                 vars: {},
             });
 

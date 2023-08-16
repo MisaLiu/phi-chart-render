@@ -79,9 +79,11 @@ function calcTick()
 
                 if (settings.shader)
                 {
+
                     render.gameContainer.filters = [];
                     render.stage.filters = [];
-
+                    for (let i in chart.judgeline) chart.judgeline[i].noteContainer.filters = [];
+                    for (let i in chart.notes) chart.notes[i].sprite.filters = [];
                     for (let i = 0, length = effects.length; i < length; i++)
                     {
                         const effect = effects[i];
@@ -90,8 +92,29 @@ function calcTick()
                         if (effect.startTime > currentTime) break;
 
                         effect.calcTime(currentTime, render.sizer.shaderScreenSize);
-                        if (effect.isGlobal) render.stage.filters.push(effect.shader);
-                        else render.gameContainer.filters.push(effect.shader);
+                        
+                        if (effect.target) {
+                            const selectors = effect.target.split(' ');
+                            selectors.forEach((selector) => { 
+                                    if (selector.startsWith('L')) {
+                                        const judgelineIndex = parseInt(selector.substr(1));
+                                        if (effect.isGlobal) {
+                                            this.chart.judgeline[judgelineIndex].sprite.parent.filters.push(effect.shader);
+                                        }
+                                        else {
+                                            this.chart.judgeline[judgelineIndex].noteContainer.filters.push(effect.shader);
+                                        }
+                                    }
+                                    else if (selector.startsWith('N')) {
+                                        const noteIndex = parseInt(selector.substr(1));
+                                        this.chart.notes[noteIndex].sprite.filters.push(effect.shader);
+                                    }
+                            });
+                        }
+                        else {
+                            if (effect.isGlobal) render.stage.filters.push(effect.shader);
+                            else render.gameContainer.filters.push(effect.shader);
+                        }
                     }
                 }
             }
