@@ -122,7 +122,6 @@ export default class Note
         this.sprite.alpha = this.basicAlpha;
         this.sprite.visible = false;
         this.sprite.outScreen = true;
-        this.sprite.cullable = false;
 
         if (this.hitsound)
         {

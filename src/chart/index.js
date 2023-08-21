@@ -189,7 +189,7 @@ export default class Chart
         this.judgelines.forEach((judgeline, index) =>
         {
             let judgelineContainer = new Container();
-            let noteContainer = new Container();
+            let notesContainer = new Container();
 
             judgelineContainer.name = "Line" + index;
             judgeline.createSprite(textures, zipFiles, debug);
@@ -201,9 +201,9 @@ export default class Chart
             if (!isNaN(judgeline.zIndex)) linesWithZIndex.push(judgeline);
             
             judgelineContainer.addChild(judgeline.sprite);
-            judgelineContainer.addChild(noteContainer);
+            judgelineContainer.addChild(notesContainer);
             stage.addChild(judgelineContainer);
-            judgeline.noteContainer = noteContainer;
+            judgeline.notesContainer = notesContainer;
             if (judgeline.debugSprite)
             {
                 judgeline.debugSprite.zIndex = 999 + judgeline.sprite.zIndex;
@@ -231,11 +231,14 @@ export default class Chart
 
         this.notes.forEach((note, index) =>
         {
+            let noteContainer = new Container();
             note.createSprite(textures, zipFiles, multiNoteHL, debug);
 
-            note.sprite.zIndex = 10 + (this.judgelines.length + linesWithZIndex.length) + (note.type === 3 ? index : index + 10);
+            noteContainer.zIndex = note.type === 3 ? -index : -index + this.notes.length;
+            noteContainer.name = "Note" + index + " with zIndex " + noteContainer.zIndex;
 
-            note.judgeline.noteContainer.addChild(note.sprite);
+            noteContainer.addChild(note.sprite);
+            note.judgeline.notesContainer.addChild(noteContainer);
             if (note.debugSprite)
             {
                 note.debugSprite.zIndex = 999 + note.sprite.zIndex;

@@ -1185,6 +1185,7 @@ async function loadChartFiles(_files)
             .catch((e) =>
             {
                 console.error('Unsupported file: ' + file.name);
+                console.error(e);
                 return;
             }));
         }

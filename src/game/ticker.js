@@ -82,8 +82,14 @@ function calcTick()
 
                     render.gameContainer.filters = [];
                     render.stage.filters = [];
-                    for (let i in chart.judgeline) chart.judgeline[i].noteContainer.filters = [];
-                    for (let i in chart.notes) chart.notes[i].sprite.filters = [];
+                    for (let i in chart.judgeline) {
+                        chart.judgeline[i].sprite.parent.filters = [];
+                        chart.judgeline[i].notesContainers.filters = [];
+                    }
+                    for (let i in chart.notes) {
+                        chart.notes[i].sprite.parent.filters = [];
+                        chart.notes[i].sprite.filters = [];
+                    }
                     for (let i = 0, length = effects.length; i < length; i++)
                     {
                         const effect = effects[i];
@@ -102,12 +108,17 @@ function calcTick()
                                             this.chart.judgeline[judgelineIndex].sprite.parent.filters.push(effect.shader);
                                         }
                                         else {
-                                            this.chart.judgeline[judgelineIndex].noteContainer.filters.push(effect.shader);
+                                            this.chart.judgeline[judgelineIndex].notesContainers.filters.push(effect.shader);
                                         }
                                     }
                                     else if (selector.startsWith('N')) {
                                         const noteIndex = parseInt(selector.substr(1));
-                                        this.chart.notes[noteIndex].sprite.filters.push(effect.shader);
+                                        if (effect.isGlobal) {
+                                            this.chart.notes[noteIndex].sprite.parent.filters.push(effect.shader);
+                                        }
+                                        else {
+                                            this.chart.notes[noteIndex].sprite.filters.push(effect.shader);
+                                        }
                                     }
                             });
                         }

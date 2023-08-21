@@ -31,7 +31,7 @@ export default class Judgeline
         this.isText = false;
         
         this.sprite = undefined;
-        this.noteContainer = undefined;
+        this.notesContainer = undefined;
 
         this.reset();
     }
@@ -251,7 +251,6 @@ export default class Judgeline
         
         this.sprite.anchor.set(0.5);
         this.sprite.alpha = 1;
-        this.sprite.cullable = false;
 
         // For debug propose
         if (debug)
