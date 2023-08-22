@@ -9,13 +9,12 @@ const CurrentVersion = 'v' + config.version + '-' + git.short();
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/phi-chart-render/',
   plugins: [
     createHtmlPlugin({
-      minify: true,
-      template: 'public/index.vite.html',
       inject: {
         data: {
-          'GIT_VERSION': CurrentVersion
+          GIT_VERSION: CurrentVersion
         }
       }
     }),
@@ -27,6 +26,11 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 9000,
+    open: true
   }
 });
 
