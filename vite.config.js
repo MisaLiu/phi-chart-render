@@ -25,7 +25,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
-            urlPattern: /\/phi-chart-render(.*?)\.(png|ico|ogg)/,
+            urlPattern: /\/phi-chart-render(.*?)\.(png|ogg|ico|ttf)/,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'assets-cache',
