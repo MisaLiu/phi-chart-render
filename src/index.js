@@ -10,7 +10,7 @@ import './phizone';
 
 (() =>
 {
-    if (process.env.NODE_ENV === 'production')
+    if (import.meta.env.MODE === 'production')
     {
         // Init sentry
         Sentry.init({
@@ -18,8 +18,8 @@ import './phizone';
             integrations: [ new BrowserTracing() ],
             tracesSampleRate: 1.0,
             maxBreadcrumbs: 50,
-            debug: (process.env.NODE_ENV === 'development'),
-            release: (process.env.NODE_ENV === 'production'),
+            debug: (import.meta.env.MODE === 'development'),
+            release: (import.meta.env.MODE === 'production'),
             beforeSend: (event, hint) => {
                 let err = hint.originalException;
 
@@ -117,7 +117,7 @@ const assets = {
 
 var GlobalGame;
 
-if (process.env.NODE_ENV === 'development')
+if (import.meta.env.MODE === 'development')
 {
     window.qs = qs;
     window.doms = doms;
@@ -363,7 +363,7 @@ doms.startBtn.addEventListener('click', async () => {
             debug: doms.settings.debug.checked,
             shader: doms.settings.prprExtra.checked
         },
-        watermark: 'github/MisaLiu/phi-chart-render ' + GIT_VERSION + (process.env.NODE_ENV === 'development' ? ' [Develop Mode]' : '')
+        watermark: 'github/MisaLiu/phi-chart-render ' + GIT_VERSION + (import.meta.env.MODE === 'development' ? ' [Develop Mode]' : '')
     });
 
     document.body.appendChild(GlobalGame.render.view);
@@ -386,7 +386,7 @@ doms.startBtn.addEventListener('click', async () => {
 
     // eruda.hide();
 
-    if (process.env.NODE_ENV === 'development')
+    if (import.meta.env.MODE === 'development')
     {
         window._game = GlobalGame;
         window.globalThis.__PIXI_APP__ = GlobalGame.render;
@@ -565,7 +565,7 @@ window.addEventListener('load', async () =>
         }
     }
 
-    if (process.env.NODE_ENV === 'production')
+    if (import.meta.env.MODE === 'production')
     {
         fetch('https://www.googletagmanager.com/gtag/js?id=G-PW9YT2TVFV')
             .then(res => res.text())
@@ -843,7 +843,7 @@ function exitGame()
     GlobalGame.destroy(true);
     GlobalGame = undefined;
 
-    if (process.env.NODE_ENV === 'development')
+    if (import.meta.env.MODE === 'development')
     {
         window._game = undefined;
         window.globalThis.__PIXI_APP__ = undefined;

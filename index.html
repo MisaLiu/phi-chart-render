@@ -7,12 +7,10 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
         <link rel="shortcut icon" href="./icons/favicon.ico" />
-        <link rel="manifest" href="./manifest.webmanifest" />
-        <link href="./style.css" rel="stylesheet" />
+        <link href="src/style/index.css" rel="stylesheet" />
         <!--script src="./eruda.min.js"></script>
         <script>eruda.init();</script-->
         <script>
-            const GITHUB_CURRENT_GIT_HASH = `{{CURRENT_HASH}}`;
             // 全屏相关。代码来自 lchzh3473
             const fullscreen = {
                 // 切换全屏状态
@@ -94,26 +92,6 @@
                 }
             };
 
-            function setCookie(cname,cvalue,exdays)
-            {
-                var d = new Date();
-                d.setTime(d.getTime()+(exdays*24*60*60*1000));
-                var expires = "expires="+d.toGMTString();
-                document.cookie = cname + "=" + cvalue + "; " + expires;
-            }
-
-            function getCookie(cname)
-            {
-                var name = cname + "=";
-                var ca = document.cookie.split(';');
-                for(var i=0; i<ca.length; i++) 
-                {
-                    var c = ca[i].trim();
-                    if (c.indexOf(name)==0) return c.substring(name.length,c.length);
-                }
-                return "";
-            }
-
             function getSearchString(name)
             {
                 let searchString = window.location.search.substring(1, window.location.search.length);
@@ -132,21 +110,6 @@
                 }
 
                 return null;
-            }
-
-            async function unregistServiceWorker()
-            {
-                if (navigator.serviceWorker.getRegistrations)
-                {
-                    let sws = await navigator.serviceWorker.getRegistrations();
-                    if (sws.length > 1)
-                    {
-                        for (const sw of sws)
-                        {
-                            sw.unregister();
-                        }
-                    }
-                }
             }
 
             if (getSearchString('debug') === 'true')
@@ -173,29 +136,6 @@
 
                 xhr.open('GET', 'https://cdn.bootcdn.net/ajax/libs/vConsole/3.15.0/vconsole.min.js');
                 xhr.send();
-            }
-            
-            // Init service worker
-            if (GITHUB_CURRENT_GIT_HASH != '{{' + 'CURRENT_HASH' + '}}' && 'serviceWorker' in navigator)
-            {
-                /*
-                if (navigator.userAgent.indexOf('like Mac OS X') > -1)
-                {
-                    if (getCookie('ios-unregist') != 'true')
-                    {
-                        unregistServiceWorker();
-                        setCookie('ios-unregist', 'true');
-                    }
-                }
-                else */
-                if (getSearchString('unregistServiceWorker') == 'true')
-                {
-                    unregistServiceWorker();
-                }
-                else
-                {
-                    navigator.serviceWorker.register('./sw.js');
-                }
             }
         </script>
     </head>
@@ -363,5 +303,7 @@
             <pre><code class="content">Test Text Not A Real Error</code></pre>
             <div>The infomation about this error will upload to <a href="https://sentry.io" target="_blank">Sentry.io</a> for analyze and debug.</div>
         </div>
+
+        <script type="module" src="/src/index.js"></script>
     </body>
 </html>
