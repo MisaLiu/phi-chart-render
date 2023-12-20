@@ -1,3 +1,7 @@
+# <u>**This project is now deprecated**</u>
+
+Read [this](https://github.com/MisaLiu/phi-chart-render/issues/19) for more infomation (Chinese).
+
 # Phi-Chart-Render
 
 A *Phigros* chart render based on [Pixi.js](https://pixijs.com)
