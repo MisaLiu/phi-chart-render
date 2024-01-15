@@ -3,6 +3,8 @@ name: Build test page to GitHub Pages
 on:
   push:
     branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
   workflow_dispatch:
     inputs:
       tags:
@@ -37,6 +39,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v2
       
+      - name: Replace current git hash to HTML
+        run: |
+          sed -i 's/{{CURRENT_HASH}}/${{ github.sha }}/g' ./public/index.html
+          sed -i 's/{{CURRENT_HASH}}/${{ github.sha }}/g' ./public/sw.js
+      
       - name: Build webpack 
         run: |
           npm install
@@ -51,14 +58,17 @@ jobs:
         with:
           environment: production
           version: ${{ github.sha }}
-          sourcemaps: './dist ./dist/assets'
+          sourcemaps: './dist'
           set_commits: skip
           ignore_missing: true
+      
+      - name: Copy JavaScript to /public
+        run: cp -rf ./dist/* ./public/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: './dist'
+          path: './public'
       
       - name: Deploy to GitHub Pages
         id: deployment

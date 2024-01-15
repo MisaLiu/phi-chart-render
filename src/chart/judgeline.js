@@ -31,6 +31,7 @@ export default class Judgeline
         this.isText = false;
         
         this.sprite = undefined;
+        this.notesContainer = undefined;
 
         this.reset();
     }

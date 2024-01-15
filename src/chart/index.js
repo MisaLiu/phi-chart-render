@@ -1,7 +1,7 @@
 import { number as verifyNum } from '@/verify';
 import * as Convert from './convert';
 import md5Hash from 'md5-js';
-import { Sprite, Graphics, Text } from 'pixi.js';
+import { Sprite, Graphics, Text, Container } from 'pixi.js';
 
 export default class Chart
 {
@@ -188,15 +188,22 @@ export default class Chart
 
         this.judgelines.forEach((judgeline, index) =>
         {
+            let judgelineContainer = new Container();
+            let notesContainer = new Container();
+
+            judgelineContainer.name = "Line" + index;
             judgeline.createSprite(textures, zipFiles, debug);
 
             judgeline.sprite.position.x = size.width / 2;
             judgeline.sprite.position.y = size.height / 2;
-            judgeline.sprite.zIndex = 10 + index;
+            judgelineContainer.zIndex = 10 + this.judgelines.length * 2 - index;
 
             if (!isNaN(judgeline.zIndex)) linesWithZIndex.push(judgeline);
-
-            stage.addChild(judgeline.sprite);
+            
+            judgelineContainer.addChild(judgeline.sprite);
+            judgelineContainer.addChild(notesContainer);
+            stage.addChild(judgelineContainer);
+            judgeline.notesContainer = notesContainer;
             if (judgeline.debugSprite)
             {
                 judgeline.debugSprite.zIndex = 999 + judgeline.sprite.zIndex;
@@ -217,17 +224,21 @@ export default class Chart
         linesWithZIndex.sort((a, b) => a.zIndex - b.zIndex);
         linesWithZIndex.forEach((judgeline, index) =>
         {
-            judgeline.sprite.zIndex = 10 + this.judgelines.length + index;
+            judgeline.sprite.parent.zIndex = 10 + this.judgelines.length - index;
+            judgeline.sprite.parent.name += " with zIndex " + judgeline.sprite.parent.zIndex;
             if (judgeline.debugSprite) judgeline.debugSprite.zIndex = 999 + judgeline.sprite.zIndex;
         });
 
         this.notes.forEach((note, index) =>
         {
+            let noteContainer = new Container();
             note.createSprite(textures, zipFiles, multiNoteHL, debug);
 
-            note.sprite.zIndex = 10 + (this.judgelines.length + linesWithZIndex.length) + (note.type === 3 ? index : index + 10);
+            noteContainer.zIndex = note.type === 3 ? -index : -index + this.notes.length;
+            noteContainer.name = "Note" + index + " with zIndex " + noteContainer.zIndex;
 
-            stage.addChild(note.sprite);
+            noteContainer.addChild(note.sprite);
+            note.judgeline.notesContainer.addChild(noteContainer);
             if (note.debugSprite)
             {
                 note.debugSprite.zIndex = 999 + note.sprite.zIndex;
